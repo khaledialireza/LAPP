@@ -85,6 +85,7 @@
 
     // transcript
     lines = parseTranscript(L.transcript);
+    lines.forEach((l, j) => l.fa = (L.transcriptFa || [])[j] || "");
     const total = lines.reduce((n, l) => n + l.text.length, 0);
     let acc = 0;
     lines.forEach(l => { l.start = acc / total; acc += l.text.length; l.end = acc / total; });
@@ -95,9 +96,15 @@
 
     // audio
     player.src = L.audio; player.playbackRate = SPEEDS[state.speed];
-    $("#hNowLine").textContent = lines[0] ? `${lines[0].who}: ${lines[0].text}` : "";
+    showNow(0);
 
     renderVocab(); renderQuiz(true); renderBuilder(); renderProgress(); renderWotd();
+  }
+
+  function showNow(i) {
+    const l = lines[i];
+    $("#hNowLine").textContent = l ? `${l.who}: ${l.text}` : "";
+    $("#hNowFa").textContent = l ? l.fa : "";
   }
 
   $("#transcript").addEventListener("click", e => {
@@ -147,7 +154,7 @@
     if (i !== lastLine && i >= 0) {
       lastLine = i;
       $$("#transcript .line").forEach((r, j) => r.classList.toggle("now", j === i));
-      $("#hNowLine").textContent = `${lines[i].who}: ${lines[i].text}`;
+      showNow(i);
       if ($("#follow").checked && $("#audio").classList.contains("active"))
         $(`#transcript .line[data-i="${i}"]`)?.scrollIntoView({ block: "center", behavior: "smooth" });
     }
