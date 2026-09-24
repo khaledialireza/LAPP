@@ -46,6 +46,7 @@
   function go(id) {
     $$(".screen").forEach(s => s.classList.toggle("active", s.id === id));
     $$(".nav button").forEach(b => b.classList.toggle("on", b.dataset.go === id));
+    document.body.dataset.screen = id;
     if (location.hash !== "#" + id) history.replaceState(null, "", "#" + id);
   }
   document.addEventListener("click", e => {
@@ -53,6 +54,7 @@
     const a = e.target.closest("[data-act]"); if (a) act(a.dataset.act);
     const l = e.target.closest("[data-lesson]"); if (l) setLesson(state.idx + Number(l.dataset.lesson));
     const sp = e.target.closest("[data-speed]"); if (sp) setSpeed(state.speed + Number(sp.dataset.speed));
+    if (e.target.closest("[data-speed-cycle]")) setSpeed((state.speed + 1) % SPEEDS.length);
     const s = e.target.closest("[data-say]"); if (s) { e.stopPropagation(); speak(s.dataset.say); }
   });
 
@@ -76,7 +78,7 @@
     if (i < 0 || i >= LESSONS.length) return toast("درس‌های بعدی به‌زودی اضافه می‌شوند");
     state.idx = i; store.set("lesson", i);
     const L = LESSONS[i];
-    $("#dockLesson").textContent = "L" + L.id;
+    $$(".js-lesson-num").forEach(e => e.textContent = "L" + L.id);
     $("#sbTitle").textContent = `Lektion ${L.id} · ${L.title}`;
     $("#hLessonTitle").textContent = L.title; $("#hLessonFa").textContent = L.fa; $("#hLevel").textContent = L.level;
     $("#lTitle").innerHTML = `Lektion ${L.id} <small>${esc(L.title)}</small>`;
@@ -94,9 +96,10 @@
     const total = lines.reduce((n, l) => n + l.text.length, 0);
     let acc = 0;
     lines.forEach(l => { l.start = acc / total; acc += l.text.length; l.end = acc / total; });
-    $("#transcript").innerHTML = lines.map((l, j) => `
+    const listHtml = lines.map((l, j) => `
       <div class="line ${l.who.toLowerCase()}" data-i="${j}"><span class="who">${esc(l.who)}</span>
       <span>${esc(l.text)} <button class="say" style="display:inline-grid;width:22px;height:22px;vertical-align:middle" data-say="${esc(l.text)}">${SAY_ICON}</button></span></div>`).join("");
+    $("#transcript").innerHTML = listHtml; $("#mTranscript").innerHTML = listHtml;
     filterSpeakers();
 
     // audio
@@ -106,8 +109,24 @@
     renderVocab(); renderQuiz(true); renderBuilder(); renderProgress(); renderWotd();
   }
 
+  let curLine = 0;
+  const cleanWord = tok => tok.replace(/^[^A-Za-zÄÖÜäöüß]+|[^A-Za-zÄÖÜäöüß'-]+$/g, "");
+  const wordHtml = text => text.split(/(\s+)/).map(tok => {
+    const w = cleanWord(tok);
+    if (!w) return esc(tok);
+    const k = tok.indexOf(w);
+    return `${esc(tok.slice(0, k))}<button class="w" data-w="${esc(w)}">${esc(w)}</button>${esc(tok.slice(k + w.length))}`;
+  }).join("");
+
   function showNow(i) {
+    curLine = i;
     const l = lines[i];
+    $("#mWho").textContent = l ? l.who : "";
+    $("#mNum").textContent = l ? `${i + 1} / ${lines.length}` : "";
+    $("#lineCard").className = "line-card " + (l ? l.who.toLowerCase() : "");
+    $("#lcSay").dataset.say = l ? l.text : "";
+    $("#mDe").innerHTML = l ? wordHtml(l.text) : "";
+    $("#mFa").textContent = l ? l.fa : "";
     $("#hNowLine").textContent = l ? `${l.who}: ${l.text}` : "";
     $("#hNowFa").textContent = l ? l.fa : "";
     $("#aNowWho").textContent = l ? l.who : "";
@@ -115,19 +134,22 @@
     $("#aNowFa").textContent = l ? l.fa : "";
   }
 
-  $("#transcript").addEventListener("click", e => {
+  const onLineClick = e => {
     const row = e.target.closest(".line"); if (!row || e.target.closest("[data-say]")) return;
     const l = lines[row.dataset.i];
     showNow(Number(row.dataset.i));
+    setDrawer(false);
     if (player.duration) { player.currentTime = lineStart(l); player.play(); }
     else speak(l.text);
-  });
-  $("#spkTabs").addEventListener("click", e => {
+  };
+  $("#transcript").addEventListener("click", onLineClick);
+  $("#mTranscript").addEventListener("click", onLineClick);
+  ["#spkTabs", "#mSpkTabs"].forEach(id => $(id).addEventListener("click", e => {
     const b = e.target.closest("button"); if (!b) return;
-    state.spk = b.dataset.spk; $$("#spkTabs button").forEach(x => x.classList.toggle("on", x === b)); filterSpeakers();
-  });
+    state.spk = b.dataset.spk; $$(`${id} button`).forEach(x => x.classList.toggle("on", x === b)); filterSpeakers();
+  }));
   function filterSpeakers() {
-    $$("#transcript .line").forEach(r => r.classList.toggle("hide", state.spk !== "all" && !r.classList.contains(state.spk)));
+    $$(".transcript .line").forEach(r => r.classList.toggle("hide", state.spk !== "all" && !r.classList.contains(state.spk)));
   }
 
   /* ---------- Audio ---------- */
@@ -139,15 +161,16 @@
     if (a === "back10") player.currentTime = Math.max(0, player.currentTime - 10);
     if (a === "fwd10") player.currentTime = Math.min(player.duration || 0, player.currentTime + 10);
     if (a === "prev" || a === "next") {
-      const cur = lineAt(player.currentTime);
-      const t = lines[Math.max(0, Math.min(lines.length - 1, cur + (a === "next" ? 1 : -1)))];
-      if (player.duration) player.currentTime = lineStart(t);
+      const j = Math.max(0, Math.min(lines.length - 1, curLine + (a === "next" ? 1 : -1)));
+      showNow(j);
+      if (player.duration) player.currentTime = lineStart(lines[j]);
     }
   }
   function setSpeed(i) {
     state.speed = Math.max(0, Math.min(SPEEDS.length - 1, i));
     player.playbackRate = SPEEDS[state.speed];
-    $("#speed").textContent = SPEEDS[state.speed].toFixed(2).replace(/0$/, "") + "×";
+    const label = SPEEDS[state.speed].toFixed(2).replace(/0$/, "") + "×";
+    $$(".js-speed").forEach(e => e.textContent = label);
   }
   const setIcons = () => $$(".ico-play").forEach(s => s.innerHTML = player.paused ? PLAY : PAUSE);
   player.addEventListener("play", setIcons);
@@ -162,10 +185,12 @@
     const i = lineAt(player.currentTime);
     if (i !== lastLine && i >= 0) {
       lastLine = i;
-      $$("#transcript .line").forEach((r, j) => r.classList.toggle("now", j === i));
+      $$(".transcript .line").forEach(r => r.classList.toggle("now", Number(r.dataset.i) === i));
       showNow(i);
       if ($("#follow").checked && $("#audio").classList.contains("active"))
         $(`#transcript .line[data-i="${i}"]`)?.scrollIntoView({ block: "center", behavior: "smooth" });
+      if ($("#mFollow").checked && $("#drawer").classList.contains("open"))
+        $(`#mTranscript .line[data-i="${i}"]`)?.scrollIntoView({ block: "center", behavior: "smooth" });
     }
   });
   $$("[data-seek]").forEach(bar => bar.addEventListener("click", e => {
@@ -264,6 +289,56 @@
   faToggle.checked = store.get("showFa", true);
   const applyFa = () => { $("#aNowBox").hidden = !faToggle.checked; store.set("showFa", faToggle.checked); };
   faToggle.addEventListener("change", applyFa); applyFa();
+
+  /* ---------- Dialog: translation toggle, drawer, word popup ---------- */
+  const faBtn = $("#faBtn");
+  const applyMobileFa = on => {
+    faBtn.setAttribute("aria-pressed", on); $("#mFa").hidden = !on; store.set("showFa", on);
+  };
+  faBtn.onclick = () => applyMobileFa(faBtn.getAttribute("aria-pressed") !== "true");
+  applyMobileFa(store.get("showFa", true));
+
+  function setDrawer(open) {
+    $("#drawer").classList.toggle("open", open);
+    $("#drawerHandle").setAttribute("aria-expanded", open);
+    if (open) $(`#mTranscript .line[data-i="${curLine}"]`)?.scrollIntoView({ block: "center" });
+  }
+  $("#drawerHandle").onclick = () => setDrawer(!$("#drawer").classList.contains("open"));
+
+  const DICT = window.DICT || {}, NAMES = window.NAMES || {}, dictIdx = {};
+  for (const [k, v] of Object.entries(DICT)) {
+    for (const f of [k.replace(/_.*/, ""), ...(v.f || [])]) { dictIdx[f] = k; dictIdx[f.toLowerCase()] ??= k; }
+  }
+  function lookup(w) {
+    if (NAMES[w]) return { lemma: w, p: "اسم خاص", fa: NAMES[w], g: "" };
+    const k = dictIdx[w] || dictIdx[w.toLowerCase()];
+    if (k) return { lemma: k.replace(/_.*/, ""), ...DICT[k] };
+    if (/^[a-z'-]+$/i.test(w) && !/[äöüß]/i.test(w)) return { lemma: w, p: "انگلیسی", fa: "این کلمه انگلیسی است (توضیح گوینده برای بینندگان).", g: "" };
+    return { lemma: w, p: "", fa: "معنی این کلمه هنوز ثبت نشده.", g: "" };
+  }
+  function openWord(w) {
+    const d = lookup(w), l = lines[curLine];
+    $("#popWord").textContent = w;
+    $("#popLemma").textContent = d.lemma.toLowerCase() !== w.toLowerCase() ? `← ${d.lemma}` : "";
+    $("#popPos").textContent = d.p; $("#popPos").hidden = !d.p;
+    $("#popFa").textContent = d.fa;
+    $("#popG").innerHTML = d.g ? d.g.split(" · ").map(x => `<div>${esc(x)}</div>`).join("") : "";
+    $("#popSay").dataset.say = w;
+    $("#popCtx").innerHTML = l ? l.text.split(/(\s+)/).map(tok =>
+      tok.replace(/^[^A-Za-zÄÖÜäöüß]+|[^A-Za-zÄÖÜäöüß'-]+$/g, "") === w ? `<mark>${esc(tok)}</mark>` : esc(tok)).join("") : "";
+    $("#popCtxFa").textContent = l ? l.fa : "";
+    $("#popBack").hidden = false;
+  }
+  const closeWord = () => { $("#popBack").hidden = true; };
+  $("#mDe").addEventListener("click", e => {
+    const b = e.target.closest(".w"); if (!b) return;
+    if (!player.paused) player.pause();
+    openWord(b.dataset.w);
+  });
+  $("#popClose").onclick = closeWord;
+  $("#popBack").addEventListener("click", e => { if (e.target.id === "popBack") closeWord(); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") { closeWord(); setDrawer(false); } });
+  $("#lcSay").innerHTML = SAY_ICON; $("#popSay").innerHTML = SAY_ICON;
 
   /* ---------- Init ---------- */
   tick(); setInterval(tick, 10000);

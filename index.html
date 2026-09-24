@@ -13,7 +13,12 @@
   <div class="frame">
     <!-- Status bar -->
     <header class="status">
-      <div class="brand"><span class="dot"></span>LAPP <span class="fa" style="color:var(--muted);font-weight:400">· آلمانی</span></div>
+      <div class="stepper lesson-pick mob-only">
+        <button class="icon-btn" data-lesson="-1" aria-label="vorherige Lektion">‹</button>
+        <b class="js-lesson-num">L1</b>
+        <button class="icon-btn" data-lesson="1" aria-label="nächste Lektion">›</button>
+      </div>
+      <div class="brand desk-only"><span class="dot"></span>LAPP <span class="fa" style="color:var(--muted);font-weight:400">· آلمانی</span></div>
       <div class="clock" id="sbClock">--:--</div>
       <div class="right">
         <div class="mini-player">
@@ -22,7 +27,7 @@
           <button class="icon-btn" data-act="toggle" aria-label="play"><svg class="ico-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l12-7z"/></svg></button>
           <button class="icon-btn" data-act="next" aria-label="weiter"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg></button>
         </div>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 9a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0"/><circle cx="12" cy="19.5" r="1" fill="currentColor"/></svg>
+        <svg class="wifi" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 9a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0"/><circle cx="12" cy="19.5" r="1" fill="currentColor"/></svg>
       </div>
     </header>
 
@@ -97,6 +102,7 @@
 
       <!-- AUDIO -->
       <section class="screen" id="audio">
+        <div class="audio-desk desk-only">
         <div class="screen-head">
           <h1>Dialog <small>Daily German Talk</small></h1>
           <div class="tabs" id="spkTabs">
@@ -126,6 +132,55 @@
             <p class="notice fa" id="audioNote">روی هر خط بزنید تا صوت به همان‌جا برود (تقریبی). دکمهٔ 🔊 با صدای مرورگر می‌خواند.</p>
           </div>
           <div class="tile transcript" id="transcript"></div>
+        </div>
+        </div>
+        <div class="audio-mob mob-only">
+          <div class="screen-head">
+            <h1>Dialog <small>Daily German Talk</small></h1>
+            <button class="chip-btn fa" id="faBtn" aria-pressed="true">ترجمه</button>
+          </div>
+          <div class="stage">
+            <article class="line-card" id="lineCard">
+              <div class="lc-top"><span class="lc-who" id="mWho"></span><span class="lc-num" id="mNum"></span>
+                <button class="say" id="lcSay" aria-label="vorlesen"></button></div>
+              <p class="lc-de" id="mDe"></p>
+              <p class="lc-fa fa" id="mFa"></p>
+              <p class="lc-hint fa">روی هر کلمه بزنید تا معنی و گرامرش را ببینید</p>
+            </article>
+            <button class="nav-arrow" data-act="prev" aria-label="vorheriger Satz">‹</button>
+            <button class="nav-arrow" data-act="next" aria-label="nächster Satz">›</button>
+          </div>
+          <div class="drawer" id="drawer">
+            <button class="drawer-handle" id="drawerHandle" aria-expanded="false">
+              <span class="grip"></span><span>Transkript</span><span class="chev">⌃</span>
+            </button>
+            <div class="drawer-body">
+              <div class="drawer-tools">
+                <div class="tabs" id="mSpkTabs">
+                  <button class="on" data-spk="all">Alle</button>
+                  <button data-spk="anna">Anna</button>
+                  <button data-spk="ben">Ben</button>
+                </div>
+                <label class="speakers"><input type="checkbox" id="mFollow" checked> Mitlesen</label>
+              </div>
+              <div class="transcript" id="mTranscript"></div>
+            </div>
+          </div>
+          <div class="player-bar">
+            <div class="progress" data-seek><i class="bar"></i></div>
+            <div class="pb-row">
+              <span class="tCur">0:00</span>
+              <div class="player-ctrls">
+                <button class="icon-btn" data-act="back10" aria-label="-10s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button>
+                <button class="icon-btn play-main" data-act="toggle" aria-label="play"><svg class="ico-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l12-7z"/></svg></button>
+                <button class="icon-btn" data-act="fwd10" aria-label="+10s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg></button>
+              </div>
+              <div class="pb-right">
+                <button class="chip-btn js-speed" data-speed-cycle aria-label="Tempo">1.0×</button>
+                <span class="tDur">0:00</span>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -162,9 +217,9 @@
 
     <!-- Bottom dock -->
     <footer class="dock">
-      <div class="stepper">
+      <div class="stepper desk-only">
         <button class="icon-btn" data-lesson="-1" aria-label="vorherige Lektion">‹</button>
-        <span id="dockLesson">L1</span>
+        <span id="dockLesson" class="js-lesson-num">L1</span>
         <button class="icon-btn" data-lesson="1" aria-label="nächste Lektion">›</button>
         <span class="label">Lektion</span>
       </div>
@@ -175,10 +230,10 @@
         <button data-go="vocab" aria-label="Vokabeln"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 20 12 4l7 16M8 14h8"/></svg></button>
         <button data-go="practice" aria-label="Üben"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></button>
       </nav>
-      <div class="right">
+      <div class="right desk-only">
         <div class="stepper">
           <button class="icon-btn" data-speed="-1" aria-label="langsamer">‹</button>
-          <span id="speed">1.0×</span>
+          <span id="speed" class="js-speed">1.0×</span>
           <button class="icon-btn" data-speed="1" aria-label="schneller">›</button>
           <span class="label">Tempo</span>
         </div>
@@ -188,10 +243,24 @@
 
   <audio id="player" preload="metadata"></audio>
   <div class="toast" id="toast"></div>
+  <div class="pop-back" id="popBack" hidden>
+    <div class="pop" role="dialog" aria-modal="true" aria-labelledby="popWord">
+      <div class="pop-head">
+        <div><div class="pop-word" id="popWord"></div><div class="pop-lemma" id="popLemma"></div></div>
+        <button class="say" id="popSay" aria-label="vorlesen"></button>
+        <button class="icon-btn pop-x" id="popClose" aria-label="schließen">✕</button>
+      </div>
+      <span class="chip fa" id="popPos"></span>
+      <p class="pop-fa fa" id="popFa"></p>
+      <div class="pop-g fa" id="popG"></div>
+      <div class="pop-ctx"><h3>Im Satz · در این جمله</h3><p id="popCtx"></p><p class="fa" id="popCtxFa"></p></div>
+    </div>
+  </div>
 
   <script src="data/lessons.js"></script>
   <script src="data/lesson1-fa.js"></script>
   <script src="data/lesson1-times.js"></script>
+  <script src="data/dict-de.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
