@@ -189,7 +189,7 @@
       showNow(i);
       if ($("#follow").checked && $("#audio").classList.contains("active"))
         $(`#transcript .line[data-i="${i}"]`)?.scrollIntoView({ block: "center", behavior: "smooth" });
-      if ($("#mFollow").checked && $("#drawer").classList.contains("open"))
+      if ($("#mFollow").checked && $("#mTranscript").clientHeight > 0)
         $(`#mTranscript .line[data-i="${i}"]`)?.scrollIntoView({ block: "center", behavior: "smooth" });
     }
   });

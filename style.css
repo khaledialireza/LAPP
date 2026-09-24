@@ -197,7 +197,7 @@ main { position: relative; overflow: hidden; }
 .toast.on { opacity: 1; }
 
 /* ---------- Responsive ---------- */
-@media (max-width: 900px) {
+@media (max-width: 900px), (max-height: 520px) {
   body { padding: 0; align-items: stretch; }
   .frame { height: 100vh; height: 100dvh; border-radius: 0; grid-template-rows: 40px 1fr auto; }
   .status .mini-player .title { display: none; }
@@ -307,7 +307,7 @@ main { position: relative; overflow: hidden; }
 .pop-ctx .fa { color: var(--muted); }
 mark { background: rgba(240,138,168,.3); color: var(--text); border-radius: 4px; padding: 0 2px; }
 
-@media (max-width: 900px) {
+@media (max-width: 900px), (max-height: 520px) {
   .desk-only { display: none !important; }
   .lesson-pick.mob-only { display: flex; font-size: 14px; }
   body[data-screen="audio"] .status .mini-player,
@@ -324,4 +324,54 @@ mark { background: rgba(240,138,168,.3); color: var(--text); border-radius: 4px;
   .lc-fa { font-size: 16px; }
   .pop-back { place-items: end center; padding: 0; }
   .pop { width: 100%; border-radius: 18px 18px 0 0; }
+}
+
+/* ---------- Phone landscape: side-by-side, nothing squeezed ---------- */
+@media (max-height: 520px) and (orientation: landscape) {
+  .frame { grid-template-rows: 32px 1fr auto; }
+  .status { font-size: 12px; }
+  .dock { padding: 4px 12px; }
+  .nav button { height: 34px; }
+  .nav button svg { width: 18px; height: 18px; }
+  .nav button.on::after { bottom: 2px; }
+  .screen { padding: 8px 12px; }
+
+  #audio { padding: 8px 12px; }
+  .audio-mob {
+    grid-template-columns: 1.25fr 1fr;
+    grid-template-rows: auto 1fr auto;
+    grid-template-areas: "head head" "stage drawer" "stage player";
+    column-gap: 12px; row-gap: 8px;
+  }
+  .audio-mob:has(.drawer.open) { grid-template-rows: auto 1fr auto; }
+  .audio-mob .screen-head { grid-area: head; }
+  .audio-mob .screen-head h1 { font-size: 16px; }
+  .audio-mob .stage { grid-area: stage; opacity: 1 !important; pointer-events: auto !important; gap: 8px; }
+  .audio-mob .stage .line-card { align-self: stretch; }
+  .line-card { padding: 12px 14px; }
+  .lc-de { font-size: 18px; margin: 8px 0 6px; }
+  .lc-fa { font-size: 14px; }
+  .lc-hint { display: none; }
+  .stage .nav-arrow { height: 34px; }
+
+  /* transcript always visible on the right */
+  .audio-mob .drawer { grid-area: drawer; }
+  .drawer-handle { display: none; }
+  .drawer .drawer-body { max-height: none; opacity: 1; flex: 1; padding-top: 8px; }
+  .drawer .line { grid-template-columns: 44px 1fr; padding: 6px 8px; font-size: 14px; }
+
+  .audio-mob .player-bar { grid-area: player; padding: 8px 12px 6px; }
+  .pb-row { margin-top: 6px; }
+  .pb-row .player-ctrls .icon-btn { width: 34px; height: 34px; }
+  .pb-row .play-main { width: 42px !important; height: 42px !important; }
+
+  /* home: clock + tiles in one row, player below */
+  .home-top { grid-template-columns: 1.2fr 1fr 1fr 1fr; grid-template-rows: 1fr; }
+  .clock-tile { grid-column: auto; flex-direction: column; justify-content: center; }
+  .clock-tile .time { font-size: 30px; }
+  .ring { width: 48px; height: 48px; }
+  .continue .cover { width: 44px; height: 44px; font-size: 16px; }
+  .continue .play-lg { width: 44px; height: 44px; }
+
+  .pop { max-height: 90vh; }
 }
