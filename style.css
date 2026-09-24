@@ -231,5 +231,9 @@ main { position: relative; overflow: hidden; }
   .nav button { flex: 1; width: auto; }
 }
 .now-fa { margin-top: 10px; color: var(--muted); line-height: 1.9; font-size: 15px; }
-.line-fa { display: block; margin-top: 4px; color: var(--muted); font-size: 14px; line-height: 1.9; }
-.transcript.no-fa .line-fa { display: none; }
+.player { overflow: auto; }
+.now-box { background: var(--tile-2); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+.now-box[hidden] { display: none; }
+.now-box h3 { margin: 0; color: var(--accent); }
+.now-de { font-size: 16px; line-height: 1.6; }
+.now-fa-lg { font-size: 16px; line-height: 2; color: var(--text); opacity: .85; }
