@@ -91,7 +91,7 @@
     lines.forEach(l => { l.start = acc / total; acc += l.text.length; l.end = acc / total; });
     $("#transcript").innerHTML = lines.map((l, j) => `
       <div class="line ${l.who.toLowerCase()}" data-i="${j}"><span class="who">${esc(l.who)}</span>
-      <span>${esc(l.text)} <button class="say" style="display:inline-grid;width:22px;height:22px;vertical-align:middle" data-say="${esc(l.text)}">${SAY_ICON}</button></span></div>`).join("");
+      <span>${esc(l.text)} <button class="say" style="display:inline-grid;width:22px;height:22px;vertical-align:middle" data-say="${esc(l.text)}">${SAY_ICON}</button>${l.fa ? `<span class="fa line-fa">${esc(l.fa)}</span>` : ""}</span></div>`).join("");
     filterSpeakers();
 
     // audio
@@ -250,6 +250,11 @@
   }
   $("#speakIntro").onclick = () => speak($("#builderOut").textContent);
   $("#copyIntro").onclick = () => navigator.clipboard?.writeText($("#builderOut").textContent).then(() => toast("کپی شد"));
+
+  const faToggle = $("#showFa");
+  faToggle.checked = store.get("showFa", true);
+  const applyFa = () => { $("#transcript").classList.toggle("no-fa", !faToggle.checked); store.set("showFa", faToggle.checked); };
+  faToggle.addEventListener("change", applyFa); applyFa();
 
   /* ---------- Init ---------- */
   tick(); setInterval(tick, 10000);
