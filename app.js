@@ -17,7 +17,10 @@
     vf: "all"
   };
   const player = $("#player");
-  let lines = [];
+  let lines = [], timed = false;
+  // seconds where a line starts: real timings if present, else proportional estimate
+  const lineStart = l => timed ? l.t0 : l.start * (player.duration || 0);
+  const lineAt = t => timed ? lines.findIndex(l => t < l.t1) : lines.findIndex(l => t / (player.duration || 1) < l.end);
 
   const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const fmt = t => isFinite(t) ? `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, "0")}` : "0:00";
@@ -86,6 +89,8 @@
     // transcript
     lines = parseTranscript(L.transcript);
     lines.forEach((l, j) => l.fa = (L.transcriptFa || [])[j] || "");
+    timed = Array.isArray(L.timings) && L.timings.length === lines.length;
+    if (timed) lines.forEach((l, j) => { l.t0 = L.timings[j]; l.t1 = L.timings[j + 1] ?? Infinity; });
     const total = lines.reduce((n, l) => n + l.text.length, 0);
     let acc = 0;
     lines.forEach(l => { l.start = acc / total; acc += l.text.length; l.end = acc / total; });
@@ -114,7 +119,7 @@
     const row = e.target.closest(".line"); if (!row || e.target.closest("[data-say]")) return;
     const l = lines[row.dataset.i];
     showNow(Number(row.dataset.i));
-    if (player.duration) { player.currentTime = l.start * player.duration; player.play(); }
+    if (player.duration) { player.currentTime = lineStart(l); player.play(); }
     else speak(l.text);
   });
   $("#spkTabs").addEventListener("click", e => {
@@ -134,9 +139,9 @@
     if (a === "back10") player.currentTime = Math.max(0, player.currentTime - 10);
     if (a === "fwd10") player.currentTime = Math.min(player.duration || 0, player.currentTime + 10);
     if (a === "prev" || a === "next") {
-      const cur = lines.findIndex(l => l.end > (player.currentTime / (player.duration || 1)));
+      const cur = lineAt(player.currentTime);
       const t = lines[Math.max(0, Math.min(lines.length - 1, cur + (a === "next" ? 1 : -1)))];
-      if (player.duration) player.currentTime = t.start * player.duration;
+      if (player.duration) player.currentTime = lineStart(t);
     }
   }
   function setSpeed(i) {
@@ -154,7 +159,7 @@
     const p = player.currentTime / (player.duration || 1);
     $$(".bar").forEach(b => b.style.width = p * 100 + "%");
     $$(".tCur").forEach(e => e.textContent = fmt(player.currentTime));
-    const i = lines.findIndex(l => p < l.end);
+    const i = lineAt(player.currentTime);
     if (i !== lastLine && i >= 0) {
       lastLine = i;
       $$("#transcript .line").forEach((r, j) => r.classList.toggle("now", j === i));
