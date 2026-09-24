@@ -201,15 +201,29 @@ main { position: relative; overflow: hidden; }
   body { padding: 0; align-items: stretch; }
   .frame { height: 100vh; height: 100dvh; border-radius: 0; grid-template-rows: 40px 1fr auto; }
   .status .mini-player .title { display: none; }
-  .home-top { grid-template-columns: 1fr 1fr; }
-  .clock-tile { grid-column: span 2; }
-  .home-bottom, .home-top { flex: none; }
+  /* Home fits one screen on mobile: no page scroll */
+  #home { overflow: hidden; gap: 10px; padding: 12px; }
+  .home-top { flex: 1; min-height: 0; grid-template-columns: repeat(3, 1fr); grid-template-rows: auto 1fr; gap: 10px; }
+  .clock-tile { grid-column: span 3; flex-direction: row; justify-content: space-between; padding: 4px 4px 0; }
+  .clock-tile .time { font-size: 34px; }
+  .home-top .tile:not(.clock-tile) { padding: 10px; overflow: hidden; }
+  .home-top .tile h3 { font-size: 10px; margin-bottom: 6px; }
+  .home-top .big { font-size: 15px; }
+  .home-top .fa, .home-top .chip { font-size: 12px; }
+  .ring { width: 58px; height: 58px; }
+  #ringSub { font-size: 10px !important; text-align: center; }
+  .home-bottom { flex: none; }
   .lesson-grid, .audio-grid, .practice-grid { grid-template-columns: 1fr; grid-template-rows: none; }
   .lesson-grid .intro, .lesson-grid .phr { grid-row: auto; grid-column: auto; }
   .audio-grid .transcript { max-height: none; }
-  .continue { grid-template-columns: auto 1fr; }
-  .continue .cover { width: 72px; height: 72px; font-size: 26px; }
-  .continue .play-lg { grid-column: span 2; width: 100%; border-radius: 12px; height: 48px; }
+  .continue { grid-template-columns: auto 1fr auto; gap: 12px; padding: 12px; }
+  .continue .cover { width: 56px; height: 56px; font-size: 20px; border-radius: 10px; }
+  .continue .play-lg { width: 52px; height: 52px; }
+  .continue .play-lg svg { width: 22px; height: 22px; }
+  .continue h3 { font-size: 10px; margin-bottom: 4px; }
+  #hNowLine { font-size: 15px !important; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .now-fa { font-size: 13px; margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  #home .pager { display: none; }
   .phrase { grid-template-columns: auto 1fr; }
   .phrase .fa, .phrase .note { grid-column: 2; }
   .dock { grid-template-columns: 1fr 1fr; padding: 8px 12px; row-gap: 8px; }
