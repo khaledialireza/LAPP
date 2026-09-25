@@ -934,3 +934,12 @@ body:not(.playing) .status .mini-player { display: none !important; }
 }
 #lesson .screen-head { flex-wrap: wrap; }
 #lesson .back-btn { flex: 0 0 100%; margin-bottom: -4px; }
+
+/* Vocab cards: no 3D layers (hundreds of preserve-3d cards crash iOS Safari).
+   Faces cross-fade; off-screen cards are skipped by the renderer. */
+.card { perspective: none; content-visibility: auto; contain-intrinsic-size: auto 150px; }
+.card .in { transform-style: flat; transition: none; transform: none !important; }
+.card .face { backface-visibility: visible; transition: opacity .2s ease; }
+.card .back { transform: none; opacity: 0; visibility: hidden; }
+.card.flip .front { opacity: 0; visibility: hidden; }
+.card.flip .back { opacity: 1; visibility: visible; }
