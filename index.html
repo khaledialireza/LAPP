@@ -16,7 +16,7 @@
   <meta name="description" content="LAPP — آموزش زبان آلمانی با دیالوگ صوتی، واژگان و تمرین.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=muhilxye">
+  <link rel="stylesheet" href="style.css?v=muhjhubb">
 </head>
 <body data-screen="home">
   <div class="frame">
@@ -102,38 +102,15 @@
 
       <!-- AUDIO -->
       <section class="screen" id="audio">
-        <div class="audio-mob">
-          <div class="screen-head">
-            <h1>Dialog <small>Daily German Talk</small></h1>
-            <button class="chip-btn fa" id="faBtn" aria-pressed="true" data-i18n="showTranslation"></button>
-          </div>
-          <div class="stage">
-            <article class="line-card" id="lineCard">
-              <div class="lc-top"><span class="lc-who" id="mWho"></span><span class="lc-num" id="mNum"></span>
-                <button class="say" id="lcSay" aria-label="vorlesen"></button></div>
-              <p class="lc-de" id="mDe"></p>
-              <p class="lc-fa fa" id="mFa"></p>
-              <p class="lc-hint fa" data-i18n="tapWord"></p>
-            </article>
-            <button class="nav-arrow" data-act="prev" aria-label="vorheriger Satz">‹</button>
-            <button class="nav-arrow" data-act="next" aria-label="nächster Satz">›</button>
-          </div>
-          <div class="drawer" id="drawer">
-            <button class="drawer-handle" id="drawerHandle" aria-expanded="false">
-              <span class="grip"></span><span>Transkript</span><span class="chev">⌃</span>
-            </button>
-            <div class="drawer-body">
-              <div class="drawer-tools">
-                <div class="tabs" id="mSpkTabs">
-                  <button class="on" data-spk="all">Alle</button>
-                  <button data-spk="anna">Anna</button>
-                  <button data-spk="ben">Ben</button>
-                </div>
-                <label class="speakers"><input type="checkbox" id="mFollow" checked> Mitlesen</label>
-              </div>
-              <div class="transcript" id="mTranscript"></div>
-            </div>
-          </div>
+        <div class="ly-head">
+          <div><h1 class="ly-title">Dialog</h1><div class="ly-meta">Daily German Talk · <span id="mNum"></span></div></div>
+          <button class="ly-chip fa" id="faBtn" aria-pressed="true" data-i18n="showTranslation"></button>
+        </div>
+        <div class="lyrics" id="mTranscript"></div>
+        <div class="ly-tools">
+          <div class="ly-seg" id="mSpkTabs"><button class="on" data-spk="all">Alle</button><button data-spk="anna">Anna</button><button data-spk="ben">Ben</button></div>
+          <button class="ly-chip" data-speed-cycle aria-label="Tempo">🐢 <span class="js-speed">1×</span></button>
+          <button class="ly-chip" id="lyRepeat">↻ Satz</button>
         </div>
       </section>
 
@@ -282,16 +259,16 @@
     </div>
   </div>
 
-  <script src="data/lessons.js?v=muhilxye"></script>
-  <script src="data/lesson1-fa.js?v=muhilxye"></script>
-  <script src="data/lesson1-times.js?v=muhilxye"></script>
-  <script src="data/lesson1-words.js?v=muhilxye"></script>
-  <script src="data/dict-de.js?v=muhilxye"></script>
-  <script src="data/dict-tr.js?v=muhilxye"></script>
-  <script src="data/lesson1-ru.js?v=muhilxye"></script>
-  <script src="data/lesson1-uk.js?v=muhilxye"></script>
-  <script src="i18n.js?v=muhilxye"></script>
-  <script src="exercises.js?v=muhilxye"></script>
-  <script src="app.js?v=muhilxye"></script>
+  <script src="data/lessons.js?v=muhjhubb"></script>
+  <script src="data/lesson1-fa.js?v=muhjhubb"></script>
+  <script src="data/lesson1-times.js?v=muhjhubb"></script>
+  <script src="data/lesson1-words.js?v=muhjhubb"></script>
+  <script src="data/dict-de.js?v=muhjhubb"></script>
+  <script src="data/dict-tr.js?v=muhjhubb"></script>
+  <script src="data/lesson1-ru.js?v=muhjhubb"></script>
+  <script src="data/lesson1-uk.js?v=muhjhubb"></script>
+  <script src="i18n.js?v=muhjhubb"></script>
+  <script src="exercises.js?v=muhjhubb"></script>
+  <script src="app.js?v=muhjhubb"></script>
 </body>
 </html>

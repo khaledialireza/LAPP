@@ -1153,3 +1153,41 @@ body.rec-locked .rp-mic svg { display: none; } body.rec-locked .rp-mic::after { 
 .sh-b { flex: 1; height: 50px; border-radius: 14px; font-weight: 700; font-size: 16px; }
 .sh-b.sq { flex: 0 0 50px; }
 .sh-b.sec { background: var(--tile-2); color: var(--accent); } .sh-b.pri { background: var(--accent); color: #fff; }
+
+/* ---------- Dialog v2: lyrics view (Apple Music style) ---------- */
+#audio.active { display: flex !important; flex-direction: column; gap: 6px; height: 100%; min-height: 0; box-sizing: border-box; padding-bottom: 4px; position: relative; overflow: hidden;
+  background: radial-gradient(90% 55% at 15% 25%, rgba(255,45,85,.20), transparent 60%), radial-gradient(80% 55% at 90% 85%, rgba(94,92,230,.22), transparent 60%); }
+.ly-head { display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+.ly-title { margin: 0; font-size: 30px; font-weight: 800; letter-spacing: -.3px; }
+.ly-meta { font-size: 12px; font-weight: 600; color: var(--muted); }
+.ly-chip { height: 34px; padding: 0 12px; border-radius: 17px; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; color: var(--text);
+  background: var(--glass); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); border: .5px solid var(--glass-border); }
+.ly-chip[aria-pressed="true"] { color: var(--accent); }
+.lyrics { position: relative; flex: 1; min-height: 0; overflow-y: auto; padding: 38vh 4px 38vh; scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(transparent, #000 14%, #000 82%, transparent); mask-image: linear-gradient(transparent, #000 14%, #000 82%, transparent); }
+.lyrics::-webkit-scrollbar { display: none; }
+.ly-line { padding: 10px 6px; border-radius: 14px; cursor: pointer; opacity: .32; transition: opacity .35s, transform .35s; transform-origin: left center; }
+.ly-line:hover { opacity: .55; }
+.ly-line.hide { display: none; }
+.ly-who { display: block; font-size: 11px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase; margin-bottom: 2px; }
+.ly-line.anna .ly-who { color: #FF2D55; } .ly-line.ben .ly-who { color: #5E5CE6; }
+.ly-de { font-size: 21px; font-weight: 700; line-height: 1.3; letter-spacing: -.2px; }
+.ly-fa { display: none; font-size: 15px; font-weight: 500; color: var(--muted); line-height: 1.8; text-align: left; margin-top: 6px; }
+.ly-line.cur { opacity: 1; }
+.ly-line.cur .ly-de { font-size: 27px; color: var(--muted); }
+.ly-line.cur .ly-fa { display: block; }
+body.no-fa .ly-line.cur .ly-fa { display: none; }
+.ly-line.cur .w { font: inherit; color: var(--muted); opacity: .6; padding: 0; background: none; border: 0; border-bottom: 0; transition: color .2s, opacity .2s; }
+.ly-line.cur .w.sung { color: var(--text); opacity: 1; }
+.ly-tools { display: flex; justify-content: center; align-items: center; gap: 8px; flex-shrink: 0; flex-wrap: wrap; }
+.ly-seg { display: inline-flex; padding: 2px; border-radius: 17px; background: var(--glass); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border: .5px solid var(--glass-border); }
+.ly-seg button { height: 30px; padding: 0 12px; border-radius: 15px; font-size: 13px; font-weight: 700; color: var(--muted); }
+.ly-seg button.on { background: var(--tile); color: var(--text); box-shadow: 0 2px 6px rgba(0,0,0,.12); }
+@media (min-width: 901px) and (min-height: 521px) { .lyrics { padding-left: 10%; padding-right: 10%; } .ly-line.cur .ly-de { font-size: 32px; } .ly-de { font-size: 24px; } }
+@media (max-height: 520px) and (orientation: landscape) {
+  #audio.active { display: grid !important; grid-template-columns: 1fr auto; grid-template-rows: auto minmax(0, 1fr); }
+  .ly-head { grid-column: 1 / -1; } .ly-title { font-size: 22px; }
+  .lyrics { grid-column: 1; }
+  .ly-tools { grid-column: 2; grid-row: 2; flex-direction: column; justify-content: center; }
+  .ly-line.cur .ly-de { font-size: 22px; } .ly-de { font-size: 17px; }
+}

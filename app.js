@@ -130,10 +130,9 @@
     const total = lines.reduce((n, l) => n + l.text.length, 0);
     let acc = 0;
     lines.forEach(l => { l.start = acc / total; acc += l.text.length; l.end = acc / total; });
-    const listHtml = lines.map((l, j) => `
-      <div class="line ${l.who.toLowerCase()}" data-i="${j}"><span class="who">${esc(l.who)}</span>
-      <span>${esc(l.text)} <button class="say" style="display:inline-grid;width:22px;height:22px;vertical-align:middle" data-say="${esc(l.text)}">${SAY_ICON}</button></span></div>`).join("");
-    $("#mTranscript").innerHTML = listHtml;
+    $("#mTranscript").innerHTML = lines.map((l, j) => `
+      <div class="ly-line ${l.who.toLowerCase()}" data-i="${j}"><span class="ly-who">${esc(l.who)}</span>
+      <div class="ly-de">${esc(l.text)}</div><div class="ly-fa fa">${esc(l.fa || "")}</div></div>`).join("");
     filterSpeakers();
 
     // audio
@@ -152,34 +151,46 @@
     return `${esc(tok.slice(0, k))}<button class="w" data-w="${esc(w)}">${esc(w)}</button>${esc(tok.slice(k + w.length))}`;
   }).join("");
 
+  // lyrics view: the current line is big, its words are tappable and fill as they are spoken
+  let followPause = 0;
   function showNow(i) {
+    const prev = $(`#mTranscript .ly-line[data-i="${curLine}"]`);
+    if (prev && curLine !== i) { prev.classList.remove("cur"); prev.querySelector(".ly-de").textContent = lines[curLine]?.text || ""; }
     curLine = i;
-    const l = lines[i];
-    $("#mWho").textContent = l ? l.who : "";
+    const l = lines[i], row = $(`#mTranscript .ly-line[data-i="${i}"]`);
     $("#mNum").textContent = l ? `${i + 1} / ${lines.length}` : "";
-    $("#lineCard").className = "line-card " + (l ? l.who.toLowerCase() : "");
-    $("#lcSay").dataset.say = l ? l.text : "";
-    $("#mDe").innerHTML = l ? wordHtml(l.text) : "";
-    $("#mFa").textContent = l ? l.fa : "";
+    if (row && l) {
+      row.classList.add("cur"); row.querySelector(".ly-de").innerHTML = wordHtml(l.text);
+      const box = $("#mTranscript");
+      if (Date.now() > followPause && box.clientHeight) box.scrollTo({ top: row.offsetTop - box.clientHeight / 2 + row.offsetHeight / 2, behavior: "smooth" });
+    }
     $("#dpLine").textContent = l ? l.text : "";
     $("#dpWho").textContent = l ? l.who : "";
   }
-
-  const onLineClick = e => {
-    const row = e.target.closest(".line"); if (!row || e.target.closest("[data-say]")) return;
-    const l = lines[row.dataset.i];
-    showNow(Number(row.dataset.i));
-    setDrawer(false);
+  // words of the current line light up with the audio (spread over the line by length)
+  function singWords(t) {
+    const l = lines[curLine]; if (!l || !isFinite(l.t1)) return;
+    const f = Math.max(0, Math.min(1, (t - l.t0) / Math.max(0.3, l.t1 - l.t0)));
+    const ws = $$(`#mTranscript .ly-line.cur .w`); let tot = 0; ws.forEach(w => tot += w.textContent.length + 1);
+    let acc = 0; ws.forEach(w => { acc += w.textContent.length + 1; w.classList.toggle("sung", acc / tot <= f + 0.02); });
+  }
+  ["touchstart", "wheel"].forEach(ev => $("#mTranscript").addEventListener(ev, () => { followPause = Date.now() + 4000; }, { passive: true }));
+  $("#mTranscript").addEventListener("click", e => {
+    const row = e.target.closest(".ly-line"); if (!row) return;
+    const w = e.target.closest(".w");
+    if (w && row.classList.contains("cur")) { if (!player.paused) player.pause(); openWord(w.dataset.w); return; }
+    const i = Number(row.dataset.i), l = lines[i];
+    followPause = 0; showNow(i);
     if (player.duration) { player.currentTime = lineStart(l); player.play(); }
     else speak(l.text);
-  };
-  $("#mTranscript").addEventListener("click", onLineClick);
-  ["#mSpkTabs"].forEach(id => $(id).addEventListener("click", e => {
+  });
+  $("#lyRepeat").onclick = () => { unlockAudio(); playClip(curLine); };
+  $("#mSpkTabs").addEventListener("click", e => {
     const b = e.target.closest("button"); if (!b) return;
-    state.spk = b.dataset.spk; $$(`${id} button`).forEach(x => x.classList.toggle("on", x === b)); filterSpeakers();
-  }));
+    state.spk = b.dataset.spk; $$("#mSpkTabs button").forEach(x => x.classList.toggle("on", x === b)); filterSpeakers();
+  });
   function filterSpeakers() {
-    $$(".transcript .line").forEach(r => r.classList.toggle("hide", state.spk !== "all" && !r.classList.contains(state.spk)));
+    $$("#mTranscript .ly-line").forEach(r => r.classList.toggle("hide", state.spk !== "all" && !r.classList.contains(state.spk)));
   }
 
   /* ---------- Audio ---------- */
@@ -216,11 +227,9 @@
     const i = lineAt(player.currentTime);
     if (i !== lastLine && i >= 0) {
       lastLine = i;
-      $$(".transcript .line").forEach(r => r.classList.toggle("now", Number(r.dataset.i) === i));
       showNow(i);
-      if ($("#mFollow").checked && $("#mTranscript").clientHeight > 0)
-        $(`#mTranscript .line[data-i="${i}"]`)?.scrollIntoView({ block: "center", behavior: "smooth" });
     }
+    singWords(player.currentTime);
   });
   $$("[data-seek]").forEach(bar => bar.addEventListener("click", e => {
     if (!player.duration) return;
@@ -964,20 +973,11 @@
     $("#examAgain").onclick = startExam;
   }
 
-  /* ---------- Dialog: translation toggle, drawer, word popup ---------- */
+  /* ---------- Dialog: translation toggle, word popup ---------- */
   const faBtn = $("#faBtn");
-  const applyMobileFa = on => {
-    faBtn.setAttribute("aria-pressed", on); $("#mFa").hidden = !on; store.set("showFa", on);
-  };
+  const applyMobileFa = on => { faBtn.setAttribute("aria-pressed", on); document.body.classList.toggle("no-fa", !on); store.set("showFa", on); };
   faBtn.onclick = () => applyMobileFa(faBtn.getAttribute("aria-pressed") !== "true");
   applyMobileFa(store.get("showFa", true));
-
-  function setDrawer(open) {
-    $("#drawer").classList.toggle("open", open);
-    $("#drawerHandle").setAttribute("aria-expanded", open);
-    if (open) $(`#mTranscript .line[data-i="${curLine}"]`)?.scrollIntoView({ block: "center" });
-  }
-  $("#drawerHandle").onclick = () => setDrawer(!$("#drawer").classList.contains("open"));
 
   const DICT = window.DICT || {}, NAMES = window.NAMES || {}, dictIdx = {};
   for (const [k, v] of Object.entries(DICT)) {
@@ -1005,15 +1005,10 @@
     $("#popBack").hidden = false;
   }
   const closeWord = () => { $("#popBack").hidden = true; };
-  $("#mDe").addEventListener("click", e => {
-    const b = e.target.closest(".w"); if (!b) return;
-    if (!player.paused) player.pause();
-    openWord(b.dataset.w);
-  });
   $("#popClose").onclick = closeWord;
   $("#popBack").addEventListener("click", e => { if (e.target.id === "popBack") closeWord(); });
-  document.addEventListener("keydown", e => { if (e.key === "Escape") { closeWord(); setDrawer(false); } });
-  $("#lcSay").innerHTML = SAY_ICON; $("#popSay").innerHTML = SAY_ICON;
+  document.addEventListener("keydown", e => { if (e.key === "Escape") closeWord(); });
+  $("#popSay").innerHTML = SAY_ICON;
 
   /* ---------- Interface language ---------- */
   function applyDictLang() {

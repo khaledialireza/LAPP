@@ -358,6 +358,46 @@ button { font: inherit; color: inherit; background: none; border: 0; }
 .sheet .acts { display: flex; gap: 10px; margin-top: 12px; } .sheet .acts span { flex: 1; height: 50px; border-radius: 14px; display: grid; place-items: center; font-weight: 700; font-size: 16px; }
 .sheet .acts .a1 { background: var(--fill); color: var(--tint); } .sheet .acts .a2 { background: var(--tint); color: #fff; }
 .legend { display: flex; gap: 12px; font-size: 12px; color: var(--label2); } .legend span::before { content: "●"; margin-right: 3px; } .legend .g::before { color: var(--green); } .legend .r::before { color: var(--red); } .legend .p::before { color: var(--label3); }
+
+/* dialog ideas */
+.dg { position: absolute; inset: 0; display: flex; flex-direction: column; padding-bottom: 112px; }
+.sb { position: relative; z-index: 5; }
+.dg .hd { padding: 54px 18px 6px; display: flex; align-items: center; justify-content: space-between; }
+.dg .hd .t { font-size: 28px; font-weight: 800; } .dg .hd .t small { display: block; font-size: 12px; font-weight: 600; color: var(--label2); }
+.dg .pill2 { height: 32px; padding: 0 12px; border-radius: 16px; background: var(--card); font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; }
+/* A lyrics */
+.dgA { background: radial-gradient(90% 60% at 20% 30%, rgba(255,45,85,.28), transparent 60%), radial-gradient(80% 60% at 90% 80%, rgba(94,92,230,.3), transparent 60%), var(--bg); }
+.dgA .ly { flex: 1; overflow: hidden; padding: 10px 22px; display: flex; flex-direction: column; gap: 18px; justify-content: center; -webkit-mask-image: linear-gradient(transparent, #000 18%, #000 78%, transparent); mask-image: linear-gradient(transparent, #000 18%, #000 78%, transparent); }
+.ly .l { font-size: 22px; font-weight: 700; line-height: 1.3; opacity: .28; filter: blur(.6px); }
+.ly .l .who { display: block; font-size: 12px; font-weight: 800; letter-spacing: .5px; margin-bottom: 2px; }
+.ly .l.cur { opacity: 1; filter: none; font-size: 28px; }
+.ly .l.cur .sung { color: var(--label); } .ly .l.cur .rest { color: var(--label2); opacity: .55; }
+.ly .l .fa { display: block; font-size: 15px; font-weight: 500; color: var(--label2); margin-top: 8px; line-height: 1.7; }
+.ly .anna .who { color: #FF2D55; } .ly .ben .who { color: #5E5CE6; }
+.dgA .tools { display: flex; justify-content: center; gap: 10px; padding: 0 0 8px; }
+.dgA .tools span { height: 34px; padding: 0 12px; border-radius: 17px; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; }
+/* B chat */
+.dgB .chat { flex: 1; padding: 6px 14px; display: flex; flex-direction: column; gap: 10px; justify-content: flex-end; overflow: hidden; }
+.cb { display: flex; gap: 8px; align-items: flex-end; max-width: 88%; }
+.cb .av { width: 30px; height: 30px; border-radius: 15px; color: #fff; font-weight: 800; font-size: 13px; display: grid; place-items: center; flex: 0 0 30px; }
+.cb .bb { padding: 9px 13px; border-radius: 18px; background: var(--card); font-size: 16px; line-height: 1.4; }
+.cb .bb small { display: block; font-size: 12px; color: var(--label2); margin-top: 4px; }
+.cb.r { align-self: flex-end; flex-direction: row-reverse; } .cb.r .bb { background: var(--indigo); color: #fff; } .cb.r .bb small { color: rgba(255,255,255,.75); }
+.cb.cur .bb { box-shadow: 0 0 0 2px var(--tint); } .cb.fade { opacity: .5; }
+.eq { display: inline-flex; gap: 2px; align-items: flex-end; height: 12px; margin-left: 6px; } .eq i { width: 3px; background: currentColor; border-radius: 1px; }
+/* C focus */
+.dgC .stage { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 10px 22px; gap: 16px; }
+.duo { display: flex; gap: 34px; margin-top: 16px; } .duo .p { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; }
+.duo .p .av { width: 74px; height: 74px; border-radius: 37px; display: grid; place-items: center; color: #fff; font-size: 28px; font-weight: 800; }
+.duo .p.on .av { box-shadow: 0 0 0 4px var(--bg), 0 0 0 7px #5E5CE6, 0 0 30px rgba(94,92,230,.6); } .duo .p.off { opacity: .45; }
+.dgC .big { background: var(--card); border-radius: 26px; padding: 22px; width: 100%; margin-top: auto; }
+.dgC .big .d { font-size: 25px; font-weight: 700; line-height: 1.35; } .dgC .big .f { font-size: 15px; color: var(--label2); margin-top: 10px; line-height: 1.7; }
+.dgC .swipe { font-size: 12px; color: var(--label3); text-align: center; }
+.scrub { width: 100%; margin-bottom: auto; } .scrub .tr { position: relative; height: 26px; display: flex; align-items: center; }
+.scrub .tr .ln { position: absolute; left: 0; right: 0; height: 4px; border-radius: 2px; background: var(--fill); } .scrub .tr .pr { position: absolute; left: 0; width: 30%; height: 4px; border-radius: 2px; background: var(--tint); }
+.scrub .tr .mk { position: absolute; width: 2px; height: 10px; background: var(--label3); border-radius: 1px; }
+.scrub .tr .kn { position: absolute; left: 30%; width: 16px; height: 16px; border-radius: 8px; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,.3); transform: translateX(-8px); }
+.scrub .tm { display: flex; justify-content: space-between; font-size: 12px; color: var(--label2); }
 </style>
 </head>
 <body>
@@ -454,6 +494,21 @@ const wv = (n, seed = 3) => Array.from({ length: n }, (_, i) => `<i style="heigh
 const rpTop = (step) => `<div class="top"><span class="x">✕</span><div class="ttl">Rollenspiel<small>Du bist Anna · Satz ${step} / 10</small></div><span class="rec">0:04</span></div><div class="steps">${Array.from({ length: 10 }, (_, i) => `<i class="${i < step - 1 ? "d" : i === step - 1 ? "c" : ""}"></i>`).join("")}</div>`;
 const MIC2 = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-3.1A7 7 0 0 0 19 11z"/></svg>';
 const screens = {
+  dlgA: () => { const L = (i, c) => { const l = lines[i]; const cls = l.who.toLowerCase(); if (!c) return `<div class="l ${cls}"><span class="who">${l.who.toUpperCase()}</span>${l.text}</div>`; const w = l.text.split(" "); const k = Math.ceil(w.length * .55); return `<div class="l cur ${cls}"><span class="who">${l.who.toUpperCase()}</span><span class="sung">${w.slice(0, k).join(" ")}</span> <span class="rest">${w.slice(k).join(" ")}</span><span class="fa" dir="rtl">${l.fa}</span></div>`; };
+    return `${sb}<div class="dg dgA"><div class="hd"><div class="t">Dialog<small>Daily German Talk · 52 / 173</small></div><span class="pill2">FA ⇄</span></div>
+    <div class="ly">${L(49)}${L(50)}${L(51, 1)}${L(52)}${L(53)}</div>
+    <div class="tools"><span class="glass">Alle ▾</span><span class="glass">🐢 0.8×</span><span class="glass">↻ Satz</span></div>
+    <div class="chrome"><div class="dk"><div class="rbtn glass">${I.home.replace("<svg", '<svg class="ic"')}</div><div class="mini glass" style="position:relative"><div class="art">L1</div><div class="mt">${lines[51].text}<small>Ben · 4:20 / 18:11</small></div><button><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg></button><button>${I.fwd}</button><div class="pbar" style="left:62px;right:24px"><i></i></div></div></div></div></div>`; },
+  dlgB: () => { const C = (i, cls = "") => { const l = lines[i]; const r = l.who === "Ben"; return `<div class="cb ${r ? "r" : ""} ${cls}"><span class="av" style="background:${r ? "var(--indigo)" : "var(--tint)"}">${l.who[0]}</span><div class="bb">${l.text}${cls === "cur" ? `<span class="eq"><i style="height:6px"></i><i style="height:12px"></i><i style="height:8px"></i></span>` : ""}<small class="fa" dir="rtl">${l.fa}</small></div></div>`; };
+    return `${sb}<div class="dg dgB"><div class="hd"><div class="t">Dialog<small>Anna & Ben · Daily German Talk</small></div><span class="pill2">FA ⇄</span></div>
+    <div class="chat">${C(49, "fade")}${C(50)}${C(51, "cur")}</div>
+    <div class="chrome"><div class="dk">${tabs("audio")}${playRound()}</div></div></div>`; },
+  dlgC: () => `${sb}<div class="dg dgC"><div class="hd"><div class="t">Dialog<small>Daily German Talk</small></div><span class="pill2">FA ⇄</span></div>
+    <div class="stage"><div class="duo"><div class="p off"><span class="av" style="background:linear-gradient(135deg,#FF6B9A,#FF2D55)">A</span>Anna</div><div class="p on"><span class="av" style="background:linear-gradient(135deg,#8A6CF0,#5E5CE6)">B</span>Ben 🔊</div></div>
+    <div class="big"><div class="d">${lines[51].text}</div><div class="f fa" dir="rtl">${lines[51].fa}</div></div>
+    <div class="swipe">‹ wischen für vorherigen / nächsten Satz ›</div>
+    <div class="scrub"><div class="tr"><span class="ln"></span><span class="pr"></span>${[8, 17, 24, 30, 41, 55, 63, 77, 88].map(x => `<span class="mk" style="left:${x}%"></span>`).join("")}<span class="kn"></span></div><div class="tm"><span>4:20</span><span>Satz 52 / 173</span><span>18:11</span></div></div></div>
+    <div class="chrome"><div class="dk">${tabs("audio")}${playRound()}</div></div></div>`,
   rpA: () => `${sb}<div class="rp rpA">${rpTop(4)}
     <div class="chat">
       <div class="bub them">So Ben, wie geht's dir heute?<small class="fa">خب بن، امروز چطوری؟</small></div>
