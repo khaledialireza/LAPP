@@ -181,6 +181,28 @@ button { font: inherit; color: inherit; background: none; border: 0; }
 .backnav b { font-size: 26px; font-weight: 400; margin-top: -3px; }
 .phr { padding: 12px 16px; border-bottom: .5px solid var(--sep); } .phr:last-child { border: 0; }
 .phr .d { font-weight: 600; font-size: 16px; } .phr .f { color: var(--label2); font-size: 14px; margin-top: 3px; }
+
+/* dock with player accessory (iOS 26 style) */
+.dk { display: flex; gap: 8px; align-items: center; }
+.dk .tabbar { flex: 1; }
+.rbtn { width: 64px; height: 64px; border-radius: 32px; display: grid; place-items: center; flex: 0 0 64px; position: relative; color: var(--tint); }
+.rbtn svg.ic { width: 26px; height: 26px; }
+.rbtn .ring { position: absolute; inset: 5px; width: auto; height: auto; }
+.dk .mini { flex: 1; min-width: 0; height: 64px; border-radius: 32px; padding-right: 10px; }
+.dk .mini .art { width: 46px; height: 46px; border-radius: 23px; }
+.pbar { position: absolute; left: 70px; right: 96px; bottom: 7px; height: 3px; border-radius: 2px; background: var(--fill); overflow: hidden; }
+.pbar i { display: block; width: 28%; height: 100%; background: var(--tint); }
+.nowcard { background: var(--card); border-radius: 20px; padding: 16px; margin-top: 12px; }
+.nowcard .k { font-size: 12px; font-weight: 600; color: var(--label2); text-transform: uppercase; display: flex; justify-content: space-between; }
+.nowcard .d { font-size: 20px; font-weight: 600; line-height: 1.35; margin: 8px 0 6px; }
+.nowcard .f { font-size: 15px; color: var(--label2); line-height: 1.8; }
+.tapnote { position: absolute; font-size: 12px; font-weight: 700; color: #fff; background: #0A84FF; border-radius: 10px; padding: 3px 8px; pointer-events: none; }
+.railp { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.railp .vmini { width: 60px; border-radius: 30px; padding: 7px 0; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.railp .vmini .art { width: 46px; height: 46px; border-radius: 23px; background: linear-gradient(135deg, #FF6B9A, #8A6CF0); color: #fff; font-weight: 800; display: grid; place-items: center; font-size: 14px; }
+.railp .vmini button { width: 44px; height: 40px; display: grid; place-items: center; }
+.railp .vmini svg { width: 22px; height: 22px; }
+.land .main.one { grid-template-columns: 1fr; }
 </style>
 </head>
 <body>
@@ -221,7 +243,42 @@ const bottomBar = (active, withMini = true) => `<div class="chrome">${withMini &
 const row = (color, icon, t1, t2, val, extra = "") => `<div class="row"><span class="ico" style="background:${color}">${icon}</span><div class="txt"><div class="t1">${t1}</div>${t2 ? `<div class="t2 fa" style="text-align:left">${t2}</div>` : ""}${extra}</div>${val ? `<span class="val">${val}</span>` : ""}<span class="chev">${I.chev}</span></div>`;
 const words = (t, hl) => t.split(" ").map(w => `<span class="w ${w.replace(/[^\wäöüß]/gi, "") === hl ? "hl" : ""}">${w}</span>`).join(" ");
 
+
+const ringSvg = (pct = 28) => `<svg class="ring" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="none" stroke="var(--fill)" stroke-width="2.5"/><circle cx="18" cy="18" r="16" fill="none" stroke="var(--tint)" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="${pct} 101" transform="rotate(-90 18 18)"/></svg>`;
+const playRound = () => `<div class="rbtn glass">${ringSvg()}<svg class="ic" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>`;
+const tabRound = () => `<div class="rbtn glass">${I.home.replace("<svg", '<svg class="ic"')}</div>`;
+const dockHome = collapsed => `${sb}<div class="navh"><button class="pill"><b>L1</b><span class="sub">Sich vorstellen</span>${I.down}</button><div class="nav-right"></div></div><div class="scroll" style="padding-bottom:120px">
+    <div class="large">Guten Abend</div><div class="large-sub">Freitag, 25. September</div>
+    <div class="tiles3">
+      <div class="tile3 tap"><div class="kicker">Lektion</div><div class="t">Sich vorstellen</div><div class="s fa">معرفی خود</div><span class="chipx">A1</span></div>
+      <div class="tile3"><div class="kicker">Fortschritt</div><div class="t" style="margin-top:6px">12%</div><div class="s fa">۵ از ۱۰۰ تمرین</div></div>
+      <div class="tile3"><div class="kicker">Wort des Tages</div><div class="t">das Vorbild</div><div class="s fa">الگو</div></div>
+    </div>
+    <div class="nowcard"><div class="k"><span style="color:var(--indigo)">Ben</span><span>52 / 173</span></div><div class="d">${lines[51].text}</div><div class="f fa" dir="rtl">${lines[51].fa}</div></div>
+  </div><div class="chrome"><div class="dk">${collapsed
+    ? `${tabRound()}<div class="mini glass" style="position:relative"><div class="art">L1</div><div class="mt">${lines[51].text}<small>Ben · 4:20 / 18:11</small></div><button><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg></button><button>${I.fwd}</button><div class="pbar" style="left:62px;right:24px"><i></i></div></div>`
+    : `${tabs("home")}${playRound()}`}</div></div>`;
+const landDock = collapsed => {
+  const tabsV = TABS().map(([k, ic]) => `<div class="tabv ${k === "home" ? "on" : ""}">${ic}</div>`).join("");
+  const rail = collapsed
+    ? `<div class="railp"><div class="rbtn glass" style="width:56px;height:56px">${I.home.replace("<svg", '<svg class="ic"')}</div><div class="vmini glass"><div class="art">L1</div><button style="color:var(--tint)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg></button><button>${I.fwd}</button></div></div>`
+    : `<div class="railp"><div class="pillv glass">${tabsV}</div><div class="rbtn glass" style="width:52px;height:52px">${ringSvg()}<svg class="ic" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div></div>`;
+  return `<div class="land right"><div class="main">
+      <div class="topbar"><button class="pill"><b>L1</b><span class="sub">Sich vorstellen</span>${I.down}</button></div>
+      <div><div class="greet">Guten Abend</div><div class="muted" style="margin-bottom:10px">Freitag, 25. September</div>
+        <div class="tiles3">
+          <div class="tile3"><div class="kicker">Lektion</div><div class="t">Sich vorstellen</div><div class="s fa">معرفی خود</div></div>
+          <div class="tile3"><div class="kicker">Fortschritt</div><div class="t">12%</div></div>
+          <div class="tile3"><div class="kicker">Wort</div><div class="t">das Vorbild</div><div class="s fa">الگو</div></div>
+        </div></div>
+      <div class="nowcard" style="grid-row:2;grid-column:2;margin:0"><div class="k"><span style="color:var(--indigo)">Ben</span><span>52 / 173</span></div><div class="d" style="font-size:17px">${lines[51].text}</div><div class="f fa" dir="rtl" style="font-size:14px">${lines[51].fa}</div></div>
+    </div><div class="rail">${rail}</div></div>`;
+};
 const screens = {
+  dockA: () => dockHome(false),
+  dockB: () => dockHome(true),
+  landA: () => landDock(false),
+  landB: () => landDock(true),
   lessonv: () => `${sb}<div class="navh"><span class="backnav"><b>‹</b><span class="fa">خانه</span></span><div class="nav-right"></div></div><div class="scroll" style="padding-bottom:120px">
     <div class="large">Sich vorstellen</div><div class="large-sub fa" style="text-align:left">درس ۱ · معرفی خود · A1 — از کاشی «درس» در خانه باز می‌شود</div>
     <div class="group" style="padding:14px 16px;font-size:15px;line-height:1.6" dir="rtl"><span class="fa">در این درس یاد می‌گیری خودت را معرفی کنی، بگویی اهل کجایی و چه کاری می‌کنی.</span></div>

@@ -943,3 +943,44 @@ body:not(.playing) .status .mini-player { display: none !important; }
 .card .back { transform: none; opacity: 0; visibility: hidden; }
 .card.flip .front { opacity: 0; visibility: hidden; }
 .card.flip .back { opacity: 1; visibility: visible; }
+
+/* ---------- One player, in the dock (iOS 26 style accessory) ---------- */
+.dock-round { width: 60px; height: 60px; flex: 0 0 60px; border-radius: 50%; display: grid; place-items: center; position: relative; color: var(--accent);
+  background: var(--glass); -webkit-backdrop-filter: saturate(180%) blur(24px); backdrop-filter: saturate(180%) blur(24px);
+  border: .5px solid var(--glass-border); box-shadow: var(--shadow); }
+.dock-round > svg:not(.dring) { width: 26px; height: 26px; }
+.dring { position: absolute; inset: 4px; width: calc(100% - 8px); height: calc(100% - 8px); transform: rotate(-90deg); pointer-events: none; }
+.dring circle { fill: none; stroke-width: 2.5; }
+.ring-bg { stroke: var(--sep); }
+.ring-fg { stroke: var(--accent); stroke-linecap: round; stroke-dasharray: 0 100; }
+.dock-player { display: flex; align-items: center; gap: 6px; position: relative; height: 64px; padding: 0 8px; border-radius: 32px; min-width: 0;
+  background: var(--glass); -webkit-backdrop-filter: saturate(180%) blur(24px); backdrop-filter: saturate(180%) blur(24px);
+  border: .5px solid var(--glass-border); box-shadow: var(--shadow); }
+.dp-cover { width: 48px; height: 48px; flex: 0 0 48px; border-radius: 50%; position: relative; display: grid; place-items: center;
+  background: linear-gradient(135deg, #FF6B9A, #8A6CF0); color: #fff; font-weight: 800; font-size: 14px; }
+.dp-cover .dring { inset: -3px; width: calc(100% + 6px); height: calc(100% + 6px); }
+.dp-cover .ring-bg { stroke: transparent; }
+.dp-text { flex: 1; min-width: 0; overflow: hidden; display: flex; flex-direction: column; align-items: flex-start; text-align: start; padding: 0 4px; color: var(--text); }
+.dp-line { display: block; max-width: 100%; font-size: 15px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dp-sub { font-size: 12px; color: var(--muted); }
+.dock-player .icon-btn { width: 40px; height: 40px; flex: 0 0 40px; color: var(--text); background: none; }
+.dock-player .icon-btn svg { width: 22px; height: 22px; }
+.dp-prog { position: absolute; left: 66px; right: 24px; bottom: 6px; height: 3px; margin: 0; }
+/* expanded (default): tabs + round play button; collapsed: round tab button + player */
+.dock-tabs-btn, .dock-player { display: none; }
+body.dock-collapsed .nav, body.dock-collapsed .dock-play { display: none; }
+body.dock-collapsed .dock-tabs-btn { display: grid; }
+body.dock-collapsed .dock-player { display: flex; flex: 1; max-width: 520px; }
+@media (max-width: 900px), (max-height: 520px) { .dock .nav { flex: 1; } }
+/* home: the current line (no player of its own) */
+.hnow { background: var(--tile); border-radius: 20px; padding: 16px; display: flex; flex-direction: column; align-items: stretch; gap: 6px; text-align: start; color: var(--text); flex: 0 1 auto; min-height: 0; overflow: auto; }
+.hnow-k { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+.hnow .hp-who { font-size: 13px; text-transform: uppercase; }
+@media (max-height: 520px) and (orientation: landscape) {
+  .hnow { grid-column: 2; grid-row: 1 / span 2; align-self: start; max-height: 100%; }
+  .dock-round { width: 52px; height: 52px; flex: 0 0 52px; }
+  body.dock-collapsed .dock-player { flex: none; flex-direction: column; width: 60px; height: auto; padding: 6px 0; gap: 4px; border-radius: 30px; }
+  .dock-player .dp-text, .dock-player .dp-prog { display: none; }
+  .dp-cover { width: 44px; height: 44px; flex: 0 0 44px; }
+}
+.frame > * { min-width: 0; }

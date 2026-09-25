@@ -56,6 +56,8 @@
     $$(".nav button").forEach(b => b.classList.toggle("on", b.dataset.go === tab));
     document.body.dataset.screen = id;
     if (location.hash !== "#" + id) history.replaceState(null, "", "#" + id);
+    const on = $(".nav button.on");
+    if (on) $("#dockTabsBtn").innerHTML = on.querySelector("svg").outerHTML;
   }
   document.addEventListener("click", e => {
     const g = e.target.closest("[data-go]"); if (g) go(g.dataset.go);
@@ -164,6 +166,8 @@
     $("#hNum").textContent = l ? `${i + 1} / ${lines.length}` : "";
     $("#hNowLine").textContent = l ? l.text : "";
     $("#hNowFa").textContent = l ? l.fa : "";
+    $("#dpLine").textContent = l ? l.text : "";
+    $("#dpWho").textContent = l ? l.who : "";
   }
 
   const onLineClick = e => {
@@ -212,6 +216,7 @@
   player.addEventListener("timeupdate", () => {
     const p = player.currentTime / (player.duration || 1);
     $$(".bar").forEach(b => b.style.width = p * 100 + "%");
+    $$(".ring-fg").forEach(c => c.style.strokeDasharray = `${p * 100} 100`);
     $$(".tCur").forEach(e => e.textContent = fmt(player.currentTime));
     const i = lineAt(player.currentTime);
     if (i !== lastLine && i >= 0) {
@@ -954,14 +959,20 @@
   setDockSide(store.get("dockSide", "right"));
   $("#dockSwap").addEventListener("click", () => setDockSide(document.body.classList.contains("dock-left") ? "right" : "left"));
 
-  /* ---------- Top player: only while the lesson audio plays (not during practice clips) ---------- */
+  /* ---------- Lesson audio playing (not practice clips) ---------- */
   const markPlaying = () => document.body.classList.toggle("playing", !player.paused && clipStop == null);
   ["play", "pause", "ended"].forEach(ev => player.addEventListener(ev, markPlaying));
+
+  /* ---------- Dock: the one player. While the lesson plays it fills the dock and the
+     tabs fold into a round button; tapping that button brings the tabs back. ---------- */
+  const setDock = collapsed => document.body.classList.toggle("dock-collapsed", collapsed);
+  player.addEventListener("play", () => { if (clipStop == null) setDock(true); });
+  $("#dockTabsBtn").addEventListener("click", () => setDock(false));
 
   /* ---------- Init ---------- */
   tick(); setInterval(tick, 10000);
   setSpeed(state.speed);
   if (LESSONS.length) setLesson(state.idx);
   const start = location.hash.slice(1);
-  if (start && document.getElementById(start)?.classList.contains("screen")) go(start);
+  go(start && document.getElementById(start)?.classList.contains("screen") ? start : "home");
 })();
