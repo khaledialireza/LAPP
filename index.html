@@ -15,9 +15,10 @@
     <header class="status">
       <div class="stepper lesson-pick mob-only">
         <button class="icon-btn" data-lesson="-1" aria-label="vorherige Lektion">‹</button>
-        <b class="js-lesson-num">L1</b>
+        <button class="lp-btn" id="lpBtn" aria-haspopup="listbox" aria-expanded="false"><b class="js-lesson-num">L1</b> <span class="lp-name" id="lpName"></span> <span class="lp-caret">▾</span></button>
         <button class="icon-btn" data-lesson="1" aria-label="nächste Lektion">›</button>
       </div>
+      <div class="lp-menu" id="lpMenu" role="listbox" hidden></div>
       <div class="brand desk-only"><span class="dot"></span>LAPP <span class="fa" style="color:var(--muted);font-weight:400">· آلمانی</span></div>
       <div class="clock" id="sbClock">--:--</div>
       <div class="right">
@@ -230,10 +231,10 @@
         <span class="label">Lektion</span>
       </div>
       <nav class="nav">
-        <button data-go="home" class="on" aria-label="Start"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11 12 4l9 7v9H3z"/><path d="M9 20v-6h6v6"/></svg></button>
-        <button data-go="lesson" aria-label="Lektion"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M8 7h7"/></svg></button>
-        <button data-go="audio" aria-label="Audio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg></button>
         <button data-go="vocab" aria-label="Vokabeln"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 20 12 4l7 16M8 14h8"/></svg></button>
+        <button data-go="lesson" aria-label="Lektion"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M8 7h7"/></svg></button>
+        <button data-go="home" class="on" aria-label="Start"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11 12 4l9 7v9H3z"/><path d="M9 20v-6h6v6"/></svg></button>
+        <button data-go="audio" aria-label="Audio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg></button>
         <button data-go="practice" aria-label="Üben"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></button>
       </nav>
       <div class="right desk-only">

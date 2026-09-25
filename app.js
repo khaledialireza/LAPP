@@ -58,6 +58,15 @@
     const s = e.target.closest("[data-say]"); if (s) { e.stopPropagation(); speak(s.dataset.say); }
   });
 
+  /* ---------- Lesson picker (top-left) ---------- */
+  const setMenu = open => { $("#lpMenu").hidden = !open; $("#lpBtn").setAttribute("aria-expanded", open); };
+  $("#lpBtn").addEventListener("click", e => { e.stopPropagation(); setMenu($("#lpMenu").hidden); });
+  $("#lpMenu").addEventListener("click", e => {
+    const b = e.target.closest("[data-pick]"); if (!b) return;
+    setLesson(Number(b.dataset.pick)); setMenu(false);
+  });
+  document.addEventListener("click", e => { if (!e.target.closest("#lpMenu")) setMenu(false); });
+
   /* ---------- Clock ---------- */
   function tick() {
     const d = new Date();
@@ -79,6 +88,9 @@
     state.idx = i; store.set("lesson", i);
     const L = LESSONS[i];
     $$(".js-lesson-num").forEach(e => e.textContent = "L" + L.id);
+    $("#lpName").textContent = L.title;
+    $("#lpMenu").innerHTML = LESSONS.map((x, j) => `<button role="option" aria-selected="${j === i}" data-pick="${j}">
+      <b>L${x.id}</b><span>${esc(x.title)}</span><span class="fa">${esc(x.fa)}</span></button>`).join("");
     $("#sbTitle").textContent = `Lektion ${L.id} · ${L.title}`;
     $("#hLessonTitle").textContent = L.title; $("#hLessonFa").textContent = L.fa; $("#hLevel").textContent = L.level;
     $("#lTitle").innerHTML = `Lektion ${L.id} <small>${esc(L.title)}</small>`;

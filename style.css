@@ -461,3 +461,70 @@ mark { background: rgba(240,138,168,.3); color: var(--text); border-radius: 4px;
   .ex-filter { flex-wrap: nowrap; overflow-x: auto; }
   .ex-filter button { white-space: nowrap; }
 }
+
+/* ---------- Lesson dropdown ---------- */
+.status { position: relative; }
+.lp-btn { display: flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 8px; }
+.lp-btn:hover, .lp-btn[aria-expanded="true"] { background: var(--tile-2); }
+.lp-name { color: var(--muted); font-weight: 500; max-width: 38vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lp-caret { color: var(--muted); font-size: 11px; }
+.lp-menu { position: absolute; top: calc(100% + 6px); left: 10px; z-index: 30; min-width: 240px; max-height: 60vh; overflow: auto;
+  background: var(--panel); border: 1px solid rgba(255,255,255,.08); border-radius: 14px; box-shadow: var(--shadow); padding: 6px; animation: fade .15s ease; }
+.lp-menu[hidden] { display: none; }
+.lp-menu button { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; width: 100%; text-align: start; padding: 10px 12px; border-radius: 10px; }
+.lp-menu button:hover { background: var(--tile-2); }
+.lp-menu button[aria-selected="true"] { background: var(--tile); }
+.lp-menu button b { grid-row: span 2; color: var(--accent); align-self: center; }
+.lp-menu button .fa { color: var(--muted); font-size: 12px; }
+
+/* ---------- Phone: fit the screen exactly (98%), only lists scroll ---------- */
+@media (max-width: 900px), (max-height: 520px) {
+  html, body { height: 100%; overflow: hidden; }
+  body { padding: 1dvh 1dvw; align-items: center; }
+  .frame { height: 98vh; height: 98dvh; width: 100%; border-radius: 14px; }
+  .status .wifi { display: none; }
+  .screen { overflow: hidden; }
+  /* home: compact tiles, no stretching */
+  #home { justify-content: flex-start; }
+  #home .home-top { flex: none; grid-template-rows: auto auto; }
+  #home .home-top .tile:not(.clock-tile) { min-height: 0; }
+  #home .home-bottom { flex: none; }
+  /* lesson: intro compact, phrases list scrolls */
+  #lesson .lesson-grid { flex: 1; min-height: 0; grid-template-rows: auto 1fr; }
+  #lesson .lesson-grid .intro { gap: 6px; }
+  #lesson .lesson-grid .intro .big { font-size: 18px; }
+  #lesson .lesson-grid .intro #lSum { font-size: 13px; line-height: 1.7; }
+  #lesson .lesson-grid .intro > div[style*="margin-top:auto"] { margin-top: 4px !important; }
+  #lesson .lesson-grid .intro .tile { display: none; }
+  #lesson .lesson-grid .phr { min-height: 0; overflow: auto; }
+  /* vocab: grid is the scrolling list */
+  #vocab .vocab-grid { flex: 1; min-height: 0; overflow: auto; align-content: start; }
+  /* practice: card area scrolls only if a card is taller than the screen */
+  #practice .ex-wrap { flex: 1; min-height: 0; overflow: auto; }
+  #practice .screen-head small.fa { display: none; }
+}
+@media (max-height: 520px) and (orientation: landscape) {
+  #lesson .lesson-grid { grid-template-rows: 1fr; }
+  #lesson .lesson-grid .intro { overflow: auto; }
+  #home .home-top { grid-template-rows: auto; }
+}
+@media (max-width: 900px), (max-height: 520px) {
+  .status { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 8px; }
+  .lesson-pick { min-width: 0; }
+  .lesson-pick [data-lesson] { display: none; }
+  .lp-btn { min-width: 0; }
+  .lp-name { max-width: none; min-width: 0; }
+  #home { justify-content: center; }
+  .ex-card { gap: 10px; padding: 14px; }
+  .ex-q, .ex-sent { font-size: 16px; line-height: 1.8; }
+  .opts { gap: 6px; }
+  .opts button { padding: 9px 12px; font-size: 15px; line-height: 1.45; }
+  .ex-map { padding: 2px; }
+}
+@media (max-width: 900px), (max-height: 520px) {
+  #practice .ex-wrap { overflow: hidden; align-items: stretch; }
+  .ex-card { max-height: 100%; min-height: 0; overflow: hidden; }
+  .ex-top, .ex-foot { flex-shrink: 0; }
+  .ex-body, .ex-feedback { min-height: 0; overflow: auto; flex: 0 1 auto; }
+  .ex-body { display: flex; flex-direction: column; gap: 10px; }
+}
