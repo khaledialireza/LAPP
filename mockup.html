@@ -310,6 +310,54 @@ button { font: inherit; color: inherit; background: none; border: 0; }
 /* portrait */
 .h5.por .scroll { padding-bottom: 120px; display: flex; flex-direction: column; gap: 12px; }
 .h5.por .hero5 { min-height: 300px; }
+
+/* role play ideas */
+.rp { position: absolute; inset: 0; display: flex; flex-direction: column; }
+.rp .top { padding: 54px 16px 8px; display: flex; align-items: center; gap: 10px; }
+.rp .top .x { width: 32px; height: 32px; border-radius: 16px; background: var(--fill); display: grid; place-items: center; color: var(--label2); font-size: 16px; }
+.rp .top .ttl { flex: 1; font-weight: 700; font-size: 17px; } .rp .top .ttl small { display: block; font-size: 12px; color: var(--label2); font-weight: 500; }
+.rp .steps { display: flex; gap: 4px; padding: 0 16px 8px; } .rp .steps i { flex: 1; height: 4px; border-radius: 2px; background: var(--fill); } .rp .steps i.d { background: var(--green); } .rp .steps i.c { background: var(--tint); }
+.wk { color: var(--green); } .wm { color: var(--red); text-decoration: underline wavy; text-underline-offset: 4px; } .wp { color: var(--label3); }
+.wave { display: flex; align-items: center; gap: 3px; height: 36px; overflow: hidden; min-width: 0; } .wave i { width: 3px; border-radius: 2px; background: var(--tint); }
+.rec { display: inline-flex; align-items: center; gap: 6px; color: var(--red); font-weight: 700; font-size: 13px; } .rec::before { content: ""; width: 9px; height: 9px; border-radius: 5px; background: var(--red); box-shadow: 0 0 0 4px rgba(255,59,48,.2); }
+/* A: chat + hold to talk */
+.rpA .chat { flex: 1; padding: 6px 14px; display: flex; flex-direction: column; gap: 8px; overflow: hidden; justify-content: flex-end; }
+.bub { max-width: 80%; padding: 9px 13px; border-radius: 18px; font-size: 16px; line-height: 1.35; }
+.bub.them { background: var(--card); align-self: flex-start; border-bottom-left-radius: 6px; } .bub.them small { display: block; font-size: 12px; color: var(--label2); margin-top: 3px; }
+.bub.me { background: var(--tint); color: #fff; align-self: flex-end; border-bottom-right-radius: 6px; }
+.bub.now { background: var(--card); border: 2px dashed var(--tint); align-self: flex-end; font-size: 18px; font-weight: 600; }
+.rpA .bar { flex-shrink: 0; height: 60px; margin: 14px 12px 40px; padding: 10px 10px 10px 16px; border-radius: 30px; display: flex; align-items: center; gap: 12px; }
+.rpA .bar .time { font-variant-numeric: tabular-nums; font-weight: 600; }
+.rpA .bar .slide { flex: 1; text-align: center; color: var(--label2); font-size: 13px; }
+.bigmic { width: 76px; height: 76px; border-radius: 50%; background: var(--red); color: #fff; display: grid; place-items: center; box-shadow: 0 0 0 10px rgba(255,59,48,.18), 0 0 0 22px rgba(255,59,48,.08); flex: 0 0 76px; margin: -24px -6px -24px 0; }
+.bigmic svg { width: 32px; height: 32px; }
+.lockp { position: absolute; right: 30px; bottom: 150px; width: 40px; height: 70px; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 8px 0; color: var(--label2); font-size: 14px; }
+/* B: teleprompter */
+.rpB .stage { flex: 1; padding: 10px 22px; display: flex; flex-direction: column; justify-content: center; gap: 14px; }
+.rpB .prev { font-size: 15px; color: var(--label2); } .rpB .prev b { color: var(--indigo); font-size: 12px; display: block; }
+.rpB .cur { font-size: 30px; font-weight: 700; line-height: 1.3; letter-spacing: -.3px; }
+.rpB .fa { font-size: 15px; color: var(--label2); }
+.rpB .tl { margin: 0 16px; padding: 12px 14px; border-radius: 20px; background: var(--card); }
+.rpB .tl .row1 { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 13px; color: var(--label2); }
+.rpB .tl .track { position: relative; height: 42px; display: flex; align-items: center; gap: 2px; }
+.rpB .tl .track i { flex: 1; border-radius: 2px; background: var(--tint); } .rpB .tl .track i.f { background: var(--fill); }
+.rpB .tl .head { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--label); left: 62%; }
+.rpB .ctl { display: flex; justify-content: space-around; align-items: center; padding: 16px 30px 34px; }
+.rpB .ctl .sm { width: 50px; height: 50px; border-radius: 25px; background: var(--fill); display: grid; place-items: center; color: var(--label); font-size: 18px; }
+.stopbtn { width: 78px; height: 78px; border-radius: 50%; border: 4px solid var(--red); display: grid; place-items: center; } .stopbtn i { width: 30px; height: 30px; border-radius: 8px; background: var(--red); }
+/* C: result sheet */
+.rpC .scene { flex: 1; padding: 6px 16px; display: flex; flex-direction: column; gap: 10px; }
+.persona { display: flex; align-items: center; gap: 10px; } .persona .av { width: 44px; height: 44px; border-radius: 22px; display: grid; place-items: center; color: #fff; font-weight: 800; }
+.persona .said { background: var(--card); border-radius: 16px; padding: 10px 12px; font-size: 15px; flex: 1; }
+.sheet { margin-top: auto; background: var(--card); border-radius: 26px 26px 0 0; padding: 14px 18px 34px; box-shadow: 0 -10px 30px rgba(0,0,0,.12); }
+.sheet .grab { width: 36px; height: 5px; border-radius: 3px; background: var(--fill); margin: 0 auto 10px; }
+.sheet .score { display: flex; align-items: center; gap: 12px; }
+.sheet .score .pc { font-size: 34px; font-weight: 800; color: var(--green); }
+.sheet .line { font-size: 22px; font-weight: 600; line-height: 1.45; margin: 10px 0; }
+.sheet .heard { font-size: 13px; color: var(--label2); background: var(--fill); border-radius: 12px; padding: 8px 10px; }
+.sheet .acts { display: flex; gap: 10px; margin-top: 12px; } .sheet .acts span { flex: 1; height: 50px; border-radius: 14px; display: grid; place-items: center; font-weight: 700; font-size: 16px; }
+.sheet .acts .a1 { background: var(--fill); color: var(--tint); } .sheet .acts .a2 { background: var(--tint); color: #fff; }
+.legend { display: flex; gap: 12px; font-size: 12px; color: var(--label2); } .legend span::before { content: "●"; margin-right: 3px; } .legend .g::before { color: var(--green); } .legend .r::before { color: var(--red); } .legend .p::before { color: var(--label3); }
 </style>
 </head>
 <body>
@@ -401,7 +449,41 @@ const h5 = mode => {
   }
   return `<div class="h5 por">${sb}<div class="scroll" style="padding-top:8px">${hd}${hero}${rings}${word}</div><div class="chrome"><div class="dk">${tabs("home")}${playRound()}</div></div></div>`;
 };
+
+const wv = (n, seed = 3) => Array.from({ length: n }, (_, i) => `<i style="height:${6 + Math.abs(Math.sin(i * 0.7 + seed) * 26 + Math.sin(i * 1.9) * 6)}px"></i>`).join("");
+const rpTop = (step) => `<div class="top"><span class="x">✕</span><div class="ttl">Rollenspiel<small>Du bist Anna · Satz ${step} / 10</small></div><span class="rec">0:04</span></div><div class="steps">${Array.from({ length: 10 }, (_, i) => `<i class="${i < step - 1 ? "d" : i === step - 1 ? "c" : ""}"></i>`).join("")}</div>`;
+const MIC2 = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-3.1A7 7 0 0 0 19 11z"/></svg>';
 const screens = {
+  rpA: () => `${sb}<div class="rp rpA">${rpTop(4)}
+    <div class="chat">
+      <div class="bub them">So Ben, wie geht's dir heute?<small class="fa">خب بن، امروز چطوری؟</small></div>
+      <div class="bub me">Mir geht's sehr gut, danke. Und dir?</div>
+      <div class="bub them">Mir geht's prima. Woher kommst du?<small class="fa">من عالی‌ام. اهل کجایی؟</small></div>
+      <div class="bub now"><span class="wk">Ich</span> <span class="wk">komme</span> <span class="wk">aus</span> <span class="wp">Berlin,</span> <span class="wp">aber</span> <span class="wp">ich</span> <span class="wp">wohne</span> <span class="wp">in</span> <span class="wp">München.</span></div>
+    </div>
+    <div class="lockp glass"><span>🔒</span><span>⌃</span></div>
+    <div class="bar glass"><span class="rec"></span><span class="time">0:04</span><div class="wave" style="flex:1">${wv(22)}</div><div class="bigmic">${MIC2}</div></div>
+  </div>`,
+  rpB: () => `${sb}<div class="rp rpB">${rpTop(4)}
+    <div class="stage">
+      <div class="prev"><b>ANNA</b>Mir geht's prima. Woher kommst du?</div>
+      <div class="cur"><span class="wk">Ich komme aus</span> <span class="wk">Berlin,</span> <span class="wp">aber ich wohne in München.</span></div>
+      <div class="fa" dir="rtl">اهل برلینم، ولی در مونیخ زندگی می‌کنم.</div>
+    </div>
+    <div class="tl"><div class="row1"><span class="rec">Aufnahme · 0:04</span><span>Stille → Ende nach 2 s</span></div><div class="track">${wv(46, 1)}${'<i class="f" style="height:4px"></i>'.repeat(18)}<span class="head"></span></div></div>
+    <div class="ctl"><span class="sm">↺</span><div class="stopbtn"><i></i></div><span class="sm">🔊</span></div>
+  </div>`,
+  rpC: () => `${sb}<div class="rp rpC">${rpTop(4)}
+    <div class="scene">
+      <div class="persona"><span class="av" style="background:var(--indigo)">B</span><div class="said">Mir geht's prima. Woher kommst du?</div></div>
+    </div>
+    <div class="sheet"><div class="grab"></div>
+      <div class="score"><span class="pc">89%</span><div><b>Sehr gut!</b><div class="legend"><span class="g">erkannt</span><span class="r">fehlt</span><span class="p">unklar</span></div></div></div>
+      <div class="line"><span class="wk">Ich komme aus Berlin,</span> <span class="wk">aber ich</span> <span class="wm">wohne</span> <span class="wk">in München.</span></div>
+      <div class="heard">🎧 Gehört: „ich komme aus berlin aber ich wohnte in münchen“ · <span class="fa">«wohne» شنیده نشد</span></div>
+      <div class="acts"><span class="a1">↺ Nochmal</span><span class="a2">Weiter ›</span></div>
+    </div>
+  </div>`,
   home5: () => h5("por"),
   land5: () => h5("land"),
   land4: () => {
