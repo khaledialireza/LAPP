@@ -297,15 +297,20 @@
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   let activeRec = null;
   const stopListening = () => { try { activeRec?.abort(); } catch {} activeRec = null; };
+  // one short listening session: mic on → one phrase → mic off (resolves only after the mic is released)
   function listen() {
     return new Promise((resolve, reject) => {
       if (!SR) return reject(new Error("no-sr"));
-      const r = new SR(); r.lang = "de-DE"; r.interimResults = false; r.maxAlternatives = 4;
+      stopListening();
+      const r = new SR(); r.lang = "de-DE"; r.interimResults = false; r.continuous = false; r.maxAlternatives = 4;
       activeRec = r;
-      let done = false;
-      r.onresult = ev => { done = true; resolve([...ev.results[0]].map(a => a.transcript)); };
-      r.onerror = ev => { if (!done) { done = true; reject(ev.error || "error"); } };
-      r.onend = () => { if (!done) { done = true; reject("no-speech"); } };
+      let result = null, error = null;
+      r.onresult = ev => { result = [...ev.results[0]].map(a => a.transcript); try { r.stop(); } catch {} };
+      r.onerror = ev => { error = ev.error || "error"; };
+      r.onend = () => {
+        if (activeRec === r) activeRec = null;
+        result ? resolve(result) : reject(error || "no-speech");
+      };
       r.start();
     });
   }
