@@ -100,11 +100,9 @@
     state.idx = i; store.set("lesson", i);
     const L = LESSONS[i];
     $$(".js-lesson-num").forEach(e => e.textContent = "L" + L.id);
-    $("#sbTitle").textContent = `Lektion ${L.id} · ${L.title}`;
     $("#lpName").textContent = L.title;
     $("#lpMenu").innerHTML = LESSONS.map((x, j) => `<button role="option" aria-selected="${j === i}" data-pick="${j}">
       <b>L${x.id}</b><span>${esc(x.title)}</span><span class="fa">${esc(x.fa)}</span></button>`).join("");
-    $("#sbTitle").textContent = `Lektion ${L.id} · ${L.title}`;
     const TR = lessonTr(L);
     $("#hLessonTitle").textContent = L.title; $("#hLessonFa").textContent = TR.title; $("#hLevel").textContent = L.level;
     $("#lTitle").innerHTML = `Lektion ${L.id} <small>${esc(L.title)}</small>`;
