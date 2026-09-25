@@ -215,6 +215,8 @@ main { position: relative; overflow: hidden; }
   .home-bottom { flex: none; }
   .lesson-grid, .audio-grid, .practice-grid { grid-template-columns: 1fr; grid-template-rows: none; }
   .lesson-grid .intro, .lesson-grid .phr { grid-row: auto; grid-column: auto; }
+  .lesson-grid, .practice-grid { flex: none; }
+  .lesson-grid > .tile, .practice-grid > .tile { min-height: auto; }
   .audio-grid .transcript { max-height: none; }
   .continue { grid-template-columns: auto 1fr auto; gap: 12px; padding: 12px; }
   .continue .cover { width: 56px; height: 56px; font-size: 20px; border-radius: 10px; }
@@ -374,4 +376,15 @@ mark { background: rgba(240,138,168,.3); color: var(--text); border-radius: 4px;
   .continue .play-lg { width: 44px; height: 44px; }
 
   .pop { max-height: 90vh; }
+
+  .screen-head h1 { font-size: 16px; }
+  .lesson-grid, .practice-grid { flex: 1; min-height: 0; grid-template-columns: 1fr 1.3fr; grid-template-rows: 1fr; }
+  .lesson-grid > .tile, .practice-grid > .tile { min-height: 0; overflow: auto; }
+  .lesson-grid .intro { grid-row: auto; }
+  .lesson-grid .intro > * { flex-shrink: 0; }
+  .lesson-grid .intro > div[style*="margin-top:auto"] { margin-top: 4px !important; }
+  .lesson-grid .phr { grid-column: auto; grid-row: auto; }
+  .tile { padding: 12px; }
+  .quiz-q { font-size: 15px; margin: 6px 0 10px; }
+  .opts button { padding: 9px 12px; }
 }
