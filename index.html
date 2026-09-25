@@ -2,12 +2,21 @@
 <html lang="de">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#F2F2F7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+  <meta name="color-scheme" content="light dark">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="LAPP">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
   <title>LAPP | Deutsch lernen</title>
   <meta name="description" content="LAPP — آموزش زبان آلمانی با دیالوگ صوتی، واژگان و تمرین.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=muh15ibo">
+  <link rel="stylesheet" href="style.css?v=muhc8l35">
 </head>
 <body>
   <div class="frame">
@@ -244,11 +253,11 @@
     <footer class="dock">
       <div class="dock-side"></div>
       <nav class="nav">
-        <button data-go="vocab" aria-label="Vokabeln"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 20 12 4l7 16M8 14h8"/></svg></button>
-        <button data-go="lesson" aria-label="Lektion"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M8 7h7"/></svg></button>
-        <button data-go="home" class="on" aria-label="Start"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11 12 4l9 7v9H3z"/><path d="M9 20v-6h6v6"/></svg></button>
-        <button data-go="audio" aria-label="Audio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg></button>
-        <button data-go="practice" aria-label="Üben"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></button>
+        <button data-go="vocab" aria-label="Vokabeln"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 20 12 4l7 16M8 14h8"/></svg><span class="tab-l fa" data-i18n="tabVocab"></span></button>
+        <button data-go="lesson" aria-label="Lektion"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M8 7h7"/></svg><span class="tab-l fa" data-i18n="tabLesson"></span></button>
+        <button data-go="home" class="on" aria-label="Start"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11 12 4l9 7v9H3z"/><path d="M9 20v-6h6v6"/></svg><span class="tab-l fa" data-i18n="tabHome"></span></button>
+        <button data-go="audio" aria-label="Audio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg><span class="tab-l fa" data-i18n="tabDialog"></span></button>
+        <button data-go="practice" aria-label="Üben"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg><span class="tab-l fa" data-i18n="tabPractice"></span></button>
       </nav>
       <div class="dock-side dock-acct" id="dockAcct"></div>
     </footer>
@@ -285,16 +294,16 @@
     </div>
   </div>
 
-  <script src="data/lessons.js?v=muh15ibo"></script>
-  <script src="data/lesson1-fa.js?v=muh15ibo"></script>
-  <script src="data/lesson1-times.js?v=muh15ibo"></script>
-  <script src="data/lesson1-words.js?v=muh15ibo"></script>
-  <script src="data/dict-de.js?v=muh15ibo"></script>
-  <script src="data/dict-tr.js?v=muh15ibo"></script>
-  <script src="data/lesson1-ru.js?v=muh15ibo"></script>
-  <script src="data/lesson1-uk.js?v=muh15ibo"></script>
-  <script src="i18n.js?v=muh15ibo"></script>
-  <script src="exercises.js?v=muh15ibo"></script>
-  <script src="app.js?v=muh15ibo"></script>
+  <script src="data/lessons.js?v=muhc8l35"></script>
+  <script src="data/lesson1-fa.js?v=muhc8l35"></script>
+  <script src="data/lesson1-times.js?v=muhc8l35"></script>
+  <script src="data/lesson1-words.js?v=muhc8l35"></script>
+  <script src="data/dict-de.js?v=muhc8l35"></script>
+  <script src="data/dict-tr.js?v=muhc8l35"></script>
+  <script src="data/lesson1-ru.js?v=muhc8l35"></script>
+  <script src="data/lesson1-uk.js?v=muhc8l35"></script>
+  <script src="i18n.js?v=muhc8l35"></script>
+  <script src="exercises.js?v=muhc8l35"></script>
+  <script src="app.js?v=muhc8l35"></script>
 </body>
 </html>
