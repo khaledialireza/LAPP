@@ -984,3 +984,15 @@ body.dock-collapsed .dock-player { display: flex; flex: 1; max-width: 520px; }
   .dp-cover { width: 44px; height: 44px; flex: 0 0 44px; }
 }
 .frame > * { min-width: 0; }
+
+/* Dock hugs the screen edge: only a sliver of the safe area stays free */
+@media (max-width: 900px), (max-height: 520px) {
+  .dock { padding: 4px 8px max(4px, calc(env(safe-area-inset-bottom) - 18px)) !important; }
+}
+@media (max-height: 520px) and (orientation: landscape) {
+  .frame { padding-left: 0 !important; padding-right: 0 !important; }
+  .frame > .status, .frame > main { padding-left: env(safe-area-inset-left); padding-right: 0; }
+  .dock { padding: 4px max(4px, calc(env(safe-area-inset-right) - 34px)) 4px 2px !important; }
+  body.dock-left .frame > .status, body.dock-left .frame > main { padding-left: 0; padding-right: env(safe-area-inset-right); }
+  body.dock-left .dock { padding: 4px 2px 4px max(4px, calc(env(safe-area-inset-left) - 34px)) !important; }
+}
