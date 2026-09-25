@@ -39,7 +39,7 @@
   }
 
   function speak(text) {
-    if (!("speechSynthesis" in window)) return toast("مرورگر از خواندن متن پشتیبانی نمی‌کند");
+    if (!("speechSynthesis" in window)) return toast(t("noTts"));
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text.replace(/[*"]/g, ""));
     u.lang = "de-DE"; u.rate = SPEEDS[state.speed] * 0.95;
@@ -89,8 +89,14 @@
     });
   }
 
+  // lesson texts in the interface language (Persian lives in lessons.js / lesson1-fa.js)
+  function lessonTr(L) {
+    const lang = window.I18N ? I18N.lang : "fa", tr = L.tr && L.tr[lang];
+    if (lang === "fa" || !tr) return { title: L.fa, summary: L.summary, phrases: L.phrases.map(p => p[1]), notes: L.phrases.map(p => p[2]), lines: L.transcriptFa || [] };
+    return { title: tr.title, summary: tr.summary, phrases: tr.phrases, notes: tr.phraseNotes || [], lines: tr.lines };
+  }
   function setLesson(i) {
-    if (i < 0 || i >= LESSONS.length) return toast("درس‌های بعدی به‌زودی اضافه می‌شوند");
+    if (i < 0 || i >= LESSONS.length) return toast(t("moreLessonsSoon"));
     state.idx = i; store.set("lesson", i);
     const L = LESSONS[i];
     $$(".js-lesson-num").forEach(e => e.textContent = "L" + L.id);
@@ -98,17 +104,18 @@
     $("#lpMenu").innerHTML = LESSONS.map((x, j) => `<button role="option" aria-selected="${j === i}" data-pick="${j}">
       <b>L${x.id}</b><span>${esc(x.title)}</span><span class="fa">${esc(x.fa)}</span></button>`).join("");
     $("#sbTitle").textContent = `Lektion ${L.id} · ${L.title}`;
-    $("#hLessonTitle").textContent = L.title; $("#hLessonFa").textContent = L.fa; $("#hLevel").textContent = L.level;
+    const TR = lessonTr(L);
+    $("#hLessonTitle").textContent = L.title; $("#hLessonFa").textContent = TR.title; $("#hLevel").textContent = L.level;
     $("#lTitle").innerHTML = `Lektion ${L.id} <small>${esc(L.title)}</small>`;
-    $("#lLevel").textContent = L.level; $("#lDe").textContent = L.title; $("#lSum").textContent = L.summary;
+    $("#lLevel").textContent = L.level; $("#lDe").textContent = L.title; $("#lSum").textContent = TR.summary;
     $("#lessonList").innerHTML = LESSONS.map((x, j) => `<button class="chip" style="${j === i ? "background:var(--accent);color:#1b1024" : ""}" data-lesson="${j - i}">L${x.id}</button>`).join("");
-    $("#phrases").innerHTML = L.phrases.map(([de, fa, note]) => `
+    $("#phrases").innerHTML = L.phrases.map(([de], pi) => [de, TR.phrases[pi] || "", TR.notes[pi] || ""]).map(([de, fa, note]) => `
       <div class="phrase"><button class="say" data-say="${esc(de)}">${SAY_ICON}</button>
       <span class="de">${esc(de)}</span><span class="fa">${esc(fa)}</span><span class="note fa">${esc(note)}</span></div>`).join("");
 
     // transcript
     lines = parseTranscript(L.transcript);
-    lines.forEach((l, j) => l.fa = (L.transcriptFa || [])[j] || "");
+    lines.forEach((l, j) => l.fa = TR.lines[j] || "");
     timed = Array.isArray(L.timings) && L.timings.length === lines.length;
     // timings: [start, end] per line (or older format: start only, ends at the next line)
     if (timed) lines.forEach((l, j) => {
@@ -178,8 +185,8 @@
   /* ---------- Audio ---------- */
   function act(a) {
     if (a === "toggle") {
-      if (!player.src || player.error) return toast("فایل صوتی این درس هنوز آپلود نشده (audio/lesson1.mp3)");
-      player.paused ? player.play().catch(() => toast("پخش ممکن نشد")) : player.pause();
+      if (!player.src || player.error) return toast(t("noAudio"));
+      player.paused ? player.play().catch(() => toast(t("playFailed"))) : player.pause();
     }
     if (a === "back10") player.currentTime = Math.max(0, player.currentTime - 10);
     if (a === "fwd10") player.currentTime = Math.min(player.duration || 0, player.currentTime + 10);
@@ -199,7 +206,7 @@
   player.addEventListener("play", setIcons);
   player.addEventListener("pause", setIcons);
   player.addEventListener("loadedmetadata", () => $$(".tDur").forEach(e => e.textContent = fmt(player.duration)));
-  player.addEventListener("error", () => { $("#audioNote").textContent = "فایل صوتی پیدا نشد — آن را در پوشهٔ audio با نام lesson1.mp3 قرار دهید. تا آن موقع 🔊 با صدای مرورگر می‌خواند."; });
+  player.addEventListener("error", () => { $("#audioNote").textContent = t("audioMissing"); });
   let lastLine = -1;
   player.addEventListener("timeupdate", () => {
     const p = player.currentTime / (player.duration || 1);
@@ -251,11 +258,11 @@
     $("#vocabCount").textContent = `${known} / ${vocabList.length}`;
     $("#vocabGrid").innerHTML = list.map(v => `
       <div class="card ${state.known.has(v.key) ? "known" : ""}" data-de="${esc(v.key)}"><div class="in">
-        <div class="face front"><button class="say" data-say="${esc(v.de)}">${SAY_ICON}</button><div class="de">${esc(v.de)}</div><div class="en fa">${esc(v.p)}</div></div>
+        <div class="face front"><button class="say" data-say="${esc(v.de)}">${SAY_ICON}</button><div class="de">${esc(v.de)}</div><div class="en fa">${esc(I18N.pos(v.p))}</div></div>
         <div class="face back"><div class="fa v-fa">${esc(v.fa)}</div>
           ${v.g ? `<div class="fa v-g">${esc(v.g.split(" · ").slice(0, 2).join(" · "))}</div>` : ""}
           <button class="btn ghost" data-known style="font-size:12px;padding:6px 10px">${state.known.has(v.key) ? "✓ Gelernt" : "Als gelernt markieren"}</button></div>
-      </div></div>`).join("") || `<p class="fa notice">چیزی اینجا نیست.</p>`;
+      </div></div>`).join("") || `<p class="fa notice">${t("nothingHere")}</p>`;
   }
   $("#vocabGrid").addEventListener("click", e => {
     const c = e.target.closest(".card"); if (!c || e.target.closest("[data-say]")) return;
@@ -274,7 +281,7 @@
   function renderWotd() {
     if (!vocabList.length) return;
     const v = vocabList[new Date().getDate() * 7 % vocabList.length];
-    $("#wotdDe").textContent = v.de; $("#wotdFa").textContent = v.fa; $("#wotdEn").textContent = v.p;
+    $("#wotdDe").textContent = v.de; $("#wotdFa").textContent = v.fa; $("#wotdEn").textContent = I18N.pos(v.p);
   }
   function renderProgress() {
     const k = vocabList.filter(v => state.known.has(v.key)).length;
@@ -282,7 +289,7 @@
     const pct = Math.round((k / (vocabList.length || 1) * 0.4 + ok / n * 0.6) * 100);
     $("#ring").setAttribute("stroke-dasharray", `${pct} 100`);
     $("#ringTxt").textContent = pct + "%";
-    $("#ringSub").textContent = `${k}/${vocabList.length} واژه · تمرین ${ok}/${ex.list.length}`;
+    $("#ringSub").textContent = `${k}/${vocabList.length} ${t("words")} · ${t("exercisesShort")} ${ok}/${ex.list.length}`;
   }
 
   /* ---------- Vocab scope ---------- */
@@ -325,10 +332,10 @@
     return { ok: true };
   }
   const MIC_MSG = {
-    insecure: `میکروفون فقط روی نسخهٔ امن سایت کار می‌کند. <a href="https://${location.host}${location.pathname}">نسخهٔ https را باز کن</a>.`,
-    "no-sr": "این مرورگر تشخیص گفتار ندارد. در آیفون Safari (با Siri روشن) و در اندروید Chrome را باز کن.",
-    denied: "اجازهٔ میکروفون داده نشد. دوباره بزن و «Allow / اجازه» را انتخاب کن. اگر پنجره نیامد: تنظیمات Safari ← Microphone ← Allow.",
-    "no-mic": "میکروفونی پیدا نشد."
+    get insecure() { return `${t("micInsecure")} <a href="https://${location.host}${location.pathname}">${t("openHttps")}</a>.`; },
+    get "no-sr"() { return t("micNoSr"); },
+    get denied() { return t("micDenied"); },
+    get "no-mic"() { return t("micNone"); }
   };
   function micGate(onReady) {
     $("#dlgFoot").innerHTML = `<button class="btn big" id="dlgStart">🎤 Start</button>`;
@@ -336,7 +343,7 @@
       unlockAudio();
       const r = await ensureMic();
       if (r.ok) { $("#dlgFoot").innerHTML = ""; onReady(); return; }
-      $("#dlgFoot").innerHTML = `<p class="fa warn mic-msg">${MIC_MSG[r.why]}</p><button class="btn big" id="dlgStart">🎤 دوباره اجازه بده</button>`;
+      $("#dlgFoot").innerHTML = `<p class="fa warn mic-msg">${MIC_MSG[r.why]}</p><button class="btn big" id="dlgStart">🎤 ${t("allowAgain")}</button>`;
       $("#dlgStart").onclick = () => micGate(onReady) || $("#dlgStart").click();
     };
   }
@@ -398,16 +405,16 @@
     const v = pickWord(); fc.cur = v; fc.last = v.key;
     fc.dir = Math.random() < 0.5 ? "de" : "fa";
     const voice = fc.dir === "fa" && SR;
-    $("#fcDir").innerHTML = fc.dir === "de" ? `Deutsch → <span class="fa">فارسی</span>` : `<span class="fa">فارسی</span> → Deutsch 🎤`;
+    $("#fcDir").innerHTML = fc.dir === "de" ? `Deutsch → <span class="fa">${t("nativeLang")}</span>` : `<span class="fa">${t("nativeLang")}</span> → Deutsch 🎤`;
     $("#fcPrompt").innerHTML = fc.dir === "de"
       ? `<span>${esc(v.de)}</span><button class="say" data-say="${esc(v.de)}">${SAY_ICON}</button>`
       : `<span class="fa">${esc(v.fa)}</span>`;
-    $("#fcPos").textContent = v.p;
+    $("#fcPos").textContent = I18N.pos(v.p);
     const d = closeDistractor(v, fc.dir);
     const optsList = [v, d].filter(Boolean).sort(() => Math.random() - 0.5);
     $("#fcOpts").innerHTML = voice ? "" : optsList.map(o => `<button data-k="${esc(o.key)}" class="${fc.dir === "de" ? "fa" : ""}">${esc(fc.dir === "de" ? o.fa : o.de)}</button>`).join("");
     $("#fcOpts").hidden = voice;
-    $("#fcVoice").hidden = !voice; $("#fcHeard").textContent = "آلمانی‌اش را بلند بگو";
+    $("#fcVoice").hidden = !voice; $("#fcHeard").textContent = t("sayGerman");
     $("#fcInfo").hidden = true; $("#fcNext").hidden = true;
     $("#fcCard").className = "fc-card";
     renderFcStats();
@@ -437,13 +444,13 @@
   });
   $("#fcMic").onclick = async () => {
     const v = fc.cur, forms = [bareDe(v), ...(DICT[v.key]?.f || [])].map(f => window.Practice.norm(f));
-    $("#fcMic").classList.add("rec"); $("#fcHeard").textContent = "در حال گوش دادن…";
+    $("#fcMic").classList.add("rec"); $("#fcHeard").textContent = t("listening");
     try {
       const alts = await listen();
       const ok = alts.some(a => nw(a).some(w => forms.includes(w)));
-      $("#fcHeard").innerHTML = `<span class="fa">شنیدم:</span> «${esc(alts[0])}»`;
+      $("#fcHeard").innerHTML = `<span class="fa">${t("heard")}</span> «${esc(alts[0])}»`;
       fcAnswer(ok);
-    } catch (err) { $("#fcHeard").textContent = "چیزی نشنیدم؛ دوباره بزن."; }
+    } catch (err) { $("#fcHeard").textContent = t("heardNothing"); }
     $("#fcMic").classList.remove("rec");
   };
   $("#fcSkip").onclick = () => fcAnswer(false);
@@ -509,7 +516,7 @@
     const fb = $("#exFeedback");
     fb.hidden = false;
     fb.className = "ex-feedback " + (correct ? "ok" : "bad");
-    fb.innerHTML = `<div class="fb-title">${correct ? "✓ Richtig! · آفرین" : "✗ Nicht ganz · دوباره گوش کن"}</div>
+    fb.innerHTML = `<div class="fb-title">${correct ? "✓ Richtig! · " + t("wellDone") : "✗ Nicht ganz · " + t("listenAgain")}</div>
       ${detail}
       <div class="fb-ans"><button class="say" data-say="${esc(e.answer)}">${SAY_ICON}</button><span>${esc(e.answer)}</span></div>
       ${l && l.fa ? `<div class="fa fb-fa">${esc(e.explain || l.fa)}</div>` : ""}
@@ -537,20 +544,20 @@
     });
 
     if (e.type === "translate") {
-      body.innerHTML = `<p class="ex-q fa">${esc(e.prompt)}</p><p class="ex-sub fa">آلمانی‌اش کدام است؟</p>${optHtml(e.options)}`;
+      body.innerHTML = `<p class="ex-q fa">${esc(e.prompt)}</p><p class="ex-sub fa">${t("whichGerman")}</p>${optHtml(e.options)}`;
       bindOpts();
     } else if (e.type === "listen") {
-      body.innerHTML = `<button class="play-big" id="exPlay">▶</button><p class="ex-sub fa">گوش کن؛ کدام جمله را شنیدی؟</p>${optHtml(e.options)}`;
+      body.innerHTML = `<button class="play-big" id="exPlay">▶</button><p class="ex-sub fa">${t("whichHeard")}</p>${optHtml(e.options)}`;
       $("#exPlay").onclick = () => playClip(e.line);
       bindOpts();
     } else if (e.type === "respond") {
       body.innerHTML = `<div class="ex-bubble"><button class="say" data-say="${esc(e.prompt)}">${SAY_ICON}</button><span>${esc(e.prompt)}</span></div>
-        <p class="ex-sub fa">اگر از تو این را بپرسند، جواب مناسب کدام است؟</p>${optHtml(e.options)}`;
+        <p class="ex-sub fa">${t("bestReply")}</p>${optHtml(e.options)}`;
       bindOpts();
     } else if (e.type === "fill") {
       body.innerHTML = `${e.hint ? `<p class="ex-sub fa">${esc(e.hint)}</p>` : ""}
         <p class="ex-sent">${esc(e.before)}<input id="exInput" autocomplete="off" autocapitalize="off" spellcheck="false" size="${Math.max(4, e.answer.length)}" aria-label="Lücke">${esc(e.after)}</p>
-        <div class="umlauts">${["ä", "ö", "ü", "ß"].map(c => `<button data-c="${c}">${c}</button>`).join("")}<button class="hint" id="exHint">💡 <span class="fa">راهنما</span></button></div>`;
+        <div class="umlauts">${["ä", "ö", "ü", "ß"].map(c => `<button data-c="${c}">${c}</button>`).join("")}<button class="hint" id="exHint">💡 <span class="fa">${t("hint")}</span></button></div>`;
       const inp = $("#exInput"); let hints = 0;
       $$(".umlauts [data-c]", body).forEach(b => b.onclick = () => { inp.value += b.dataset.c; inp.focus(); });
       $("#exHint").onclick = () => { hints++; inp.value = e.answer.slice(0, hints); inp.focus(); };
@@ -559,10 +566,10 @@
       $("#exCheck").hidden = false; $("#exCheck").onclick = check;
     } else if (e.type === "order") {
       const built = [];
-      body.innerHTML = `${e.hint ? `<p class="ex-sub fa">${esc(e.hint)}</p>` : `<p class="ex-sub fa">کلمه‌ها را به ترتیب درست بزن</p>`}
+      body.innerHTML = `${e.hint ? `<p class="ex-sub fa">${esc(e.hint)}</p>` : `<p class="ex-sub fa">${t("tapOrder")}</p>`}
         <div class="build" id="exBuilt"></div><div class="bank" id="exBank">${e.tokens.map((t, j) => `<button data-j="${j}">${esc(t)}</button>`).join("")}</div>`;
       const draw = () => {
-        $("#exBuilt").innerHTML = built.map((j, k) => `<button data-k="${k}">${esc(e.tokens[j])}</button>`).join("") || `<span class="ph fa">اینجا ساخته می‌شود…</span>`;
+        $("#exBuilt").innerHTML = built.map((j, k) => `<button data-k="${k}">${esc(e.tokens[j])}</button>`).join("") || `<span class="ph fa">${t("buildsHere")}</span>`;
         $$("#exBank button").forEach(b => b.classList.toggle("used", built.includes(Number(b.dataset.j))));
         $("#exCheck").hidden = built.length !== e.tokens.length;
       };
@@ -576,17 +583,17 @@
       draw();
     } else if (e.type === "speak") {
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-      body.innerHTML = `<p class="ex-q fa">${esc(e.prompt)}</p><p class="ex-sub fa">این را به آلمانی بلند بگو</p>
+      body.innerHTML = `<p class="ex-q fa">${esc(e.prompt)}</p><p class="ex-sub fa">${t("sayInGerman")}</p>
         <div class="speak-row">${SR ? `<button class="mic" id="exMic" aria-label="Mikrofon">🎤</button>` : ""}
-        <button class="chip-btn" id="exReveal">Lösung zeigen · <span class="fa">نمایش جواب</span></button></div>
+        <button class="chip-btn" id="exReveal">Lösung zeigen · <span class="fa">${t("showAnswer")}</span></button></div>
         <p class="heard" id="exHeard"></p>
-        <div class="self" id="exSelf" hidden><span class="fa">درست گفتی؟</span><button class="btn" data-self="1">✓ Ja</button><button class="btn ghost" data-self="0">✗ Nein</button></div>`;
+        <div class="self" id="exSelf" hidden><span class="fa">${t("saidRight")}</span><button class="btn" data-self="1">✓ Ja</button><button class="btn ghost" data-self="0">✗ Nein</button></div>`;
       const reveal = () => { $("#exHeard").innerHTML = `<b>${esc(e.answer)}</b>`; $("#exSelf").hidden = false; speak(e.answer); };
       $("#exReveal").onclick = reveal;
       $$("#exSelf [data-self]").forEach(b => b.onclick = () => { $("#exSelf").hidden = true; finishEx(b.dataset.self === "1"); });
       if (SR) $("#exMic").onclick = () => {
         const r = new SR(); r.lang = "de-DE"; r.interimResults = false; r.maxAlternatives = 3;
-        $("#exMic").classList.add("rec"); $("#exHeard").innerHTML = `<span class="fa">در حال گوش دادن…</span>`;
+        $("#exMic").classList.add("rec"); $("#exHeard").innerHTML = `<span class="fa">${t("listening")}</span>`;
         r.onresult = ev => {
           const target = window.Practice.words(window.Practice.norm(e.answer));
           const best = [...ev.results[0]].map(a => {
@@ -595,10 +602,10 @@
             return { t: a.transcript, score: hit / target.length };
           }).sort((p, q) => q.score - p.score)[0];
           const pct = Math.round(best.score * 100);
-          $("#exHeard").innerHTML = `<span class="fa">شنیدم:</span> «${esc(best.t)}» · ${pct}%`;
+          $("#exHeard").innerHTML = `<span class="fa">${t("heard")}</span> «${esc(best.t)}» · ${pct}%`;
           finishEx(best.score >= 0.7);
         };
-        r.onerror = () => { $("#exHeard").innerHTML = `<span class="fa">میکروفون در دسترس نیست؛ از «نمایش جواب» استفاده کن.</span>`; };
+        r.onerror = () => { $("#exHeard").innerHTML = `<span class="fa">${t("micUnavailable")}</span>`; };
         r.onend = () => $("#exMic")?.classList.remove("rec");
         r.start();
       };
@@ -647,7 +654,7 @@
       if (next) ex.i = next.id;
       const [de, fa] = window.Practice.TYPE_LABEL[ex.filter];
       showPanel("pEx", `${de} <span class="fa">· ${fa}</span>`); renderExercise();
-    } else if (k === "fc") { showPanel("pFc", `Karteikarten <span class="fa">· فلش‌کارت</span>`); fc.right = fc.wrong = fc.streak = 0; nextCard(); }
+    } else if (k === "fc") { showPanel("pFc", `Karteikarten <span class="fa">· ${t("flashcards")}</span>`); fc.right = fc.wrong = fc.streak = 0; nextCard(); }
     else if (k === "exam") startExam();
     else startDialog(k);
   });
@@ -655,9 +662,9 @@
   /* ---------- Dialog speaking: role play · gap dialog · read aloud ---------- */
   const dlg = { run: 0, items: [], i: 0, mode: "", role: "" };
   const DLG = {
-    role: ["Rollenspiel", "نقش‌آفرینی"],
-    gap: ["Lückendialog", "جای خالی را بگو"],
-    read: ["Vorlesen", "بلندخوانی"]
+    get role() { return ["Rollenspiel", t("role")]; },
+    get gap() { return ["Lückendialog", t("gap")]; },
+    get read() { return ["Vorlesen", t("read")]; }
   };
   const wcount = s => window.Practice.words(s).length;
   function pickBlock(n, maxWords) {
@@ -687,9 +694,9 @@
     const [de, fa] = DLG[mode];
     showPanel("pDlg", `${de} <span class="fa">· ${fa}</span>`);
     $("#dlgIntro").innerHTML = mode === "role"
-      ? "نقش‌ها تصادفی‌اند. وقتی نوبت توست میکروفون خودش روشن می‌شود؛ جمله را بلند بگو تا درست شود."
-      : mode === "gap" ? "میکروفون خودش روشن می‌شود. کل خط را همراه کلمه‌های خالی بلند بگو."
-      : "میکروفون خودش روشن می‌شود. هر خط را بلند بخوان تا درست شود.";
+      ? t("roleIntro")
+      : mode === "gap" ? t("gapIntro")
+      : t("readIntro");
     renderDlg();
     micGate(runDlg);
   }
@@ -714,7 +721,7 @@
       return `<span class="hint-chip"><b dir="ltr">${esc(shown)}</b>${fa ? ` <span class="fa">= ${esc(fa)}</span>` : ""}</span>`;
     }).join("");
   }
-  const STATE_TXT = { listen: "🎤 گوش می‌دهم… بگو", model: "🔊 جواب درست را گوش کن", retry: "دوباره بگو", silent: "صدایی نشنیدم؛ دوباره بگو", them: "🔊" };
+  const STATE_TXT = { get listen() { return t("stListen"); }, get model() { return t("stModel"); }, get retry() { return t("stRetry"); }, get silent() { return t("stSilent"); }, them: "🔊" };
   // only the previous line and the current one are visible; the next line stays hidden
   function renderDlg() {
     const cur = dlg.i;
@@ -723,12 +730,12 @@
       const l = lines[it.line], sc = it.score, st = k < cur ? "done" : "cur";
       const showScore = sc && sc.html && (k < cur || it.state !== "listen");
       return `<div class="dl ${it.mine ? "mine" : "them"} ${st}" data-k="${k}">
-        <div class="dl-who">${esc(l.who)}${it.mine ? ` <span class="fa">(تو)</span>` : ""}</div>
+        <div class="dl-who">${esc(l.who)}${it.mine ? ` <span class="fa">(${t("you")})</span>` : ""}</div>
         <div class="dl-text">${it.reveal || !showScore || (it.blanks.length && !sc.ok) ? lineHtml(it) : sc.html}</div>
         ${sc && (k < cur || it.state !== "listen") ? `<div class="dl-res ${sc.ok ? "ok" : "bad"}">${sc.self ? "✓" : `${Math.round(sc.pct * 100)}%`} ${sc.said ? `<span class="said">«${esc(sc.said)}»</span>` : ""}</div>` : ""}
         ${k === cur && it.state ? `<div class="dl-state ${it.state}">${it.state === "listen" ? `<span class="mic-live"></span>` : ""}<span class="fa">${STATE_TXT[it.state] || ""}</span>${it.tries ? ` <span class="tries">${it.tries}×</span>` : ""}</div>` : ""}
-        ${k === cur && it.hint ? `<div class="dl-hint"><span class="fa">راهنما:</span> ${it.hint}</div>` : ""}
-        ${k === cur && it.mine && !SR ? `<div class="dl-act"><button class="btn" data-self="${k}">✓ <span class="fa">گفتم</span></button></div>` : ""}
+        ${k === cur && it.hint ? `<div class="dl-hint"><span class="fa">${t("hintColon")}</span> ${it.hint}</div>` : ""}
+        ${k === cur && it.mine && !SR ? `<div class="dl-act"><button class="btn" data-self="${k}">✓ <span class="fa">${t("iSaidIt")}</span></button></div>` : ""}
         ${k < cur ? `<div class="fa dl-fa">${esc(l.fa || "")}</div>` : ""}
       </div>`;
     }).join("");
@@ -783,8 +790,8 @@
     const avg = mine.length ? Math.round(mine.reduce((a, x) => a + x.score.pct, 0) / mine.length * 100) : 0;
     const st = store.get("dlg", {}); st[dlg.mode] = Math.max(st[dlg.mode] || 0, avg); store.set("dlg", st);
     renderDlg();
-    $("#dlgFoot").innerHTML = `<div class="dlg-sum"><b>${avg}%</b> <span class="fa">درست گفتی</span></div>
-      <button class="btn big" id="dlgAgain">↻ Nochmal · <span class="fa">خط‌های جدید</span></button>`;
+    $("#dlgFoot").innerHTML = `<div class="dlg-sum"><b>${avg}%</b> <span class="fa">${t("saidCorrectly")}</span></div>
+      <button class="btn big" id="dlgAgain">↻ Nochmal · <span class="fa">${t("newLines")}</span></button>`;
     $("#dlgAgain").onclick = () => startDialog(dlg.mode);
   }
 
@@ -803,7 +810,7 @@
   function examRecord(ok) { const it = exam.items[exam.k]; if (it && it.res === undefined) { it.res = ok; if (ok) exam.right++; } }
   function examNext() {
     exam.k++;
-    const title = `Prüfung <span class="fa">· آزمون</span>`;
+    const title = `Prüfung <span class="fa">· ${t("exam")}</span>`;
     if (exam.k >= exam.items.length) return examEnd();
     const it = exam.items[exam.k];
     if (it.kind === "ex") { ex.filter = "all"; ex.i = it.id; showPanel("pEx", title); renderExercise(); }
@@ -814,13 +821,13 @@
     const n = exam.items.length, pct = Math.round(exam.right / n * 100);
     const best = Math.max(store.get("exam" + LESSONS[state.idx].id, 0), pct); store.set("exam" + LESSONS[state.idx].id, best);
     exam.active = false;
-    showPanel("pEnd", `Prüfung <span class="fa">· آزمون</span>`);
+    showPanel("pEnd", `Prüfung <span class="fa">· ${t("exam")}</span>`);
     $("#pEnd").innerHTML = `<div class="exam-end">
       <div class="exam-score">${exam.right} / ${n}</div>
       <div class="exam-pct ${pct >= 70 ? "ok" : "bad"}">${pct}%</div>
-      <p class="fa">${pct >= 90 ? "عالی! آماده‌ای برای درس بعد 🎉" : pct >= 70 ? "خوب بود! کمی دیگر تمرین کن." : "دوباره تمرین کن و بعد آزمون بده."}</p>
-      <p class="fa muted">بهترین نتیجه: ${best}%</p>
-      <button class="btn big" id="examAgain">↻ Neue Prüfung · <span class="fa">آزمون جدید</span></button></div>`;
+      <p class="fa">${pct >= 90 ? t("examGreat") : pct >= 70 ? t("examGood") : t("examRetry")}</p>
+      <p class="fa muted">${t("bestResult")} ${best}%</p>
+      <button class="btn big" id="examAgain">↻ Neue Prüfung · <span class="fa">${t("newExam")}</span></button></div>`;
     $("#examAgain").onclick = startExam;
   }
 
@@ -848,14 +855,14 @@
     if (NAMES[w]) return { lemma: w, p: "اسم خاص", fa: NAMES[w], g: "" };
     const k = dictIdx[w] || dictIdx[w.toLowerCase()];
     if (k) return { lemma: k.replace(/_.*/, ""), ...DICT[k] };
-    if (/^[a-z'-]+$/i.test(w) && !/[äöüß]/i.test(w)) return { lemma: w, p: "انگلیسی", fa: "این کلمه انگلیسی است (توضیح گوینده برای بینندگان).", g: "" };
-    return { lemma: w, p: "", fa: "معنی این کلمه هنوز ثبت نشده.", g: "" };
+    if (/^[a-z'-]+$/i.test(w) && !/[äöüß]/i.test(w)) return { lemma: w, p: "انگلیسی", fa: t("englishWord"), g: "" };
+    return { lemma: w, p: "", fa: t("noMeaning"), g: "" };
   }
   function openWord(w) {
     const d = lookup(w), l = lines[curLine];
     $("#popWord").textContent = w;
     $("#popLemma").textContent = d.lemma.toLowerCase() !== w.toLowerCase() ? `← ${d.lemma}` : "";
-    $("#popPos").textContent = d.p; $("#popPos").hidden = !d.p;
+    $("#popPos").textContent = I18N.pos(d.p); $("#popPos").hidden = !d.p;
     $("#popFa").textContent = d.fa;
     $("#popG").innerHTML = d.g ? d.g.split(" · ").map(x => `<div>${esc(x)}</div>`).join("") : "";
     $("#popSay").dataset.say = w;
@@ -874,6 +881,78 @@
   $("#popBack").addEventListener("click", e => { if (e.target.id === "popBack") closeWord(); });
   document.addEventListener("keydown", e => { if (e.key === "Escape") { closeWord(); setDrawer(false); } });
   $("#lcSay").innerHTML = SAY_ICON; $("#popSay").innerHTML = SAY_ICON;
+
+  /* ---------- Interface language ---------- */
+  function applyDictLang() {
+    const lang = I18N.lang, col = lang === "ru" ? 0 : 1, TRD = window.DICT_TR || {}, NT = (window.NAMES_TR || {})[lang] || {};
+    for (const [k, d] of Object.entries(DICT)) {
+      if (d.fa0 === undefined) { d.fa0 = d.fa; d.g0 = d.g; }
+      d.fa = lang === "fa" ? d.fa0 : ((TRD[k] || [])[col] || d.fa0);
+      d.g = lang === "fa" ? d.g0 : ""; // grammar notes are written in Persian only
+    }
+    if (!window.NAMES0) window.NAMES0 = { ...NAMES };
+    for (const n of Object.keys(NAMES)) NAMES[n] = lang === "fa" ? window.NAMES0[n] : (NT[n] || window.NAMES0[n]);
+  }
+  function applyLang() {
+    applyDictLang(); I18N.apply();
+    $$(".js-lang-code").forEach(e => e.textContent = I18N.lang.toUpperCase());
+    if (LESSONS.length) setLesson(state.idx);
+    if (!$("#profBack").hidden) renderProfile();
+    if (!$("#pView").hidden) closeView();
+  }
+  window.addEventListener("lapp:lang", applyLang);
+  const langMenu = $("#langMenu");
+  document.addEventListener("click", e => {
+    const b = e.target.closest("[data-lang-btn]");
+    if (b) {
+      e.stopPropagation();
+      langMenu.innerHTML = I18N.langs.map(l => `<button data-set-lang="${l}" class="${l === I18N.lang ? "on" : ""}"><b>${l.toUpperCase()}</b> ${I18N.name(l)}</button>`).join("");
+      const r = b.getBoundingClientRect();
+      langMenu.style.left = Math.max(8, Math.min(innerWidth - 200, r.right - 190)) + "px";
+      if (r.top > innerHeight / 2) { langMenu.style.top = ""; langMenu.style.bottom = (innerHeight - r.top + 8) + "px"; }
+      else { langMenu.style.bottom = ""; langMenu.style.top = (r.bottom + 8) + "px"; }
+      langMenu.hidden = !langMenu.hidden; return;
+    }
+    const sl = e.target.closest("[data-set-lang]");
+    if (sl) { langMenu.hidden = true; I18N.setLang(sl.dataset.setLang); return; }
+    if (!e.target.closest("#langMenu")) langMenu.hidden = true;
+  });
+
+  /* ---------- Profile ---------- */
+  const initial = n => (n || "").trim().charAt(0).toUpperCase() || "🙂";
+  const paintAvatar = () => $$(".js-avatar").forEach(e => e.textContent = initial(store.get("name", "")));
+  function renderProfile() {
+    const L = LESSONS[state.idx];
+    const known = vocabList.filter(v => state.known.has(v.key)).length;
+    const res = exResults(), okEx = Object.values(res).filter(Boolean).length;
+    const fcs = Object.values(store.get("fc", {})), fr = fcs.reduce((a, x) => a + x[0], 0), fw = fcs.reduce((a, x) => a + x[1], 0);
+    const exam = store.get("exam" + L.id, 0), dl = store.get("dlg", {}), bestDlg = Math.max(0, ...Object.values(dl));
+    $("#profName").value = store.get("name", "");
+    $("#profName").placeholder = t("learner");
+    const row = (label, val, pct) => `<div class="ps"><span class="fa">${label}</span><b dir="ltr">${val}</b>${pct != null ? `<i style="--p:${Math.round(pct)}%"></i>` : ""}</div>`;
+    $("#profStats").innerHTML =
+      row(t("wordsLearned"), `${known} / ${vocabList.length}`, known / (vocabList.length || 1) * 100) +
+      row(t("exercisesDone"), `${okEx} / ${ex.list.length}`, okEx / (ex.list.length || 1) * 100) +
+      row(t("flashcardsStat"), `${fr} / ${fw}`) +
+      row(t("bestExam"), `${exam}%`, exam) +
+      row(t("bestSpeaking"), `${bestDlg}%`, bestDlg);
+    $("#profLang").innerHTML = I18N.langs.map(l => `<button data-set-lang="${l}" class="${l === I18N.lang ? "on" : ""}">${I18N.name(l)}</button>`).join("");
+    paintAvatar();
+  }
+  document.addEventListener("click", e => {
+    if (e.target.closest("[data-profile]")) { renderProfile(); $("#profBack").hidden = false; }
+  });
+  $("#profClose").onclick = () => { $("#profBack").hidden = true; };
+  $("#profBack").addEventListener("click", e => { if (e.target.id === "profBack") $("#profBack").hidden = true; });
+  $("#profName").addEventListener("input", e => { store.set("name", e.target.value.trim()); paintAvatar(); });
+  $("#profReset").onclick = () => {
+    if (!confirm(t("resetConfirm"))) return;
+    try { Object.keys(localStorage).filter(k => k.startsWith("lapp:") && !/^lapp:(lang|name)$/.test(k)).forEach(k => localStorage.removeItem(k)); } catch {}
+    location.reload();
+  };
+  paintAvatar();
+  applyDictLang(); I18N.apply();
+  $$(".js-lang-code").forEach(e => e.textContent = I18N.lang.toUpperCase());
 
   /* ---------- Init ---------- */
   tick(); setInterval(tick, 10000);

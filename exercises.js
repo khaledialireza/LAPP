@@ -3,13 +3,14 @@
 (() => {
   const TOTAL = 100;
   const PLAN = [["translate", 20], ["fill", 20], ["order", 20], ["listen", 15], ["respond", 15], ["speak", 10]];
+  const tt = k => (window.t ? window.t(k) : k);
   const TYPE_LABEL = {
-    translate: ["Übersetzen", "ترجمه کن"],
-    fill: ["Lücke füllen", "جای خالی را بنویس"],
-    order: ["Satz bauen", "جمله را بساز"],
-    listen: ["Hören", "گوش کن و انتخاب کن"],
-    respond: ["Antworten", "بهترین جواب چیست؟"],
-    speak: ["Sprechen", "بلند بگو"]
+    get translate() { return ["Übersetzen", tt("exTranslate")]; },
+    get fill() { return ["Lücke füllen", tt("exFill")]; },
+    get order() { return ["Satz bauen", tt("exOrder")]; },
+    get listen() { return ["Hören", tt("exListen")]; },
+    get respond() { return ["Antworten", tt("exRespond")]; },
+    get speak() { return ["Sprechen", tt("exSpeak")]; }
   };
   // کلماتی که نشان می‌دهند جمله انگلیسی است (توضیح گوینده‌ها)
   const EN = new Set("the is are you what what's where means that it's it to a and or do my i nice meet first next last one word perfect easy like for from how old your favorite imagine we fly sounds but just yourself myself introduce oneself living job free time reflexive verb complicated female age twenty-five five twenty hobbies origin introductions turn".split(" "));

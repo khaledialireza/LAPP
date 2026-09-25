@@ -19,9 +19,11 @@
         <button class="icon-btn" data-lesson="1" aria-label="nächste Lektion">›</button>
       </div>
       <div class="lp-menu" id="lpMenu" role="listbox" hidden></div>
-      <div class="brand desk-only"><span class="dot"></span>LAPP <span class="fa" style="color:var(--muted);font-weight:400">· آلمانی</span></div>
+      <div class="brand desk-only"><span class="dot"></span>LAPP <span class="fa" style="color:var(--muted);font-weight:400">· <span data-i18n="german">آلمانی</span></span></div>
       <div class="clock" id="sbClock">--:--</div>
       <div class="right">
+        <div class="mob-only mob-acct"><button class="icon-btn ui-lang" data-lang-btn aria-label="Language"><span class="js-lang-code">FA</span></button>
+        <button class="avatar-btn" data-profile aria-label="Profile"><span class="js-avatar">?</span></button></div>
         <div class="mini-player">
           <span class="title" id="sbTitle">Lektion 1</span>
           <button class="icon-btn" data-act="prev" aria-label="zurück"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
@@ -90,11 +92,11 @@
             </div>
             <div class="tile" style="background:var(--tile-2);margin-top:6px">
               <h3>du vs. Sie</h3>
-              <div class="fa" style="font-size:13px;line-height:1.9"><b>du</b> = دوستانه (دوست، همسن، مهمانی)<br><b>Sie</b> = رسمی (رئیس، معلم، اداره)</div>
+              <div class="fa" style="font-size:13px;line-height:1.9"><b>du</b> = <span data-i18n="duInfo"></span><br><b>Sie</b> = <span data-i18n="sieInfo"></span></div>
             </div>
           </div>
           <div class="tile phr">
-            <h3>Wichtige Sätze · جمله‌های مهم</h3>
+            <h3>Wichtige Sätze · <span class="fa" data-i18n="keyPhrases"></span></h3>
             <div id="phrases"></div>
           </div>
         </div>
@@ -123,13 +125,13 @@
               <button class="icon-btn" data-act="toggle" style="background:var(--accent);color:#1b1024" aria-label="play"><svg class="ico-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l12-7z"/></svg></button>
               <button class="icon-btn" data-act="fwd10" aria-label="+10s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg></button>
             </div>
-            <div class="speakers" style="flex-direction:column;gap:8px"><label><input type="checkbox" id="follow" checked> Mitlesen (Auto-Scroll)</label><label><input type="checkbox" id="showFa" checked> <span class="fa">ترجمهٔ فارسی</span></label></div>
+            <div class="speakers" style="flex-direction:column;gap:8px"><label><input type="checkbox" id="follow" checked> Mitlesen (Auto-Scroll)</label><label><input type="checkbox" id="showFa" checked> <span class="fa" data-i18n="showTranslation"></span></label></div>
             <div class="now-box" id="aNowBox">
               <h3 id="aNowWho"></h3>
               <div id="aNowDe" class="now-de"></div>
               <div id="aNowFa" class="fa now-fa-lg"></div>
             </div>
-            <p class="notice fa" id="audioNote">روی هر خط بزنید تا صوت به همان‌جا برود (تقریبی). دکمهٔ 🔊 با صدای مرورگر می‌خواند.</p>
+            <p class="notice fa" id="audioNote"><span data-i18n="audioNote"></span></p>
           </div>
           <div class="tile transcript" id="transcript"></div>
         </div>
@@ -137,7 +139,7 @@
         <div class="audio-mob mob-only">
           <div class="screen-head">
             <h1>Dialog <small>Daily German Talk</small></h1>
-            <button class="chip-btn fa" id="faBtn" aria-pressed="true">ترجمه</button>
+            <button class="chip-btn fa" id="faBtn" aria-pressed="true" data-i18n="showTranslation"></button>
           </div>
           <div class="stage">
             <article class="line-card" id="lineCard">
@@ -145,7 +147,7 @@
                 <button class="say" id="lcSay" aria-label="vorlesen"></button></div>
               <p class="lc-de" id="mDe"></p>
               <p class="lc-fa fa" id="mFa"></p>
-              <p class="lc-hint fa">روی هر کلمه بزنید تا معنی و گرامرش را ببینید</p>
+              <p class="lc-hint fa" data-i18n="tapWord"></p>
             </article>
             <button class="nav-arrow" data-act="prev" aria-label="vorheriger Satz">‹</button>
             <button class="nav-arrow" data-act="next" aria-label="nächster Satz">›</button>
@@ -186,7 +188,7 @@
       <!-- VOCAB -->
       <section class="screen" id="vocab">
         <div class="screen-head">
-          <h1>Vokabeln <small class="fa">دیکشنری درس</small> <small id="vocabCount" dir="ltr" class="chip"></small></h1>
+          <h1>Vokabeln <small class="fa" data-i18n="lessonDict"></small> <small id="vocabCount" dir="ltr" class="chip"></small></h1>
           <div class="tabs" id="vocabScope">
             <button class="on" data-scope="lesson">Lektion</button>
             <button data-scope="all">Alle Lektionen</button>
@@ -194,7 +196,7 @@
         </div>
         <div class="v-list" id="vList">
           <div class="v-tools">
-            <input class="v-search" id="vocabSearch" type="search" placeholder="Suchen · جستجو" aria-label="Suchen">
+            <input class="v-search" id="vocabSearch" type="search" placeholder="Suchen · جستجو" data-i18n-ph="Suchen · {search}" aria-label="Suchen">
             <div class="tabs" id="vocabTabs">
               <button class="on" data-vf="all">Alle</button>
               <button data-vf="new">Neu</button>
@@ -208,19 +210,19 @@
       <!-- PRACTICE -->
       <section class="screen" id="practice">
         <div class="p-hub" id="pHub">
-          <div class="screen-head"><h1>Üben <small class="fa">حرف بزن، نه فقط بنویس</small></h1><div class="ex-stats" id="exStats"></div></div>
+          <div class="screen-head"><h1>Üben <small class="fa" data-i18n="speakNotWrite"></small></h1><div class="ex-stats" id="exStats"></div></div>
           <div class="hub-scroll">
-            <h3 class="hub-h">Sprechen · <span class="fa">صحبت کردن</span></h3>
+            <h3 class="hub-h">Sprechen · <span class="fa" data-i18n="speaking"></span></h3>
             <div class="hub-grid">
-              <button class="hub-tile speak" data-open="role"><span class="ht-ico">🎭</span><b>Rollenspiel</b><span class="fa">نقش‌آفرینی · ۱۰ خط</span></button>
-              <button class="hub-tile speak" data-open="gap"><span class="ht-ico">🧩</span><b>Lückendialog</b><span class="fa">بخوان و جای خالی را بگو · ۵ خط</span></button>
-              <button class="hub-tile speak" data-open="read"><span class="ht-ico">📖</span><b>Vorlesen</b><span class="fa">بلندخوانی · ۵ خط</span></button>
-              <button class="hub-tile speak" data-open="fc"><span class="ht-ico">🃏</span><b>Karteikarten</b><span class="fa">فلش‌کارت لغات · صوتی</span></button>
+              <button class="hub-tile speak" data-open="role"><span class="ht-ico">🎭</span><b>Rollenspiel</b><span class="fa" data-i18n="roleSub"></span></button>
+              <button class="hub-tile speak" data-open="gap"><span class="ht-ico">🧩</span><b>Lückendialog</b><span class="fa" data-i18n="gapSub"></span></button>
+              <button class="hub-tile speak" data-open="read"><span class="ht-ico">📖</span><b>Vorlesen</b><span class="fa" data-i18n="readSub"></span></button>
+              <button class="hub-tile speak" data-open="fc"><span class="ht-ico">🃏</span><b>Karteikarten</b><span class="fa" data-i18n="fcSub"></span></button>
             </div>
-            <h3 class="hub-h">Übungen · <span class="fa">تمرین‌ها</span></h3>
+            <h3 class="hub-h">Übungen · <span class="fa" data-i18n="exercises"></span></h3>
             <div class="hub-grid" id="hubEx"></div>
           </div>
-          <button class="exam-btn" data-open="exam"><span>🏁 Prüfung</span><span class="fa">آزمون · ۱۰ تا ۱۵ سؤال از همهٔ تمرین‌ها</span></button>
+          <button class="exam-btn" data-open="exam"><span>🏁 Prüfung</span><span class="fa" data-i18n="examSub"></span></button>
         </div>
 
         <div class="p-view" id="pView" hidden>
@@ -238,7 +240,7 @@
                 <div class="ex-feedback" id="exFeedback" hidden></div>
                 <div class="ex-foot">
                   <button class="btn ghost" id="exPrev">‹ Zurück</button>
-                  <button class="btn" id="exCheck" hidden>Prüfen · <span class="fa">بررسی</span></button>
+                  <button class="btn" id="exCheck" hidden>Prüfen · <span class="fa" data-i18n="check"></span></button>
                   <button class="btn ghost" id="exNext">Weiter ›</button>
                 </div>
               </article>
@@ -255,8 +257,8 @@
               <div class="fc-opts" id="fcOpts"></div>
               <div class="fc-voice" id="fcVoice" hidden>
                 <button class="mic" id="fcMic" aria-label="Mikrofon">🎤</button>
-                <p class="heard fa" id="fcHeard">آلمانی‌اش را بلند بگو</p>
-                <button class="chip-btn" id="fcSkip">Weiß nicht · <span class="fa">بلد نیستم</span></button>
+                <p class="heard fa" id="fcHeard" data-i18n="sayGerman"></p>
+                <button class="chip-btn" id="fcSkip">Weiß nicht · <span class="fa" data-i18n="dontKnow"></span></button>
               </div>
               <div class="fc-info fa" id="fcInfo" hidden></div>
               <button class="btn" id="fcNext" hidden>Weiter ›</button>
@@ -289,12 +291,30 @@
         <button data-go="audio" aria-label="Audio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg></button>
         <button data-go="practice" aria-label="Üben"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></button>
       </nav>
-      <div class="right desk-only"></div>
+      <div class="right desk-only">
+        <button class="icon-btn ui-lang" data-lang-btn aria-label="Language"><span class="js-lang-code">FA</span></button>
+        <button class="avatar-btn" data-profile aria-label="Profile"><span class="js-avatar">?</span></button>
+      </div>
     </footer>
   </div>
 
   <audio id="player" preload="metadata"></audio>
   <div class="toast" id="toast"></div>
+  <div class="lang-menu" id="langMenu" hidden></div>
+  <div class="pop-back" id="profBack" hidden>
+    <div class="pop prof" role="dialog" aria-modal="true" aria-labelledby="profTitle">
+      <div class="pop-head">
+        <div class="avatar-big js-avatar">?</div>
+        <div><div class="pop-word" id="profTitle" data-i18n="profile"></div><div class="pop-lemma fa" data-i18n="savedOnDevice"></div></div>
+        <button class="icon-btn pop-x" id="profClose" aria-label="close">✕</button>
+      </div>
+      <label class="prof-name"><span class="fa" data-i18n="yourName"></span><input id="profName" maxlength="30" autocomplete="name"></label>
+      <h3 class="fa" data-i18n="progress"></h3>
+      <div class="prof-stats" id="profStats"></div>
+      <div class="prof-lang"><span class="fa" data-i18n="uiLanguage"></span><div class="tabs" id="profLang"></div></div>
+      <button class="btn ghost prof-reset" id="profReset" data-i18n="resetProgress"></button>
+    </div>
+  </div>
   <div class="pop-back" id="popBack" hidden>
     <div class="pop" role="dialog" aria-modal="true" aria-labelledby="popWord">
       <div class="pop-head">
@@ -305,7 +325,7 @@
       <span class="chip fa" id="popPos"></span>
       <p class="pop-fa fa" id="popFa"></p>
       <div class="pop-g fa" id="popG"></div>
-      <div class="pop-ctx"><h3>Im Satz · در این جمله</h3><p id="popCtx"></p><p class="fa" id="popCtxFa"></p></div>
+      <div class="pop-ctx"><h3>Im Satz · <span class="fa" data-i18n="inSentence"></span></h3><p id="popCtx"></p><p class="fa" id="popCtxFa"></p></div>
     </div>
   </div>
 
@@ -314,6 +334,10 @@
   <script src="data/lesson1-times.js"></script>
   <script src="data/lesson1-words.js"></script>
   <script src="data/dict-de.js"></script>
+  <script src="data/dict-tr.js"></script>
+  <script src="data/lesson1-ru.js"></script>
+  <script src="data/lesson1-uk.js"></script>
+  <script src="i18n.js"></script>
   <script src="exercises.js"></script>
   <script src="app.js"></script>
 </body>

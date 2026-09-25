@@ -694,3 +694,43 @@ mark { background: rgba(240,138,168,.3); color: var(--text); border-radius: 4px;
 mark.w-fill { background: rgba(127,214,164,.25); color: var(--ok); }
 .dl-state.silent { color: var(--bad); }
 .dl-state.model { color: var(--ok); }
+
+/* ---------- Interface language: .fa marks text in the learner's language ---------- */
+html[data-ui="ru"] .fa, html[data-ui="uk"] .fa { direction: ltr; font-family: "Inter", system-ui, sans-serif; }
+html[data-ui="ru"] .lc-fa, html[data-ui="uk"] .lc-fa,
+html[data-ui="ru"] #lSum, html[data-ui="uk"] #lSum { text-align: start; }
+
+/* ---------- Language + profile buttons ---------- */
+.dock .right { gap: 10px; }
+.ui-lang { width: auto; height: 34px; padding: 0 10px; border-radius: 10px; background: var(--tile-2); font-size: 12px; font-weight: 700; letter-spacing: .5px; color: var(--muted); }
+.ui-lang:hover { color: var(--text); }
+.avatar-btn { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), #8a6cf0); color: #1b1024; font-weight: 800; display: grid; place-items: center; }
+.mob-acct { display: none; align-items: center; gap: 6px; }
+.mob-acct .ui-lang { height: 26px; padding: 0 6px; font-size: 11px; }
+.mob-acct .avatar-btn { width: 28px; height: 28px; font-size: 13px; }
+.lang-menu { position: fixed; z-index: 40; width: 190px; background: var(--panel); border: 1px solid rgba(255,255,255,.08); border-radius: 14px; box-shadow: var(--shadow); padding: 6px; display: flex; flex-direction: column; gap: 2px; animation: fade .15s ease; }
+.lang-menu[hidden] { display: none; }
+.lang-menu button { text-align: start; padding: 10px 12px; border-radius: 10px; display: flex; gap: 10px; align-items: center; }
+.lang-menu button:hover { background: var(--tile-2); }
+.lang-menu button.on { background: var(--tile); }
+.lang-menu b { color: var(--accent); font-size: 12px; width: 22px; }
+
+/* profile */
+.prof { gap: 12px; }
+.avatar-big { width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), #8a6cf0); color: #1b1024; font-weight: 800; font-size: 22px; display: grid; place-items: center; flex: 0 0 52px; }
+.prof-name { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--muted); }
+.prof-name input { background: var(--tile-2); border: 1px solid transparent; color: var(--text); border-radius: 10px; padding: 10px 12px; font: inherit; font-size: 15px; }
+.prof-name input:focus { outline: none; border-color: var(--accent); }
+.prof h3 { margin: 4px 0 0; font-size: 12px; color: var(--muted); font-weight: 500; }
+.prof-stats { display: flex; flex-direction: column; gap: 8px; }
+.ps { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center; background: var(--tile-2); border-radius: 10px; padding: 10px 12px; font-size: 14px; }
+.ps i { grid-column: 1 / -1; height: 5px; border-radius: 3px; background: linear-gradient(90deg, var(--accent) var(--p), rgba(255,255,255,.08) var(--p)); }
+.prof-lang { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 13px; color: var(--muted); flex-wrap: wrap; }
+.prof-lang .tabs button.on { background: var(--tile); color: var(--text); }
+.prof-reset { align-self: flex-start; color: var(--bad); font-size: 13px; }
+
+@media (max-width: 900px), (max-height: 520px) {
+  .mob-acct { display: flex; }
+  .status .mini-player [data-act="prev"], .status .mini-player [data-act="next"] { display: none; }
+}
+.pop-head > .avatar-big { flex: 0 0 52px; }
