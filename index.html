@@ -188,37 +188,91 @@
       <!-- VOCAB -->
       <section class="screen" id="vocab">
         <div class="screen-head">
-          <h1>Vokabeln <small class="fa">همهٔ کلمه‌های درس · روی کارت بزنید</small> <small id="vocabCount" dir="ltr" class="chip"></small></h1>
-          <input class="v-search" id="vocabSearch" type="search" placeholder="Suchen · جستجو" aria-label="Suchen">
-          <div class="tabs" id="vocabTabs">
-            <button class="on" data-vf="all">Alle</button>
-            <button data-vf="new">Neu</button>
-            <button data-vf="known">Gelernt</button>
+          <h1>Vokabeln <small class="fa">دیکشنری درس</small> <small id="vocabCount" dir="ltr" class="chip"></small></h1>
+          <div class="tabs" id="vocabScope">
+            <button class="on" data-scope="lesson">Lektion</button>
+            <button data-scope="all">Alle Lektionen</button>
           </div>
         </div>
-        <div class="vocab-grid" id="vocabGrid"></div>
+        <div class="v-list" id="vList">
+          <div class="v-tools">
+            <input class="v-search" id="vocabSearch" type="search" placeholder="Suchen · جستجو" aria-label="Suchen">
+            <div class="tabs" id="vocabTabs">
+              <button class="on" data-vf="all">Alle</button>
+              <button data-vf="new">Neu</button>
+              <button data-vf="known">Gelernt</button>
+            </div>
+          </div>
+          <div class="vocab-grid" id="vocabGrid"></div>
+        </div>
       </section>
 
       <!-- PRACTICE -->
       <section class="screen" id="practice">
-        <div class="screen-head">
-          <h1>Üben <small class="fa">۱۰۰ تمرین از کل متن درس</small></h1>
-          <div class="ex-stats" id="exStats"></div>
-        </div>
-        <div class="tabs ex-filter" id="exFilter"></div>
-        <div class="ex-wrap">
-          <article class="ex-card">
-            <div class="ex-top"><span class="ex-type" id="exType"></span><span class="ex-state" id="exState"></span><span class="ex-num" id="exNum"></span></div>
-            <div class="ex-body" id="exBody"></div>
-            <div class="ex-feedback" id="exFeedback" hidden></div>
-            <div class="ex-foot">
-              <button class="btn ghost" id="exPrev">‹ Zurück</button>
-              <button class="btn" id="exCheck" hidden>Prüfen · <span class="fa">بررسی</span></button>
-              <button class="btn ghost" id="exNext">Weiter ›</button>
+        <div class="p-hub" id="pHub">
+          <div class="screen-head"><h1>Üben <small class="fa">حرف بزن، نه فقط بنویس</small></h1><div class="ex-stats" id="exStats"></div></div>
+          <div class="hub-scroll">
+            <h3 class="hub-h">Sprechen · <span class="fa">صحبت کردن</span></h3>
+            <div class="hub-grid">
+              <button class="hub-tile speak" data-open="role"><span class="ht-ico">🎭</span><b>Rollenspiel</b><span class="fa">نقش‌آفرینی · ۱۰ خط</span></button>
+              <button class="hub-tile speak" data-open="gap"><span class="ht-ico">🧩</span><b>Lückendialog</b><span class="fa">بخوان و جای خالی را بگو · ۵ خط</span></button>
+              <button class="hub-tile speak" data-open="read"><span class="ht-ico">📖</span><b>Vorlesen</b><span class="fa">بلندخوانی · ۵ خط</span></button>
+              <button class="hub-tile speak" data-open="fc"><span class="ht-ico">🃏</span><b>Karteikarten</b><span class="fa">فلش‌کارت لغات · صوتی</span></button>
             </div>
-          </article>
+            <h3 class="hub-h">Übungen · <span class="fa">تمرین‌ها</span></h3>
+            <div class="hub-grid" id="hubEx"></div>
+          </div>
+          <button class="exam-btn" data-open="exam"><span>🏁 Prüfung</span><span class="fa">آزمون · ۱۰ تا ۱۵ سؤال از همهٔ تمرین‌ها</span></button>
         </div>
-        <div class="ex-map" id="exMap"></div>
+
+        <div class="p-view" id="pView" hidden>
+          <div class="pv-head">
+            <button class="icon-btn pv-back" id="pBack" aria-label="zurück">‹</button>
+            <h2 id="pTitle"></h2>
+            <span class="pv-prog" id="pProg"></span>
+          </div>
+
+          <div class="pv-panel" id="pEx" hidden>
+            <div class="ex-wrap">
+              <article class="ex-card">
+                <div class="ex-top"><span class="ex-type" id="exType"></span><span class="ex-state" id="exState"></span><span class="ex-num" id="exNum"></span></div>
+                <div class="ex-body" id="exBody"></div>
+                <div class="ex-feedback" id="exFeedback" hidden></div>
+                <div class="ex-foot">
+                  <button class="btn ghost" id="exPrev">‹ Zurück</button>
+                  <button class="btn" id="exCheck" hidden>Prüfen · <span class="fa">بررسی</span></button>
+                  <button class="btn ghost" id="exNext">Weiter ›</button>
+                </div>
+              </article>
+            </div>
+            <div class="ex-map" id="exMap"></div>
+          </div>
+
+          <div class="pv-panel" id="pFc" hidden>
+            <div class="fc-stats" id="fcStats"></div>
+            <article class="fc-card" id="fcCard">
+              <div class="fc-dir" id="fcDir"></div>
+              <div class="fc-prompt" id="fcPrompt"></div>
+              <span class="chip fa fc-pos" id="fcPos"></span>
+              <div class="fc-opts" id="fcOpts"></div>
+              <div class="fc-voice" id="fcVoice" hidden>
+                <button class="mic" id="fcMic" aria-label="Mikrofon">🎤</button>
+                <p class="heard fa" id="fcHeard">آلمانی‌اش را بلند بگو</p>
+                <button class="chip-btn" id="fcSkip">Weiß nicht · <span class="fa">بلد نیستم</span></button>
+              </div>
+              <div class="fc-info fa" id="fcInfo" hidden></div>
+              <button class="btn" id="fcNext" hidden>Weiter ›</button>
+            </article>
+          </div>
+
+          <div class="pv-panel" id="pDlg" hidden>
+            <p class="dlg-intro fa" id="dlgIntro"></p>
+            <div class="dlg-list" id="dlgList"></div>
+            <div class="dlg-foot" id="dlgFoot"></div>
+          </div>
+
+          <div class="pv-panel" id="pEnd" hidden></div>
+        </div>
       </section>
     </main>
 
@@ -267,6 +321,7 @@
   <script src="data/lessons.js"></script>
   <script src="data/lesson1-fa.js"></script>
   <script src="data/lesson1-times.js"></script>
+  <script src="data/lesson1-words.js"></script>
   <script src="data/dict-de.js"></script>
   <script src="exercises.js"></script>
   <script src="app.js"></script>

@@ -113,5 +113,5 @@
     return mixed.slice(0, TOTAL).map((e, i) => ({ ...e, id: i }));
   }
 
-  window.Practice = { build, TYPE_LABEL, norm, words };
+  window.Practice = { build, TYPE_LABEL, norm, words, isGerman };
 })();

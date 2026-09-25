@@ -214,17 +214,23 @@
   /* ---------- Vocab: every word of the lesson ---------- */
   let vocabList = [];
   const ARTICLE = { "اسم مذکر": "der ", "اسم مؤنث": "die ", "اسم خنثی": "das ", "اسم جمع": "die " };
-  function buildVocab() {
-    const seen = new Map();
-    lines.forEach(l => l.text.split(/\s+/).forEach(tok => {
-      const w = cleanWord(tok); if (!w) return;
-      const k = dictKey(w);
-      if (!k || seen.has(k)) { if (k) seen.get(k).n++; return; }
-      const d = DICT[k];
-      if (!d.p || d.p === "انگلیسی") return;
-      seen.set(k, { key: k, de: (ARTICLE[d.p] || "") + k.replace(/_.*/, ""), p: d.p, fa: d.fa, g: d.g, n: 1 });
+  const vocabEntry = k => { const d = DICT[k]; return d && { key: k, de: (ARTICLE[d.p] || "") + k.replace(/_.*/, ""), p: d.p, fa: d.fa, g: d.g }; };
+  // lesson dictionary = keys into the one global dictionary (no duplicated entries)
+  function lessonKeys(L, lessonLines) {
+    if (Array.isArray(L.words)) return L.words.filter(k => DICT[k]);
+    const keys = [];
+    lessonLines.forEach(l => l.text.split(/\s+/).forEach(tok => {
+      const k = dictKey(cleanWord(tok));
+      if (k && DICT[k].p && DICT[k].p !== "انگلیسی" && !keys.includes(k)) keys.push(k);
     }));
-    vocabList = [...seen.values()];
+    return keys;
+  }
+  function buildVocab() {
+    const L = LESSONS[state.idx];
+    const keys = state.vscope === "all"
+      ? [...new Set(LESSONS.flatMap(x => x === L ? lessonKeys(x, lines) : (x.words || [])))]
+      : lessonKeys(L, lines);
+    vocabList = keys.map(vocabEntry).filter(Boolean);
   }
   function renderVocab() {
     const q = ($("#vocabSearch").value || "").trim().toLowerCase();
@@ -268,41 +274,164 @@
     $("#ringSub").textContent = `${k}/${vocabList.length} واژه · تمرین ${ok}/${ex.list.length}`;
   }
 
+  /* ---------- Vocab scope ---------- */
+  state.vscope = "lesson";
+  $("#vocabScope").addEventListener("click", e => {
+    const b = e.target.closest("[data-scope]"); if (!b) return;
+    state.vscope = b.dataset.scope; $$("#vocabScope button").forEach(x => x.classList.toggle("on", x === b));
+    buildVocab(); renderVocab();
+  });
+
+  /* ---------- Speech: recognition + scoring ---------- */
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  function listen() {
+    return new Promise((resolve, reject) => {
+      if (!SR) return reject(new Error("no-sr"));
+      const r = new SR(); r.lang = "de-DE"; r.interimResults = false; r.maxAlternatives = 4;
+      let done = false;
+      r.onresult = ev => { done = true; resolve([...ev.results[0]].map(a => a.transcript)); };
+      r.onerror = ev => { if (!done) { done = true; reject(ev.error || "error"); } };
+      r.onend = () => { if (!done) { done = true; reject("no-speech"); } };
+      r.start();
+    });
+  }
+  const nw = s => window.Practice.words(window.Practice.norm(s));
+  // how much of `target` was said; `required` words must all be present
+  function scoreSpeech(target, alts, required = []) {
+    const tw = nw(target), req = required.map(w => window.Practice.norm(w));
+    let best = null;
+    for (const a of alts) {
+      const said = nw(a), pool = said.slice();
+      const hit = tw.map(w => { const k = pool.indexOf(w); if (k >= 0) { pool.splice(k, 1); return true; } return false; });
+      const pct = hit.filter(Boolean).length / (tw.length || 1);
+      const reqOk = req.every(w => said.includes(w));
+      if (!best || pct + (reqOk ? 1 : 0) > best.pct + (best.reqOk ? 1 : 0)) best = { pct, reqOk, hit, said: a };
+    }
+    const toks = target.split(/\s+/); let wi = 0;
+    const html = toks.map(t => { const has = nw(t).length; if (!has) return esc(t); const ok = best.hit[wi++]; return `<span class="${ok ? "w-ok" : "w-miss"}">${esc(t)}</span>`; }).join(" ");
+    return { ...best, ok: best.pct >= 0.7 && best.reqOk, html };
+  }
+
+  /* ---------- Flashcards (in practice): DE→FA choose · FA→DE speak ---------- */
+  const fc = { cur: null, last: null, dir: "de", right: 0, wrong: 0, streak: 0, timer: 0, list: [] };
+  const fcStats = () => store.get("fc", {});
+  const lev = (a, b) => {
+    a = a.toLowerCase(); b = b.toLowerCase();
+    const d = Array.from({ length: b.length + 1 }, (_, i) => i);
+    for (let i = 1; i <= a.length; i++) { let prev = d[0]; d[0] = i;
+      for (let j = 1; j <= b.length; j++) { const t = d[j]; d[j] = Math.min(d[j] + 1, d[j - 1] + 1, prev + (a[i - 1] === b[j - 1] ? 0 : 1)); prev = t; } }
+    return d[b.length];
+  };
+  const posGroup = p => (p || "").split(/[\s(]/)[0];
+  const bareDe = v => v.de.replace(/^(der|die|das) /, "");
+  function closeDistractor(v, dir) {
+    const scored = fc.list.filter(c => c.key !== v.key && c.fa !== v.fa && c.de !== v.de).map(c => {
+      let sc = (c.p === v.p ? 4 : posGroup(c.p) === posGroup(v.p) ? 2 : 0);
+      if (dir === "fa") sc += Math.max(0, 3 - lev(bareDe(c), bareDe(v)) / 2) + (bareDe(c)[0]?.toLowerCase() === bareDe(v)[0]?.toLowerCase() ? 1 : 0);
+      else sc += Math.max(0, 2 - Math.abs(c.fa.length - v.fa.length) / 4);
+      return { c, sc: sc + Math.random() * 0.8 };
+    }).sort((x, y) => y.sc - x.sc);
+    return scored[Math.floor(Math.random() * Math.min(3, scored.length))]?.c;
+  }
+  function pickWord() {
+    const st = fcStats();
+    const weights = fc.list.map(v => {
+      const [r = 0, w = 0] = st[v.key] || [];
+      return v.key === fc.last ? 0 : Math.max(0.2, (r + w === 0 ? 3 : 1) + w * 3 - Math.min(r, 4) * 0.6);
+    });
+    let x = Math.random() * weights.reduce((a, b) => a + b, 0);
+    for (let i = 0; i < fc.list.length; i++) { x -= weights[i]; if (x <= 0) return fc.list[i]; }
+    return fc.list[0];
+  }
+  function renderFcStats() {
+    $("#fcStats").innerHTML = `<span class="ok">✓ ${fc.right}</span><span class="bad">✗ ${fc.wrong}</span><span>🔥 ${fc.streak}</span>`;
+  }
+  function nextCard() {
+    clearTimeout(fc.timer);
+    fc.list = lessonKeys(LESSONS[state.idx], lines).map(vocabEntry).filter(Boolean);
+    if (!fc.list.length) return;
+    const v = pickWord(); fc.cur = v; fc.last = v.key;
+    fc.dir = Math.random() < 0.5 ? "de" : "fa";
+    const voice = fc.dir === "fa" && SR;
+    $("#fcDir").innerHTML = fc.dir === "de" ? `Deutsch → <span class="fa">فارسی</span>` : `<span class="fa">فارسی</span> → Deutsch 🎤`;
+    $("#fcPrompt").innerHTML = fc.dir === "de"
+      ? `<span>${esc(v.de)}</span><button class="say" data-say="${esc(v.de)}">${SAY_ICON}</button>`
+      : `<span class="fa">${esc(v.fa)}</span>`;
+    $("#fcPos").textContent = v.p;
+    const d = closeDistractor(v, fc.dir);
+    const optsList = [v, d].filter(Boolean).sort(() => Math.random() - 0.5);
+    $("#fcOpts").innerHTML = voice ? "" : optsList.map(o => `<button data-k="${esc(o.key)}" class="${fc.dir === "de" ? "fa" : ""}">${esc(fc.dir === "de" ? o.fa : o.de)}</button>`).join("");
+    $("#fcOpts").hidden = voice;
+    $("#fcVoice").hidden = !voice; $("#fcHeard").textContent = "آلمانی‌اش را بلند بگو";
+    $("#fcInfo").hidden = true; $("#fcNext").hidden = true;
+    $("#fcCard").className = "fc-card";
+    renderFcStats();
+    if (fc.dir === "de") speak(v.de);
+  }
+  function fcAnswer(ok) {
+    const v = fc.cur;
+    const st = fcStats(), [r = 0, w = 0] = st[v.key] || [];
+    st[v.key] = ok ? [r + 1, w] : [r, w + 1]; store.set("fc", st);
+    if (ok) { fc.right++; fc.streak++; if (st[v.key][0] >= 3 && !state.known.has(v.key)) { state.known.add(v.key); store.set("known", [...state.known]); renderProgress(); } }
+    else { fc.wrong++; fc.streak = 0; }
+    $("#fcCard").className = "fc-card " + (ok ? "ok" : "bad");
+    $("#fcInfo").innerHTML = `<div class="fc-pair"><b dir="ltr">${esc(v.de)}</b> = ${esc(v.fa)}</div>${v.g ? `<div class="fc-g">${esc(v.g)}</div>` : ""}`;
+    $("#fcInfo").hidden = false; $("#fcNext").hidden = false; $("#fcVoice").hidden = true;
+    renderFcStats();
+    if (fc.dir === "fa") speak(v.de);
+    if (exam.active) examRecord(ok);
+    else if (ok) fc.timer = setTimeout(nextCard, 1600);
+  }
+  $("#fcOpts").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b || b.disabled) return;
+    const ok = b.dataset.k === fc.cur.key;
+    $$("#fcOpts button").forEach(x => { x.disabled = true; if (x.dataset.k === fc.cur.key) x.classList.add("ok"); });
+    if (!ok) b.classList.add("bad");
+    fcAnswer(ok);
+  });
+  $("#fcMic").onclick = async () => {
+    const v = fc.cur, forms = [bareDe(v), ...(DICT[v.key]?.f || [])].map(f => window.Practice.norm(f));
+    $("#fcMic").classList.add("rec"); $("#fcHeard").textContent = "در حال گوش دادن…";
+    try {
+      const alts = await listen();
+      const ok = alts.some(a => nw(a).some(w => forms.includes(w)));
+      $("#fcHeard").innerHTML = `<span class="fa">شنیدم:</span> «${esc(alts[0])}»`;
+      fcAnswer(ok);
+    } catch (err) { $("#fcHeard").textContent = "چیزی نشنیدم؛ دوباره بزن."; }
+    $("#fcMic").classList.remove("rec");
+  };
+  $("#fcSkip").onclick = () => fcAnswer(false);
+  $("#fcNext").onclick = () => exam.active ? examNext() : nextCard();
+
   /* ---------- Practice: 100 exercise cards ---------- */
   const ex = { list: [], i: 0, filter: "all" };
   const exKey = () => "ex" + LESSONS[state.idx].id;
   const exResults = () => store.get(exKey(), {});
   const shuffleArr = a => a.map(x => [Math.random(), x]).sort((p, q) => p[0] - q[0]).map(x => x[1]);
-  let clipStop = null;
+  let clipStop = null, clipDone = null;
+  // plays one dialog line from the lesson audio; resolves when it ends
   function playClip(i) {
     const l = lines[i];
-    if (!player.duration || !timed) return speak(l.text);
+    if (!player.duration || !timed) { speak(l.text); return new Promise(r => setTimeout(r, 400 + l.text.length * 55)); }
+    if (clipDone) clipDone();
     player.currentTime = l.t0; clipStop = l.t1; player.play();
+    return new Promise(r => { clipDone = r; });
   }
-  player.addEventListener("timeupdate", () => { if (clipStop != null && player.currentTime >= clipStop) { player.pause(); clipStop = null; } });
-  player.addEventListener("seeking", () => { if (clipStop != null && player.currentTime < (lines.find(l => l.t1 === clipStop)?.t0 ?? 0)) clipStop = null; });
+  player.addEventListener("timeupdate", () => { if (clipStop != null && player.currentTime >= clipStop) { player.pause(); clipStop = null; clipDone?.(); clipDone = null; } });
+  player.addEventListener("pause", () => { if (clipStop == null && clipDone) { clipDone(); clipDone = null; } });
 
   function buildPractice() {
     ex.list = window.Practice ? window.Practice.build(LESSONS[state.idx], lines, w => { const k = dictKey(w); return k ? DICT[k] : {}; }) : [];
     ex.i = Math.min(store.get(exKey() + ":i", 0), ex.list.length - 1);
-    const counts = {}; ex.list.forEach(e => counts[e.type] = (counts[e.type] || 0) + 1);
-    $("#exFilter").innerHTML = `<button class="on" data-t="all">Alle</button>` + Object.keys(counts).map(t =>
-      `<button data-t="${t}">${window.Practice.TYPE_LABEL[t][0]} <small>${counts[t]}</small></button>`).join("");
-    renderExercise();
+    renderHub();
   }
   const visibleEx = () => ex.list.filter(e => ex.filter === "all" || e.type === ex.filter);
-  $("#exFilter").addEventListener("click", e => {
-    const b = e.target.closest("button"); if (!b) return;
-    ex.filter = b.dataset.t; $$("#exFilter button").forEach(x => x.classList.toggle("on", x === b));
-    const v = visibleEx(); if (v.length && !v.includes(ex.list[ex.i])) ex.i = v[0].id;
-    renderExercise();
-  });
   function stepEx(d) {
     const v = visibleEx(); const k = v.indexOf(ex.list[ex.i]);
     const n = v[Math.max(0, Math.min(v.length - 1, k + d))]; if (n) { ex.i = n.id; renderExercise(); }
   }
   $("#exPrev").onclick = () => stepEx(-1);
-  $("#exNext").onclick = () => stepEx(1);
+  $("#exNext").onclick = () => exam.active ? examNext() : stepEx(1);
 
   function renderMap() {
     const res = exResults();
@@ -327,7 +456,8 @@
       ${timed ? `<button class="chip-btn" id="exClip">▶ Im Dialog hören</button>` : ""}`;
     $("#exClip") && ($("#exClip").onclick = () => playClip(e.line));
     $("#exCheck").hidden = true; $("#exNext").classList.add("pulse");
-    renderMap(); renderProgress();
+    renderMap(); renderProgress(); renderHub();
+    if (exam.active) examRecord(correct);
   }
 
   function renderExercise() {
@@ -424,6 +554,183 @@
   faToggle.checked = store.get("showFa", true);
   const applyFa = () => { $("#aNowBox").hidden = !faToggle.checked; store.set("showFa", faToggle.checked); };
   faToggle.addEventListener("change", applyFa); applyFa();
+
+  /* ---------- Practice hub: tiles → one exercise view ---------- */
+  const TYPE_ICON = { translate: "🔁", fill: "✏️", order: "🧱", listen: "👂", respond: "💬", speak: "🗣️" };
+  function renderHub() {
+    const res = exResults(), counts = {}, done = {};
+    ex.list.forEach(e => { counts[e.type] = (counts[e.type] || 0) + 1; if (res[e.id] === true) done[e.type] = (done[e.type] || 0) + 1; });
+    $("#hubEx").innerHTML = Object.keys(counts).map(t => {
+      const [de, fa] = window.Practice.TYPE_LABEL[t];
+      return `<button class="hub-tile" data-open="ex:${t}"><span class="ht-ico">${TYPE_ICON[t] || "•"}</span><b>${de}</b><span class="fa">${fa}</span><span class="ht-prog">✓ ${done[t] || 0}/${counts[t]}</span></button>`;
+    }).join("");
+    renderMap();
+  }
+  function showPanel(id, title) {
+    $("#pHub").hidden = true; $("#pView").hidden = false;
+    $$("#pView .pv-panel").forEach(p => p.hidden = p.id !== id);
+    $("#pTitle").innerHTML = title; $("#pProg").textContent = "";
+  }
+  function closeView() {
+    exam.active = false; dlg.run++;
+    if (!player.paused) player.pause();
+    $("#pView").hidden = true; $("#pView").classList.remove("exam"); $("#pHub").hidden = false; renderHub();
+  }
+  $("#pBack").onclick = closeView;
+  $("#pHub").addEventListener("click", e => {
+    const b = e.target.closest("[data-open]"); if (!b) return;
+    const k = b.dataset.open;
+    if (k.startsWith("ex:")) {
+      ex.filter = k.slice(3);
+      const v = visibleEx(), res = exResults();
+      const next = v.find(x => res[x.id] === undefined) || v[0];
+      if (next) ex.i = next.id;
+      const [de, fa] = window.Practice.TYPE_LABEL[ex.filter];
+      showPanel("pEx", `${de} <span class="fa">· ${fa}</span>`); renderExercise();
+    } else if (k === "fc") { showPanel("pFc", `Karteikarten <span class="fa">· فلش‌کارت</span>`); fc.right = fc.wrong = fc.streak = 0; nextCard(); }
+    else if (k === "exam") startExam();
+    else startDialog(k);
+  });
+
+  /* ---------- Dialog speaking: role play · gap dialog · read aloud ---------- */
+  const dlg = { run: 0, items: [], i: 0, mode: "", role: "" };
+  const DLG = {
+    role: ["Rollenspiel", "نقش‌آفرینی"],
+    gap: ["Lückendialog", "جای خالی را بگو"],
+    read: ["Vorlesen", "بلندخوانی"]
+  };
+  const wcount = s => window.Practice.words(s).length;
+  function pickBlock(n, maxWords) {
+    const starts = [];
+    for (let s = 0; s + n <= lines.length; s++) {
+      const blk = lines.slice(s, s + n);
+      if (blk.every(l => wcount(l.text) <= maxWords && window.Practice.isGerman(l.text))) starts.push(s);
+    }
+    const s = starts.length ? starts[Math.floor(Math.random() * starts.length)] : 0;
+    return Array.from({ length: n }, (_, k) => s + k);
+  }
+  function blanksFor(text) {
+    const cands = window.Practice.words(text).filter(w => w.length >= 3 && !NAMES[w] && DICT[dictKey(w)] && !/^(der|die|das|und|ich|du|wir|ihr|sie|es|ein|eine)$/i.test(w));
+    const pick = shuffleArr([...new Set(cands)]).slice(0, wcount(text) > 8 ? 2 : 1);
+    return pick;
+  }
+  function startDialog(mode) {
+    dlg.run++; dlg.mode = mode; dlg.i = 0;
+    let idx;
+    if (mode === "role") { idx = pickBlock(10, 22); dlg.role = Math.random() < 0.5 ? "Anna" : "Ben"; }
+    else if (mode === "gap") idx = pickBlock(5, 20);
+    else idx = shuffleArr(lines.map((l, i) => i).filter(i => wcount(lines[i].text) >= 3 && wcount(lines[i].text) <= 18 && window.Practice.isGerman(lines[i].text))).slice(0, 5).sort((a, b) => a - b);
+    dlg.items = idx.map(i => ({ line: i, mine: mode !== "role" || lines[i].who === dlg.role, blanks: mode === "gap" ? blanksFor(lines[i].text) : [], score: null }));
+    const [de, fa] = DLG[mode];
+    showPanel("pDlg", `${de} <span class="fa">· ${fa}</span>`);
+    $("#dlgIntro").innerHTML = mode === "role"
+      ? `تو نقش <b>${dlg.role}</b> هستی. جملهٔ طرف مقابل پخش می‌شود؛ بعد جملهٔ خودت را با 🎤 بلند بگو.`
+      : mode === "gap" ? "هر خط را کامل و بلند بخوان و جای خالی‌ها را هم بگو."
+      : "هر خط را با صدای بلند بخوان.";
+    if (!SR) $("#dlgIntro").innerHTML += `<br><span class="warn">این مرورگر تشخیص گفتار ندارد؛ بعد از گفتن، «✓ گفتم» را بزن. (Chrome یا Safari)</span>`;
+    renderDlg();
+    $("#dlgFoot").innerHTML = `<button class="btn big" id="dlgStart">▶ Start</button>`;
+    $("#dlgStart").onclick = () => { $("#dlgFoot").innerHTML = ""; runDlg(); };
+  }
+  function lineHtml(it) {
+    const l = lines[it.line];
+    if (!it.blanks.length || it.score) return esc(l.text);
+    return l.text.split(/(\s+)/).map(tok => {
+      const w = cleanWord(tok);
+      return w && it.blanks.includes(w) ? esc(tok.replace(w, "_".repeat(Math.max(4, w.length)))) : esc(tok);
+    }).join("");
+  }
+  function renderDlg() {
+    const cur = dlg.i;
+    $("#dlgList").innerHTML = dlg.items.map((it, k) => {
+      const l = lines[it.line];
+      const st = k < cur ? "done" : k === cur ? "cur" : "todo";
+      const sc = it.score;
+      return `<div class="dl ${it.mine ? "mine" : "them"} ${st}" data-k="${k}">
+        <div class="dl-who">${esc(l.who)}${it.mine && dlg.mode === "role" ? ` <span class="fa">(تو)</span>` : ""}</div>
+        <div class="dl-text">${sc && sc.html ? sc.html : lineHtml(it)}</div>
+        ${sc ? `<div class="dl-res ${sc.ok ? "ok" : "bad"}">${sc.self ? "✓" : `${Math.round(sc.pct * 100)}%`} ${sc.said ? `<span class="said">«${esc(sc.said)}»</span>` : ""}</div>` : ""}
+        ${k === cur && it.mine ? `<div class="dl-act">
+            ${SR ? `<button class="mic small" data-mic="${k}">🎤</button>` : `<button class="btn" data-self="${k}">✓ <span class="fa">گفتم</span></button>`}
+            ${sc && !sc.ok ? `<button class="chip-btn" data-next="${k}">Weiter ›</button>` : ""}
+            <button class="chip-btn" data-hear="${k}">🔊</button></div>` : ""}
+        ${k < cur || (k === cur && sc) ? `<div class="fa dl-fa">${esc(l.fa || "")}</div>` : ""}
+      </div>`;
+    }).join("");
+    $("#pProg").textContent = `${Math.min(cur + 1, dlg.items.length)} / ${dlg.items.length}`;
+    $(`#dlgList .dl[data-k="${cur}"]`)?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }
+  async function runDlg() {
+    const run = dlg.run;
+    while (dlg.i < dlg.items.length && run === dlg.run) {
+      const it = dlg.items[dlg.i];
+      renderDlg();
+      if (!it.mine) { await playClip(it.line); if (run !== dlg.run) return; dlg.i++; continue; }
+      return; // wait for the learner (mic / buttons)
+    }
+    if (run === dlg.run && dlg.i >= dlg.items.length) finishDlg();
+  }
+  $("#dlgList").addEventListener("click", async e => {
+    const mic = e.target.closest("[data-mic]"), self = e.target.closest("[data-self]"), nx = e.target.closest("[data-next]"), hear = e.target.closest("[data-hear]");
+    const it = dlg.items[dlg.i]; if (!it) return;
+    if (hear) return playClip(it.line);
+    if (nx) { dlg.i++; return runDlg(); }
+    if (self) { it.score = { ok: true, pct: 1, self: true }; dlg.i++; return runDlg(); }
+    if (mic) {
+      mic.classList.add("rec");
+      try {
+        const alts = await listen();
+        it.score = scoreSpeech(lines[it.line].text, alts, it.blanks);
+        if (it.score.ok) { renderDlg(); setTimeout(() => { if (dlg.items[dlg.i] === it) { dlg.i++; runDlg(); } }, 1400); }
+        else renderDlg();
+      } catch (err) { mic.classList.remove("rec"); toast("چیزی نشنیدم؛ دوباره 🎤 را بزن"); }
+    }
+  });
+  function finishDlg() {
+    const mine = dlg.items.filter(x => x.mine && x.score);
+    const avg = mine.length ? Math.round(mine.reduce((a, x) => a + x.score.pct, 0) / mine.length * 100) : 0;
+    const st = store.get("dlg", {}); st[dlg.mode] = Math.max(st[dlg.mode] || 0, avg); store.set("dlg", st);
+    renderDlg();
+    $("#dlgFoot").innerHTML = `<div class="dlg-sum"><b>${avg}%</b> <span class="fa">درست گفتی</span></div>
+      <button class="btn big" id="dlgAgain">↻ Nochmal · <span class="fa">خط‌های جدید</span></button>`;
+    $("#dlgAgain").onclick = () => startDialog(dlg.mode);
+  }
+
+  /* ---------- Exam: 10–15 random questions from all exercise types ---------- */
+  const exam = { active: false, items: [], k: 0, right: 0 };
+  function startExam() {
+    const n = 10 + Math.floor(Math.random() * 6), nFc = 2 + Math.floor(Math.random() * 2);
+    const byType = {}; shuffleArr(ex.list).forEach(e => (byType[e.type] ||= []).push(e));
+    const picks = []; let t = 0; const types = Object.keys(byType);
+    while (picks.length < n - nFc && types.length) { const arr = byType[types[t++ % types.length]]; if (arr.length) picks.push({ kind: "ex", id: arr.pop().id }); }
+    for (let k = 0; k < nFc; k++) picks.push({ kind: "fc" });
+    Object.assign(exam, { active: true, items: shuffleArr(picks), k: -1, right: 0 });
+    $("#pView").classList.add("exam");
+    examNext();
+  }
+  function examRecord(ok) { const it = exam.items[exam.k]; if (it && it.res === undefined) { it.res = ok; if (ok) exam.right++; } }
+  function examNext() {
+    exam.k++;
+    const title = `Prüfung <span class="fa">· آزمون</span>`;
+    if (exam.k >= exam.items.length) return examEnd();
+    const it = exam.items[exam.k];
+    if (it.kind === "ex") { ex.filter = "all"; ex.i = it.id; showPanel("pEx", title); renderExercise(); }
+    else { showPanel("pFc", title); nextCard(); }
+    $("#pProg").textContent = `${exam.k + 1} / ${exam.items.length}`;
+  }
+  function examEnd() {
+    const n = exam.items.length, pct = Math.round(exam.right / n * 100);
+    const best = Math.max(store.get("exam" + LESSONS[state.idx].id, 0), pct); store.set("exam" + LESSONS[state.idx].id, best);
+    exam.active = false;
+    showPanel("pEnd", `Prüfung <span class="fa">· آزمون</span>`);
+    $("#pEnd").innerHTML = `<div class="exam-end">
+      <div class="exam-score">${exam.right} / ${n}</div>
+      <div class="exam-pct ${pct >= 70 ? "ok" : "bad"}">${pct}%</div>
+      <p class="fa">${pct >= 90 ? "عالی! آماده‌ای برای درس بعد 🎉" : pct >= 70 ? "خوب بود! کمی دیگر تمرین کن." : "دوباره تمرین کن و بعد آزمون بده."}</p>
+      <p class="fa muted">بهترین نتیجه: ${best}%</p>
+      <button class="btn big" id="examAgain">↻ Neue Prüfung · <span class="fa">آزمون جدید</span></button></div>`;
+    $("#examAgain").onclick = startExam;
+  }
 
   /* ---------- Dialog: translation toggle, drawer, word popup ---------- */
   const faBtn = $("#faBtn");
