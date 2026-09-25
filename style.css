@@ -985,14 +985,39 @@ body.dock-collapsed .dock-player { display: flex; flex: 1; max-width: 520px; }
 }
 .frame > * { min-width: 0; }
 
-/* Dock hugs the screen edge: only a sliver of the safe area stays free */
+/* ---------- No top bar: lesson picker lives on the home page ---------- */
+.status { display: none !important; }
+.frame { grid-template-rows: minmax(0, 1fr) auto !important; }
+main { padding-top: 6px; }
+.home-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; position: relative; }
+.home-hl { min-width: 0; }
+.home-head .lesson-pick { flex-shrink: 1; min-width: 0; margin-top: 6px; }
+.home-head .lp-btn { background: var(--tile); border-radius: 18px; padding: 7px 12px; max-width: 100%; }
+.home-head .lp-name { display: none; }
+.home-head .home-greet { white-space: nowrap; }
+.home-head .lp-menu { left: auto; right: 0; top: calc(100% + 4px); }
+
+/* phones: fill the whole screen (100dvh leaves a gap in iOS home-screen apps) */
 @media (max-width: 900px), (max-height: 520px) {
-  .dock { padding: 4px 8px max(4px, calc(env(safe-area-inset-bottom) - 18px)) !important; }
+  html, body { height: 100%; }
+  .frame { position: fixed; inset: 0; width: auto; height: auto !important; }
+  .dock { padding: 4px 10px max(8px, calc(env(safe-area-inset-bottom) - 10px)) !important; }
 }
+/* landscape: keep the side dock out of the notch, and short enough for Safari's bars */
 @media (max-height: 520px) and (orientation: landscape) {
-  .frame { padding-left: 0 !important; padding-right: 0 !important; }
-  .frame > .status, .frame > main { padding-left: env(safe-area-inset-left); padding-right: 0; }
-  .dock { padding: 4px max(4px, calc(env(safe-area-inset-right) - 34px)) 4px 2px !important; }
-  body.dock-left .frame > .status, body.dock-left .frame > main { padding-left: 0; padding-right: env(safe-area-inset-right); }
-  body.dock-left .dock { padding: 4px 2px 4px max(4px, calc(env(safe-area-inset-left) - 34px)) !important; }
+  .frame { grid-template-rows: minmax(0, 1fr) !important; padding-left: 0 !important; padding-right: 0 !important; padding-top: 0 !important; }
+  .frame > main { grid-row: 1; padding: 8px 0 max(6px, env(safe-area-inset-bottom)) env(safe-area-inset-left); }
+  .dock { grid-row: 1 !important; padding: 6px max(8px, env(safe-area-inset-right)) 6px 6px !important; gap: 6px !important; }
+  body.dock-left .frame > main { padding-left: 0; padding-right: env(safe-area-inset-right); }
+  body.dock-left .dock { padding: 6px 6px 6px max(8px, env(safe-area-inset-left)) !important; }
+  .dock .nav { padding: 4px; gap: 2px; }
+  .nav button { height: min(44px, calc((100vh - 150px) / 5)) !important; width: 46px !important; }
+  .nav .tab-me .avatar-btn { width: 24px; height: 24px; }
+  .dock-round { width: 46px; height: 46px; flex: 0 0 46px; }
+  .dock-round > svg:not(.dring) { width: 22px; height: 22px; }
+  .dock-swap { width: 34px; height: 34px; }
+  .dock-swap svg { width: 16px; height: 16px; }
+  body.dock-collapsed .dock-player { width: 54px; }
+  .dp-cover { width: 40px; height: 40px; flex: 0 0 40px; }
+  .dock-player .icon-btn { width: 36px; height: 36px; flex: 0 0 36px; }
 }
