@@ -26,7 +26,7 @@
   let lines = [], timed = false;
   // seconds where a line starts: real timings if present, else proportional estimate
   const lineStart = l => timed ? l.t0 : l.start * (player.duration || 0);
-  const lineAt = t => timed ? lines.findIndex(l => t < l.t1) : lines.findIndex(l => t / (player.duration || 1) < l.end);
+  const lineAt = t => timed ? lines.findIndex(l => t < l.next) : lines.findIndex(l => t / (player.duration || 1) < l.end);
 
   const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const fmt = t => isFinite(t) ? `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, "0")}` : "0:00";
@@ -110,7 +110,12 @@
     lines = parseTranscript(L.transcript);
     lines.forEach((l, j) => l.fa = (L.transcriptFa || [])[j] || "");
     timed = Array.isArray(L.timings) && L.timings.length === lines.length;
-    if (timed) lines.forEach((l, j) => { l.t0 = L.timings[j]; l.t1 = L.timings[j + 1] ?? Infinity; });
+    // timings: [start, end] per line (or older format: start only, ends at the next line)
+    if (timed) lines.forEach((l, j) => {
+      const t = L.timings[j];
+      if (Array.isArray(t)) { l.t0 = t[0]; l.t1 = t[1]; l.next = (L.timings[j + 1] || [Infinity])[0]; }
+      else { l.t0 = t; l.t1 = L.timings[j + 1] ?? Infinity; l.next = l.t1; }
+    });
     const total = lines.reduce((n, l) => n + l.text.length, 0);
     let acc = 0;
     lines.forEach(l => { l.start = acc / total; acc += l.text.length; l.end = acc / total; });
