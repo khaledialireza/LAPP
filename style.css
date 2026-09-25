@@ -388,3 +388,76 @@ mark { background: rgba(240,138,168,.3); color: var(--text); border-radius: 4px;
   .quiz-q { font-size: 15px; margin: 6px 0 10px; }
   .opts button { padding: 9px 12px; }
 }
+
+/* ---------- Vocab (all words) ---------- */
+.v-search { background: var(--tile-2); border: 1px solid transparent; color: var(--text); border-radius: 999px; padding: 7px 14px; font: inherit; font-size: 13px; width: 180px; }
+.v-search:focus { outline: none; border-color: var(--accent); }
+#vocabCount { color: var(--accent); }
+.card .v-fa { font-size: 16px; }
+.card .v-g { font-size: 11px; color: var(--muted); line-height: 1.6; }
+.card { height: 150px; }
+
+/* ---------- Practice cards ---------- */
+.ex-stats { display: flex; gap: 12px; font-size: 13px; color: var(--muted); }
+.ex-stats .ok { color: var(--ok); } .ex-stats .bad { color: var(--bad); }
+.ex-filter { flex-wrap: wrap; }
+.ex-filter small { opacity: .6; }
+.ex-wrap { flex: 1; min-height: 0; display: flex; justify-content: center; align-items: flex-start; overflow: auto; }
+.ex-card { width: min(760px, 100%); background: var(--tile); border-radius: 18px; padding: 20px 22px; display: flex; flex-direction: column; gap: 14px; }
+.ex-top { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+.ex-type { color: var(--accent); font-weight: 600; flex: 1; }
+.ex-type .fa { color: var(--muted); font-weight: 400; }
+.ex-num { color: var(--muted); }
+.ex-state.ok { color: var(--ok); } .ex-state.bad { color: var(--bad); }
+.ex-q { font-size: 20px; line-height: 1.9; margin: 0; }
+.ex-sub { color: var(--muted); font-size: 13px; margin: 0; }
+.ex-sent { font-size: 20px; line-height: 2.2; margin: 0; }
+.ex-sent input { font: inherit; background: var(--tile-2); color: var(--text); border: 0; border-bottom: 2px solid var(--accent); border-radius: 8px 8px 0 0; padding: 0 8px; margin: 0 4px; text-align: center; }
+.ex-sent input:focus { outline: none; background: var(--tile-hi); }
+.ex-sent input.ok { border-color: var(--ok); } .ex-sent input.bad { border-color: var(--bad); }
+.umlauts { display: flex; gap: 6px; flex-wrap: wrap; }
+.umlauts button { min-width: 40px; height: 36px; border-radius: 10px; background: var(--tile-2); font-size: 16px; }
+.umlauts .hint { font-size: 13px; padding: 0 12px; }
+.ex-bubble { display: flex; align-items: center; gap: 10px; background: var(--tile-2); border-radius: 14px 14px 14px 4px; padding: 12px 14px; font-size: 18px; align-self: flex-start; }
+.play-big { width: 72px; height: 72px; border-radius: 50%; background: var(--accent); color: #1b1024; font-size: 26px; align-self: center; }
+.build { min-height: 54px; border: 2px dashed var(--tile-hi); border-radius: 12px; padding: 8px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.build.ok { border-color: var(--ok); } .build.bad { border-color: var(--bad); }
+.build .ph { color: var(--muted); font-size: 13px; padding: 0 6px; }
+.bank { display: flex; flex-wrap: wrap; gap: 6px; }
+.build button, .bank button { padding: 8px 12px; border-radius: 10px; background: var(--tile-2); font-size: 16px; }
+.build button { background: var(--tile-hi); }
+.bank button.used { opacity: .25; pointer-events: none; }
+.speak-row { display: flex; gap: 12px; align-items: center; }
+.mic { width: 64px; height: 64px; border-radius: 50%; background: var(--accent); font-size: 26px; }
+.mic.rec { animation: pulse 1s infinite; }
+@keyframes pulse { 50% { box-shadow: 0 0 0 10px rgba(240,138,168,.25); } }
+.heard { margin: 0; min-height: 1.4em; }
+.self { display: flex; gap: 8px; align-items: center; }
+.ex-feedback { border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+.ex-feedback[hidden] { display: none; }
+.ex-feedback.ok { background: rgba(127,214,164,.12); box-shadow: inset 3px 0 0 var(--ok); }
+.ex-feedback.bad { background: rgba(255,128,128,.1); box-shadow: inset 3px 0 0 var(--bad); }
+.fb-title { font-weight: 700; }
+.ex-feedback.ok .fb-title { color: var(--ok); } .ex-feedback.bad .fb-title { color: var(--bad); }
+.fb-ans { display: flex; gap: 8px; align-items: center; font-size: 17px; }
+.fb-fa, .fb-note { color: var(--muted); font-size: 14px; line-height: 1.8; }
+.ex-feedback .chip-btn { align-self: flex-start; }
+.ex-foot { display: flex; justify-content: space-between; gap: 8px; }
+#exNext.pulse { background: var(--accent); color: #1b1024; }
+.ex-map { display: flex; gap: 5px; overflow-x: auto; padding: 4px 2px 6px; flex-shrink: 0; }
+.ex-map .dot { flex: 0 0 12px; height: 12px; border-radius: 4px; background: var(--tile); }
+.ex-map .dot.ok { background: var(--ok); } .ex-map .dot.bad { background: var(--bad); }
+.ex-map .dot.cur { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+@media (max-width: 900px), (max-height: 520px) {
+  .v-search { width: 100%; }
+  .vocab-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  .card { height: 130px; }
+  .card .de { font-size: 16px; }
+  #vocab .screen-head { flex-wrap: wrap; gap: 8px; }
+  .ex-card { padding: 16px; }
+  .ex-q, .ex-sent { font-size: 18px; }
+  #practice .screen-head { flex-wrap: wrap; gap: 6px; }
+  .ex-filter { flex-wrap: nowrap; overflow-x: auto; }
+  .ex-filter button { white-space: nowrap; }
+}

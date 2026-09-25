@@ -187,7 +187,8 @@
       <!-- VOCAB -->
       <section class="screen" id="vocab">
         <div class="screen-head">
-          <h1>Vokabeln <small class="fa">برای دیدن معنی روی کارت بزنید</small></h1>
+          <h1>Vokabeln <small class="fa">همهٔ کلمه‌های درس · روی کارت بزنید</small> <small id="vocabCount" dir="ltr" class="chip"></small></h1>
+          <input class="v-search" id="vocabSearch" type="search" placeholder="Suchen · جستجو" aria-label="Suchen">
           <div class="tabs" id="vocabTabs">
             <button class="on" data-vf="all">Alle</button>
             <button data-vf="new">Neu</button>
@@ -199,19 +200,24 @@
 
       <!-- PRACTICE -->
       <section class="screen" id="practice">
-        <div class="screen-head"><h1>Üben <small class="fa">تمرین</small></h1></div>
-        <div class="practice-grid">
-          <div class="tile" id="quiz"></div>
-          <div class="tile builder">
-            <h3>Stell dich vor · خودت را معرفی کن</h3>
-            <div id="builderRows"></div>
-            <div class="output" id="builderOut"></div>
-            <div style="display:flex;gap:8px">
-              <button class="btn" id="speakIntro">🔊 Vorlesen</button>
-              <button class="btn ghost" id="copyIntro">Kopieren</button>
-            </div>
-          </div>
+        <div class="screen-head">
+          <h1>Üben <small class="fa">۱۰۰ تمرین از کل متن درس</small></h1>
+          <div class="ex-stats" id="exStats"></div>
         </div>
+        <div class="tabs ex-filter" id="exFilter"></div>
+        <div class="ex-wrap">
+          <article class="ex-card">
+            <div class="ex-top"><span class="ex-type" id="exType"></span><span class="ex-state" id="exState"></span><span class="ex-num" id="exNum"></span></div>
+            <div class="ex-body" id="exBody"></div>
+            <div class="ex-feedback" id="exFeedback" hidden></div>
+            <div class="ex-foot">
+              <button class="btn ghost" id="exPrev">‹ Zurück</button>
+              <button class="btn" id="exCheck" hidden>Prüfen · <span class="fa">بررسی</span></button>
+              <button class="btn ghost" id="exNext">Weiter ›</button>
+            </div>
+          </article>
+        </div>
+        <div class="ex-map" id="exMap"></div>
       </section>
     </main>
 
@@ -261,6 +267,7 @@
   <script src="data/lesson1-fa.js"></script>
   <script src="data/lesson1-times.js"></script>
   <script src="data/dict-de.js"></script>
+  <script src="exercises.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

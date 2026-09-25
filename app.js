@@ -106,7 +106,7 @@
     player.src = L.audio; player.playbackRate = SPEEDS[state.speed];
     showNow(0);
 
-    renderVocab(); renderQuiz(true); renderBuilder(); renderProgress(); renderWotd();
+    buildVocab(); buildPractice(); renderVocab(); renderProgress(); renderWotd();
   }
 
   let curLine = 0;
@@ -199,15 +199,33 @@
     player.currentTime = ((e.clientX - r.left) / r.width) * player.duration;
   }));
 
-  /* ---------- Vocab ---------- */
+  /* ---------- Vocab: every word of the lesson ---------- */
+  let vocabList = [];
+  const ARTICLE = { "اسم مذکر": "der ", "اسم مؤنث": "die ", "اسم خنثی": "das ", "اسم جمع": "die " };
+  function buildVocab() {
+    const seen = new Map();
+    lines.forEach(l => l.text.split(/\s+/).forEach(tok => {
+      const w = cleanWord(tok); if (!w) return;
+      const k = dictKey(w);
+      if (!k || seen.has(k)) { if (k) seen.get(k).n++; return; }
+      const d = DICT[k];
+      if (!d.p || d.p === "انگلیسی") return;
+      seen.set(k, { key: k, de: (ARTICLE[d.p] || "") + k.replace(/_.*/, ""), p: d.p, fa: d.fa, g: d.g, n: 1 });
+    }));
+    vocabList = [...seen.values()];
+  }
   function renderVocab() {
-    const L = LESSONS[state.idx];
-    const list = L.vocab.filter(([de]) => state.vf === "all" || (state.vf === "known") === state.known.has(de));
-    $("#vocabGrid").innerHTML = list.map(([de, fa, en]) => `
-      <div class="card ${state.known.has(de) ? "known" : ""}" data-de="${esc(de)}"><div class="in">
-        <div class="face front"><button class="say" data-say="${esc(de)}">${SAY_ICON}</button><div class="de">${esc(de)}</div><div class="en">${esc(en)}</div></div>
-        <div class="face back"><div class="fa" style="font-size:18px">${esc(fa)}</div>
-          <button class="btn ghost" data-known style="font-size:12px;padding:6px 10px">${state.known.has(de) ? "✓ Gelernt" : "Als gelernt markieren"}</button></div>
+    const q = ($("#vocabSearch").value || "").trim().toLowerCase();
+    const list = vocabList.filter(v => (state.vf === "all" || (state.vf === "known") === state.known.has(v.key))
+      && (!q || v.de.toLowerCase().includes(q) || v.fa.includes(q)));
+    const known = vocabList.filter(v => state.known.has(v.key)).length;
+    $("#vocabCount").textContent = `${known} / ${vocabList.length}`;
+    $("#vocabGrid").innerHTML = list.map(v => `
+      <div class="card ${state.known.has(v.key) ? "known" : ""}" data-de="${esc(v.key)}"><div class="in">
+        <div class="face front"><button class="say" data-say="${esc(v.de)}">${SAY_ICON}</button><div class="de">${esc(v.de)}</div><div class="en fa">${esc(v.p)}</div></div>
+        <div class="face back"><div class="fa v-fa">${esc(v.fa)}</div>
+          ${v.g ? `<div class="fa v-g">${esc(v.g.split(" · ").slice(0, 2).join(" · "))}</div>` : ""}
+          <button class="btn ghost" data-known style="font-size:12px;padding:6px 10px">${state.known.has(v.key) ? "✓ Gelernt" : "Als gelernt markieren"}</button></div>
       </div></div>`).join("") || `<p class="fa notice">چیزی اینجا نیست.</p>`;
   }
   $("#vocabGrid").addEventListener("click", e => {
@@ -222,68 +240,173 @@
     const b = e.target.closest("button"); if (!b) return;
     state.vf = b.dataset.vf; $$("#vocabTabs button").forEach(x => x.classList.toggle("on", x === b)); renderVocab();
   });
+  $("#vocabSearch").addEventListener("input", () => renderVocab());
 
   function renderWotd() {
-    const v = LESSONS[state.idx].vocab;
-    const [de, fa, en] = v[new Date().getDate() % v.length];
-    $("#wotdDe").textContent = de; $("#wotdFa").textContent = fa; $("#wotdEn").textContent = en;
+    if (!vocabList.length) return;
+    const v = vocabList[new Date().getDate() * 7 % vocabList.length];
+    $("#wotdDe").textContent = v.de; $("#wotdFa").textContent = v.fa; $("#wotdEn").textContent = v.p;
   }
   function renderProgress() {
-    const L = LESSONS[state.idx];
-    const k = L.vocab.filter(([de]) => state.known.has(de)).length;
-    const best = store.get("quiz" + L.id, 0);
-    const pct = Math.round((k / L.vocab.length * 0.6 + best / L.quiz.length * 0.4) * 100);
+    const k = vocabList.filter(v => state.known.has(v.key)).length;
+    const res = exResults(), ok = Object.values(res).filter(Boolean).length, n = ex.list.length || 1;
+    const pct = Math.round((k / (vocabList.length || 1) * 0.4 + ok / n * 0.6) * 100);
     $("#ring").setAttribute("stroke-dasharray", `${pct} 100`);
     $("#ringTxt").textContent = pct + "%";
-    $("#ringSub").textContent = `${k}/${L.vocab.length} واژه · آزمون ${best}/${L.quiz.length}`;
+    $("#ringSub").textContent = `${k}/${vocabList.length} واژه · تمرین ${ok}/${ex.list.length}`;
   }
 
-  /* ---------- Quiz ---------- */
-  const quiz = { i: 0, score: 0, order: [] };
-  const shuffle = a => a.map(x => [Math.random(), x]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
-  function renderQuiz(reset) {
-    const Q = LESSONS[state.idx].quiz;
-    if (reset) Object.assign(quiz, { i: 0, score: 0, order: shuffle(Q.map((_, j) => j)) });
-    const box = $("#quiz");
-    if (quiz.i >= Q.length) {
-      const best = Math.max(store.get("quiz" + LESSONS[state.idx].id, 0), quiz.score);
-      store.set("quiz" + LESSONS[state.idx].id, best); renderProgress();
-      box.innerHTML = `<h3>Quiz</h3><div class="quiz-q fa">نتیجه: ${quiz.score} از ${Q.length} ${quiz.score === Q.length ? "🎉" : ""}</div>
-        <button class="btn" id="qAgain">Nochmal</button>`;
-      $("#qAgain").onclick = () => renderQuiz(true); return;
-    }
-    const q = Q[quiz.order[quiz.i]];
-    const opts = shuffle(q.a.map((t, j) => ({ t, ok: j === q.c })));
-    box.innerHTML = `<h3>Quiz · ${quiz.i + 1}/${Q.length}</h3><div class="quiz-q fa">${esc(q.q)}</div>
-      <div class="opts">${opts.map((o, j) => `<button data-j="${j}" class="${/[a-zäöüß]/i.test(o.t) ? "" : "fa"}">${esc(o.t)}</button>`).join("")}</div>
-      <div class="quiz-foot"><span>Punkte: ${quiz.score}</span><button class="btn ghost" id="qNext" disabled>Weiter ›</button></div>`;
-    $$(".opts button", box).forEach(b => b.onclick = () => {
-      const o = opts[b.dataset.j];
-      if (o.ok) quiz.score++;
-      $$(".opts button", box).forEach((x, j) => { x.disabled = true; if (opts[j].ok) x.classList.add("ok"); });
-      if (!o.ok) b.classList.add("bad");
-      $("#qNext").disabled = false;
+  /* ---------- Practice: 100 exercise cards ---------- */
+  const ex = { list: [], i: 0, filter: "all" };
+  const exKey = () => "ex" + LESSONS[state.idx].id;
+  const exResults = () => store.get(exKey(), {});
+  const shuffleArr = a => a.map(x => [Math.random(), x]).sort((p, q) => p[0] - q[0]).map(x => x[1]);
+  let clipStop = null;
+  function playClip(i) {
+    const l = lines[i];
+    if (!player.duration || !timed) return speak(l.text);
+    player.currentTime = l.t0; clipStop = l.t1; player.play();
+  }
+  player.addEventListener("timeupdate", () => { if (clipStop != null && player.currentTime >= clipStop) { player.pause(); clipStop = null; } });
+  player.addEventListener("seeking", () => { if (clipStop != null && player.currentTime < (lines.find(l => l.t1 === clipStop)?.t0 ?? 0)) clipStop = null; });
+
+  function buildPractice() {
+    ex.list = window.Practice ? window.Practice.build(LESSONS[state.idx], lines, w => { const k = dictKey(w); return k ? DICT[k] : {}; }) : [];
+    ex.i = Math.min(store.get(exKey() + ":i", 0), ex.list.length - 1);
+    const counts = {}; ex.list.forEach(e => counts[e.type] = (counts[e.type] || 0) + 1);
+    $("#exFilter").innerHTML = `<button class="on" data-t="all">Alle</button>` + Object.keys(counts).map(t =>
+      `<button data-t="${t}">${window.Practice.TYPE_LABEL[t][0]} <small>${counts[t]}</small></button>`).join("");
+    renderExercise();
+  }
+  const visibleEx = () => ex.list.filter(e => ex.filter === "all" || e.type === ex.filter);
+  $("#exFilter").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    ex.filter = b.dataset.t; $$("#exFilter button").forEach(x => x.classList.toggle("on", x === b));
+    const v = visibleEx(); if (v.length && !v.includes(ex.list[ex.i])) ex.i = v[0].id;
+    renderExercise();
+  });
+  function stepEx(d) {
+    const v = visibleEx(); const k = v.indexOf(ex.list[ex.i]);
+    const n = v[Math.max(0, Math.min(v.length - 1, k + d))]; if (n) { ex.i = n.id; renderExercise(); }
+  }
+  $("#exPrev").onclick = () => stepEx(-1);
+  $("#exNext").onclick = () => stepEx(1);
+
+  function renderMap() {
+    const res = exResults();
+    $("#exMap").innerHTML = visibleEx().map(e => `<button class="dot ${res[e.id] === true ? "ok" : res[e.id] === false ? "bad" : ""} ${e.id === ex.i ? "cur" : ""}" data-id="${e.id}" aria-label="${e.id + 1}"></button>`).join("");
+    const ok = Object.values(res).filter(Boolean).length, bad = Object.values(res).filter(v => v === false).length;
+    $("#exStats").innerHTML = `<span class="ok">✓ ${ok}</span><span class="bad">✗ ${bad}</span><span>${Object.keys(res).length} / ${ex.list.length}</span>`;
+    $("#exMap .cur")?.scrollIntoView({ block: "nearest", inline: "center" });
+  }
+  $("#exMap").addEventListener("click", e => { const d = e.target.closest(".dot"); if (d) { ex.i = Number(d.dataset.id); renderExercise(); } });
+
+  function finishEx(correct, detail = "") {
+    const e = ex.list[ex.i], res = exResults();
+    res[e.id] = correct; store.set(exKey(), res);
+    const l = lines[e.line];
+    const fb = $("#exFeedback");
+    fb.hidden = false;
+    fb.className = "ex-feedback " + (correct ? "ok" : "bad");
+    fb.innerHTML = `<div class="fb-title">${correct ? "✓ Richtig! · آفرین" : "✗ Nicht ganz · دوباره گوش کن"}</div>
+      ${detail}
+      <div class="fb-ans"><button class="say" data-say="${esc(e.answer)}">${SAY_ICON}</button><span>${esc(e.answer)}</span></div>
+      ${l && l.fa ? `<div class="fa fb-fa">${esc(e.explain || l.fa)}</div>` : ""}
+      ${timed ? `<button class="chip-btn" id="exClip">▶ Im Dialog hören</button>` : ""}`;
+    $("#exClip") && ($("#exClip").onclick = () => playClip(e.line));
+    $("#exCheck").hidden = true; $("#exNext").classList.add("pulse");
+    renderMap(); renderProgress();
+  }
+
+  function renderExercise() {
+    const e = ex.list[ex.i]; if (!e) return;
+    store.set(exKey() + ":i", ex.i);
+    const [de, fa] = window.Practice.TYPE_LABEL[e.type];
+    $("#exType").innerHTML = `${de} <span class="fa">· ${fa}</span>`;
+    $("#exNum").textContent = `${e.id + 1} / ${ex.list.length}`;
+    $("#exFeedback").hidden = true; $("#exCheck").hidden = true; $("#exNext").classList.remove("pulse");
+    const body = $("#exBody");
+    const optHtml = opts => `<div class="opts">${opts.map((o, j) => `<button data-j="${j}">${esc(o)}</button>`).join("")}</div>`;
+    const bindOpts = () => $$(".opts button", body).forEach(b => b.onclick = () => {
+      const pickText = e.options[b.dataset.j], ok = pickText === e.answer;
+      $$(".opts button", body).forEach((x, j) => { x.disabled = true; if (e.options[j] === e.answer) x.classList.add("ok"); });
+      if (!ok) b.classList.add("bad");
+      finishEx(ok);
     });
-    $("#qNext").onclick = () => { quiz.i++; renderQuiz(); };
-  }
 
-  /* ---------- Intro builder ---------- */
-  function renderBuilder() {
-    const T = LESSONS[state.idx].template;
-    const saved = store.get("intro", {});
-    $("#builderRows").innerHTML = T.map(([pre, key, ph, post]) => `
-      <div class="row"><span>${esc(pre)}</span>${key ? `<input data-k="${key}" placeholder="${esc(ph)}" value="${esc(saved[key] || "")}">` : ""}${post ? `<span>${esc(post)}</span>` : ""}</div>`).join("");
-    const update = () => {
-      const vals = {};
-      $$("#builderRows input").forEach(i => vals[i.dataset.k] = i.value.trim());
-      store.set("intro", vals);
-      $("#builderOut").textContent = T.map(([pre, key, ph, post]) =>
-        (pre + (key ? " " + (vals[key] || ph) : "") + (post ? (post === "." ? "." : " " + post) : (key ? "." : ""))).replace(" .", ".")).join(" ");
-    };
-    $("#builderRows").oninput = update; update();
+    if (e.type === "translate") {
+      body.innerHTML = `<p class="ex-q fa">${esc(e.prompt)}</p><p class="ex-sub fa">آلمانی‌اش کدام است؟</p>${optHtml(e.options)}`;
+      bindOpts();
+    } else if (e.type === "listen") {
+      body.innerHTML = `<button class="play-big" id="exPlay">▶</button><p class="ex-sub fa">گوش کن؛ کدام جمله را شنیدی؟</p>${optHtml(e.options)}`;
+      $("#exPlay").onclick = () => playClip(e.line);
+      bindOpts();
+    } else if (e.type === "respond") {
+      body.innerHTML = `<div class="ex-bubble"><button class="say" data-say="${esc(e.prompt)}">${SAY_ICON}</button><span>${esc(e.prompt)}</span></div>
+        <p class="ex-sub fa">اگر از تو این را بپرسند، جواب مناسب کدام است؟</p>${optHtml(e.options)}`;
+      bindOpts();
+    } else if (e.type === "fill") {
+      body.innerHTML = `${e.hint ? `<p class="ex-sub fa">${esc(e.hint)}</p>` : ""}
+        <p class="ex-sent">${esc(e.before)}<input id="exInput" autocomplete="off" autocapitalize="off" spellcheck="false" size="${Math.max(4, e.answer.length)}" aria-label="Lücke">${esc(e.after)}</p>
+        <div class="umlauts">${["ä", "ö", "ü", "ß"].map(c => `<button data-c="${c}">${c}</button>`).join("")}<button class="hint" id="exHint">💡 <span class="fa">راهنما</span></button></div>`;
+      const inp = $("#exInput"); let hints = 0;
+      $$(".umlauts [data-c]", body).forEach(b => b.onclick = () => { inp.value += b.dataset.c; inp.focus(); });
+      $("#exHint").onclick = () => { hints++; inp.value = e.answer.slice(0, hints); inp.focus(); };
+      const check = () => { if (!inp.value.trim()) return inp.focus(); const ok = window.Practice.norm(inp.value) === window.Practice.norm(e.answer); inp.classList.add(ok ? "ok" : "bad"); inp.disabled = true; finishEx(ok, e.note ? `<div class="fa fb-note">${esc(e.note)}</div>` : ""); };
+      inp.addEventListener("keydown", k => { if (k.key === "Enter") check(); });
+      $("#exCheck").hidden = false; $("#exCheck").onclick = check;
+    } else if (e.type === "order") {
+      const built = [];
+      body.innerHTML = `${e.hint ? `<p class="ex-sub fa">${esc(e.hint)}</p>` : `<p class="ex-sub fa">کلمه‌ها را به ترتیب درست بزن</p>`}
+        <div class="build" id="exBuilt"></div><div class="bank" id="exBank">${e.tokens.map((t, j) => `<button data-j="${j}">${esc(t)}</button>`).join("")}</div>`;
+      const draw = () => {
+        $("#exBuilt").innerHTML = built.map((j, k) => `<button data-k="${k}">${esc(e.tokens[j])}</button>`).join("") || `<span class="ph fa">اینجا ساخته می‌شود…</span>`;
+        $$("#exBank button").forEach(b => b.classList.toggle("used", built.includes(Number(b.dataset.j))));
+        $("#exCheck").hidden = built.length !== e.tokens.length;
+      };
+      $("#exBank").onclick = ev => { const b = ev.target.closest("button"); if (!b || b.classList.contains("used") || b.disabled) return; built.push(Number(b.dataset.j)); draw(); };
+      $("#exBuilt").onclick = ev => { const b = ev.target.closest("button"); if (!b || b.disabled) return; built.splice(Number(b.dataset.k), 1); draw(); };
+      $("#exCheck").onclick = () => {
+        const ok = built.map(j => e.tokens[j]).join(" ").toLowerCase() === window.Practice.words(e.answer).join(" ").toLowerCase();
+        $$("#exBuilt button, #exBank button").forEach(b => b.disabled = true);
+        $("#exBuilt").classList.add(ok ? "ok" : "bad"); finishEx(ok);
+      };
+      draw();
+    } else if (e.type === "speak") {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      body.innerHTML = `<p class="ex-q fa">${esc(e.prompt)}</p><p class="ex-sub fa">این را به آلمانی بلند بگو</p>
+        <div class="speak-row">${SR ? `<button class="mic" id="exMic" aria-label="Mikrofon">🎤</button>` : ""}
+        <button class="chip-btn" id="exReveal">Lösung zeigen · <span class="fa">نمایش جواب</span></button></div>
+        <p class="heard" id="exHeard"></p>
+        <div class="self" id="exSelf" hidden><span class="fa">درست گفتی؟</span><button class="btn" data-self="1">✓ Ja</button><button class="btn ghost" data-self="0">✗ Nein</button></div>`;
+      const reveal = () => { $("#exHeard").innerHTML = `<b>${esc(e.answer)}</b>`; $("#exSelf").hidden = false; speak(e.answer); };
+      $("#exReveal").onclick = reveal;
+      $$("#exSelf [data-self]").forEach(b => b.onclick = () => { $("#exSelf").hidden = true; finishEx(b.dataset.self === "1"); });
+      if (SR) $("#exMic").onclick = () => {
+        const r = new SR(); r.lang = "de-DE"; r.interimResults = false; r.maxAlternatives = 3;
+        $("#exMic").classList.add("rec"); $("#exHeard").innerHTML = `<span class="fa">در حال گوش دادن…</span>`;
+        r.onresult = ev => {
+          const target = window.Practice.words(window.Practice.norm(e.answer));
+          const best = [...ev.results[0]].map(a => {
+            const said = window.Practice.words(window.Practice.norm(a.transcript));
+            const hit = target.filter(w => said.includes(w)).length;
+            return { t: a.transcript, score: hit / target.length };
+          }).sort((p, q) => q.score - p.score)[0];
+          const pct = Math.round(best.score * 100);
+          $("#exHeard").innerHTML = `<span class="fa">شنیدم:</span> «${esc(best.t)}» · ${pct}%`;
+          finishEx(best.score >= 0.7);
+        };
+        r.onerror = () => { $("#exHeard").innerHTML = `<span class="fa">میکروفون در دسترس نیست؛ از «نمایش جواب» استفاده کن.</span>`; };
+        r.onend = () => $("#exMic")?.classList.remove("rec");
+        r.start();
+      };
+    }
+    // restore answered state marker
+    const prev = exResults()[e.id];
+    $("#exState").className = "ex-state " + (prev === true ? "ok" : prev === false ? "bad" : "");
+    $("#exState").textContent = prev === true ? "✓" : prev === false ? "✗" : "";
+    renderMap();
   }
-  $("#speakIntro").onclick = () => speak($("#builderOut").textContent);
-  $("#copyIntro").onclick = () => navigator.clipboard?.writeText($("#builderOut").textContent).then(() => toast("کپی شد"));
 
   const faToggle = $("#showFa");
   faToggle.checked = store.get("showFa", true);
@@ -309,6 +432,7 @@
   for (const [k, v] of Object.entries(DICT)) {
     for (const f of [k.replace(/_.*/, ""), ...(v.f || [])]) { dictIdx[f] = k; dictIdx[f.toLowerCase()] ??= k; }
   }
+  function dictKey(w) { return dictIdx[w] || dictIdx[w.toLowerCase()]; }
   function lookup(w) {
     if (NAMES[w]) return { lemma: w, p: "اسم خاص", fa: NAMES[w], g: "" };
     const k = dictIdx[w] || dictIdx[w.toLowerCase()];
