@@ -688,3 +688,9 @@ mark { background: rgba(240,138,168,.3); color: var(--text); border-radius: 4px;
 .warn { color: var(--bad); }
 .mic-msg { text-align: center; line-height: 1.9; font-size: 14px; margin: 0; }
 .mic-msg a { color: var(--accent); }
+.dl-hint { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 13px; color: var(--muted); }
+.hint-chip { background: var(--tile-2); border-radius: 8px; padding: 3px 8px; }
+.hint-chip b { color: var(--accent); }
+mark.w-fill { background: rgba(127,214,164,.25); color: var(--ok); }
+.dl-state.silent { color: var(--bad); }
+.dl-state.model { color: var(--ok); }

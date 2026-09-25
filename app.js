@@ -670,13 +670,26 @@
   }
   function lineHtml(it) {
     const l = lines[it.line];
-    if (!it.blanks.length || (it.score && it.score.ok)) return esc(l.text);
+    if (!it.blanks.length) return esc(l.text);
     return l.text.split(/(\s+)/).map(tok => {
       const w = cleanWord(tok);
-      return w && it.blanks.includes(w) ? esc(tok.replace(w, "_".repeat(Math.max(4, w.length)))) : esc(tok);
+      if (!w || !it.blanks.includes(w)) return esc(tok);
+      // revealed (after success or when the answer is played): show the word highlighted
+      return it.reveal ? esc(tok).replace(esc(w), `<mark class="w-fill">${esc(w)}</mark>`) : esc(tok.replace(w, "_".repeat(Math.max(4, w.length))));
     }).join("");
   }
-  const STATE_TXT = { listen: "🎤 گوش می‌دهم… بگو", model: "🔊 گوش کن و بعد تکرار کن", retry: "دوباره بگو", them: "🔊" };
+  // hint for words that were missed: first letter + meaning
+  function hintFor(it) {
+    const said = it.score ? nw(it.score.said || "") : [];
+    const target = it.blanks.length ? it.blanks : window.Practice.words(lines[it.line].text);
+    const miss = [...new Set(target.filter(w => !said.includes(window.Practice.norm(w))))].slice(0, 3);
+    return miss.map(w => {
+      const k = dictKey(w), fa = k ? DICT[k].fa : "";
+      const shown = it.blanks.length ? w[0] + "…".padEnd(Math.min(w.length, 6), "·") : w;
+      return `<span class="hint-chip"><b dir="ltr">${esc(shown)}</b>${fa ? ` <span class="fa">= ${esc(fa)}</span>` : ""}</span>`;
+    }).join("");
+  }
+  const STATE_TXT = { listen: "🎤 گوش می‌دهم… بگو", model: "🔊 جواب درست را گوش کن", retry: "دوباره بگو", silent: "صدایی نشنیدم؛ دوباره بگو", them: "🔊" };
   // only the previous line and the current one are visible; the next line stays hidden
   function renderDlg() {
     const cur = dlg.i;
@@ -686,9 +699,10 @@
       const showScore = sc && sc.html && (k < cur || it.state !== "listen");
       return `<div class="dl ${it.mine ? "mine" : "them"} ${st}" data-k="${k}">
         <div class="dl-who">${esc(l.who)}${it.mine ? ` <span class="fa">(تو)</span>` : ""}</div>
-        <div class="dl-text">${showScore ? (it.blanks.length && !sc.ok ? lineHtml(it) : sc.html) : lineHtml(it)}</div>
+        <div class="dl-text">${it.reveal || !showScore || (it.blanks.length && !sc.ok) ? lineHtml(it) : sc.html}</div>
         ${sc && (k < cur || it.state !== "listen") ? `<div class="dl-res ${sc.ok ? "ok" : "bad"}">${sc.self ? "✓" : `${Math.round(sc.pct * 100)}%`} ${sc.said ? `<span class="said">«${esc(sc.said)}»</span>` : ""}</div>` : ""}
         ${k === cur && it.state ? `<div class="dl-state ${it.state}">${it.state === "listen" ? `<span class="mic-live"></span>` : ""}<span class="fa">${STATE_TXT[it.state] || ""}</span>${it.tries ? ` <span class="tries">${it.tries}×</span>` : ""}</div>` : ""}
+        ${k === cur && it.hint ? `<div class="dl-hint"><span class="fa">راهنما:</span> ${it.hint}</div>` : ""}
         ${k === cur && it.mine && !SR ? `<div class="dl-act"><button class="btn" data-self="${k}">✓ <span class="fa">گفتم</span></button></div>` : ""}
         ${k < cur ? `<div class="fa dl-fa">${esc(l.fa || "")}</div>` : ""}
       </div>`;
@@ -696,25 +710,30 @@
     $("#pProg").textContent = `${Math.min(cur + 1, dlg.items.length)} / ${dlg.items.length}`;
   }
   const wait = ms => new Promise(r => setTimeout(r, ms));
+  // listen with a time limit so a silent or stuck recognizer never blocks the lesson
+  const listenFor = ms => Promise.race([listen(), new Promise((_, rej) => setTimeout(() => { stopListening(); rej("timeout"); }, ms))]);
   async function speakTurn(it, run) {
-    const MAX = 5;
+    const MAX = 2; // two wrong attempts → play the right answer and move on
     while (run === dlg.run) {
-      if (it.tries >= 2 && it.tries % 2 === 0) { it.state = "model"; renderDlg(); await playClip(it.line); if (run !== dlg.run) return; await wait(300); }
       it.state = "listen"; renderDlg();
-      let alts;
-      try { alts = await listen(); }
+      let alts = null;
+      try { alts = await listenFor(10000); }
       catch (err) {
         if (run !== dlg.run) return;
         if (err === "not-allowed" || err === "service-not-allowed") { it.state = ""; renderDlg(); micGate(runDlg); $("#dlgFoot").insertAdjacentHTML("afterbegin", `<p class="fa warn mic-msg">${MIC_MSG.denied}</p>`); return "stop"; }
-        await wait(250); continue; // silence: keep listening
       }
       if (run !== dlg.run) return;
       it.tries++;
-      it.score = scoreSpeech(lines[it.line].text, alts, it.blanks);
-      it.state = it.score.ok ? "" : "retry"; renderDlg();
-      if (it.score.ok) { await wait(1100); return; }
-      if (it.tries >= MAX) { await playClip(it.line); await wait(400); return; }
-      await wait(1300);
+      if (alts && alts.length) it.score = scoreSpeech(lines[it.line].text, alts, it.blanks);
+      if (it.score && it.score.ok && alts) { it.reveal = true; it.hint = ""; it.state = ""; renderDlg(); await wait(1100); return; }
+      if (it.tries >= MAX) {
+        it.reveal = true; it.hint = ""; it.state = "model"; renderDlg();
+        await playClip(it.line); if (run !== dlg.run) return;
+        await wait(700); it.state = ""; return;
+      }
+      it.hint = hintFor(it);
+      it.state = alts ? "retry" : "silent"; renderDlg();
+      await wait(1500);
     }
   }
   async function runDlg() {
