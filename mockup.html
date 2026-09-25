@@ -148,6 +148,39 @@ button { font: inherit; color: inherit; background: none; border: 0; }
 .player .ctrls button { width: 44px; height: 44px; display: grid; place-items: center; color: var(--label); }
 .player .ctrls .pp { width: 60px; height: 60px; border-radius: 50%; background: var(--tint); color: #fff; }
 .player .ctrls svg { width: 24px; height: 24px; }
+
+/* landscape with side rail */
+.land { position: relative; height: 100%; display: flex; }
+.land.left { flex-direction: row-reverse; }
+.land .main { flex: 1; min-width: 0; padding: 14px 18px 14px 18px; display: grid; grid-template-columns: 1fr 1.15fr; grid-template-rows: auto 1fr; gap: 12px; }
+.land.right .main { padding-left: 54px; } .land.left .main { padding-right: 54px; }
+.rail { width: 76px; flex: 0 0 76px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px 0; }
+.land.right .rail { padding-right: 14px; } .land.left .rail { padding-left: 14px; }
+.rail .pillv { border-radius: 30px; padding: 6px; display: flex; flex-direction: column; gap: 4px; }
+.rail .tabv { width: 48px; height: 44px; border-radius: 22px; display: grid; place-items: center; color: var(--label2); }
+.rail .tabv svg { width: 23px; height: 23px; }
+.rail .tabv.on { color: var(--tint); background: var(--fill); }
+.rail .swap { margin-top: 10px; width: 40px; height: 40px; border-radius: 20px; display: grid; place-items: center; color: var(--label2); }
+.rail .swap svg { width: 18px; height: 18px; }
+.land .topbar { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; }
+.land .greet { font-size: 26px; font-weight: 700; }
+.land .tiles3 { grid-template-columns: repeat(3, 1fr); align-self: start; }
+.land .tile3 { min-height: 104px; }
+.land .player { margin: 0; grid-row: 2; grid-column: 2; }
+.land .player .de2 { font-size: 17px; } .land .player .fa2 { font-size: 14px; line-height: 1.6; }
+.land .player .ctrls .pp { width: 50px; height: 50px; }
+.npill { display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 6px 0 12px; border-radius: 17px; background: var(--tint-soft); color: var(--tint); font-size: 13px; font-weight: 600; }
+.npill .bars { display: flex; gap: 2px; align-items: flex-end; height: 12px; } .npill .bars i { width: 3px; background: var(--tint); border-radius: 1px; }
+.npill button { width: 26px; height: 26px; border-radius: 13px; background: var(--tint); color: #fff; display: grid; place-items: center; } .npill svg { width: 12px; height: 12px; }
+
+.avatar.sm { width: 26px; height: 26px; font-size: 12px; }
+.tab.on .avatar.sm, .tabv.on .avatar.sm { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--tint); }
+.tile3.tap { position: relative; box-shadow: inset 0 0 0 2px var(--tint); }
+.tile3.tap::after { content: "›"; position: absolute; right: 10px; top: 6px; font-size: 22px; color: var(--tint); font-weight: 600; }
+.backnav { display: flex; align-items: center; gap: 2px; color: var(--tint); font-size: 17px; padding: 6px 12px; }
+.backnav b { font-size: 26px; font-weight: 400; margin-top: -3px; }
+.phr { padding: 12px 16px; border-bottom: .5px solid var(--sep); } .phr:last-child { border: 0; }
+.phr .d { font-weight: 600; font-size: 16px; } .phr .f { color: var(--label2); font-size: 14px; margin-top: 3px; }
 </style>
 </head>
 <body>
@@ -180,18 +213,54 @@ const I = {
   speaker: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 4V5L7 9zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4z"/></svg>'
 };
 const sb = `<div class="sb"><span>9:41</span><span class="icons"><svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M8 3c2 0 3.9.8 5.3 2.1l1.4-1.5A9.6 9.6 0 0 0 8 1C5.5 1 3.1 2 1.3 3.6l1.4 1.5A7.6 7.6 0 0 1 8 3zm0 4c1 0 2 .4 2.7 1.1l1.4-1.5A6 6 0 0 0 8 5a6 6 0 0 0-4.1 1.6l1.4 1.5C6 7.4 7 7 8 7zm0 4 1.8-1.9a2.6 2.6 0 0 0-3.6 0z"/></svg><svg width="27" height="13" viewBox="0 0 27 13"><rect x=".5" y=".5" width="23" height="12" rx="3.5" fill="none" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="18" height="9" rx="2" fill="currentColor"/><rect x="25" y="4.5" width="1.5" height="4" rx=".75" fill="currentColor" opacity=".4"/></svg></span></div>`;
-const nav = `<div class="nav"><button class="pill"><b>L1</b><span class="sub">Sich vorstellen</span>${I.down}</button><div class="nav-right"><span class="lang">FA</span><span class="avatar">A</span></div></div>`;
-const tabs = active => `<div class="tabbar glass">${[["vocab", I.words, "واژگان"], ["lesson", I.book, "درس"], ["home", I.home, "خانه"], ["audio", I.wave, "دیالوگ"], ["practice", I.target, "تمرین"]].map(([k, ic, lb]) => `<div class="tab ${k === active ? "on" : ""}">${ic}<span class="fa">${lb}</span></div>`).join("")}</div>`;
+const nav = `<div class="nav"><button class="pill"><b>L1</b><span class="sub">Sich vorstellen</span>${I.down}</button><div class="nav-right">${q.get("dock") === "v2" ? "" : '<span class="lang">FA</span><span class="avatar">A</span>'}</div></div>`;
+const TABS = () => q.get("dock") === "v2" ? [["me", '<span class="avatar sm">A</span>', "من"], ["vocab", I.words, "واژگان"], ["home", I.home, "خانه"], ["audio", I.wave, "دیالوگ"], ["practice", I.target, "تمرین"]] : [["vocab", I.words, "واژگان"], ["lesson", I.book, "درس"], ["home", I.home, "خانه"], ["audio", I.wave, "دیالوگ"], ["practice", I.target, "تمرین"]];
+const tabs = active => `<div class="tabbar glass">${TABS().map(([k, ic, lb]) => `<div class="tab ${k === active ? "on" : ""}">${ic}<span class="fa">${lb}</span></div>`).join("")}</div>`;
 const mini = (i = 6) => `<div class="mini glass"><div class="art">L1</div><div class="mt">${lines[i].text}<small>${lines[i].who} · Daily German Talk</small></div><button>${I.play}</button><button>${I.fwd}</button></div>`;
-const bottomBar = (active, withMini = true) => `<div class="chrome">${withMini ? mini() : ""}${tabs(active)}</div>`;
+const bottomBar = (active, withMini = true) => `<div class="chrome">${withMini && q.get("dock") !== "v2" ? mini() : ""}${tabs(active)}</div>`;
 const row = (color, icon, t1, t2, val, extra = "") => `<div class="row"><span class="ico" style="background:${color}">${icon}</span><div class="txt"><div class="t1">${t1}</div>${t2 ? `<div class="t2 fa" style="text-align:left">${t2}</div>` : ""}${extra}</div>${val ? `<span class="val">${val}</span>` : ""}<span class="chev">${I.chev}</span></div>`;
 const words = (t, hl) => t.split(" ").map(w => `<span class="w ${w.replace(/[^\wäöüß]/gi, "") === hl ? "hl" : ""}">${w}</span>`).join(" ");
 
 const screens = {
-  home2: () => `${sb}<div class="navh"><button class="pill"><b>L1</b><span class="sub">Sich vorstellen</span>${I.down}</button><div class="nav-right"><span class="lang">FA</span><span class="avatar">A</span></div></div><div class="scroll" style="padding-bottom:120px">
+  lessonv: () => `${sb}<div class="navh"><span class="backnav"><b>‹</b><span class="fa">خانه</span></span><div class="nav-right"></div></div><div class="scroll" style="padding-bottom:120px">
+    <div class="large">Sich vorstellen</div><div class="large-sub fa" style="text-align:left">درس ۱ · معرفی خود · A1 — از کاشی «درس» در خانه باز می‌شود</div>
+    <div class="group" style="padding:14px 16px;font-size:15px;line-height:1.6" dir="rtl"><span class="fa">در این درس یاد می‌گیری خودت را معرفی کنی، بگویی اهل کجایی و چه کاری می‌کنی.</span></div>
+    <div class="section-h" style="padding:14px 20px 6px;color:var(--label2);font-size:13px;font-weight:600">WICHTIGE SÄTZE</div>
+    <div class="group">
+      <div class="phr"><div class="d">Ich heiße Ben.</div><div class="f fa" dir="rtl">اسم من بن است.</div></div>
+      <div class="phr"><div class="d">Woher kommen Sie?</div><div class="f fa" dir="rtl">اهل کجا هستید؟</div></div>
+      <div class="phr"><div class="d">Ich wohne in Berlin.</div><div class="f fa" dir="rtl">در برلین زندگی می‌کنم.</div></div>
+      <div class="phr"><div class="d">Was machen Sie beruflich?</div><div class="f fa" dir="rtl">شغل شما چیست؟</div></div>
+    </div>
+  </div><div class="chrome">${tabs("home")}</div>`,
+  land: () => {
+    const side = q.get("side") || "right";
+    const tabsV = TABS().map(([k, ic]) => `<div class="tabv ${k === "home" ? "on" : ""}">${ic}</div>`).join("");
+    const swap = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M7 7h13l-4-4M17 17H4l4 4"/></svg>';
+    return `<div class="land ${side}"><div class="main">
+      <div class="topbar"><button class="pill"><b>L1</b><span class="sub">Sich vorstellen</span>${I.down}</button>${q.get("dock") === "v2" ? "" : '<span class="avatar">A</span>'}</div>
+      <div><div class="greet">Guten Abend</div><div class="muted" style="margin-bottom:10px">Freitag, 25. September</div>
+        <div class="tiles3">
+          <div class="tile3 ${q.get("dock") === "v2" ? "tap" : ""}"><div class="kicker">Lektion</div><div class="t">Sich vorstellen</div><div class="s fa">معرفی خود</div><span class="chipx">A1</span></div>
+          <div class="tile3"><div class="kicker">Fortschritt</div><div class="t" style="margin-top:6px">12%</div><div class="s fa">۵ از ۱۰۰ تمرین</div></div>
+          <div class="tile3"><div class="kicker">Wort</div><div class="t">das Vorbild</div><div class="s fa">الگو</div></div>
+        </div></div>
+      <div class="player">
+        <div class="top"><div class="art">L1</div><div class="meta"><b>Weiterhören</b><span>52 / 173</span></div></div>
+        <div class="de2"><span style="color:var(--indigo);font-size:13px;font-weight:700">Ben</span><br>${lines[51].text}</div>
+        <div class="fa2 fa">${lines[51].fa}</div>
+        <div class="prog"><i></i></div>
+        <div class="ctrls"><button class="pp">${I.play}</button></div>
+      </div></div>
+      <div class="rail"><div class="pillv glass">${tabsV}</div><button class="swap glass">${swap}</button></div></div>`;
+  },
+  nowplaying: () => `${sb}<div class="navh"><button class="pill"><b>L1</b><span class="sub">Sich vorst…</span>${I.down}</button><div class="nav-right"><span class="npill"><span class="bars"><i style="height:6px"></i><i style="height:12px"></i><i style="height:8px"></i></span>4:20<button><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg></button></span><span class="avatar">A</span></div></div>
+    <div class="scroll"><div class="large">Vokabeln</div><div class="large-sub fa" style="text-align:left">وقتی صدا در حال پخش است، این دکمه بالا ظاهر می‌شود</div>
+    <div class="group">${row("var(--orange)", I.words, "das Vorbild", "الگو · اسم خنثی", "")}${row("var(--orange)", I.words, "ehrlich", "صادق · صفت", "")}${row("var(--orange)", I.words, "wohnen", "زندگی کردن · فعل", "")}</div></div>${bottomBar("vocab", false)}`,
+  home2: () => `${sb}<div class="navh"><button class="pill"><b>L1</b><span class="sub">Sich vorstellen</span>${I.down}</button><div class="nav-right">${q.get("dock") === "v2" ? "" : '<span class="avatar">A</span>'}</div></div><div class="scroll" style="padding-bottom:120px">
     <div class="large">Guten Abend</div><div class="large-sub">Freitag, 25. September</div>
     <div class="tiles3">
-      <div class="tile3"><div class="kicker">Lektion</div><div class="t">Sich vorstellen</div><div class="s fa">معرفی خود</div><span class="chipx">A1</span></div>
+      <div class="tile3 ${q.get("dock") === "v2" ? "tap" : ""}"><div class="kicker">Lektion</div><div class="t">Sich vorstellen</div><div class="s fa">معرفی خود</div><span class="chipx">A1</span></div>
       <div class="tile3"><div class="kicker">Fortschritt</div><svg class="ring-s" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--fill)" stroke-width="4"/><circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--tint)" stroke-width="4" stroke-linecap="round" stroke-dasharray="12 100" transform="rotate(-90 18 18)"/></svg><div class="t">12%</div><div class="s fa">۵ از ۱۰۰ تمرین</div></div>
       <div class="tile3"><div class="kicker">Wort des Tages</div><div class="t">das Vorbild</div><div class="s fa">الگو</div><span class="chipx fa">اسم خنثی</span></div>
     </div>

@@ -104,6 +104,7 @@
     tabVocab: { fa: "واژگان", ru: "Слова", uk: "Слова" },
     tabLesson: { fa: "درس", ru: "Урок", uk: "Урок" },
     tabHome: { fa: "خانه", ru: "Главная", uk: "Головна" },
+    tabMe: { fa: "من", ru: "Я", uk: "Я" },
     tabDialog: { fa: "دیالوگ", ru: "Диалог", uk: "Діалог" },
     tabPractice: { fa: "تمرین", ru: "Практика", uk: "Практика" },
     uiLanguage: { fa: "زبان", ru: "Язык", uk: "Мова" }

@@ -900,3 +900,37 @@ body[data-screen="home"] .status .mini-player { display: none !important; }
   .hp-de { font-size: 17px; } .hp-fa { font-size: 14px; }
 }
 .hplayer .cover { width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, #FF6B9A, #8A6CF0); color: #fff; font-weight: 800; font-size: 16px; display: grid; place-items: center; flex: 0 0 44px; }
+
+/* ---------- Dock v2: avatar lives in the dock, lesson opens from home ---------- */
+.dock-side, .acct { display: none !important; }
+.dock { display: flex !important; justify-content: center; align-items: center; gap: 10px; }
+.nav .tab-me .avatar-btn { width: 26px; height: 26px; font-size: 12px; }
+.nav .tab-me.on .avatar-btn, .nav .tab-me:active .avatar-btn { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent); }
+.dock-swap { display: none; width: 40px; height: 40px; border-radius: 50%; place-items: center; color: var(--muted);
+  background: var(--glass); -webkit-backdrop-filter: saturate(180%) blur(24px); backdrop-filter: saturate(180%) blur(24px);
+  border: .5px solid var(--glass-border); box-shadow: var(--shadow); }
+.dock-swap svg { width: 18px; height: 18px; }
+.back-btn { display: inline-flex; align-items: center; gap: 2px; color: var(--accent); font-size: 17px; padding: 2px 0; align-self: flex-start; }
+.back-btn .back-chev { font-size: 28px; line-height: 1; margin-top: -3px; }
+.htile-go { position: relative; }
+.htile-go::after { content: "›"; position: absolute; top: 6px; right: 10px; font-size: 22px; font-weight: 600; color: var(--accent); line-height: 1; }
+/* top player shows only while the lesson audio plays */
+body:not(.playing) .status .mini-player { display: none !important; }
+
+/* landscape phones: icon-only vertical dock at the side, swappable left/right */
+@media (max-height: 520px) and (orientation: landscape) {
+  .frame { grid-template-columns: 1fr auto; grid-template-rows: 36px 1fr; }
+  .frame > .status { grid-column: 1; grid-row: 1; }
+  .frame > main { grid-column: 1; grid-row: 2; }
+  .dock { grid-column: 2; grid-row: 1 / span 2; flex-direction: column; padding: 8px 10px 8px 4px !important; }
+  body.dock-left .frame { grid-template-columns: auto 1fr; }
+  body.dock-left .frame > .status, body.dock-left .frame > main { grid-column: 2; }
+  body.dock-left .dock { grid-column: 1; padding: 8px 4px 8px 10px !important; }
+  .dock .nav { flex-direction: column; width: auto !important; padding: 6px; gap: 4px; border-radius: 30px; }
+  .nav button { width: 48px !important; height: 44px !important; flex: none !important; border-radius: 22px; }
+  .nav button svg { width: 22px; height: 22px; }
+  .nav .tab-l { display: none; }
+  .dock-swap { display: grid; }
+}
+#lesson .screen-head { flex-wrap: wrap; }
+#lesson .back-btn { flex: 0 0 100%; margin-bottom: -4px; }

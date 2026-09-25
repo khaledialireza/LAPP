@@ -51,7 +51,9 @@
   /* ---------- Navigation ---------- */
   function go(id) {
     $$(".screen").forEach(s => s.classList.toggle("active", s.id === id));
-    $$(".nav button").forEach(b => b.classList.toggle("on", b.dataset.go === id));
+    // the lesson page opens from the home tile, so home stays lit
+    const tab = id === "lesson" ? "home" : id;
+    $$(".nav button").forEach(b => b.classList.toggle("on", b.dataset.go === tab));
     document.body.dataset.screen = id;
     if (location.hash !== "#" + id) history.replaceState(null, "", "#" + id);
   }
@@ -947,14 +949,14 @@
   applyDictLang(); I18N.apply();
   $$(".js-lang-code").forEach(e => e.textContent = I18N.lang.toUpperCase());
 
-  /* ---------- Wide screens: language + profile sit bottom-right (same buttons, moved) ---------- */
-  const wideMQ = matchMedia("(min-width: 901px) and (min-height: 521px)");
-  const placeAcct = () => {
-    const acct = $(".acct");
-    (wideMQ.matches ? $("#dockAcct") : $(".status .right")).prepend(acct);
-  };
-  wideMQ.addEventListener ? wideMQ.addEventListener("change", placeAcct) : wideMQ.addListener(placeAcct);
-  placeAcct();
+  /* ---------- Landscape: side dock, left or right hand ---------- */
+  const setDockSide = side => { document.body.classList.toggle("dock-left", side === "left"); store.set("dockSide", side); };
+  setDockSide(store.get("dockSide", "right"));
+  $("#dockSwap").addEventListener("click", () => setDockSide(document.body.classList.contains("dock-left") ? "right" : "left"));
+
+  /* ---------- Top player: only while the lesson audio plays (not during practice clips) ---------- */
+  const markPlaying = () => document.body.classList.toggle("playing", !player.paused && clipStop == null);
+  ["play", "pause", "ended"].forEach(ev => player.addEventListener(ev, markPlaying));
 
   /* ---------- Init ---------- */
   tick(); setInterval(tick, 10000);

@@ -16,7 +16,7 @@
   <meta name="description" content="LAPP — آموزش زبان آلمانی با دیالوگ صوتی، واژگان و تمرین.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=muhdmwnq">
+  <link rel="stylesheet" href="style.css?v=muhegaym">
 </head>
 <body data-screen="home">
   <div class="frame">
@@ -28,7 +28,6 @@
       <div class="lp-menu" id="lpMenu" role="listbox" hidden></div>
       <div class="clock"></div>
       <div class="right">
-        <div class="acct"><button class="avatar-btn" data-profile aria-label="Profile"><span class="js-avatar">?</span></button></div>
         <div class="mini-player">
           <button class="icon-btn mp-extra" data-act="prev" aria-label="zurück"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
           <button class="icon-btn" data-act="toggle" aria-label="play"><svg class="ico-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l12-7z"/></svg></button>
@@ -46,7 +45,7 @@
           <div class="home-date" id="homeDate"></div>
         </div>
         <div class="home-tiles">
-          <button class="htile" data-go="lesson">
+          <button class="htile htile-go" data-go="lesson">
             <span class="kicker">Lektion</span>
             <b id="hLessonTitle"></b>
             <span class="sub fa" id="hLessonFa"></span>
@@ -88,6 +87,7 @@
       <!-- LESSON -->
       <section class="screen" id="lesson">
         <div class="screen-head">
+          <button class="back-btn" data-go="home"><span class="back-chev">‹</span><span data-i18n="tabHome"></span></button>
           <h1 id="lTitle"></h1>
           <div class="lessons-row" id="lessonList"></div>
         </div>
@@ -256,15 +256,14 @@
 
     <!-- Bottom dock -->
     <footer class="dock">
-      <div class="dock-side"></div>
       <nav class="nav">
+        <button class="tab-me" data-profile aria-label="Profile"><span class="avatar-btn js-avatar">?</span><span class="tab-l fa" data-i18n="tabMe"></span></button>
         <button data-go="vocab" aria-label="Vokabeln"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 20 12 4l7 16M8 14h8"/></svg><span class="tab-l fa" data-i18n="tabVocab"></span></button>
-        <button data-go="lesson" aria-label="Lektion"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M8 7h7"/></svg><span class="tab-l fa" data-i18n="tabLesson"></span></button>
         <button data-go="home" class="on" aria-label="Start"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11 12 4l9 7v9H3z"/><path d="M9 20v-6h6v6"/></svg><span class="tab-l fa" data-i18n="tabHome"></span></button>
         <button data-go="audio" aria-label="Audio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg><span class="tab-l fa" data-i18n="tabDialog"></span></button>
         <button data-go="practice" aria-label="Üben"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg><span class="tab-l fa" data-i18n="tabPractice"></span></button>
       </nav>
-      <div class="dock-side dock-acct" id="dockAcct"></div>
+      <button class="dock-swap" id="dockSwap" aria-label="Dock links/rechts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h13l-4-4M17 17H4l4 4"/></svg></button>
     </footer>
   </div>
 
@@ -299,16 +298,16 @@
     </div>
   </div>
 
-  <script src="data/lessons.js?v=muhdmwnq"></script>
-  <script src="data/lesson1-fa.js?v=muhdmwnq"></script>
-  <script src="data/lesson1-times.js?v=muhdmwnq"></script>
-  <script src="data/lesson1-words.js?v=muhdmwnq"></script>
-  <script src="data/dict-de.js?v=muhdmwnq"></script>
-  <script src="data/dict-tr.js?v=muhdmwnq"></script>
-  <script src="data/lesson1-ru.js?v=muhdmwnq"></script>
-  <script src="data/lesson1-uk.js?v=muhdmwnq"></script>
-  <script src="i18n.js?v=muhdmwnq"></script>
-  <script src="exercises.js?v=muhdmwnq"></script>
-  <script src="app.js?v=muhdmwnq"></script>
+  <script src="data/lessons.js?v=muhegaym"></script>
+  <script src="data/lesson1-fa.js?v=muhegaym"></script>
+  <script src="data/lesson1-times.js?v=muhegaym"></script>
+  <script src="data/lesson1-words.js?v=muhegaym"></script>
+  <script src="data/dict-de.js?v=muhegaym"></script>
+  <script src="data/dict-tr.js?v=muhegaym"></script>
+  <script src="data/lesson1-ru.js?v=muhegaym"></script>
+  <script src="data/lesson1-uk.js?v=muhegaym"></script>
+  <script src="i18n.js?v=muhegaym"></script>
+  <script src="exercises.js?v=muhegaym"></script>
+  <script src="app.js?v=muhegaym"></script>
 </body>
 </html>
