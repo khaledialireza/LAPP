@@ -77,7 +77,8 @@
   function tick() {
     const d = new Date();
     const t = d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
-    $("#sbClock").textContent = t; $("#homeTime").textContent = t;
+    const h = d.getHours();
+    $("#hGreet").textContent = h < 5 ? "Gute Nacht" : h < 11 ? "Guten Morgen" : h < 17 ? "Guten Tag" : h < 22 ? "Guten Abend" : "Gute Nacht";
     $("#homeDate").textContent = d.toLocaleDateString("de-DE", { weekday: "long", day: "2-digit", month: "long" });
   }
 
@@ -156,7 +157,10 @@
     $("#lcSay").dataset.say = l ? l.text : "";
     $("#mDe").innerHTML = l ? wordHtml(l.text) : "";
     $("#mFa").textContent = l ? l.fa : "";
-    $("#hNowLine").textContent = l ? `${l.who}: ${l.text}` : "";
+    $("#hWho").textContent = l ? l.who : "";
+    $("#hWho").className = "hp-who " + (l ? l.who.toLowerCase() : "");
+    $("#hNum").textContent = l ? `${i + 1} / ${lines.length}` : "";
+    $("#hNowLine").textContent = l ? l.text : "";
     $("#hNowFa").textContent = l ? l.fa : "";
   }
 

@@ -856,3 +856,47 @@ body { font-family: -apple-system, "SF Pro Text", "SF Pro Display", system-ui, "
 .hub-tile .fa { font-size: 12px; }
 .ht-ico { grid-row: 1 / span 3; align-self: center; }
 .hub-grid { flex-shrink: 0; }
+
+/* ---------- Home (v2): large greeting, aligned tiles, player with text on top ---------- */
+#home { gap: 12px; justify-content: flex-start !important; }
+.home-head { flex-shrink: 0; }
+.home-greet { margin: 0; font-size: 32px; font-weight: 700; letter-spacing: .3px; }
+.home-date { color: var(--muted); font-size: 15px; margin-top: 2px; }
+.home-tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; flex-shrink: 0; }
+.htile { background: var(--tile); border-radius: 16px; padding: 12px; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: start; min-height: 118px; }
+.htile .kicker { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .3px; }
+.htile b { font-size: 16px; line-height: 1.2; }
+.htile .sub { font-size: 13px; color: var(--muted); text-align: left; align-self: stretch; }
+.htile .tag { margin-top: auto; font-size: 12px; color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); border-radius: 10px; padding: 2px 8px; }
+.htile .tag:empty { display: none; }
+.htile .ring { width: 46px; height: 46px; margin: 2px 0; }
+.hplayer { background: var(--tile); border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 10px; flex: 1; min-height: 0; }
+.hp-top { display: flex; align-items: center; gap: 12px; }
+.hplayer .cover { width: 44px; height: 44px; border-radius: 12px; font-size: 16px; }
+.hp-meta b { display: block; font-size: 15px; }
+.hp-meta > span { font-size: 13px; color: var(--muted); }
+.hp-text { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: 6px; }
+.hp-who { font-size: 14px; font-weight: 700; color: var(--accent-2); }
+.hp-who.anna { color: var(--accent); }
+.hp-de { font-size: 21px; font-weight: 600; line-height: 1.35; letter-spacing: -.2px; }
+.hp-fa { font-size: 16px; color: var(--muted); line-height: 1.8; text-align: left; }
+.hplayer .progress { margin: 0; flex-shrink: 0; }
+.hplayer .times { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-top: -4px; }
+.hp-ctrls { display: flex; justify-content: center; align-items: center; gap: 28px; flex-shrink: 0; }
+.hp-ctrls .icon-btn { width: 44px; height: 44px; color: var(--text); }
+.hp-ctrls .icon-btn svg { width: 24px; height: 24px; }
+.hp-ctrls .play-lg { width: 60px; height: 60px; }
+/* the home screen has its own player: no duplicate in the top bar */
+body[data-screen="home"] .status .mini-player { display: none !important; }
+.clock { visibility: hidden; }
+@media (max-height: 520px) and (orientation: landscape) {
+  #home { display: none; }
+  #home.active { display: grid; grid-template-columns: 1fr 1.2fr; grid-template-rows: auto 1fr; gap: 10px; }
+  .home-head { grid-column: 1; }
+  .home-tiles { grid-column: 1; grid-row: 2; grid-template-columns: 1fr 1fr 1fr; align-self: start; }
+  .htile { min-height: 0; }
+  .hplayer { grid-column: 2; grid-row: 1 / span 2; }
+  .home-greet { font-size: 24px; }
+  .hp-de { font-size: 17px; } .hp-fa { font-size: 14px; }
+}
+.hplayer .cover { width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, #FF6B9A, #8A6CF0); color: #fff; font-weight: 800; font-size: 16px; display: grid; place-items: center; flex: 0 0 44px; }
