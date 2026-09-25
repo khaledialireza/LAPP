@@ -328,6 +328,7 @@
   function micGate(onReady) {
     $("#dlgFoot").innerHTML = `<button class="btn big" id="dlgStart">🎤 Start</button>`;
     $("#dlgStart").onclick = async () => {
+      unlockAudio();
       const r = await ensureMic();
       if (r.ok) { $("#dlgFoot").innerHTML = ""; onReady(); return; }
       $("#dlgFoot").innerHTML = `<p class="fa warn mic-msg">${MIC_MSG[r.why]}</p><button class="btn big" id="dlgStart">🎤 دوباره اجازه بده</button>`;
@@ -452,10 +453,24 @@
   // plays one dialog line from the lesson audio; resolves when it ends
   function playClip(i) {
     const l = lines[i];
-    if (!player.duration || !timed) { speak(l.text); return new Promise(r => setTimeout(r, 400 + l.text.length * 55)); }
+    const viaSpeech = () => { speak(l.text); return new Promise(r => setTimeout(r, 400 + l.text.length * 55)); };
+    if (!player.duration || !timed) return viaSpeech();
     if (clipDone) clipDone();
-    player.currentTime = l.t0; clipStop = l.t1; player.play();
-    return new Promise(r => { clipDone = r; });
+    player.currentTime = l.t0; clipStop = l.t1;
+    return new Promise(resolve => {
+      let finished = false;
+      const done = () => { if (finished) return; finished = true; clearTimeout(guard); clipDone = null; resolve(); };
+      clipDone = done;
+      // never hang: resolve after the clip length even if the browser swallowed events
+      const guard = setTimeout(() => { if (!player.paused) player.pause(); clipStop = null; done(); }, (l.t1 - l.t0) * 1000 + 2500);
+      // if the browser blocks playback (autoplay rules), read the line with speech instead
+      player.play().catch(() => { clipStop = null; viaSpeech().then(done); });
+    });
+  }
+  // unlock audio on a user tap so later clips may play without another tap (Safari)
+  function unlockAudio() {
+    try { const p = player.play(); p && p.then(() => player.pause()).catch(() => {}); } catch {}
+    try { speechSynthesis.speak(new SpeechSynthesisUtterance("")); } catch {}
   }
   player.addEventListener("timeupdate", () => { if (clipStop != null && player.currentTime >= clipStop) { player.pause(); clipStop = null; clipDone?.(); clipDone = null; } });
   player.addEventListener("pause", () => { if (clipStop == null && clipDone) { clipDone(); clipDone = null; } });
