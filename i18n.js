@@ -105,6 +105,8 @@
     tabLesson: { fa: "درس", ru: "Урок", uk: "Урок" },
     tabHome: { fa: "خانه", ru: "Главная", uk: "Головна" },
     tabMe: { fa: "من", ru: "Я", uk: "Я" },
+    lessonMore: { fa: "درس ›", ru: "Урок ›", uk: "Урок ›" },
+    speakHint: { fa: "۳ دقیقه", ru: "3 мин", uk: "3 хв" },
     tabDialog: { fa: "دیالوگ", ru: "Диалог", uk: "Діалог" },
     tabPractice: { fa: "تمرین", ru: "Практика", uk: "Практика" },
     uiLanguage: { fa: "زبان", ru: "Язык", uk: "Мова" }

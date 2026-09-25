@@ -16,7 +16,7 @@
   <meta name="description" content="LAPP — آموزش زبان آلمانی با دیالوگ صوتی، واژگان و تمرین.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=muhg2h1j">
+  <link rel="stylesheet" href="style.css?v=muhh0n3n">
 </head>
 <body data-screen="home">
   <div class="frame">
@@ -25,41 +25,51 @@
     <main>
       <!-- HOME -->
       <section class="screen active" id="home">
-        <div class="home-head">
-          <div class="home-hl">
-            <h1 class="home-greet" id="hGreet">Guten Tag</h1>
-            <div class="home-date" id="homeDate"></div>
-          </div>
-          <div class="stepper lesson-pick">
-            <button class="lp-btn" id="lpBtn" aria-haspopup="listbox" aria-expanded="false"><b class="js-lesson-num">L1</b> <span class="lp-name" id="lpName"></span> <span class="lp-caret">▾</span></button>
+        <div class="home-hero hero5">
+          <div class="h5-chips">
+            <div class="lesson-pick">
+              <button class="lp-btn chip5" id="lpBtn" aria-haspopup="listbox" aria-expanded="false"><b class="js-lesson-num">L1</b> <span class="lp-name" id="lpName"></span> <span class="lp-caret">▾</span></button>
+            </div>
+            <span class="chip5" id="hLevel"></span>
+            <button class="chip5 h5-more" data-go="lesson" data-i18n="lessonMore"></button>
           </div>
           <div class="lp-menu" id="lpMenu" role="listbox" hidden></div>
-        </div>
-        <div class="home-tiles">
-          <button class="htile htile-go" data-go="lesson">
-            <span class="kicker">Lektion</span>
-            <b id="hLessonTitle"></b>
-            <span class="sub fa" id="hLessonFa"></span>
-            <span class="tag" id="hLevel"></span>
-          </button>
-          <div class="htile">
-            <span class="kicker">Fortschritt</span>
-            <svg class="ring" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--tile-2)" stroke-width="4"/><circle id="ring" cx="18" cy="18" r="15.9" fill="none" stroke="var(--accent)" stroke-width="4" stroke-linecap="round" stroke-dasharray="0 100" transform="rotate(-90 18 18)"/></svg>
-            <b id="ringTxt">0%</b>
-            <span class="sub fa" id="ringSub"></span>
+          <div class="h5-lbl"><span class="js-lesson-word">Lektion</span> · Weitermachen</div>
+          <div class="h5-ttl" id="hLessonTitle"></div>
+          <div class="h5-sub fa" id="hLessonFa"></div>
+          <div class="h5-orbrow">
+            <button class="orb" id="hSpeak" aria-label="Jetzt sprechen"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-3.1A7 7 0 0 0 19 11z"/></svg></button>
+            <div class="h5-orbtxt"><b>Jetzt sprechen</b><span>Rollenspiel · <span class="fa" data-i18n="speakHint"></span></span></div>
+            <button class="h5-listen" data-act="toggle">▶ Hören</button>
           </div>
-          <button class="htile" data-go="vocab">
-            <span class="kicker">Wort des Tages</span>
-            <b id="wotdDe"></b>
-            <span class="sub fa" id="wotdFa"></span>
-            <span class="tag fa" id="wotdEn"></span>
+        </div>
+        <div class="home-side">
+          <div class="home-head">
+            <div class="home-hl">
+              <h1 class="home-greet" id="hGreet">Guten Tag</h1>
+              <div class="home-date" id="homeDate"></div>
+            </div>
+            <span class="streak" id="hStreak" title="Streak">🔥 0</span>
+          </div>
+          <div class="rings5">
+            <svg viewBox="0 0 100 100"><g transform="rotate(-90 50 50)" fill="none" stroke-linecap="round" stroke-width="11">
+              <circle cx="50" cy="50" r="42" class="rg-bg rg-s"/><circle cx="50" cy="50" r="42" class="rg rg-s" id="rgSpeak" pathLength="100" stroke-dasharray="0 100"/>
+              <circle cx="50" cy="50" r="29" class="rg-bg rg-l"/><circle cx="50" cy="50" r="29" class="rg rg-l" id="rgListen" pathLength="100" stroke-dasharray="0 100"/>
+              <circle cx="50" cy="50" r="16" class="rg-bg rg-w"/><circle cx="50" cy="50" r="16" class="rg rg-w" id="rgWords" pathLength="100" stroke-dasharray="0 100"/></g></svg>
+            <div class="rings-lg">
+              <div><b class="c-s" id="lgSpeak">0/8</b> <span>Sätze gesprochen</span></div>
+              <div><b class="c-l" id="lgListen">0/15</b> <span>Min gehört</span></div>
+              <div><b class="c-w" id="lgWords">0</b> <span>Wörter</span></div>
+            </div>
+          </div>
+          <button class="word5" data-go="vocab">
+            <span class="kk">Wort des Tages</span>
+            <span class="sp" id="wotdSay" role="button" aria-label="anhören"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 4V5L7 9zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4z"/></svg></span>
+            <span class="wd5" id="wotdDe"></span>
+            <span class="m fa"><span id="wotdFa"></span> · <span id="wotdEn"></span></span>
+            <span class="ex" id="wotdEx"></span>
           </button>
         </div>
-        <button class="hnow" data-go="audio">
-          <div class="hnow-k"><span class="hp-who" id="hWho"></span><span id="hNum"></span></div>
-          <div class="hp-de" id="hNowLine"></div>
-          <div class="hp-fa fa" id="hNowFa"></div>
-        </button>
       </section>
 
       <!-- LESSON -->
@@ -271,16 +281,16 @@
     </div>
   </div>
 
-  <script src="data/lessons.js?v=muhg2h1j"></script>
-  <script src="data/lesson1-fa.js?v=muhg2h1j"></script>
-  <script src="data/lesson1-times.js?v=muhg2h1j"></script>
-  <script src="data/lesson1-words.js?v=muhg2h1j"></script>
-  <script src="data/dict-de.js?v=muhg2h1j"></script>
-  <script src="data/dict-tr.js?v=muhg2h1j"></script>
-  <script src="data/lesson1-ru.js?v=muhg2h1j"></script>
-  <script src="data/lesson1-uk.js?v=muhg2h1j"></script>
-  <script src="i18n.js?v=muhg2h1j"></script>
-  <script src="exercises.js?v=muhg2h1j"></script>
-  <script src="app.js?v=muhg2h1j"></script>
+  <script src="data/lessons.js?v=muhh0n3n"></script>
+  <script src="data/lesson1-fa.js?v=muhh0n3n"></script>
+  <script src="data/lesson1-times.js?v=muhh0n3n"></script>
+  <script src="data/lesson1-words.js?v=muhh0n3n"></script>
+  <script src="data/dict-de.js?v=muhh0n3n"></script>
+  <script src="data/dict-tr.js?v=muhh0n3n"></script>
+  <script src="data/lesson1-ru.js?v=muhh0n3n"></script>
+  <script src="data/lesson1-uk.js?v=muhh0n3n"></script>
+  <script src="i18n.js?v=muhh0n3n"></script>
+  <script src="exercises.js?v=muhh0n3n"></script>
+  <script src="app.js?v=muhh0n3n"></script>
 </body>
 </html>

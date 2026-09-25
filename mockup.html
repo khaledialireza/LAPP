@@ -203,6 +203,113 @@ button { font: inherit; color: inherit; background: none; border: 0; }
 .railp .vmini button { width: 44px; height: 40px; display: grid; place-items: center; }
 .railp .vmini svg { width: 22px; height: 22px; }
 .land .main.one { grid-template-columns: 1fr; }
+
+/* landscape v3 */
+.l3 { position: relative; height: 100%; display: flex; }
+.l3 .content { flex: 1; min-width: 0; padding: 14px 10px 14px 59px; display: grid; gap: 12px; }
+.l3 .rail { width: auto; flex: 0 0 auto; padding: 0 59px 0 6px; }
+.l3 .railp .pillv { padding: 4px; }
+.l3 .rail .tabv { height: 40px; width: 44px; }
+.l3.b .content { grid-template-columns: 250px 1fr; grid-template-rows: auto 1fr; }
+.l3 .hd { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.l3 .hd .g { font-size: 22px; font-weight: 700; line-height: 1.1; } .l3 .hd .d { font-size: 12px; color: var(--label2); }
+.chipL { height: 30px; padding: 0 10px; border-radius: 15px; background: var(--card); font-weight: 700; font-size: 13px; display: inline-flex; align-items: center; gap: 4px; }
+.l3 .glist { background: var(--card); border-radius: 16px; overflow: hidden; align-self: stretch; display: flex; flex-direction: column; }
+.l3 .gr { flex: 1; display: flex; align-items: center; gap: 10px; padding: 0 12px; border-top: .5px solid var(--sep); }
+.l3 .gr:first-child { border-top: 0; }
+.l3 .gr .ic { width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; color: #fff; font-size: 13px; font-weight: 800; flex: 0 0 30px; }
+.l3 .gr .tx { flex: 1; min-width: 0; } .l3 .gr .k { font-size: 11px; color: var(--label2); text-transform: uppercase; font-weight: 600; }
+.l3 .gr .v { font-size: 15px; font-weight: 600; } .l3 .gr .f { font-size: 12px; color: var(--label2); }
+.l3 .gr .chev { color: var(--label3); }
+.l3 .big { grid-column: 2; grid-row: 1 / span 2; background: var(--card); border-radius: 20px; padding: 18px 20px; display: flex; flex-direction: column; }
+.l3 .big .k { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; color: var(--label2); }
+.l3 .big .d { font-size: 22px; font-weight: 600; line-height: 1.35; margin: 12px 0 8px; }
+.l3 .big .f { font-size: 16px; color: var(--label2); line-height: 1.8; }
+.l3 .big .nav2 { margin-top: auto; display: flex; gap: 8px; }
+.l3 .big .nav2 span { flex: 1; height: 40px; border-radius: 12px; background: var(--fill); display: grid; place-items: center; font-size: 20px; color: var(--label2); }
+.l3.a .content { grid-template-rows: auto auto 1fr; }
+.l3.a .row3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.l3.a .mt { background: var(--card); border-radius: 14px; padding: 10px 12px; display: flex; align-items: center; gap: 10px; }
+.l3.a .big { grid-column: auto; grid-row: auto; }
+.l3.a .big .d { font-size: 19px; margin: 8px 0 4px; }
+
+/* landscape v4: home as a dashboard */
+.l4 { position: relative; height: 100%; display: flex; }
+.l4 .content { flex: 1; min-width: 0; padding: 14px 12px 16px 64px; display: flex; flex-direction: column; gap: 10px; }
+.l4 .rail { flex: 0 0 auto; padding: 0 64px 0 4px; display: flex; align-items: center; }
+.l4 .railp { gap: 6px; }
+.l4 .pillv { padding: 3px !important; border-radius: 22px !important; gap: 0 !important; }
+.l4 .tabv { width: 38px !important; height: 36px !important; border-radius: 18px !important; }
+.l4 .tabv svg { width: 19px !important; height: 19px !important; }
+.l4 .tabv .avatar.sm { width: 22px; height: 22px; font-size: 10px; }
+.l4 .rbtn.sm { width: 42px; height: 42px; flex: 0 0 42px; }
+.l4 .rbtn.sm svg.ic { width: 18px; height: 18px; }
+.l4 .hd { display: flex; align-items: baseline; gap: 10px; }
+.l4 .hd .g { font-size: 24px; font-weight: 700; } .l4 .hd .d { font-size: 13px; color: var(--label2); flex: 1; }
+.l4 .grid { flex: 1; min-height: 0; display: grid; gap: 10px; }
+.l4.a .grid { grid-template-columns: 1.35fr 1fr 1fr; }
+.l4.b .grid { grid-template-columns: 1.5fr 1fr; grid-template-rows: 1fr 1fr; }
+.l4.b .hero { grid-row: 1 / span 2; }
+.l4 .cd { background: var(--card); border-radius: 18px; padding: 14px; display: flex; flex-direction: column; gap: 6px; min-height: 0; }
+.l4 .kk { font-size: 11px; font-weight: 600; color: var(--label2); text-transform: uppercase; letter-spacing: .3px; }
+.l4 .hero .top { display: flex; gap: 12px; align-items: center; }
+.l4 .hero .cov { width: 52px; height: 52px; border-radius: 14px; background: linear-gradient(135deg, #FF6B9A, #8A6CF0); color: #fff; font-weight: 800; display: grid; place-items: center; font-size: 18px; }
+.l4 .hero .tt { font-size: 20px; font-weight: 700; } .l4 .hero .ff { font-size: 13px; color: var(--label2); }
+.l4 .hero .bar { height: 5px; border-radius: 3px; background: var(--fill); overflow: hidden; margin-top: 4px; } .l4 .hero .bar i { display: block; width: 30%; height: 100%; background: var(--tint); }
+.l4 .hero .acts { margin-top: auto; display: flex; gap: 8px; }
+.l4 .hero .acts span { flex: 1; height: 42px; border-radius: 12px; display: grid; place-items: center; font-weight: 600; font-size: 15px; }
+.l4 .hero .acts .p { background: var(--tint); color: #fff; } .l4 .hero .acts .s { background: var(--fill); color: var(--tint); }
+.l4 .big { font-size: 30px; font-weight: 700; } .l4 .mut { font-size: 13px; color: var(--label2); }
+.l4 .ringw { display: flex; align-items: center; gap: 12px; } .l4 .ringw svg { width: 56px; height: 56px; }
+.l4 .stat { display: flex; justify-content: space-between; font-size: 13px; border-top: .5px solid var(--sep); padding-top: 6px; }
+.l4 .stat b { font-weight: 600; }
+.l4 .wd { font-size: 24px; font-weight: 700; } .l4 .spk2 { width: 34px; height: 34px; border-radius: 17px; background: var(--fill); display: grid; place-items: center; color: var(--tint); margin-top: auto; }
+.l4 .spk2 svg { width: 16px; height: 16px; }
+
+/* v5: hero stage + activity rings */
+.h5 { position: relative; height: 100%; }
+.hero5 { position: relative; overflow: hidden; border-radius: 26px; color: #fff; padding: 18px; display: flex; flex-direction: column;
+  background: radial-gradient(120% 90% at 0% 0%, #FF5E8A 0%, transparent 55%), radial-gradient(90% 80% at 100% 100%, #6E5BFF 0%, transparent 60%), linear-gradient(135deg, #FF2D55, #7B3FF2); }
+.hero5::after { content: ""; position: absolute; width: 220px; height: 220px; border-radius: 50%; right: -60px; top: -70px; background: rgba(255,255,255,.12); }
+.hero5 .chips { display: flex; gap: 6px; position: relative; z-index: 1; }
+.hero5 .chip5 { height: 26px; padding: 0 10px; border-radius: 13px; background: rgba(255,255,255,.2); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; }
+.hero5 .lbl { font-size: 12px; font-weight: 700; opacity: .8; text-transform: uppercase; letter-spacing: .6px; margin-top: 14px; position: relative; }
+.hero5 .ttl { font-size: 30px; font-weight: 800; line-height: 1.05; letter-spacing: -.5px; position: relative; }
+.hero5 .sub { font-size: 14px; opacity: .85; position: relative; }
+.hero5 .orbrow { margin-top: auto; display: flex; align-items: center; gap: 14px; position: relative; }
+.orb { width: 74px; height: 74px; border-radius: 50%; background: #fff; color: #FF2D55; display: grid; place-items: center; box-shadow: 0 0 0 10px rgba(255,255,255,.18), 0 0 0 22px rgba(255,255,255,.08), 0 12px 30px rgba(0,0,0,.25); flex: 0 0 74px; }
+.orb svg { width: 32px; height: 32px; }
+.hero5 .orbtxt b { display: block; font-size: 18px; white-space: nowrap; } .hero5 .orbtxt { min-width: 0; } .hero5 .orbtxt span { font-size: 13px; opacity: .85; }
+.hero5 .listen { color: #fff; white-space: nowrap; flex: 0 0 auto; margin-inline-start: auto; height: 38px; padding: 0 14px; border-radius: 19px; background: rgba(255,255,255,.22); display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 14px; }
+.rings5 { background: var(--card); border-radius: 22px; padding: 14px 16px; display: flex; align-items: center; gap: 16px; }
+.rings5 svg { width: 92px; height: 92px; flex: 0 0 92px; }
+.rings5 .lg { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+.rings5 .lg div { display: flex; align-items: baseline; gap: 6px; font-size: 13px; color: var(--label2); }
+.rings5 .lg b { font-size: 18px; font-weight: 700; }
+.rings5 .lg .pk { color: #FF2D55; } .rings5 .lg .in { color: #5E5CE6; } .rings5 .lg .gr { color: #30D158; }
+.word5 { border-radius: 22px; padding: 14px 16px; background: var(--card); position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 4px; }
+.word5::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 5px; background: linear-gradient(#FF9F0A, #FF2D55); }
+.word5 .kk { font-size: 11px; font-weight: 700; color: var(--label2); text-transform: uppercase; letter-spacing: .4px; display: flex; justify-content: space-between; }
+.word5 .w { font-size: 26px; font-weight: 800; letter-spacing: -.3px; } .word5 .w small { font-size: 14px; color: #FF9F0A; font-weight: 700; margin-right: 4px; }
+.word5 .m { font-size: 14px; color: var(--label2); } .word5 .ex { font-size: 13px; font-style: italic; color: var(--label2); }
+.word5 .sp { position: absolute; right: 12px; top: 12px; width: 34px; height: 34px; border-radius: 17px; background: var(--fill); color: var(--tint); display: grid; place-items: center; } .word5 .sp svg { width: 16px; height: 16px; }
+.h5 .hd5 { display: flex; align-items: center; justify-content: space-between; }
+.h5 .hd5 .g { font-size: 26px; font-weight: 800; letter-spacing: -.3px; } .h5 .hd5 .d { font-size: 13px; color: var(--label2); }
+.h5 .streak { height: 30px; padding: 0 10px; border-radius: 15px; background: var(--card); font-weight: 700; font-size: 13px; display: inline-flex; align-items: center; gap: 4px; }
+/* landscape */
+.h5.land { display: flex; }
+.h5.land .content { flex: 1; min-width: 0; padding: 14px 12px 16px 64px; display: grid; grid-template-columns: 1.1fr 1fr; gap: 12px; }
+.h5.land .right { display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+.h5.land .word5 { flex: 1; }
+.h5.land .rail { flex: 0 0 auto; padding: 0 64px 0 4px; display: flex; align-items: center; }
+.h5.land .pillv { padding: 3px !important; border-radius: 22px !important; gap: 0 !important; }
+.h5.land .tabv { width: 38px !important; height: 36px !important; border-radius: 18px !important; }
+.h5.land .tabv svg { width: 19px !important; height: 19px !important; }
+.h5.land .tabv .avatar.sm { width: 22px; height: 22px; font-size: 10px; }
+.h5.land .rbtn.sm { width: 42px; height: 42px; flex: 0 0 42px; } .h5.land .rbtn.sm svg.ic { width: 18px; height: 18px; }
+/* portrait */
+.h5.por .scroll { padding-bottom: 120px; display: flex; flex-direction: column; gap: 12px; }
+.h5.por .hero5 { min-height: 300px; }
 </style>
 </head>
 <body>
@@ -274,7 +381,62 @@ const landDock = collapsed => {
       <div class="nowcard" style="grid-row:2;grid-column:2;margin:0"><div class="k"><span style="color:var(--indigo)">Ben</span><span>52 / 173</span></div><div class="d" style="font-size:17px">${lines[51].text}</div><div class="f fa" dir="rtl" style="font-size:14px">${lines[51].fa}</div></div>
     </div><div class="rail">${rail}</div></div>`;
 };
+
+const rings3 = `<svg viewBox="0 0 100 100"><g transform="rotate(-90 50 50)" fill="none" stroke-linecap="round" stroke-width="11">
+  <circle cx="50" cy="50" r="42" stroke="rgba(255,45,85,.18)"/><circle cx="50" cy="50" r="42" stroke="#FF2D55" stroke-dasharray="${2*Math.PI*42*.62} 999"/>
+  <circle cx="50" cy="50" r="29" stroke="rgba(94,92,230,.18)"/><circle cx="50" cy="50" r="29" stroke="#5E5CE6" stroke-dasharray="${2*Math.PI*29*.8} 999"/>
+  <circle cx="50" cy="50" r="16" stroke="rgba(48,209,88,.18)"/><circle cx="50" cy="50" r="16" stroke="#30D158" stroke-dasharray="${2*Math.PI*16*.35} 999"/></g></svg>`;
+const MIC = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-3.1A7 7 0 0 0 19 11z"/></svg>';
+const h5 = mode => {
+  const hero = `<div class="hero5"><div class="chips"><span class="chip5">L1 ${I.down}</span><span class="chip5">A1</span></div>
+    <div class="lbl">Lektion 1 · Weitermachen</div><div class="ttl">Sich<br>vorstellen</div><div class="sub fa">معرفی خود — امروز ۵ جمله را بلند بگو</div>
+    <div class="orbrow"><div class="orb">${MIC}</div><div class="orbtxt"><b>Jetzt sprechen</b><span>Rollenspiel · 3 Min</span></div><span class="listen">▶ Hören</span></div></div>`;
+  const rings = `<div class="rings5">${rings3}<div class="lg"><div><b class="pk">5/8</b> Sätze gesprochen</div><div><b class="in">12/15</b> Min gehört</div><div><b class="gr">38</b> Wörter</div></div></div>`;
+  const word = `<div class="word5"><div class="kk"><span>Wort des Tages</span></div><span class="sp">${I.speaker}</span><div class="w"><small>das</small>Vorbild</div><div class="m fa">الگو · اسم خنثی</div><div class="ex">„Sie ist mein Vorbild.“</div></div>`;
+  const hd = `<div class="hd5"><div><div class="g">Guten Abend</div><div class="d">Freitag, 25. September</div></div><span class="streak">🔥 3</span></div>`;
+  if (mode === "land") {
+    const tabsV = TABS().map(([k, ic]) => `<div class="tabv ${k === "home" ? "on" : ""}">${ic}</div>`).join("");
+    const rail = `<div class="rail"><div class="railp"><div class="pillv glass">${tabsV}</div><div class="rbtn glass sm">${ringSvg()}<svg class="ic" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div></div></div>`;
+    return `<div class="h5 land"><div class="content">${hero}<div class="right">${hd}${rings}${word}</div></div>${rail}</div>`;
+  }
+  return `<div class="h5 por">${sb}<div class="scroll" style="padding-top:8px">${hd}${hero}${rings}${word}</div><div class="chrome"><div class="dk">${tabs("home")}${playRound()}</div></div></div>`;
+};
 const screens = {
+  home5: () => h5("por"),
+  land5: () => h5("land"),
+  land4: () => {
+    const v = q.get("v") || "a";
+    const tabsV = TABS().map(([k, ic]) => `<div class="tabv ${k === "home" ? "on" : ""}">${ic}</div>`).join("");
+    const rail = `<div class="rail"><div class="railp"><div class="pillv glass">${tabsV}</div><div class="rbtn glass sm">${ringSvg()}<svg class="ic" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div></div></div>`;
+    const ring = `<svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--fill)" stroke-width="4"/><circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--green)" stroke-width="4" stroke-linecap="round" stroke-dasharray="12 100" transform="rotate(-90 18 18)"/></svg>`;
+    const hero = `<div class="cd hero"><div class="kk">Weitermachen</div><div class="top"><div class="cov">L1</div><div><div class="tt">Sich vorstellen</div><div class="ff fa">معرفی خود · A1</div></div></div>
+      <div class="bar"><i></i></div><div class="mut">Dialog 52 / 173 · 18 Min</div>
+      <div class="acts"><span class="p">🎤 Sprechen</span><span class="s">▶ Hören</span></div></div>`;
+    const prog = `<div class="cd"><div class="kk">Fortschritt</div><div class="ringw">${ring}<div class="big">12%</div></div>
+      <div class="stat"><span class="fa">واژه</span><b>38 / 313</b></div><div class="stat"><span class="fa">تمرین</span><b>5 / 100</b></div></div>`;
+    const word = `<div class="cd"><div class="kk">Wort des Tages</div><div class="wd">das Vorbild</div><div class="mut fa">الگو · اسم خنثی</div><div class="mut" style="font-style:italic">„Sie ist mein Vorbild.“</div><div class="spk2">${I.speaker}</div></div>`;
+    return `<div class="l4 ${v}"><div class="content"><div class="hd"><span class="g">Guten Abend</span><span class="d">Freitag, 25. September</span><span class="chipL">L1 ${I.down}</span></div>
+      <div class="grid">${hero}${prog}${word}</div></div>${rail}</div>`;
+  },
+  land3: () => {
+    const v = q.get("v") || "b";
+    const tabsV = TABS().map(([k, ic]) => `<div class="tabv ${k === "home" ? "on" : ""}">${ic}</div>`).join("");
+    const rail = `<div class="rail"><div class="railp"><div class="pillv glass">${tabsV}</div><div class="rbtn glass" style="width:48px;height:48px">${ringSvg()}<svg class="ic" viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px"><path d="M8 5v14l11-7z"/></svg></div></div></div>`;
+    const hd = `<div class="hd"><div><div class="g">Guten Abend</div><div class="d">Freitag, 25. September</div></div><span class="chipL">L1 ${I.down}</span></div>`;
+    const big = `<div class="big"><div class="k"><span style="color:var(--indigo)">BEN</span><span>52 / 173</span></div><div class="d">${lines[51].text}</div><div class="f fa" dir="rtl">${lines[51].fa}</div><div class="nav2"><span>‹</span><span>›</span></div></div>`;
+    if (v === "b") return `<div class="l3 b"><div class="content">${hd}
+      <div class="glist">
+        <div class="gr"><span class="ic" style="background:var(--blue)">L1</span><div class="tx"><div class="k">Lektion</div><div class="v">Sich vorstellen</div><div class="f fa">معرفی خود · A1</div></div><span class="chev">›</span></div>
+        <div class="gr"><span class="ic" style="background:var(--green)">%</span><div class="tx"><div class="k">Fortschritt</div><div class="v">12%</div><div class="f fa">۵ از ۱۰۰ تمرین</div></div></div>
+        <div class="gr"><span class="ic" style="background:var(--orange)">W</span><div class="tx"><div class="k">Wort des Tages</div><div class="v">das Vorbild</div><div class="f fa">الگو</div></div></div>
+      </div>${big}</div>${rail}</div>`;
+    return `<div class="l3 a"><div class="content">${hd}
+      <div class="row3">
+        <div class="mt"><span class="chipL" style="background:var(--blue);color:#fff">L1</span><div><div style="font-weight:600;font-size:14px">Sich vorstellen</div><div class="fa" style="font-size:11px;color:var(--label2)">معرفی خود</div></div></div>
+        <div class="mt"><span class="chipL" style="background:var(--green);color:#fff">12%</span><div class="fa" style="font-size:12px;color:var(--label2)">۵ از ۱۰۰ تمرین</div></div>
+        <div class="mt"><span class="chipL" style="background:var(--orange);color:#fff">W</span><div><div style="font-weight:600;font-size:14px">das Vorbild</div><div class="fa" style="font-size:11px;color:var(--label2)">الگو</div></div></div>
+      </div>${big}</div>${rail}</div>`;
+  },
   dockA: () => dockHome(false),
   dockB: () => dockHome(true),
   landA: () => landDock(false),

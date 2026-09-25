@@ -161,11 +161,6 @@
     $("#lcSay").dataset.say = l ? l.text : "";
     $("#mDe").innerHTML = l ? wordHtml(l.text) : "";
     $("#mFa").textContent = l ? l.fa : "";
-    $("#hWho").textContent = l ? l.who : "";
-    $("#hWho").className = "hp-who " + (l ? l.who.toLowerCase() : "");
-    $("#hNum").textContent = l ? `${i + 1} / ${lines.length}` : "";
-    $("#hNowLine").textContent = l ? l.text : "";
-    $("#hNowFa").textContent = l ? l.fa : "";
     $("#dpLine").textContent = l ? l.text : "";
     $("#dpWho").textContent = l ? l.who : "";
   }
@@ -286,14 +281,36 @@
     if (!vocabList.length) return;
     const v = vocabList[new Date().getDate() * 7 % vocabList.length];
     $("#wotdDe").textContent = v.de; $("#wotdFa").textContent = v.fa; $("#wotdEn").textContent = I18N.pos(v.p);
+    // an example sentence from the lesson that uses the word
+    const re = new RegExp(`(^|[^\\wäöüß])${v.de.replace(/^(der|die|das)\s+/i, "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}([^\\wäöüß]|$)`, "i");
+    const hit = lines.map(l => (l.text.match(/[^.!?]+[.!?]*/g) || []).find(x => re.test(x))).find(Boolean);
+    $("#wotdEx").textContent = hit ? `„${hit.trim()}“` : "";
+    $("#wotdSay").dataset.word = v.de;
+  }
+  /* ---------- Daily activity: rings + streak ---------- */
+  const GOAL = { speak: 8, listen: 15 };
+  const dayKey = (d = new Date()) => d.toISOString().slice(0, 10);
+  const daily = () => store.get("daily", {});
+  function logDay(field, n) {
+    const all = daily(), k = dayKey(), d = all[k] || { s: 0, l: 0 };
+    d[field] = (d[field] || 0) + n; all[k] = d; store.set("daily", all);
+    renderProgress();
+  }
+  function streak() {
+    const all = daily(), active = k => all[k] && (all[k].s > 0 || all[k].l >= 60 || all[k].x > 0);
+    const d = new Date(); if (!active(dayKey(d))) d.setDate(d.getDate() - 1);
+    let n = 0; while (active(dayKey(d))) { n++; d.setDate(d.getDate() - 1); }
+    return n;
   }
   function renderProgress() {
-    const k = vocabList.filter(v => state.known.has(v.key)).length;
-    const res = exResults(), ok = Object.values(res).filter(Boolean).length, n = ex.list.length || 1;
-    const pct = Math.round((k / (vocabList.length || 1) * 0.4 + ok / n * 0.6) * 100);
-    $("#ring").setAttribute("stroke-dasharray", `${pct} 100`);
-    $("#ringTxt").textContent = pct + "%";
-    $("#ringSub").textContent = `${k}/${vocabList.length} ${t("words")} · ${t("exercisesShort")} ${ok}/${ex.list.length}`;
+    const today = daily()[dayKey()] || { s: 0, l: 0 };
+    const mins = Math.floor((today.l || 0) / 60), k = vocabList.filter(v => state.known.has(v.key)).length;
+    const ring = (id, f) => $(id).setAttribute("stroke-dasharray", `${Math.min(100, Math.round(f * 100))} 100`);
+    ring("#rgSpeak", (today.s || 0) / GOAL.speak); ring("#rgListen", mins / GOAL.listen); ring("#rgWords", k / (vocabList.length || 1));
+    $("#lgSpeak").textContent = `${today.s || 0}/${GOAL.speak}`;
+    $("#lgListen").textContent = `${mins}/${GOAL.listen}`;
+    $("#lgWords").textContent = `${k}/${vocabList.length}`;
+    $("#hStreak").textContent = `🔥 ${streak()}`;
   }
 
   /* ---------- Vocab scope ---------- */
@@ -365,7 +382,9 @@
     }
     const toks = target.split(/\s+/); let wi = 0;
     const html = toks.map(t => { const has = nw(t).length; if (!has) return esc(t); const ok = best.hit[wi++]; return `<span class="${ok ? "w-ok" : "w-miss"}">${esc(t)}</span>`; }).join(" ");
-    return { ...best, ok: best.pct >= 0.7 && best.reqOk, html };
+    const ok = best.pct >= 0.7 && best.reqOk;
+    if (ok) logDay("s", 1);
+    return { ...best, ok, html };
   }
 
   /* ---------- Flashcards (in practice): DE→FA choose · FA→DE speak ---------- */
@@ -435,7 +454,7 @@
     $("#fcInfo").innerHTML = `<div class="fc-pair"><b dir="ltr">${esc(v.de)}</b> = ${esc(v.fa)}</div>${v.g ? `<div class="fc-g">${esc(v.g)}</div>` : ""}`;
     $("#fcInfo").hidden = false; $("#fcNext").hidden = false; $("#fcVoice").hidden = true;
     renderFcStats();
-    if (fc.dir === "fa") speak(v.de);
+    if (fc.dir === "fa") { speak(v.de); if (ok) logDay("s", 1); }
     if (exam.active) examRecord(ok);
     else if (ok) fc.timer = setTimeout(nextCard, 1600);
   }
@@ -962,6 +981,18 @@
   /* ---------- Lesson audio playing (not practice clips) ---------- */
   const markPlaying = () => document.body.classList.toggle("playing", !player.paused && clipStop == null);
   ["play", "pause", "ended"].forEach(ev => player.addEventListener(ev, markPlaying));
+
+  /* ---------- Listening time (lesson audio and dialog clips) ---------- */
+  let lastT = null, heard = 0;
+  player.addEventListener("timeupdate", () => {
+    const d = lastT == null ? 0 : player.currentTime - lastT; lastT = player.currentTime;
+    if (!player.paused && d > 0 && d < 2) { heard += d; if (heard >= 10) { logDay("l", Math.round(heard)); heard = 0; } }
+  });
+  player.addEventListener("pause", () => { lastT = null; if (heard >= 1) { logDay("l", Math.round(heard)); heard = 0; } });
+
+  /* ---------- Home: speak now, word of the day ---------- */
+  $("#hSpeak").addEventListener("click", () => { go("practice"); $('#pHub [data-open="role"]')?.click(); });
+  $("#wotdSay").addEventListener("click", e => { e.stopPropagation(); speak(e.currentTarget.dataset.word || ""); });
 
   /* ---------- Dock: the one player. While the lesson plays it fills the dock and the
      tabs fold into a round button; tapping that button brings the tabs back. ---------- */
