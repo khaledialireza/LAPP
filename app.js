@@ -284,10 +284,13 @@
 
   /* ---------- Speech: recognition + scoring ---------- */
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let activeRec = null;
+  const stopListening = () => { try { activeRec?.abort(); } catch {} activeRec = null; };
   function listen() {
     return new Promise((resolve, reject) => {
       if (!SR) return reject(new Error("no-sr"));
       const r = new SR(); r.lang = "de-DE"; r.interimResults = false; r.maxAlternatives = 4;
+      activeRec = r;
       let done = false;
       r.onresult = ev => { done = true; resolve([...ev.results[0]].map(a => a.transcript)); };
       r.onerror = ev => { if (!done) { done = true; reject(ev.error || "error"); } };
@@ -367,6 +370,7 @@
     $("#fcCard").className = "fc-card";
     renderFcStats();
     if (fc.dir === "de") speak(v.de);
+    if (voice) fc.timer = setTimeout(() => { if (fc.cur === v && !$("#fcVoice").hidden) $("#fcMic").click(); }, 700);
   }
   function fcAnswer(ok) {
     const v = fc.cur;
@@ -572,7 +576,7 @@
     $("#pTitle").innerHTML = title; $("#pProg").textContent = "";
   }
   function closeView() {
-    exam.active = false; dlg.run++;
+    exam.active = false; dlg.run++; stopListening();
     if (!player.paused) player.pause();
     $("#pView").hidden = true; $("#pView").classList.remove("exam"); $("#pHub").hidden = false; renderHub();
   }
@@ -615,76 +619,91 @@
     return pick;
   }
   function startDialog(mode) {
-    dlg.run++; dlg.mode = mode; dlg.i = 0;
+    stopListening(); dlg.run++; dlg.mode = mode; dlg.i = 0;
     let idx;
-    if (mode === "role") { idx = pickBlock(10, 22); dlg.role = Math.random() < 0.5 ? "Anna" : "Ben"; }
+    if (mode === "role") idx = pickBlock(10, 22);
     else if (mode === "gap") idx = pickBlock(5, 20);
     else idx = shuffleArr(lines.map((l, i) => i).filter(i => wcount(lines[i].text) >= 3 && wcount(lines[i].text) <= 18 && window.Practice.isGerman(lines[i].text))).slice(0, 5).sort((a, b) => a - b);
-    dlg.items = idx.map(i => ({ line: i, mine: mode !== "role" || lines[i].who === dlg.role, blanks: mode === "gap" ? blanksFor(lines[i].text) : [], score: null }));
+    // role play: every line is randomly yours or your partner's (at least 4 are yours)
+    let mine = idx.map(() => mode !== "role" || Math.random() < 0.5);
+    if (mode === "role") while (mine.filter(Boolean).length < 4) mine[Math.floor(Math.random() * mine.length)] = true;
+    dlg.items = idx.map((i, k) => ({ line: i, mine: mine[k], blanks: mode === "gap" ? blanksFor(lines[i].text) : [], score: null, tries: 0, state: "" }));
     const [de, fa] = DLG[mode];
     showPanel("pDlg", `${de} <span class="fa">· ${fa}</span>`);
     $("#dlgIntro").innerHTML = mode === "role"
-      ? `تو نقش <b>${dlg.role}</b> هستی. جملهٔ طرف مقابل پخش می‌شود؛ بعد جملهٔ خودت را با 🎤 بلند بگو.`
-      : mode === "gap" ? "هر خط را کامل و بلند بخوان و جای خالی‌ها را هم بگو."
-      : "هر خط را با صدای بلند بخوان.";
-    if (!SR) $("#dlgIntro").innerHTML += `<br><span class="warn">این مرورگر تشخیص گفتار ندارد؛ بعد از گفتن، «✓ گفتم» را بزن. (Chrome یا Safari)</span>`;
+      ? "نقش‌ها تصادفی‌اند. وقتی نوبت توست میکروفون خودش روشن می‌شود؛ جمله را بلند بگو تا درست شود."
+      : mode === "gap" ? "میکروفون خودش روشن می‌شود. کل خط را همراه کلمه‌های خالی بلند بگو."
+      : "میکروفون خودش روشن می‌شود. هر خط را بلند بخوان تا درست شود.";
+    if (!SR) $("#dlgIntro").innerHTML += `<br><span class="warn">این مرورگر تشخیص گفتار ندارد؛ برای این تمرین Chrome یا Safari لازم است.</span>`;
     renderDlg();
     $("#dlgFoot").innerHTML = `<button class="btn big" id="dlgStart">▶ Start</button>`;
     $("#dlgStart").onclick = () => { $("#dlgFoot").innerHTML = ""; runDlg(); };
   }
   function lineHtml(it) {
     const l = lines[it.line];
-    if (!it.blanks.length || it.score) return esc(l.text);
+    if (!it.blanks.length || (it.score && it.score.ok)) return esc(l.text);
     return l.text.split(/(\s+)/).map(tok => {
       const w = cleanWord(tok);
       return w && it.blanks.includes(w) ? esc(tok.replace(w, "_".repeat(Math.max(4, w.length)))) : esc(tok);
     }).join("");
   }
+  const STATE_TXT = { listen: "🎤 گوش می‌دهم… بگو", model: "🔊 گوش کن و بعد تکرار کن", retry: "دوباره بگو", them: "🔊" };
+  // only the previous line and the current one are visible; the next line stays hidden
   function renderDlg() {
     const cur = dlg.i;
     $("#dlgList").innerHTML = dlg.items.map((it, k) => {
-      const l = lines[it.line];
-      const st = k < cur ? "done" : k === cur ? "cur" : "todo";
-      const sc = it.score;
+      if (k < cur - 1 || k > cur) return "";
+      const l = lines[it.line], sc = it.score, st = k < cur ? "done" : "cur";
+      const showScore = sc && sc.html && (k < cur || it.state !== "listen");
       return `<div class="dl ${it.mine ? "mine" : "them"} ${st}" data-k="${k}">
-        <div class="dl-who">${esc(l.who)}${it.mine && dlg.mode === "role" ? ` <span class="fa">(تو)</span>` : ""}</div>
-        <div class="dl-text">${sc && sc.html ? sc.html : lineHtml(it)}</div>
-        ${sc ? `<div class="dl-res ${sc.ok ? "ok" : "bad"}">${sc.self ? "✓" : `${Math.round(sc.pct * 100)}%`} ${sc.said ? `<span class="said">«${esc(sc.said)}»</span>` : ""}</div>` : ""}
-        ${k === cur && it.mine ? `<div class="dl-act">
-            ${SR ? `<button class="mic small" data-mic="${k}">🎤</button>` : `<button class="btn" data-self="${k}">✓ <span class="fa">گفتم</span></button>`}
-            ${sc && !sc.ok ? `<button class="chip-btn" data-next="${k}">Weiter ›</button>` : ""}
-            <button class="chip-btn" data-hear="${k}">🔊</button></div>` : ""}
-        ${k < cur || (k === cur && sc) ? `<div class="fa dl-fa">${esc(l.fa || "")}</div>` : ""}
+        <div class="dl-who">${esc(l.who)}${it.mine ? ` <span class="fa">(تو)</span>` : ""}</div>
+        <div class="dl-text">${showScore ? (it.blanks.length && !sc.ok ? lineHtml(it) : sc.html) : lineHtml(it)}</div>
+        ${sc && (k < cur || it.state !== "listen") ? `<div class="dl-res ${sc.ok ? "ok" : "bad"}">${sc.self ? "✓" : `${Math.round(sc.pct * 100)}%`} ${sc.said ? `<span class="said">«${esc(sc.said)}»</span>` : ""}</div>` : ""}
+        ${k === cur && it.state ? `<div class="dl-state ${it.state}">${it.state === "listen" ? `<span class="mic-live"></span>` : ""}<span class="fa">${STATE_TXT[it.state] || ""}</span>${it.tries ? ` <span class="tries">${it.tries}×</span>` : ""}</div>` : ""}
+        ${k === cur && it.mine && !SR ? `<div class="dl-act"><button class="btn" data-self="${k}">✓ <span class="fa">گفتم</span></button></div>` : ""}
+        ${k < cur ? `<div class="fa dl-fa">${esc(l.fa || "")}</div>` : ""}
       </div>`;
     }).join("");
     $("#pProg").textContent = `${Math.min(cur + 1, dlg.items.length)} / ${dlg.items.length}`;
-    $(`#dlgList .dl[data-k="${cur}"]`)?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  async function speakTurn(it, run) {
+    const MAX = 5;
+    while (run === dlg.run) {
+      if (it.tries >= 2 && it.tries % 2 === 0) { it.state = "model"; renderDlg(); await playClip(it.line); if (run !== dlg.run) return; await wait(300); }
+      it.state = "listen"; renderDlg();
+      let alts;
+      try { alts = await listen(); }
+      catch (err) {
+        if (run !== dlg.run) return;
+        if (err === "not-allowed" || err === "service-not-allowed") { it.state = ""; renderDlg(); $("#dlgFoot").innerHTML = `<p class="fa warn">اجازهٔ میکروفون داده نشده. از تنظیمات مرورگر اجازه بده و دوباره Start بزن.</p><button class="btn big" id="dlgStart">▶ Start</button>`; $("#dlgStart").onclick = () => { $("#dlgFoot").innerHTML = ""; runDlg(); }; return "stop"; }
+        await wait(250); continue; // silence: keep listening
+      }
+      if (run !== dlg.run) return;
+      it.tries++;
+      it.score = scoreSpeech(lines[it.line].text, alts, it.blanks);
+      it.state = it.score.ok ? "" : "retry"; renderDlg();
+      if (it.score.ok) { await wait(1100); return; }
+      if (it.tries >= MAX) { await playClip(it.line); await wait(400); return; }
+      await wait(1300);
+    }
   }
   async function runDlg() {
     const run = dlg.run;
     while (dlg.i < dlg.items.length && run === dlg.run) {
       const it = dlg.items[dlg.i];
-      renderDlg();
-      if (!it.mine) { await playClip(it.line); if (run !== dlg.run) return; dlg.i++; continue; }
-      return; // wait for the learner (mic / buttons)
+      if (!it.mine) { it.state = "them"; renderDlg(); await playClip(it.line); if (run !== dlg.run) return; it.state = ""; await wait(250); dlg.i++; continue; }
+      if (!SR) { renderDlg(); return; } // no speech recognition: wait for the ✓ button
+      const r = await speakTurn(it, run);
+      if (r === "stop" || run !== dlg.run) return;
+      dlg.i++;
     }
     if (run === dlg.run && dlg.i >= dlg.items.length) finishDlg();
   }
-  $("#dlgList").addEventListener("click", async e => {
-    const mic = e.target.closest("[data-mic]"), self = e.target.closest("[data-self]"), nx = e.target.closest("[data-next]"), hear = e.target.closest("[data-hear]");
+  $("#dlgList").addEventListener("click", e => {
+    const self = e.target.closest("[data-self]"); if (!self) return;
     const it = dlg.items[dlg.i]; if (!it) return;
-    if (hear) return playClip(it.line);
-    if (nx) { dlg.i++; return runDlg(); }
-    if (self) { it.score = { ok: true, pct: 1, self: true }; dlg.i++; return runDlg(); }
-    if (mic) {
-      mic.classList.add("rec");
-      try {
-        const alts = await listen();
-        it.score = scoreSpeech(lines[it.line].text, alts, it.blanks);
-        if (it.score.ok) { renderDlg(); setTimeout(() => { if (dlg.items[dlg.i] === it) { dlg.i++; runDlg(); } }, 1400); }
-        else renderDlg();
-      } catch (err) { mic.classList.remove("rec"); toast("چیزی نشنیدم؛ دوباره 🎤 را بزن"); }
-    }
+    it.score = { ok: true, pct: 1, self: true }; dlg.i++; runDlg();
   });
   function finishDlg() {
     const mine = dlg.items.filter(x => x.mine && x.score);

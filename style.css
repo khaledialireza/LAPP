@@ -680,3 +680,9 @@ mark { background: rgba(240,138,168,.3); color: var(--text); border-radius: 4px;
   #home .continue { grid-template-columns: auto 1fr 1fr auto; grid-template-rows: auto minmax(0, 1fr) auto auto;
     grid-template-areas: "cover title title play" "de de fa fa" "prog prog prog prog" "times times times times"; }
 }
+.dl-state { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+.dl-state.listen { color: var(--accent); }
+.dl-state.retry { color: var(--bad); }
+.dl-state .tries { color: var(--muted); font-size: 11px; }
+.mic-live { width: 12px; height: 12px; border-radius: 50%; background: var(--accent); animation: pulse 1s infinite; }
+.warn { color: var(--bad); }
