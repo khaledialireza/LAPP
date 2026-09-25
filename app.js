@@ -1,4 +1,10 @@
 (() => {
+  if (location.protocol === "http:" && /(^|\.)khaledi\.eu$/.test(location.hostname)) {
+    fetch("https://" + location.host + "/CNAME", { mode: "no-cors", cache: "no-store" })
+      .then(() => location.replace("https://" + location.host + location.pathname + location.search + location.hash))
+      .catch(() => {});
+  }
+
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const LESSONS = window.LESSONS || [];
@@ -297,6 +303,31 @@
       r.onend = () => { if (!done) { done = true; reject("no-speech"); } };
       r.start();
     });
+  }
+  // asks the browser for the microphone; shows why it failed so the learner can fix it
+  async function ensureMic() {
+    if (!window.isSecureContext) return { ok: false, why: "insecure" };
+    if (!SR) return { ok: false, why: "no-sr" };
+    if (navigator.mediaDevices?.getUserMedia) {
+      try { const st = await navigator.mediaDevices.getUserMedia({ audio: true }); st.getTracks().forEach(t => t.stop()); }
+      catch (e) { return { ok: false, why: e && e.name === "NotFoundError" ? "no-mic" : "denied" }; }
+    }
+    return { ok: true };
+  }
+  const MIC_MSG = {
+    insecure: `میکروفون فقط روی نسخهٔ امن سایت کار می‌کند. <a href="https://${location.host}${location.pathname}">نسخهٔ https را باز کن</a>.`,
+    "no-sr": "این مرورگر تشخیص گفتار ندارد. در آیفون Safari (با Siri روشن) و در اندروید Chrome را باز کن.",
+    denied: "اجازهٔ میکروفون داده نشد. دوباره بزن و «Allow / اجازه» را انتخاب کن. اگر پنجره نیامد: تنظیمات Safari ← Microphone ← Allow.",
+    "no-mic": "میکروفونی پیدا نشد."
+  };
+  function micGate(onReady) {
+    $("#dlgFoot").innerHTML = `<button class="btn big" id="dlgStart">🎤 Start</button>`;
+    $("#dlgStart").onclick = async () => {
+      const r = await ensureMic();
+      if (r.ok) { $("#dlgFoot").innerHTML = ""; onReady(); return; }
+      $("#dlgFoot").innerHTML = `<p class="fa warn mic-msg">${MIC_MSG[r.why]}</p><button class="btn big" id="dlgStart">🎤 دوباره اجازه بده</button>`;
+      $("#dlgStart").onclick = () => micGate(onReady) || $("#dlgStart").click();
+    };
   }
   const nw = s => window.Practice.words(window.Practice.norm(s));
   // how much of `target` was said; `required` words must all be present
@@ -634,10 +665,8 @@
       ? "نقش‌ها تصادفی‌اند. وقتی نوبت توست میکروفون خودش روشن می‌شود؛ جمله را بلند بگو تا درست شود."
       : mode === "gap" ? "میکروفون خودش روشن می‌شود. کل خط را همراه کلمه‌های خالی بلند بگو."
       : "میکروفون خودش روشن می‌شود. هر خط را بلند بخوان تا درست شود.";
-    if (!SR) $("#dlgIntro").innerHTML += `<br><span class="warn">این مرورگر تشخیص گفتار ندارد؛ برای این تمرین Chrome یا Safari لازم است.</span>`;
     renderDlg();
-    $("#dlgFoot").innerHTML = `<button class="btn big" id="dlgStart">▶ Start</button>`;
-    $("#dlgStart").onclick = () => { $("#dlgFoot").innerHTML = ""; runDlg(); };
+    micGate(runDlg);
   }
   function lineHtml(it) {
     const l = lines[it.line];
@@ -676,7 +705,7 @@
       try { alts = await listen(); }
       catch (err) {
         if (run !== dlg.run) return;
-        if (err === "not-allowed" || err === "service-not-allowed") { it.state = ""; renderDlg(); $("#dlgFoot").innerHTML = `<p class="fa warn">اجازهٔ میکروفون داده نشده. از تنظیمات مرورگر اجازه بده و دوباره Start بزن.</p><button class="btn big" id="dlgStart">▶ Start</button>`; $("#dlgStart").onclick = () => { $("#dlgFoot").innerHTML = ""; runDlg(); }; return "stop"; }
+        if (err === "not-allowed" || err === "service-not-allowed") { it.state = ""; renderDlg(); micGate(runDlg); $("#dlgFoot").insertAdjacentHTML("afterbegin", `<p class="fa warn mic-msg">${MIC_MSG.denied}</p>`); return "stop"; }
         await wait(250); continue; // silence: keep listening
       }
       if (run !== dlg.run) return;
@@ -693,7 +722,7 @@
     while (dlg.i < dlg.items.length && run === dlg.run) {
       const it = dlg.items[dlg.i];
       if (!it.mine) { it.state = "them"; renderDlg(); await playClip(it.line); if (run !== dlg.run) return; it.state = ""; await wait(250); dlg.i++; continue; }
-      if (!SR) { renderDlg(); return; } // no speech recognition: wait for the ✓ button
+      if (!SR) { renderDlg(); micGate(runDlg); return; }
       const r = await speakTurn(it, run);
       if (r === "stop" || run !== dlg.run) return;
       dlg.i++;
