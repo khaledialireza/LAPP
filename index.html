@@ -7,7 +7,7 @@
   <meta name="description" content="LAPP — آموزش زبان آلمانی با دیالوگ صوتی، واژگان و تمرین.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=muh0dhs4">
+  <link rel="stylesheet" href="style.css?v=muh0qwvw">
 </head>
 <body>
   <div class="frame">
@@ -23,7 +23,10 @@
         <button class="avatar-btn" data-profile aria-label="Profile"><span class="js-avatar">?</span></button></div>
         <div class="mini-player">
           <span class="title" id="sbTitle">Lektion 1</span>
+          <button class="icon-btn mp-extra" data-act="prev" aria-label="zurück"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
           <button class="icon-btn" data-act="toggle" aria-label="play"><svg class="ico-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l12-7z"/></svg></button>
+          <button class="icon-btn mp-extra" data-act="next" aria-label="weiter"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg></button>
+          <div class="mp-extra mp-prog"><div class="progress" data-seek><i class="bar"></i></div><span class="tCur">0:00</span></div>
         </div>
       </div>
     </header>
@@ -241,6 +244,7 @@
 
     <!-- Bottom dock -->
     <footer class="dock">
+      <div class="dock-side"></div>
       <nav class="nav">
         <button data-go="vocab" aria-label="Vokabeln"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 20 12 4l7 16M8 14h8"/></svg></button>
         <button data-go="lesson" aria-label="Lektion"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M8 7h7"/></svg></button>
@@ -248,6 +252,7 @@
         <button data-go="audio" aria-label="Audio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg></button>
         <button data-go="practice" aria-label="Üben"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></button>
       </nav>
+      <div class="dock-side dock-acct" id="dockAcct"></div>
     </footer>
   </div>
 
@@ -282,16 +287,16 @@
     </div>
   </div>
 
-  <script src="data/lessons.js?v=muh0dhs4"></script>
-  <script src="data/lesson1-fa.js?v=muh0dhs4"></script>
-  <script src="data/lesson1-times.js?v=muh0dhs4"></script>
-  <script src="data/lesson1-words.js?v=muh0dhs4"></script>
-  <script src="data/dict-de.js?v=muh0dhs4"></script>
-  <script src="data/dict-tr.js?v=muh0dhs4"></script>
-  <script src="data/lesson1-ru.js?v=muh0dhs4"></script>
-  <script src="data/lesson1-uk.js?v=muh0dhs4"></script>
-  <script src="i18n.js?v=muh0dhs4"></script>
-  <script src="exercises.js?v=muh0dhs4"></script>
-  <script src="app.js?v=muh0dhs4"></script>
+  <script src="data/lessons.js?v=muh0qwvw"></script>
+  <script src="data/lesson1-fa.js?v=muh0qwvw"></script>
+  <script src="data/lesson1-times.js?v=muh0qwvw"></script>
+  <script src="data/lesson1-words.js?v=muh0qwvw"></script>
+  <script src="data/dict-de.js?v=muh0qwvw"></script>
+  <script src="data/dict-tr.js?v=muh0qwvw"></script>
+  <script src="data/lesson1-ru.js?v=muh0qwvw"></script>
+  <script src="data/lesson1-uk.js?v=muh0qwvw"></script>
+  <script src="i18n.js?v=muh0qwvw"></script>
+  <script src="exercises.js?v=muh0qwvw"></script>
+  <script src="app.js?v=muh0qwvw"></script>
 </body>
 </html>

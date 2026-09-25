@@ -751,3 +751,29 @@ body[data-screen="audio"] .status .mini-player { display: none; }
 @media (max-width: 900px) {
   .dock .nav { width: 100%; }
 }
+
+/* ---------- Wide screens (desktop/tablet): same features, roomier arrangement ---------- */
+.mp-extra { display: none; }
+.dock-side { display: none; }
+@media (min-width: 901px) and (min-height: 521px) {
+  /* top right: full mini player */
+  .mini-player .mp-extra { display: inline-grid; }
+  .mini-player .mp-prog { display: flex; align-items: center; gap: 8px; width: 140px; font-size: 11px; }
+  .mp-prog .progress { flex: 1; margin: 0; height: 4px; }
+  body[data-screen="audio"] .status .mini-player { display: flex; }
+  /* bottom: side slots so the nav stays centred; right slot holds language + profile */
+  .dock { grid-template-columns: 1fr auto 1fr; justify-items: stretch; }
+  .dock-side { display: flex; }
+  .dock-acct { justify-content: flex-end; }
+  .dock .nav { width: auto; }
+  /* dialog: sentence card and transcript side by side, player bar underneath */
+  .audio-mob { max-width: none; grid-template-columns: 1.3fr 1fr; grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-areas: "head head" "stage drawer" "player player"; }
+  .audio-mob:has(.drawer.open) { grid-template-rows: auto minmax(0, 1fr) auto; }
+  .audio-mob .screen-head { grid-area: head; }
+  .audio-mob .stage { grid-area: stage; opacity: 1 !important; pointer-events: auto !important; }
+  .audio-mob .drawer { grid-area: drawer; }
+  .audio-mob .drawer-handle { display: none; }
+  .audio-mob .drawer .drawer-body { max-height: none; opacity: 1; flex: 1; padding-top: 10px; }
+  .audio-mob .player-bar { grid-area: player; }
+}
