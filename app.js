@@ -129,7 +129,7 @@
     const listHtml = lines.map((l, j) => `
       <div class="line ${l.who.toLowerCase()}" data-i="${j}"><span class="who">${esc(l.who)}</span>
       <span>${esc(l.text)} <button class="say" style="display:inline-grid;width:22px;height:22px;vertical-align:middle" data-say="${esc(l.text)}">${SAY_ICON}</button></span></div>`).join("");
-    $("#transcript").innerHTML = listHtml; $("#mTranscript").innerHTML = listHtml;
+    $("#mTranscript").innerHTML = listHtml;
     filterSpeakers();
 
     // audio
@@ -159,9 +159,6 @@
     $("#mFa").textContent = l ? l.fa : "";
     $("#hNowLine").textContent = l ? `${l.who}: ${l.text}` : "";
     $("#hNowFa").textContent = l ? l.fa : "";
-    $("#aNowWho").textContent = l ? l.who : "";
-    $("#aNowDe").textContent = l ? l.text : "";
-    $("#aNowFa").textContent = l ? l.fa : "";
   }
 
   const onLineClick = e => {
@@ -172,9 +169,8 @@
     if (player.duration) { player.currentTime = lineStart(l); player.play(); }
     else speak(l.text);
   };
-  $("#transcript").addEventListener("click", onLineClick);
   $("#mTranscript").addEventListener("click", onLineClick);
-  ["#spkTabs", "#mSpkTabs"].forEach(id => $(id).addEventListener("click", e => {
+  ["#mSpkTabs"].forEach(id => $(id).addEventListener("click", e => {
     const b = e.target.closest("button"); if (!b) return;
     state.spk = b.dataset.spk; $$(`${id} button`).forEach(x => x.classList.toggle("on", x === b)); filterSpeakers();
   }));
@@ -206,7 +202,7 @@
   player.addEventListener("play", setIcons);
   player.addEventListener("pause", setIcons);
   player.addEventListener("loadedmetadata", () => $$(".tDur").forEach(e => e.textContent = fmt(player.duration)));
-  player.addEventListener("error", () => { $("#audioNote").textContent = t("audioMissing"); });
+  player.addEventListener("error", () => toast(t("audioMissing")));
   let lastLine = -1;
   player.addEventListener("timeupdate", () => {
     const p = player.currentTime / (player.duration || 1);
@@ -217,8 +213,6 @@
       lastLine = i;
       $$(".transcript .line").forEach(r => r.classList.toggle("now", Number(r.dataset.i) === i));
       showNow(i);
-      if ($("#follow").checked && $("#audio").classList.contains("active"))
-        $(`#transcript .line[data-i="${i}"]`)?.scrollIntoView({ block: "center", behavior: "smooth" });
       if ($("#mFollow").checked && $("#mTranscript").clientHeight > 0)
         $(`#mTranscript .line[data-i="${i}"]`)?.scrollIntoView({ block: "center", behavior: "smooth" });
     }
@@ -617,10 +611,6 @@
     renderMap();
   }
 
-  const faToggle = $("#showFa");
-  faToggle.checked = store.get("showFa", true);
-  const applyFa = () => { $("#aNowBox").hidden = !faToggle.checked; store.set("showFa", faToggle.checked); };
-  faToggle.addEventListener("change", applyFa); applyFa();
 
   /* ---------- Practice hub: tiles → one exercise view ---------- */
   const TYPE_ICON = { translate: "🔁", fill: "✏️", order: "🧱", listen: "👂", respond: "💬", speak: "🗣️" };

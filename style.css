@@ -240,7 +240,6 @@ main { position: relative; overflow: hidden; }
 .now-de { font-size: 16px; line-height: 1.6; }
 .now-fa-lg { font-size: 16px; line-height: 2; color: var(--text); opacity: .85; }
 
-.mob-only { display: none; }
 /* ---------- Status: lesson picker ---------- */
 .lesson-pick { font-size: 13px; gap: 4px; min-width: 0; }
 .lesson-pick .lp-title { color: var(--muted); font-weight: 500; margin-inline-start: 4px; }
@@ -310,8 +309,6 @@ main { position: relative; overflow: hidden; }
 mark { background: rgba(240,138,168,.3); color: var(--text); border-radius: 4px; padding: 0 2px; }
 
 @media (max-width: 900px), (max-height: 520px) {
-  .desk-only { display: none !important; }
-  .lesson-pick.mob-only { display: flex; font-size: 14px; }
   body[data-screen="audio"] .status .mini-player,
   body[data-screen="audio"] .status .wifi { display: none; }
   .dock { grid-template-columns: 1fr; padding: 8px 12px; }
@@ -495,7 +492,6 @@ mark { background: rgba(240,138,168,.3); color: var(--text); border-radius: 4px;
   #lesson .lesson-grid .intro .big { font-size: 18px; }
   #lesson .lesson-grid .intro #lSum { font-size: 13px; line-height: 1.7; }
   #lesson .lesson-grid .intro > div[style*="margin-top:auto"] { margin-top: 4px !important; }
-  #lesson .lesson-grid .intro .tile { display: none; }
   #lesson .lesson-grid .phr { min-height: 0; overflow: auto; }
   /* vocab: grid is the scrolling list */
   #vocab .vocab-grid { flex: 1; min-height: 0; overflow: auto; align-content: start; }
@@ -656,26 +652,6 @@ mark { background: rgba(240,138,168,.3); color: var(--text); border-radius: 4px;
   .ht-ico { font-size: 18px; }
 }
 
-/* ---------- Home player on phones: fixed size, full text visible ---------- */
-@media (max-width: 900px), (max-height: 520px) {
-  #home { justify-content: flex-start; }
-  #home .home-bottom { flex: 1; min-height: 0; display: flex; }
-  #home .continue {
-    flex: 1; min-height: 0; height: 100%;
-    grid-template-columns: auto 1fr auto;
-    grid-template-rows: auto minmax(0, 1fr) minmax(0, 1fr) auto auto;
-    grid-template-areas: "cover title play" "de de de" "fa fa fa" "prog prog prog" "times times times";
-    align-items: center; row-gap: 8px;
-  }
-  #home .continue > div:not(.cover) { display: contents; }
-  #home .continue .cover { grid-area: cover; }
-  #home .continue h3 { grid-area: title; margin: 0; }
-  #home .continue .play-lg { grid-area: play; }
-  #home #hNowLine { grid-area: de; align-self: stretch; overflow: auto; display: block; -webkit-line-clamp: unset; line-height: 1.6 !important; }
-  #home #hNowFa { grid-area: fa; align-self: stretch; overflow: auto; display: block; -webkit-line-clamp: unset; margin: 0; font-size: 15px; }
-  #home .continue .progress { grid-area: prog; margin: 0; }
-  #home .continue .times { grid-area: times; margin: 0 !important; }
-}
 @media (max-height: 520px) and (orientation: landscape) {
   #home .continue { grid-template-columns: auto 1fr 1fr auto; grid-template-rows: auto minmax(0, 1fr) auto auto;
     grid-template-areas: "cover title title play" "de de fa fa" "prog prog prog prog" "times times times times"; }
@@ -705,9 +681,9 @@ html[data-ui="ru"] #lSum, html[data-ui="uk"] #lSum { text-align: start; }
 .ui-lang { width: auto; height: 34px; padding: 0 10px; border-radius: 10px; background: var(--tile-2); font-size: 12px; font-weight: 700; letter-spacing: .5px; color: var(--muted); }
 .ui-lang:hover { color: var(--text); }
 .avatar-btn { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), #8a6cf0); color: #1b1024; font-weight: 800; display: grid; place-items: center; }
-.mob-acct { display: none; align-items: center; gap: 6px; }
-.mob-acct .ui-lang { height: 26px; padding: 0 6px; font-size: 11px; }
-.mob-acct .avatar-btn { width: 28px; height: 28px; font-size: 13px; }
+.acct { display: flex; align-items: center; gap: 8px; }
+.acct .ui-lang { height: 26px; padding: 0 6px; font-size: 11px; }
+.acct .avatar-btn { width: 28px; height: 28px; font-size: 13px; }
 .lang-menu { position: fixed; z-index: 40; width: 190px; background: var(--panel); border: 1px solid rgba(255,255,255,.08); border-radius: 14px; box-shadow: var(--shadow); padding: 6px; display: flex; flex-direction: column; gap: 2px; animation: fade .15s ease; }
 .lang-menu[hidden] { display: none; }
 .lang-menu button { text-align: start; padding: 10px 12px; border-radius: 10px; display: flex; gap: 10px; align-items: center; }
@@ -729,8 +705,49 @@ html[data-ui="ru"] #lSum, html[data-ui="uk"] #lSum { text-align: start; }
 .prof-lang .tabs button.on { background: var(--tile); color: var(--text); }
 .prof-reset { align-self: flex-start; color: var(--bad); font-size: 13px; }
 
-@media (max-width: 900px), (max-height: 520px) {
-  .mob-acct { display: flex; }
-  .status .mini-player [data-act="prev"], .status .mini-player [data-act="next"] { display: none; }
-}
+
 .pop-head > .avatar-big { flex: 0 0 52px; }
+
+/* =====================================================================
+   One design for every screen size. Phones and desktop share the same
+   markup; media queries below only change sizes/arrangement, never which
+   features exist. (Do not add desk-only / mob-only elements.)
+   ===================================================================== */
+.lesson-pick { display: flex; min-width: 0; font-size: 14px; }
+.status { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 8px; }
+.lp-name { max-width: none; min-width: 0; }
+.status .right { gap: 10px; }
+body[data-screen="audio"] .status .mini-player { display: none; }
+.dock { grid-template-columns: 1fr; justify-items: center; }
+.dock .nav { grid-column: auto; }
+#audio { overflow: hidden; }
+.audio-mob { display: grid; grid-template-rows: auto 1fr auto auto; gap: 10px; height: 100%; min-height: 0; width: 100%; max-width: 860px; margin: 0 auto; }
+.stage { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr auto; }
+.stage .line-card { grid-column: 1 / -1; grid-row: 1; align-self: center; }
+.stage .nav-arrow { grid-row: 2; width: 100%; border-radius: 12px; height: 40px; }
+#practice .ex-wrap { overflow: hidden; align-items: stretch; }
+.ex-card { max-height: 100%; min-height: 0; overflow: hidden; }
+.ex-top, .ex-foot { flex-shrink: 0; }
+.ex-body, .ex-feedback { min-height: 0; overflow: auto; flex: 0 1 auto; }
+.ex-body { display: flex; flex-direction: column; gap: 10px; }
+/* home player: fixed size, full sentence and translation visible */
+#home { justify-content: flex-start; }
+  #home .home-bottom { flex: 1; min-height: 0; display: flex; }
+  #home .continue {
+    flex: 1; min-height: 0; height: 100%;
+    grid-template-columns: auto 1fr auto;
+    grid-template-rows: auto minmax(0, 1fr) minmax(0, 1fr) auto auto;
+    grid-template-areas: "cover title play" "de de de" "fa fa fa" "prog prog prog" "times times times";
+    align-items: center; row-gap: 8px;
+  }
+  #home .continue > div:not(.cover) { display: contents; }
+  #home .continue .cover { grid-area: cover; }
+  #home .continue h3 { grid-area: title; margin: 0; }
+  #home .continue .play-lg { grid-area: play; }
+  #home #hNowLine { grid-area: de; align-self: stretch; overflow: auto; display: block; -webkit-line-clamp: unset; line-height: 1.6 !important; }
+  #home #hNowFa { grid-area: fa; align-self: stretch; overflow: auto; display: block; -webkit-line-clamp: unset; margin: 0; font-size: 15px; }
+  #home .continue .progress { grid-area: prog; margin: 0; }
+  #home .continue .times { grid-area: times; margin: 0 !important; }
+@media (max-width: 900px) {
+  .dock .nav { width: 100%; }
+}
