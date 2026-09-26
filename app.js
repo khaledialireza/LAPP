@@ -161,7 +161,8 @@
     if (row && l) {
       row.classList.add("cur"); row.querySelector(".ly-de").innerHTML = wordHtml(l.text);
       const box = $("#mTranscript");
-      if (Date.now() > followPause && box.clientHeight) box.scrollTo({ top: row.offsetTop - box.clientHeight / 2 + row.offsetHeight / 2, behavior: "smooth" });
+      // the previous translation collapses at once and this one grows in, so the final position is known now
+      if (Date.now() > followPause && box.clientHeight) box.scrollTo({ top: row.offsetTop - box.clientHeight * 0.38, behavior: "smooth" });
     }
     $("#dpLine").textContent = l ? l.text : "";
     $("#dpWho").textContent = l ? l.who : "";
@@ -323,7 +324,8 @@
     return out;
   }
   const G = window.Grammar;
-  function openEntry(key) {
+  // into: render the card inside that element (dialog side panel) instead of the bottom sheet
+  function openEntry(key, into) {
     const v = vocabList.find(x => x.key === key) || vocabEntry(key); if (!v) return;
     markSeen(key);
     const ar = articleOf(v), pl = pluralOf(v), pg = wordType(v.p), word = baseWord(v);
@@ -361,7 +363,8 @@
     const own = (v.g || "").split(" · ").filter(x => x && x !== v.de && !/^جمع:/.test(x) && !(pg === "V" && /^(ich|du|er|sie|es|wir|ihr|Sie) \S+$/.test(x))).map(x => `<bdi dir="auto">${esc(x)}</bdi>`);
     const all = [...own, ...notes];
     const ex = examplesFor(v, forms);
-    $("#vSheet").innerHTML = `<div class="vs-grab"></div>
+    const target = into || $("#vSheet");
+    target.innerHTML = `<div class="vs-grab"></div>
       <div class="vs-scroll">
       <div class="vs-top"><span class="vs-big">${ar ? `<span class="ar ${ar}">${ar}</span> ` : ""}${esc(word)}</span>
         <button class="spk big" data-say="${esc(v.de)}" aria-label="anhören">${SAY_ICON}</button><button class="vs-x" id="vsClose" aria-label="schließen">✕</button></div>
@@ -374,10 +377,11 @@
       <div class="vs-stats"><div><span class="vs-ico">👁</span><div><b>${seen}×</b><span>gesehen</span></div></div>
         <div><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" stroke-width="4" opacity=".15"/>${tries ? "" : "<!--"}<circle cx="18" cy="18" r="15" fill="none" stroke="${pct >= 70 ? "#30D158" : pct >= 40 ? "#FF9F0A" : "#FF375F"}" stroke-width="4" stroke-linecap="round" pathLength="100" stroke-dasharray="${pct} 100" transform="rotate(-90 18 18)"/>${tries ? "" : "-->"}</svg>
           <div><b>${tries ? pct + "%" : "—"}</b><span>${tries ? `${right} von ${tries} richtig` : "noch nicht geübt"}</span></div></div></div>`;
+    if (into) { target.querySelector("#vsClose").onclick = closeSide; return; }
     $("#vBack").hidden = false;
     $("#vsClose").onclick = closeEntry;
   }
-  function closeEntry() { $("#vBack").hidden = true; renderVocab(); }
+  function closeEntry() { $("#vBack").hidden = true; $("#vSheet").innerHTML = ""; renderVocab(); }
   $("#vBack").addEventListener("click", e => { if (e.target.id === "vBack") closeEntry(); });
   $("#vocabGrid").addEventListener("click", e => {
     if (e.target.closest("[data-say]")) return;
@@ -436,7 +440,7 @@
       .filter(x => x.n && x.pct < 70).sort((a, b) => a.pct - b.pct).slice(0, 5);
     $("#hReview").innerHTML = weak.length ? weak.map(x => `<button class="r" data-entry="${esc(x.v.key)}"><b>${esc(x.v.de)}</b><span class="fa">${esc(x.v.fa)}</span><span class="sc">${x.pct}%</span></button>`).join("")
       : `<p class="fa muted rev-empty">${t("nothingHere")}</p>`;
-    const dl = store.get("dlg", {}), fcAll = Object.values(st).reduce((a, [r = 0, w = 0]) => [a[0] + r, a[1] + r + w], [0, 0]);
+    const dl = store.get(bestKey("dlg"), {}), fcAll = Object.values(st).reduce((a, [r = 0, w = 0]) => [a[0] + r, a[1] + r + w], [0, 0]);
     const best = { role: dl.role, gap: dl.gap, read: dl.read, fc: fcAll[1] ? Math.round(fcAll[0] / fcAll[1] * 100) : undefined, exam: store.get("exam" + (LESSONS[state.idx] || {}).id, undefined) };
     const P = [["role", "🎭", "Rollenspiel", "#FF2D55"], ["gap", "🧩", "Lückendialog", "#AF52DE"], ["read", "📖", "Vorlesen", "#5856D6"], ["fc", "🃏", "Karteikarten", "#FF9500"], ["exam", "🏁", "Prüfung", "#34C759"]];
     $("#hPrac").innerHTML = P.map(([k, ic, name, col]) => `<button class="pt" data-prac="${k}"><span class="ic" style="background:${col}">${ic}</span><span class="tx"><b>${name}</b><small>Bestes: ${best[k] != null ? best[k] + "%" : "—"}</small><span class="bar"><i style="width:${best[k] || 0}%"></i></span></span></button>`).join("");
@@ -451,6 +455,10 @@
     state.vscope = b.dataset.scope; $$("#vocabScope button").forEach(x => x.classList.toggle("on", x === b));
     buildVocab(); renderVocab();
   });
+
+  // best results are kept per lesson (dlg1, fs1, …); older global values belong to lesson 1
+  const bestKey = (k, i = state.idx) => k + (LESSONS[i] || {}).id;
+  for (const k of ["dlg", "fs"]) { const old = store.get(k, null); if (old && store.get(k + "1", null) == null) store.set(k + "1", old); }
 
   /* ---------- Speech: recognition + scoring ---------- */
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -819,10 +827,10 @@
     $("#phSub").textContent = `${okAll} / ${ex.list.length} Übungen · Lektion ${state.idx + 1}`;
     $("#phExCount").textContent = `${okAll} / ${ex.list.length}`;
     $("#phRing").innerHTML = `<svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" stroke-width="4" opacity=".12"/><circle cx="18" cy="18" r="15" fill="none" stroke="var(--accent)" stroke-width="4" stroke-linecap="round" pathLength="100" stroke-dasharray="${pct} 100" transform="rotate(-90 18 18)" ${pct ? "" : 'opacity="0"'}/></svg><b>${pct}%</b>`;
-    const dl = store.get("dlg", {});
+    const dl = store.get(bestKey("dlg"), {});
     const SP = [["role", "🎭", "Rollenspiel", t("role"), "linear-gradient(135deg,#FF2D55,#FF6B9A)"], ["gap", "🧩", "Lückendialog", t("gap"), "linear-gradient(135deg,#AF52DE,#8A6CF0)"], ["read", "📖", "Vorlesen", t("readSub2"), "linear-gradient(135deg,#5856D6,#0A84FF)"]];
     $("#phSpeak").innerHTML = SP.map(([k, ic, de, fa, bg]) => `<button class="c" data-open="${k}" style="background:${bg}"><span class="sc">${dl[k] != null ? dl[k] + "%" : "—"}</span><span class="ic">${ic}</span><span class="nm"><b>${de}</b><small class="fa">${esc(fa)}</small></span></button>`).join("");
-    const fsBest = store.get("fs", {});
+    const fsBest = store.get(bestKey("fs"), {});
     const FS = [["free", "🗣️", "Frei sprechen", t("fsFreeSub"), "linear-gradient(135deg,#FF9F0A,#FF6B3D)"], ["topic", "💡", "Thema", t("fsTopicSub"), "linear-gradient(135deg,#30B0C7,#0A84FF)"], ["cue", "📝", "Stichpunkte", t("fsCueSub"), "linear-gradient(135deg,#34C759,#30B0C7)"]];
     $("#phFree").innerHTML = FS.map(([k, ic, de, fa, bg]) => `<button class="c" data-open="${k}" style="background:${bg}"><span class="sc">${fsBest[k] != null ? fsBest[k] + (k === "free" ? "" : "%") : "—"}</span><span class="ic">${ic}</span><span class="nm"><b>${de}</b><small class="fa">${esc(fa)}</small></span></button>`).join("");
     const due = dueWords(), kn = vocabList.filter(v => state.known.has(v.key)).length;
@@ -1129,7 +1137,7 @@
   }
   function showFreeResult() {
     stopListening(); recCancel();
-    const kl = keyLessons(), best = store.get("fs", {});
+    const kl = keyLessons(), best = store.get(bestKey("fs"), {});
     let html = "";
     if (fs.mode === "cue") {
       const ok = fs.answers.filter(a => a && a.ok).length, n = fs.set.items.length, pct = Math.round(ok / n * 100);
@@ -1164,7 +1172,7 @@
       const sentences = (fs.text.match(/[^.!?]+/g) || []).filter(x => x.trim().split(/\s+/).length >= 3).length || Math.floor(words / 6);
       if (sentences) logDay("s", Math.min(sentences, 20));
     }
-    store.set("fs", best);
+    store.set(bestKey("fs"), best);
     $("#fsRes").innerHTML = html + `<div class="fs-acts"><button class="vs-b sec" id="fsAgain">↻ Nochmal</button></div>`;
     $("#fsRes").hidden = false; $("#fsLive").hidden = true; $("#fsBar").hidden = true; $("#fsCnt").hidden = true;
     if (fs.mode === "cue") $("#fsTop").innerHTML = "";
@@ -1264,7 +1272,7 @@
   function finishDlg() {
     const mine = dlg.items.filter(x => x.mine && x.score);
     const avg = mine.length ? Math.round(mine.reduce((a, x) => a + x.score.pct, 0) / mine.length * 100) : 0;
-    const st = store.get("dlg", {}); st[dlg.mode] = Math.max(st[dlg.mode] || 0, avg); store.set("dlg", st);
+    const st = store.get(bestKey("dlg"), {}); st[dlg.mode] = Math.max(st[dlg.mode] || 0, avg); store.set(bestKey("dlg"), st);
     dlg.i = dlg.items.length - 1; renderDlg(); dlg.i = dlg.items.length;
     $("#dlgFoot").innerHTML = `<div class="dlg-sum"><b>${avg}%</b> <span class="fa">${t("saidCorrectly")}</span></div>
       <button class="btn big" id="dlgAgain">↻ Nochmal · <span class="fa">${t("newLines")}</span></button>`;
@@ -1332,24 +1340,33 @@
     if (/^[a-z'-]+$/i.test(w) && !/[äöüß]/i.test(w)) return { lemma: w, p: "انگلیسی", fa: t("englishWord"), g: "" };
     return { lemma: w, p: "", fa: t("noMeaning"), g: "" };
   }
+  // dialog: tapping a word opens a side panel (bottom panel on phones); the lyrics stay usable
   function openWord(w) {
-    const d = lookup(w), l = lines[curLine];
-    markSeen(dictKey(w));
-    $("#popWord").textContent = w;
-    $("#popLemma").textContent = d.lemma.toLowerCase() !== w.toLowerCase() ? `← ${d.lemma}` : "";
-    $("#popPos").textContent = I18N.pos(d.p); $("#popPos").hidden = !d.p;
-    $("#popFa").textContent = d.fa;
-    $("#popG").innerHTML = d.g ? d.g.split(" · ").map(x => `<div>${esc(x)}</div>`).join("") : "";
-    $("#popSay").dataset.say = w;
-    $("#popCtx").innerHTML = l ? l.text.split(/(\s+)/).map(tok =>
-      tok.replace(/^[^A-Za-zÄÖÜäöüß]+|[^A-Za-zÄÖÜäöüß'-]+$/g, "") === w ? `<mark>${esc(tok)}</mark>` : esc(tok)).join("") : "";
-    $("#popCtxFa").textContent = l ? l.fa : "";
-    $("#popBack").hidden = false;
+    const k = dictKey(w), side = $("#wsBody");
+    markSeen(k);
+    $$("#mTranscript .w.picked").forEach(x => x.classList.remove("picked"));
+    $$(`#mTranscript .ly-line.cur .w`).forEach(x => { if (x.dataset.w === w) x.classList.add("picked"); });
+    if (k && DICT[k]) openEntry(k, side);
+    else {
+      const d = lookup(w);
+      side.innerHTML = `<div class="vs-grab"></div><div class="vs-scroll"><div class="vs-top"><span class="vs-big">${esc(w)}</span>
+        <button class="spk big" data-say="${esc(w)}" aria-label="anhören">${SAY_ICON}</button><button class="vs-x" id="vsClose" aria-label="schließen">✕</button></div>
+        ${d.p ? `<div class="vs-tags"><span class="pos P fa">${esc(I18N.pos(d.p))}</span></div>` : ""}<div class="vs-mean fa">${esc(d.fa)}</div></div>`;
+      side.querySelector("#vsClose").onclick = closeSide;
+    }
+    $("#audio").classList.add("side-open");
+    side.scrollTop = 0;
+    const row = $("#mTranscript .ly-line.cur"), box = $("#mTranscript");
+    if (row) setTimeout(() => box.scrollTo({ top: row.offsetTop - 20, behavior: "smooth" }), 320);
+  }
+  function closeSide() {
+    $("#audio").classList.remove("side-open");
+    $$("#mTranscript .w.picked").forEach(x => x.classList.remove("picked"));
   }
   const closeWord = () => { $("#popBack").hidden = true; };
   $("#popClose").onclick = closeWord;
   $("#popBack").addEventListener("click", e => { if (e.target.id === "popBack") closeWord(); });
-  document.addEventListener("keydown", e => { if (e.key === "Escape") closeWord(); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") { closeWord(); closeSide(); } });
   $("#popSay").innerHTML = SAY_ICON;
 
   /* ---------- Interface language ---------- */
@@ -1396,7 +1413,7 @@
     const known = vocabList.filter(v => state.known.has(v.key)).length;
     const res = exResults(), okEx = Object.values(res).filter(Boolean).length;
     const fcs = Object.values(store.get("fc", {})), fr = fcs.reduce((a, x) => a + x[0], 0), fw = fcs.reduce((a, x) => a + x[1], 0);
-    const exam = store.get("exam" + L.id, 0), dl = store.get("dlg", {}), bestDlg = Math.max(0, ...Object.values(dl));
+    const exam = store.get("exam" + L.id, 0), dl = store.get(bestKey("dlg"), {}), bestDlg = Math.max(0, ...Object.values(dl));
     $("#profName").value = store.get("name", "");
     $("#profName").placeholder = t("learner");
     const row = (label, val, pct) => `<div class="ps"><span class="fa">${label}</span><b dir="ltr">${val}</b>${pct != null ? `<i style="--p:${Math.round(pct)}%"></i>` : ""}</div>`;
@@ -1442,20 +1459,25 @@
   player.addEventListener("pause", () => { lastT = null; if (heard >= 1) { logDay("l", Math.round(heard)); heard = 0; } });
 
   /* ---------- Lesson page: hero, learning path, key phrases, grammar focus ---------- */
-  const lsKey = k => k + (LESSONS[state.idx] || {}).id;
-  function lessonSteps() {
-    const L = LESSONS[state.idx], heard = store.get(lsKey("heard"), []).length, nPh = L.phrases.length, phr = store.get(lsKey("phr"), []).length;
-    const kn = vocabList.filter(v => state.known.has(v.key)).length, dl = store.get("dlg", {}), fsb = store.get("fs", {}), exb = store.get(lsKey("exam"), null);
+  const lsKey = (k, i = state.idx) => k + (LESSONS[i] || {}).id;
+  function lessonSteps(i = state.idx) {
+    const L = LESSONS[i], cur = i === state.idx;
+    const nLines = cur ? lines.length : L.transcript.split("\n").filter(x => x.trim()).length;
+    const keys = cur ? vocabList.map(v => v.key) : (L.words || []);
+    const heard = store.get(lsKey("heard", i), []).length, nPh = L.phrases.length, phr = store.get(lsKey("phr", i), []).length;
+    const kn = keys.filter(k => state.known.has(k)).length, dl = store.get(bestKey("dlg", i), {}), fsb = store.get(bestKey("fs", i), {}), exb = store.get(lsKey("exam", i), null);
     const best = (v, goal = 70) => Math.min(1, (v || 0) / goal);
     return [
-      { ic: "🎧", de: "Dialog hören", sub: tf("lsStepDialog", { a: heard, b: lines.length }), f: Math.min(1, heard / (lines.length * 0.8 || 1)), go: () => go("audio") },
+      { ic: "🎧", de: "Dialog hören", sub: tf("lsStepDialog", { a: heard, b: nLines }), f: Math.min(1, heard / (nLines * 0.8 || 1)), go: () => go("audio") },
       { ic: "📖", de: "Wichtige Sätze", sub: tf("lsStepPhr", { a: phr, b: nPh }), f: Math.min(1, phr / (nPh * 0.8 || 1)), go: () => $("#phrases").scrollIntoView({ behavior: "smooth", block: "center" }) },
-      { ic: "🔤", de: "Wörter lernen", sub: tf("lsStepWords", { a: kn, b: vocabList.length }), f: Math.min(1, kn / (vocabList.length * 0.5 || 1)), go: () => go("vocab") },
+      { ic: "🔤", de: "Wörter lernen", sub: tf("lsStepWords", { a: kn, b: keys.length }), f: Math.min(1, kn / (keys.length * 0.5 || 1)), go: () => go("vocab") },
       { ic: "🎭", de: "Rollenspiel", sub: tf("lsStepBest", { b: dl.role != null ? dl.role + "%" : "—" }), f: best(dl.role), go: () => { go("practice"); $('#pHub [data-open="role"]')?.click(); } },
       { ic: "🗣️", de: "Frei sprechen", sub: tf("lsStepBest", { b: fsb.cue != null ? fsb.cue + "%" : fsb.topic != null ? fsb.topic + "%" : "—" }), f: best(Math.max(fsb.cue || 0, fsb.topic || 0)), go: () => { go("practice"); $('#pHub [data-open="cue"]')?.click(); } },
       { ic: "🏁", de: "Prüfung", sub: tf("lsStepBest", { b: exb != null ? exb + "%" : "—" }), f: best(exb), go: () => { go("practice"); $('#pHub [data-open="exam"]')?.click(); } }
     ];
   }
+  const lessonPct = (i = state.idx) => { const st = lessonSteps(i); return Math.round(st.reduce((a, x) => a + x.f, 0) / st.length * 100); };
+  const overallPct = () => Math.round(LESSONS.reduce((a, x, i) => a + lessonPct(i), 0) / (LESSONS.length || 1));
   function renderLesson() {
     const L = LESSONS[state.idx]; if (!L) return;
     const TR = lessonTr(L), steps = lessonSteps(), pct = Math.round(steps.reduce((a, s) => a + s.f, 0) / steps.length * 100);
@@ -1464,7 +1486,8 @@
       <div class="tt">${esc(L.title)}</div><div class="fa">${esc(TR.title)} — ${esc(TR.summary)}</div>
       <div class="meta"><span>🎧 ${mins} Min</span><span>💬 ${lines.length} Sätze</span><span>🔤 ${vocabList.length} Wörter</span></div>
       <div class="pb"><i style="width:${pct}%"></i></div><div class="meta"><span class="fa">${tf("lsProgress", { p: pct })}</span></div>
-      <div class="ls-lessons">${LESSONS.map((x, j) => `<button class="chip5 ${j === state.idx ? "on" : ""}" data-lesson="${j - state.idx}">L${x.id}</button>`).join("")}</div>`;
+      <div class="ls-overall"><span>Gesamt · <span class="fa">${t("lsOverall")}</span></span><b>${overallPct()}%</b></div>
+      <div class="ls-lessons">${LESSONS.map((x, j) => { const p = lessonPct(j); return `<button class="chip5 lchip ${j === state.idx ? "on" : ""}" data-lesson="${j - state.idx}"><span>L${x.id}</span><i style="--p:${p}%"></i><small>${p}%</small></button>`; }).join("")}</div>`;
     $("#lsPath").innerHTML = steps.map((s, i) => { const st = s.f >= 1 ? "done" : i === cur ? "cur" : "todo";
       return `<button class="step ${st}" data-step="${i}"><span class="ic">${st === "done" ? "✓" : s.ic}</span><span class="tx"><b>${i + 1}. ${s.de}</b><small class="fa">${esc(s.sub)}</small><span class="sbar"><i style="width:${Math.round(s.f * 100)}%"></i></span></span><span class="go">${st === "done" ? "✓" : st === "cur" ? "Weiter ›" : "Start"}</span></button>`; }).join("");
     $("#lsPathN").textContent = `${steps.filter(s => s.f >= 1).length} / ${steps.length}`;
@@ -1498,7 +1521,8 @@
   $("#dockTabsBtn").addEventListener("click", () => setDock(false));
 
   /* ---------- iOS home-screen app: fill the whole screen ---------- */
-  if (navigator.standalone || matchMedia("(display-mode: standalone)").matches) {
+  // only iOS Safari's home-screen app (navigator.standalone) has the short-viewport bug; desktop web apps size correctly
+  if (navigator.standalone === true) {
     const fit = () => {
       const long = Math.max(screen.width, screen.height), short = Math.min(screen.width, screen.height);
       const h = innerWidth > innerHeight ? short : long;

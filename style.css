@@ -1515,3 +1515,68 @@ body.recording #fsMic::after { content: ""; width: 20px; height: 20px; border-ra
 html.standalone, html.standalone body { height: var(--app-h) !important; }
 html.standalone .frame { top: 0 !important; bottom: auto !important; height: var(--app-h) !important; }
 html.standalone .pop-back { top: 0 !important; bottom: auto !important; height: var(--app-h) !important; }
+
+/* ---------- Floating glass dock: content runs underneath ---------- */
+:root { --dock-space: calc(92px + env(safe-area-inset-bottom)); }
+.frame { grid-template-rows: minmax(0, 1fr) !important; }
+.frame > main { grid-row: 1; grid-column: 1; }
+.dock { position: absolute !important; left: 0; right: 0; bottom: 0; z-index: 15; background: transparent !important; border: 0 !important;
+  pointer-events: none; padding: 0 12px max(14px, calc(env(safe-area-inset-bottom) + 2px)) !important; }
+.dock > * { pointer-events: auto; }
+.dock .nav, .dock-round, .dock-player { box-shadow: 0 10px 30px rgba(0,0,0,.18), 0 2px 8px rgba(0,0,0,.08), inset 0 .5px 0 rgba(255,255,255,.35) !important;
+  background: color-mix(in srgb, var(--tile) 62%, transparent) !important; -webkit-backdrop-filter: saturate(180%) blur(22px); backdrop-filter: saturate(180%) blur(22px); }
+@media (prefers-color-scheme: dark) { .dock .nav, .dock-round, .dock-player { box-shadow: 0 10px 30px rgba(0,0,0,.55), inset 0 .5px 0 rgba(255,255,255,.12) !important; } }
+.screen { padding-bottom: var(--dock-space) !important; }
+/* scrolling lists continue under the glass dock */
+.dlist, .ph-grid, .ls-grid, .fs-res { margin-bottom: calc(-1 * var(--dock-space)); padding-bottom: calc(var(--dock-space) + 12px) !important; }
+#pDlg .dlg-foot { margin-top: 6px; }
+/* landscape keeps the side dock in its own column */
+@media (max-height: 520px) and (orientation: landscape) {
+  :root { --dock-space: 0px; }
+  .dock { position: relative !important; pointer-events: auto; }
+  .frame { grid-template-rows: minmax(0, 1fr) !important; }
+  .screen { padding-bottom: max(6px, env(safe-area-inset-bottom)) !important; }
+  .lyrics, .dlist, .ph-grid, .ls-grid, .fs-res, .dlg-list { margin-bottom: 0; padding-bottom: 12px !important; }
+}
+
+/* ---------- Lyrics: no size jump between lines ---------- */
+.ly-de, .ly-line.cur .ly-de { font-size: 23px; }
+@media (min-width: 901px) and (min-height: 521px) { .ly-de, .ly-line.cur .ly-de { font-size: 28px; } }
+@media (max-height: 520px) and (orientation: landscape) { .ly-de, .ly-line.cur .ly-de { font-size: 19px; } }
+.ly-line { transform-origin: left center; transition: opacity .35s ease, transform .35s ease; }
+.ly-line.cur { transform: scale(1.04); }
+.ly-fa { display: block !important; max-height: 0; opacity: 0; overflow: hidden; margin-top: 0; }
+.ly-line.cur .ly-fa { max-height: 240px; opacity: 1; margin-top: 6px; transition: max-height .45s ease, opacity .45s ease, margin .45s ease; }
+body.no-fa .ly-line.cur .ly-fa { max-height: 0; opacity: 0; }
+
+/* ---------- Dialog: word panel beside (or below) the lyrics ---------- */
+#audio { position: relative; }
+.word-side { position: absolute; z-index: 6; display: flex; flex-direction: column; overflow: hidden; background: var(--tile);
+  box-shadow: 0 12px 40px rgba(0,0,0,.22); opacity: 0; pointer-events: none; transition: transform .35s cubic-bezier(.2,.8,.2,1), opacity .25s ease; }
+.ws-body { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px; padding: 8px 16px 14px; overflow: hidden; }
+.ws-body .vs-scroll { flex: 1; min-height: 0; overflow-y: auto; }
+.ws-body .vs-big { font-size: 28px; }
+#audio.side-open .word-side { opacity: 1; pointer-events: auto; transform: none; }
+.ly-line.cur .w.picked { background: color-mix(in srgb, var(--accent) 22%, transparent); border-radius: 6px; color: var(--text); opacity: 1; }
+/* phones (portrait): panel from the bottom, lyrics shrink above it */
+.word-side { left: 8px; right: 8px; bottom: calc(var(--dock-space) + 4px); height: 56%; border-radius: 24px; transform: translateY(40px); }
+#audio > .ly-head, #audio > .lyrics, #audio > .ly-tools { transition: margin .35s cubic-bezier(.2,.8,.2,1); }
+#audio.side-open > .ly-tools { display: none; }
+#audio.side-open > .lyrics { margin-bottom: calc(56% - var(--dock-space) + 10px); }
+/* wide screens and landscape: panel on the right, content moves left */
+@media (min-width: 901px) and (min-height: 521px), (max-height: 520px) and (orientation: landscape) {
+  .word-side { left: auto; right: 12px; top: 12px; bottom: calc(var(--dock-space) + 6px); width: min(400px, 42%); height: auto; border-radius: 26px; transform: translateX(40px); }
+  #audio.side-open > .ly-tools { display: flex; }
+  #audio.side-open > .lyrics { margin-bottom: 0; }
+  #audio.side-open > .ly-head, #audio.side-open > .lyrics, #audio.side-open > .ly-tools { margin-right: calc(min(400px, 42%) + 12px); }
+}
+@media (max-height: 520px) and (orientation: landscape) {
+  .word-side { top: 6px; bottom: 6px; }
+  #audio.side-open > .ly-tools { display: none; }
+  #audio.side-open > .lyrics { grid-column: 1 / -1; }
+}
+.ls-overall { display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 700; opacity: .95; margin-top: 4px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,.25); }
+.ls-overall b { font-size: 16px; }
+.lhero .lchip { height: 30px; gap: 6px; padding: 0 10px; }
+.lhero .lchip i { width: 34px; height: 4px; border-radius: 2px; background: linear-gradient(90deg, currentColor var(--p), rgba(255,255,255,.3) var(--p)); display: inline-block; }
+.lhero .lchip small { font-size: 11px; opacity: .9; }
