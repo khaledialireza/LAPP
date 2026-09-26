@@ -314,28 +314,67 @@
         <span class="pos ${v.pg === "N" ? "N-" + (ar || "die") : v.pg}">${short}</span><button class="spk" data-say="${esc(v.de)}" aria-label="anhören">${SAY_ICON}</button></div>`;
     }).join("")}</div>`).join("") || `<p class="fa notice">${t("nothingHere")}</p>`;
   }
+  // every line of the lesson where the word (or one of its forms) appears
+  function examplesFor(v, forms) {
+    const esc2 = x => x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const list = [...new Set(forms.filter(f => f && f.length > 1))].sort((a, b) => b.length - a.length);
+    const re = new RegExp(`(^|[^\\wäöüßÄÖÜ])(${list.map(esc2).join("|")})(?=[^\\wäöüßÄÖÜ]|$)`, "gi");
+    const out = [];
+    lines.forEach((l, i) => { re.lastIndex = 0; if (out.length < 3 && re.test(l.text)) out.push({ i, who: l.who, fa: l.fa || "", html: esc(l.text).replace(re, (m, a, w) => `${a}<b>${w}</b>`) }); });
+    return out;
+  }
+  const G = window.Grammar;
   function openEntry(key) {
     const v = vocabList.find(x => x.key === key) || vocabEntry(key); if (!v) return;
     markSeen(key);
-    const ar = articleOf(v), pl = pluralOf(v), pg = wordType(v.p), ex = exampleFor(v), f = fcStats()[key] || [0, 0], seen = seenMap()[key] || 0;
+    const ar = articleOf(v), pl = pluralOf(v), pg = wordType(v.p), word = baseWord(v);
+    const seen = seenMap()[key] || 0, [right = 0, wrong = 0] = fcStats()[key] || [];
+    const tries = right + wrong, pct = tries ? Math.round(right / tries * 100) : 0;
     const GEN = { der: "maskulin · مذکر", die: "feminin · مؤنث", das: "neutral · خنثی" };
-    // grammar notes without what the header already says (article + word, plural)
-    const gParts = (v.g || "").split(" · ").filter(x => x && x !== v.de && !/^جمع:/.test(x));
-    const exHtml = ex ? esc(ex.de).replace(ex.re, (m, a, w, c) => `${a}<b>${w}</b>${c}`) : "";
+    let tags = [], table = "", notes = [], forms = [word, ...((DICT[key] || {}).f || [])];
+    if (pg === "V") {
+      const vb = G.verb(key);
+      tags = [`<span class="pos V">Verb · ${vb.irr ? "unregelmäßig" : "regelmäßig"}</span>`, `<span class="pos P">Perfekt mit „${vb.aux}“</span>`];
+      if (vb.sep) tags.push(`<span class="pos P">trennbar</span>`); if (vb.refl) tags.push(`<span class="pos P">reflexiv</span>`); if (vb.modal) tags.push(`<span class="pos P">Modalverb</span>`);
+      table = `<div class="vs-sec">KONJUGATION · <span class="fa">صرف فعل</span></div><div class="conj"><table><tr><th></th><th>Präsens</th><th>Präteritum</th><th>Perfekt</th></tr>${vb.rows.map(r => `<tr><td>${r.p}</td><td><b>${esc(r.pr)}</b></td><td>${esc(r.pt)}</td><td><span class="aux">${esc(r.pf)}</span> ${esc(r.pp)}</td></tr>`).join("")}</table></div>`;
+      notes = G.verbNotes(vb);
+      vb.rows.forEach(r => { forms.push(r.pr.split(" ")[0], r.pt.split(" ")[0]); }); forms.push(vb.pp);
+    } else if (pg === "N" && ar) {
+      tags = [`<span class="pos N-${ar}">${ar} · ${GEN[ar]}</span>`]; if (pl) tags.push(`<span class="pos P">Plural: die ${esc(pl)}</span>`);
+      const nn = G.noun(word, ar, pl);
+      table = `<div class="vs-sec">DEKLINATION · <span class="fa">صرف اسم</span></div><div class="conj"><table><tr><th></th><th>Singular</th><th></th>${nn.hasPlural ? "<th>Plural</th>" : ""}</tr>${nn.rows.map(r => `<tr><td>${r.c.slice(0, 3)}.</td><td><b>${esc(r.def)}</b></td><td>${esc(r.ind)}</td>${nn.hasPlural ? `<td>${esc(r.pl)}</td>` : ""}</tr>`).join("")}</table></div>`;
+      notes = nn.notes; if (pl) forms.push(pl);
+    } else {
+      const [, name] = POSG.find(x => x[0] === pg);
+      tags = [`<span class="pos ${pg}">${name}</span>`, `<span class="pos P fa">${esc(I18N.pos(v.p))}</span>`];
+      if (pg === "A") {
+        const a = G.adj(word);
+        if (a) { table = `<div class="vs-sec">STEIGERUNG · <span class="fa">صفت برتر و برترین</span></div><div class="conj"><table><tr><th>Positiv</th><th>Komparativ</th><th>Superlativ</th></tr><tr><td><b>${esc(a.pos)}</b></td><td>${esc(a.comp)}</td><td>${esc(a.sup)}</td></tr></table></div>`;
+          notes.push(`قبل از اسم پسوند می‌گیرد: ${a.attr.map(G.de).join(" · ")}`, `بعد از فعل‌های ${G.de("sein/werden")} بدون پسوند می‌آید: ${G.de(`Das ist ${a.pos}.`)}`); }
+      }
+      const sm = G.smallNotes(key, v.p || "");
+      notes.push(...sm.notes);
+      if (sm.table) table = `<div class="vs-sec">FORMEN · <span class="fa">صورت‌ها</span></div><div class="conj"><table><tr>${sm.table.head.map(h => `<th>${h}</th>`).join("")}</tr>${sm.table.rows.map(r => `<tr>${r.map((c, i) => i ? `<td>${esc(c)}</td>` : `<td><b>${esc(c)}</b></td>`).join("")}</tr>`).join("")}</table></div>`;
+    }
+    // notes from the dictionary first (usage, idioms), then the rules
+    const own = (v.g || "").split(" · ").filter(x => x && x !== v.de && !/^جمع:/.test(x) && !(pg === "V" && /^(ich|du|er|sie|es|wir|ihr|Sie) \S+$/.test(x))).map(x => `<bdi dir="auto">${esc(x)}</bdi>`);
+    const all = [...own, ...notes];
+    const ex = examplesFor(v, forms);
     $("#vSheet").innerHTML = `<div class="vs-grab"></div>
-      <div class="vs-top"><span class="vs-big">${ar ? `<span class="ar ${ar}">${ar}</span> ` : ""}${esc(baseWord(v))}</span>
+      <div class="vs-scroll">
+      <div class="vs-top"><span class="vs-big">${ar ? `<span class="ar ${ar}">${ar}</span> ` : ""}${esc(word)}</span>
         <button class="spk big" data-say="${esc(v.de)}" aria-label="anhören">${SAY_ICON}</button><button class="vs-x" id="vsClose" aria-label="schließen">✕</button></div>
-      <div class="vs-tags">${ar ? `<span class="pos N-${ar}">${ar} · ${GEN[ar]}</span>` : `<span class="pos ${pg}">${POSG.find(x => x[0] === pg)[1]}</span>`}
-        ${pl ? `<span class="pos P">Plural: die ${esc(pl)}</span>` : ""}${ar ? "" : `<span class="pos P fa">${esc(I18N.pos(v.p))}</span>`}</div>
+      <div class="vs-tags">${tags.join("")}</div>
       <div class="vs-mean fa">${esc(v.fa)}</div>
-      ${gParts.length ? `<div class="vs-g">${gParts.map(x => `<div dir="auto">${esc(x)}</div>`).join("")}</div>` : ""}
-      ${ex ? `<div class="vs-k">AUS DER LEKTION</div><div class="vs-ex">„${exHtml}“<div class="fa">${esc(ex.fa)}</div></div>` : ""}
-      <div class="vs-hist"><div><b>${seen}×</b>gesehen</div><div><b>${f[0]} / ${f[0] + f[1]}</b>richtig</div><div><b>${ST_NAME[wordStatus(key)]}</b>Status</div></div>
-      <div class="vs-acts"><button class="vs-b sec" id="vsPractice">🃏 Üben</button><button class="vs-b ${state.known.has(key) ? "sec" : "ok"}" id="vsKnown">${state.known.has(key) ? "↺ Doch nicht" : "✓ Kann ich"}</button></div>`;
+      ${table}
+      ${all.length ? `<div class="vs-sec">GRAMMATIK · <span class="fa">نکتهٔ دستوری</span></div><div class="gram fa">${all.map(n => `<div class="li"><span>${n}</span></div>`).join("")}</div>` : ""}
+      ${ex.length ? `<div class="vs-sec">AUS DER LEKTION · <span class="fa">در درس</span></div>${ex.map(e => `<div class="quote ${e.who.toLowerCase()}"><span class="who">${esc(e.who.toUpperCase())} · Satz ${e.i + 1}</span><span class="qde">${e.html}</span><span class="qfa fa">${esc(e.fa)}</span></div>`).join("")}` : ""}
+      </div>
+      <div class="vs-stats"><div><span class="vs-ico">👁</span><div><b>${seen}×</b><span>gesehen</span></div></div>
+        <div><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" stroke-width="4" opacity=".15"/>${tries ? "" : "<!--"}<circle cx="18" cy="18" r="15" fill="none" stroke="${pct >= 70 ? "#30D158" : pct >= 40 ? "#FF9F0A" : "#FF375F"}" stroke-width="4" stroke-linecap="round" pathLength="100" stroke-dasharray="${pct} 100" transform="rotate(-90 18 18)"/>${tries ? "" : "-->"}</svg>
+          <div><b>${tries ? pct + "%" : "—"}</b><span>${tries ? `${right} von ${tries} richtig` : "noch nicht geübt"}</span></div></div></div>`;
     $("#vBack").hidden = false;
     $("#vsClose").onclick = closeEntry;
-    $("#vsKnown").onclick = () => { state.known.has(key) ? state.known.delete(key) : state.known.add(key); store.set("known", [...state.known]); renderProgress(); closeEntry(); };
-    $("#vsPractice").onclick = () => { closeEntry(); go("practice"); $('#pHub [data-open="fc"]')?.click(); };
   }
   function closeEntry() { $("#vBack").hidden = true; renderVocab(); }
   $("#vBack").addEventListener("click", e => { if (e.target.id === "vBack") closeEntry(); });

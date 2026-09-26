@@ -1258,3 +1258,39 @@ body.no-fa .ly-line.cur .ly-fa { display: none; }
   .dlist { grid-column: 2; grid-row: 1 / -1; }
   #vocab .v-search { height: 32px; font-size: 14px; }
 }
+
+/* ---------- Word sheet v2 ---------- */
+.vsheet { height: 88vh; height: 88dvh; max-height: none; overflow: hidden; gap: 8px; padding-top: 8px; }
+.vs-scroll { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-bottom: 6px; }
+.vs-mean { font-size: 21px; font-weight: 700; margin-top: -2px; }
+.vs-sec { font-size: 11px; font-weight: 800; color: var(--muted); letter-spacing: .5px; margin-bottom: -6px; }
+.conj { border-radius: 14px; background: var(--tile-2); overflow-x: auto; }
+.conj table { width: 100%; border-collapse: collapse; font-size: 13px; white-space: nowrap; }
+.conj th { font-size: 11px; font-weight: 800; color: var(--muted); text-align: left; padding: 8px 8px 5px; }
+.conj td { padding: 6px 8px; border-top: .5px solid var(--sep); }
+.conj td:first-child { color: var(--muted); }
+.conj td b { color: var(--accent); font-weight: 700; }
+.conj .aux { color: var(--muted); }
+.gram { background: var(--tile-2); border-radius: 14px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; font-size: 14px; line-height: 1.65; text-align: right; }
+.gram .li { display: flex; gap: 8px; }
+.gram .li::before { content: ""; width: 6px; height: 6px; border-radius: 3px; background: var(--accent); margin-top: 9px; flex: 0 0 6px; }
+.gram .li > span { flex: 1; }
+.gde { font-weight: 700; unicode-bidi: isolate; direction: ltr; }
+.quote { border-left: 4px solid #5E5CE6; padding: 1px 0 1px 12px; display: flex; flex-direction: column; gap: 3px; }
+.quote.anna { border-color: #FF2D55; }
+.quote .who { font-size: 11px; font-weight: 800; letter-spacing: .5px; color: #5E5CE6; } .quote.anna .who { color: #FF2D55; }
+.quote .qde { font-size: 16px; font-weight: 600; line-height: 1.45; } .quote .qde b { color: var(--accent); }
+.quote .qfa { font-size: 13px; color: var(--muted); text-align: left; }
+.vs-stats { display: flex; gap: 10px; flex-shrink: 0; }
+.vs-stats > div { flex: 1; background: var(--tile-2); border-radius: 16px; padding: 10px 12px; display: flex; align-items: center; gap: 10px; }
+.vs-stats svg { width: 40px; height: 40px; flex: 0 0 40px; color: var(--text); }
+.vs-stats b { display: block; font-size: 20px; font-weight: 800; line-height: 1.1; }
+.vs-stats span { font-size: 12px; color: var(--muted); font-weight: 600; }
+.vs-stats .vs-ico { font-size: 24px; }
+@media (min-width: 901px) and (min-height: 521px) { .vsheet { height: min(760px, 88vh); } }
+/* iOS home-screen app with a translucent status bar: the viewport is short by the
+   status bar height, so full-screen layers reach down that much further */
+@media (display-mode: standalone) {
+  .frame, .pop-back { bottom: calc(-1 * env(safe-area-inset-top)) !important; height: auto !important; }
+}
+.vs-scroll > * { flex-shrink: 0; }

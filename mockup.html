@@ -491,6 +491,35 @@ button { font: inherit; color: inherit; background: none; border: 0; }
 .dsh .acts { display: flex; gap: 10px; margin-top: auto; } .dsh .acts span { flex: 1; height: 50px; border-radius: 14px; display: grid; place-items: center; font-weight: 700; }
 .dsh .acts .a1 { background: var(--fill); color: var(--tint); } .dsh .acts .a2 { background: var(--green); color: #fff; }
 .dimbg { position: absolute; inset: 0; background: rgba(0,0,0,.25); z-index: 3; }
+
+/* word card v2 */
+.wc { position: absolute; inset: 0; background: rgba(0,0,0,.28); }
+.wcs { position: absolute; left: 0; right: 0; bottom: 0; top: 64px; background: var(--card); border-radius: 30px 30px 0 0; padding: 10px 20px 30px; display: flex; flex-direction: column; gap: 14px; overflow: hidden; }
+.wcs .grab { width: 38px; height: 5px; border-radius: 3px; background: var(--fill); margin: 0 auto; }
+.wcs .top { display: flex; align-items: center; gap: 10px; } .wcs .big { flex: 1; font-size: 34px; font-weight: 800; letter-spacing: -.5px; }
+.wcs .circ { width: 44px; height: 44px; border-radius: 22px; background: var(--fill); display: grid; place-items: center; color: var(--tint); } .wcs .circ svg { width: 20px; height: 20px; }
+.wcs .x { width: 32px; height: 32px; border-radius: 16px; background: var(--fill); display: grid; place-items: center; color: var(--label2); font-size: 14px; }
+.wcs .tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: -6px; } .wcs .tags span { font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 10px; background: var(--fill); color: var(--label2); }
+.wcs .tags .v { background: rgba(255,159,10,.16); color: #E08600; } .wcs .tags .das { background: rgba(48,209,88,.16); color: #28B24B; }
+.wcs .mean { font-size: 22px; font-weight: 700; margin-top: -4px; }
+.wcs .sec { font-size: 12px; font-weight: 800; color: var(--label2); letter-spacing: .5px; margin-bottom: -8px; display: flex; align-items: center; gap: 6px; }
+.gram { background: var(--fill); border-radius: 16px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; font-size: 14px; line-height: 1.6; }
+.gram .li { display: flex; gap: 8px; } .gram .li::before { content: ""; width: 6px; height: 6px; border-radius: 3px; background: var(--tint); margin-top: 8px; flex: 0 0 6px; }
+.gram b { font-weight: 700; } .gde { font-weight: 700; unicode-bidi: isolate; direction: ltr; font-size: 14px; }
+.quote { border-left: 4px solid var(--indigo); padding: 2px 0 2px 12px; display: flex; flex-direction: column; gap: 4px; }
+.quote .who { font-size: 11px; font-weight: 800; color: var(--indigo); letter-spacing: .5px; } .quote .qde { font-size: 17px; font-weight: 600; line-height: 1.45; } .quote .qde b { color: var(--tint); }
+.quote .fa { font-size: 14px; color: var(--label2); }
+.conj { border-radius: 16px; overflow: hidden; background: var(--fill); }
+.conj table { width: 100%; border-collapse: collapse; font-size: 13px; white-space: nowrap; }
+.conj th { font-size: 11px; font-weight: 800; color: var(--label2); text-align: left; padding: 8px 10px 6px; letter-spacing: .3px; }
+.conj td { padding: 6px 10px; border-top: .5px solid var(--sep); } .conj td:first-child { color: var(--label2); } .conj td, .conj th { padding-left: 8px; padding-right: 6px; } .conj td b { color: var(--tint); font-weight: 700; }
+.conj .aux { color: var(--label2); }
+.stats2 { display: flex; gap: 10px; position: absolute; left: 20px; right: 20px; bottom: 26px; }
+.wcs .body { flex: 1; overflow: hidden; display: flex; flex-direction: column; gap: 14px; padding-bottom: 90px; }
+.wcs .body::after { content: ""; }
+.stats2 > div { flex: 1; background: var(--fill); border-radius: 18px; padding: 12px; display: flex; align-items: center; gap: 12px; }
+.stats2 .n { font-size: 24px; font-weight: 800; line-height: 1; } .stats2 .l { font-size: 12px; color: var(--label2); font-weight: 600; margin-top: 3px; }
+.stats2 svg { width: 44px; height: 44px; flex: 0 0 44px; }
 </style>
 </head>
 <body>
@@ -607,7 +636,36 @@ const dictList = sel => `${sb}<div class="hd"><div class="t">Wörterbuch<small>L
   <div class="sec">E</div><div class="grp">${[["s","","ehrlich","","A","صادق"],["n","die","Entspannung","-en","N-die","آرامش"]].map(r => drow(r)).join("")}</div>
   <div class="sec">F</div><div class="grp">${[["k","","freundlich","","A","دوستانه، مهربان"],["p","","fragen","","V","پرسیدن"],["n","die","Freizeit","","N-die","اوقات فراغت"]].map(r => drow(r)).join("")}</div>
   <div class="sec">V</div><div class="grp">${[["s","das","Vorbild","-er","N-das","الگو"],["p","","vorstellen","","V","خود را معرفی کردن"]].map((r, i) => drow(r, sel && i === 0)).join("")}</div></div>`;
+const STATS2 = `<div class="stats2"><div><span style="font-size:26px">👁</span><div><div class="n">3×</div><div class="l">gesehen</div></div></div>
+      <div><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="var(--sep)" stroke-width="4"/><circle cx="18" cy="18" r="15" fill="none" stroke="#30D158" stroke-width="4" stroke-linecap="round" stroke-dasharray="${0.67*94} 94" transform="rotate(-90 18 18)"/></svg><div><div class="n">67%</div><div class="l">2 von 3 richtig</div></div></div></div>`;
 const screens = {
+  wcVerb: () => `${sb}<div class="wc"></div><div class="wcs"><div class="grab"></div>
+    <div class="top"><span class="big">kommen</span><span class="circ">${I.speaker}</span><span class="x">✕</span></div>
+    <div class="tags"><span class="v">Verb · unregelmäßig</span><span>Perfekt mit „sein“</span></div>
+    <div class="mean fa">آمدن</div><div class="body">
+    <div class="sec">KONJUGATION · صرف فعل</div>
+    <div class="conj"><table><tr><th></th><th>Präsens</th><th>Präteritum</th><th>Perfekt</th></tr>
+      ${[["ich","komme","kam","bin"],["du","kommst","kamst","bist"],["er/sie/es","kommt","kam","ist"],["wir","kommen","kamen","sind"],["ihr","kommt","kamt","seid"],["sie/Sie","kommen","kamen","sind"]].map(r => `<tr><td>${r[0]}</td><td><b>${r[1]}</b></td><td>${r[2]}</td><td><span class="aux">${r[3]}</span> gekommen</td></tr>`).join("")}</table></div>
+    <div class="sec">GRAMMATIK · نکتهٔ دستوری</div>
+    <div class="gram fa"><div class="li"><span>با حرف اضافهٔ <span class="gde">aus</span> مبدأ را می‌گوید: <span class="gde">Ich komme aus Berlin.</span></span></div>
+      <div class="li"><span>پرسش: <span class="gde">Woher kommst du?</span> = اهل کجایی؟</span></div>
+      <div class="li"><span>در گذشتهٔ نقلی با <b>sein</b> می‌آید چون حرکت را نشان می‌دهد: <span class="gde">Ich bin gekommen.</span></span></div></div>
+    <div class="sec">AUS DER LEKTION · در درس</div>
+    <div class="quote"><span class="who">ANNA · Satz 12</span><span class="qde">Ich <b>komme</b> aus der Schweiz, aus Zürich.</span><span class="fa">من اهل سوئیسم، از زوریخ.</span></div>
+  </div>${STATS2}</div>`,
+  wcNoun: () => `${sb}<div class="wc"></div><div class="wcs"><div class="grab"></div>
+    <div class="top"><span class="big"><span style="color:#28B24B">das</span> Vorbild</span><span class="circ">${I.speaker}</span><span class="x">✕</span></div>
+    <div class="tags"><span class="das">das · neutral · خنثی</span><span>Plural: die Vorbilder</span></div>
+    <div class="mean fa">الگو، سرمشق</div><div class="body">
+    <div class="sec">GRAMMATIK · نکتهٔ دستوری</div>
+    <div class="gram fa"><div class="li"><span>اسم خنثی است؛ حرف تعریفش همیشه <b>das</b> است: <span class="gde">das Vorbild, ein Vorbild</span></span></div>
+      <div class="li"><span>جمع: <span class="gde">die Vorbilder</span> (پسوند <b>-er</b>)</span></div>
+      <div class="li"><span>ترکیب از <span class="gde">vor</span> (پیش) + <span class="gde">das Bild</span> (تصویر)</span></div>
+      <div class="li"><span>کاربرد رایج: <span class="gde">ein Vorbild sein für …</span> = برای … الگو بودن</span></div></div>
+    <div class="sec">AUS DER LEKTION · در درس</div>
+    <div class="quote"><span class="who">ANNA · Satz 96</span><span class="qde">Sei ein <b>Vorbild</b>!</span><span class="fa">الگو باش!</span></div>
+    <div class="quote" style="border-color:#FF2D55"><span class="who" style="color:#FF2D55">BEN · Satz 97</span><span class="qde">Du bist mein <b>Vorbild</b>.</span><span class="fa">تو الگوی منی.</span></div>
+  </div>${STATS2}</div>`,
   dictA: () => `<div class="dc">${dictList(false)}<div class="chrome"><div class="dk">${tabs("vocab")}${playRound()}</div></div></div>`,
   dictB: () => `<div class="dc">${dictList(true)}<div class="dimbg"></div><div class="dsh"><div class="grab"></div>
     <div class="top"><span class="big"><span class="ar das">das</span> Vorbild</span><span class="spk" style="width:44px;height:44px;border-radius:22px;background:var(--fill);display:grid;place-items:center;color:var(--tint)">${I.speaker}</span></div>
