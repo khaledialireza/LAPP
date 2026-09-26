@@ -580,6 +580,35 @@ button { font: inherit; color: inherit; background: none; border: 0; }
 .prd { grid-template-rows: auto auto minmax(0, 1fr); padding-bottom: 110px; }
 .prd .col { grid-row: 3; } .prd .col .sp3, .prd .col .ex6 { flex: 1; } .prd .sp3 { grid-template-rows: repeat(3, 1fr); } .prd .ex6 { grid-auto-rows: 1fr; }
 .prd .sp3 .c b { font-size: 20px; } .prd .sp3 .c .ic { font-size: 36px; } .prd .ex6 .e b { font-size: 17px; } .prd .ex6 .e .ic { width: 48px; height: 48px; flex-basis: 48px; font-size: 22px; }
+
+/* free speaking */
+.fs { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 50px 16px 30px; gap: 12px; }
+.fs .top { display: flex; align-items: center; gap: 10px; } .fs .top .x { width: 32px; height: 32px; border-radius: 16px; background: var(--fill); display: grid; place-items: center; color: var(--label2); }
+.fs .top .t { flex: 1; font-size: 17px; font-weight: 800; } .fs .top .t small { display: block; font-size: 12px; color: var(--label2); font-weight: 600; }
+.topic { border-radius: 20px; padding: 14px 16px; color: #fff; background: linear-gradient(135deg,#5856D6,#0A84FF); }
+.topic .k { font-size: 11px; font-weight: 800; letter-spacing: .6px; opacity: .85; } .topic b { display: block; font-size: 20px; margin-top: 2px; } .topic .fa { font-size: 13px; opacity: .9; }
+.prompts { display: flex; flex-direction: column; gap: 6px; }
+.prompts .q { display: flex; gap: 10px; align-items: center; padding: 10px 12px; border-radius: 14px; background: var(--card); font-size: 15px; }
+.prompts .q .n { width: 24px; height: 24px; border-radius: 12px; display: grid; place-items: center; font-size: 12px; font-weight: 800; background: var(--fill); color: var(--label2); flex: 0 0 24px; }
+.prompts .q.done { opacity: .55; } .prompts .q.done .n { background: #30D158; color: #fff; } .prompts .q.cur { box-shadow: 0 0 0 2px var(--tint); font-weight: 700; } .prompts .q.cur .n { background: var(--tint); color: #fff; }
+.live { flex: 1; background: var(--card); border-radius: 20px; padding: 14px; font-size: 19px; line-height: 1.55; font-weight: 500; overflow: hidden; position: relative; }
+.live .k { font-size: 11px; font-weight: 800; color: var(--label2); letter-spacing: .5px; margin-bottom: 6px; display: flex; justify-content: space-between; }
+.live .lw { background: rgba(48,209,88,.18); color: #28B24B; border-radius: 6px; padding: 0 3px; font-weight: 700; }
+.live .tw { background: rgba(10,132,255,.16); color: #0A84FF; border-radius: 6px; padding: 0 3px; font-weight: 700; }
+.live .int { color: var(--label3); }
+.live .cursor { display: inline-block; width: 2px; height: 20px; background: var(--tint); vertical-align: middle; animation: none; }
+.cnt { display: flex; gap: 8px; } .cnt div { flex: 1; background: var(--card); border-radius: 14px; padding: 8px 10px; font-size: 12px; color: var(--label2); font-weight: 600; } .cnt b { display: block; font-size: 20px; color: var(--label); }
+.recbar { display: flex; align-items: center; gap: 12px; height: 72px; padding: 0 8px 0 16px; border-radius: 36px; background: var(--card); }
+.recbar .t { font-weight: 800; color: #FF3B30; font-variant-numeric: tabular-nums; } .recbar .wv { flex: 1; display: flex; gap: 3px; align-items: center; height: 30px; overflow: hidden; } .recbar .wv i { width: 3px; flex: 0 0 3px; border-radius: 2px; background: #FF3B30; }
+.recbar .auto { font-size: 11px; font-weight: 800; color: var(--label2); background: var(--fill); padding: 5px 8px; border-radius: 9px; }
+.recbar .mic { width: 60px; height: 60px; border-radius: 30px; background: #FF3B30; display: grid; place-items: center; box-shadow: 0 0 0 6px rgba(255,59,48,.2); } .recbar .mic i { width: 20px; height: 20px; border-radius: 5px; background: #fff; }
+/* result */
+.res { flex: 1; display: flex; flex-direction: column; gap: 10px; overflow: hidden; }
+.res .big { display: flex; align-items: center; gap: 14px; background: var(--card); border-radius: 20px; padding: 14px; } .res .big svg { width: 72px; height: 72px; }
+.res .big b { font-size: 30px; display: block; } .res .big span { font-size: 13px; color: var(--label2); }
+.chipsw { display: flex; flex-wrap: wrap; gap: 6px; } .chipsw span { padding: 5px 10px; border-radius: 12px; font-size: 14px; font-weight: 700; }
+.chipsw .u { background: rgba(48,209,88,.16); color: #28B24B; } .chipsw .m { background: var(--fill); color: var(--label2); font-weight: 600; }
+.qres { background: var(--card); border-radius: 16px; padding: 10px 12px; display: flex; gap: 10px; align-items: flex-start; font-size: 14px; } .qres .s { font-weight: 800; } .qres small { display: block; color: var(--label2); font-size: 12px; margin-top: 2px; }
 </style>
 </head>
 <body>
@@ -706,6 +735,27 @@ const FCW = `<div class="fcw"><span class="ic">🃏</span><div><b>Karteikarten</
 const EX6 = `<div class="ex6">${[["🔁","Übersetzen","ترجمه",12,20,"#007AFF"],["✏️","Lücke füllen","جای خالی",8,20,"#FF9500"],["🧱","Satz bauen","ساختن جمله",5,20,"#30B0C7"],["🎧","Hören","شنیدن",10,15,"#AF52DE"],["💬","Antworten","جواب دادن",3,15,"#34C759"],["🎤","Sprechen","گفتن",6,10,"#FF2D55"]].map(e => `<div class="e"><span class="ic" style="background:${e[5]}">${e[0]}</span><div class="tx"><b>${e[1]}</b><small><span class="fa">${e[2]}</span> · ${e[3]}/${e[4]}</small><div class="bar"><i style="width:${e[3]/e[4]*100}%;background:${e[5]}"></i></div></div></div>`).join("")}</div>`;
 const EXM = `<div class="exm"><span style="font-size:28px">🏁</span><div><b>Prüfung</b><small class="fa">۱۰ تا ۱۵ سؤال · بهترین: ۷۰٪</small></div><span class="btn5">Start</span></div>`;
 const screens = {
+  fsA: () => { const wv = Array.from({length: 26}, (_, i) => `<i style="height:${6+Math.abs(Math.sin(i*.8)*22)}px"></i>`).join("");
+    return `${sb}<div class="fs"><div class="top"><span class="x">✕</span><div class="t">Frei sprechen<small class="fa">مکالمهٔ آزاد · هر چه می‌خواهی بگو</small></div></div>
+    <div class="cnt"><div><b>14</b>Wörter gesagt</div><div><b style="color:#28B24B">9</b>aus Lektion 1</div><div><b>1:12</b>Zeit</div></div>
+    <div class="live"><div class="k"><span>LIVE · <span class="fa">هم‌زمان</span></span><span style="color:#28B24B">● Lektion-Wort</span></div>
+      <span class="lw">Hallo</span>, <span class="lw">ich</span> <span class="lw">heiße</span> Ali. <span class="lw">Ich</span> <span class="lw">komme</span> <span class="lw">aus</span> dem Iran und <span class="lw">wohne</span> jetzt in Hamburg. <span class="lw">Mein</span> <span class="lw">Hobby</span> ist <span class="int">Fußball spielen und</span><span class="cursor"></span></div>
+    <div class="recbar"><span class="t">● 1:12</span><div class="wv">${wv}</div><span class="auto">AUTO</span><div class="mic"><i></i></div></div></div>`; },
+  fsB: () => `${sb}<div class="fs"><div class="top"><span class="x">✕</span><div class="t">Thema sprechen<small class="fa">صحبت دربارهٔ یک موضوع</small></div></div>
+    <div class="topic"><div class="k">THEMA · موضوع</div><b>Dein Wochenende</b><div class="fa">دربارهٔ آخر هفته‌ات حرف بزن: کجا بودی، چه کردی؟</div></div>
+    <div class="live"><div class="k"><span>LIVE</span><span><span style="color:#0A84FF">● zum Thema</span> · <span style="color:#28B24B">● Lektion</span></span></div>
+      Am <span class="tw">Samstag</span> <span class="lw">war</span> <span class="lw">ich</span> im <span class="tw">Park</span>. Das <span class="tw">Wetter</span> <span class="lw">war</span> <span class="lw">schön</span>. <span class="lw">Ich</span> habe ein <span class="tw">Buch</span> <span class="lw">gelesen</span> und <span class="int">Musik gehört</span><span class="cursor"></span></div>
+    <div class="recbar"><span class="t">● 0:48</span><div class="wv">${Array.from({length: 26}, (_, i) => `<i style="height:${6+Math.abs(Math.sin(i*.6+1)*22)}px"></i>`).join("")}</div><span class="auto">MANUELL</span><div class="mic"><i></i></div></div></div>`,
+  fsC: () => `${sb}<div class="fs"><div class="top"><span class="x">✕</span><div class="t">Mit Stichpunkten<small class="fa">صحبت با سرخط‌ها · ۲ از ۴</small></div></div>
+    <div class="prompts"><div class="q done"><span class="n">✓</span>Wie heißt du?</div><div class="q cur"><span class="n">2</span>Woher kommst du?</div><div class="q"><span class="n">3</span>Wo wohnst du jetzt?</div><div class="q"><span class="n">4</span>Was ist dein Beruf?</div></div>
+    <div class="live"><div class="k"><span>LIVE</span><span style="color:#28B24B">✓ passt zur Frage</span></div>Ich <span class="tw">komme</span> <span class="tw">aus</span> dem <span class="tw">Iran</span>, aus Teheran.<span class="cursor"></span></div>
+    <div class="recbar"><span class="t">● 0:06</span><div class="wv">${Array.from({length: 26}, (_, i) => `<i style="height:${6+Math.abs(Math.sin(i*.9+2)*22)}px"></i>`).join("")}</div><span class="auto">AUTO</span><div class="mic"><i></i></div></div></div>`,
+  fsR: () => `${sb}<div class="fs"><div class="top"><span class="x">✕</span><div class="t">Ergebnis<small class="fa">نتیجه · مکالمهٔ آزاد</small></div></div>
+    <div class="res"><div class="big"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="var(--fill)" stroke-width="4"/><circle cx="18" cy="18" r="15" fill="none" stroke="#30D158" stroke-width="4" stroke-linecap="round" stroke-dasharray="${.64*94} 94" transform="rotate(-90 18 18)"/></svg><div><b>23 Wörter</b><span class="fa">از واژه‌های درس ۱ · ۶۴٪ از کل حرف‌هایت · ۲:۱۵ دقیقه</span></div></div>
+    <div class="sec" style="font-size:12px;font-weight:800;color:var(--label2)">BENUTZT · استفاده کردی</div><div class="chipsw">${"ich heißen kommen aus wohnen mein Hobby Beruf Lehrer gern spielen lesen Musik hören Wochenende Samstag Park schön".split(" ").map(w => `<span class="u">${w}</span>`).join("")}</div>
+    <div class="sec" style="font-size:12px;font-weight:800;color:var(--label2)">PROBIER NÄCHSTES MAL · دفعهٔ بعد امتحان کن</div><div class="chipsw">${"Freizeit reisen kochen Vorbild Traum Erfolg".split(" ").map(w => `<span class="m">${w}</span>`).join("")}</div>
+    <div class="qres"><span class="s" style="color:#30D158">✓</span><div>Woher kommst du?<small>„Ich komme aus dem Iran“ · Antwort passt</small></div></div>
+    <div class="qres"><span class="s" style="color:#FF9F0A">~</span><div>Was ist dein Beruf?<small class="fa">«Beruf» یا اسم شغل شنیده نشد — مثلاً «Ich bin Lehrer.»</small></div></div></div></div>`,
   prac: () => `${sb}<div class="pr"><div class="hd"><div><div class="t">Üben</div><small>44 / 100 Übungen · Lektion 1</small></div><div class="ovr">${OVR(44)}<b>44%</b></div></div>
     ${REC}<div class="sec"><span>SPRECHEN · صحبت</span></div>${SP3}<div class="sec"><span>WORTSCHATZ</span></div>${FCW}<div class="sec"><span>ÜBUNGEN · تمرین‌ها</span><span>44 / 100</span></div>${EX6}${EXM}
     </div><div class="chrome"><div class="dk">${tabs("practice")}${playRound()}</div></div>`,

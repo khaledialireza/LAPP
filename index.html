@@ -16,7 +16,7 @@
   <meta name="description" content="LAPP — آموزش زبان آلمانی با دیالوگ صوتی، واژگان و تمرین.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=muigxayh">
+  <link rel="stylesheet" href="style.css?v=muipf6ha">
 </head>
 <body data-screen="home">
   <div class="frame">
@@ -139,7 +139,8 @@
           </div>
           <div class="hub-scroll ph-grid">
             <button class="ph-rec" id="phRec"></button>
-            <div class="ph-col ph-speak"><h3 class="ph-h"><span>SPRECHEN · <span class="fa" data-i18n="speaking"></span></span></h3><div class="sp3" id="phSpeak"></div></div>
+            <div class="ph-col ph-speak"><h3 class="ph-h"><span>SPRECHEN · <span class="fa" data-i18n="speaking"></span></span></h3><div class="sp3" id="phSpeak"></div>
+              <h3 class="ph-h ph-h2"><span>FREI SPRECHEN · <span class="fa" data-i18n="fsFree"></span></span></h3><div class="sp3" id="phFree"></div></div>
             <button class="ph-fc" data-open="fc"><span class="ic">🃏</span><span class="tx"><b>Karteikarten</b><small class="fa" id="phFcSub"></small></span><span class="due" id="phDue"></span></button>
             <div class="ph-col ph-ex"><h3 class="ph-h"><span>ÜBUNGEN · <span class="fa" data-i18n="exercises"></span></span><span id="phExCount"></span></h3><div class="ex6" id="hubEx"></div></div>
             <button class="ph-exam" data-open="exam"><span class="ic">🏁</span><span class="tx"><b>Prüfung</b><small class="fa" id="phExamSub"></small></span><span class="go">Start</span></button>
@@ -191,6 +192,20 @@
             <div class="dlg-list" id="dlgList"></div>
             <div class="dlg-foot" id="dlgFoot"></div>
             <div class="dlg-sheet" id="dlgSheet" hidden></div>
+          </div>
+
+          <div class="pv-panel" id="pFree" hidden>
+            <div class="fs-top" id="fsTop"></div>
+            <div class="cnt" id="fsCnt"></div>
+            <div class="live" id="fsLive"></div>
+            <div class="fs-res" id="fsRes" hidden></div>
+            <div class="recbar" id="fsBar">
+              <span class="rtime"><span class="rec-dot"></span><span class="js-rectime">0:00</span></span>
+              <span class="rp-wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+              <button class="auto" id="fsAuto">AUTO</button>
+              <button class="fs-next" id="fsNext" hidden>›</button>
+              <button class="rp-mic" id="fsMic" aria-label="Mikrofon"></button>
+            </div>
           </div>
 
           <div class="pv-panel" id="pEnd" hidden></div>
@@ -253,18 +268,19 @@
     </div>
   </div>
 
-  <script src="data/lessons.js?v=muigxayh"></script>
-  <script src="data/lesson1-fa.js?v=muigxayh"></script>
-  <script src="data/lesson1-times.js?v=muigxayh"></script>
-  <script src="data/lesson1-words.js?v=muigxayh"></script>
-  <script src="data/dict-de.js?v=muigxayh"></script>
-  <script src="data/dict-tr.js?v=muigxayh"></script>
-  <script src="data/lesson1-ru.js?v=muigxayh"></script>
-  <script src="data/lesson1-uk.js?v=muigxayh"></script>
-  <script src="i18n.js?v=muigxayh"></script>
-  <script src="data/verbs-de.js?v=muigxayh"></script>
-  <script src="grammar.js?v=muigxayh"></script>
-  <script src="exercises.js?v=muigxayh"></script>
-  <script src="app.js?v=muigxayh"></script>
+  <script src="data/lessons.js?v=muipf6ha"></script>
+  <script src="data/lesson1-fa.js?v=muipf6ha"></script>
+  <script src="data/lesson1-times.js?v=muipf6ha"></script>
+  <script src="data/lesson1-speak.js?v=muipf6ha"></script>
+  <script src="data/lesson1-words.js?v=muipf6ha"></script>
+  <script src="data/dict-de.js?v=muipf6ha"></script>
+  <script src="data/dict-tr.js?v=muipf6ha"></script>
+  <script src="data/lesson1-ru.js?v=muipf6ha"></script>
+  <script src="data/lesson1-uk.js?v=muipf6ha"></script>
+  <script src="i18n.js?v=muipf6ha"></script>
+  <script src="data/verbs-de.js?v=muipf6ha"></script>
+  <script src="grammar.js?v=muipf6ha"></script>
+  <script src="exercises.js?v=muipf6ha"></script>
+  <script src="app.js?v=muipf6ha"></script>
 </body>
 </html>

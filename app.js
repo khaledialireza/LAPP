@@ -357,6 +357,8 @@
       notes.push(...sm.notes);
       if (sm.table) table = `<div class="vs-sec">FORMEN · <span class="fa">صورت‌ها</span></div><div class="conj"><table><tr>${sm.table.head.map(h => `<th>${h}</th>`).join("")}</tr>${sm.table.rows.map(r => `<tr>${r.map((c, i) => i ? `<td>${esc(c)}</td>` : `<td><b>${esc(c)}</b></td>`).join("")}</tr>`).join("")}</table></div>`;
     }
+    const inL = (keyLessons()[key] || []).map(i => `L${i + 1} · ${LESSONS[i].level || ""}`);
+    tags.push(inL.length ? `<span class="pos P">${inL.join(" · ")}</span>` : `<span class="pos P">nicht in den Lektionen</span>`);
     // notes from the dictionary first (usage, idioms), then the rules
     const own = (v.g || "").split(" · ").filter(x => x && x !== v.de && !/^جمع:/.test(x) && !(pg === "V" && /^(ich|du|er|sie|es|wir|ihr|Sie) \S+$/.test(x))).map(x => `<bdi dir="auto">${esc(x)}</bdi>`);
     const all = [...own, ...notes];
@@ -511,7 +513,8 @@
     for (let j = 0; j < said.length; j++) {
       const s = canon(said[j]);
       if (s === c || (slip(c) && lev(s, c) <= slip(c))) return true;
-      if (j + 1 < said.length && lev(said[j] + said[j + 1], c) <= slip(c)) return true;
+      // recognizers split compounds and zu-infinitives: "kennen zu lernen" = kennenzulernen
+      for (let n = 2; n <= 3 && j + n <= said.length; n++) if (lev(said.slice(j, j + n).join(""), c) <= slip(c)) return true;
     }
     return false;
   }
@@ -821,6 +824,9 @@
     const dl = store.get("dlg", {});
     const SP = [["role", "🎭", "Rollenspiel", t("role"), "linear-gradient(135deg,#FF2D55,#FF6B9A)"], ["gap", "🧩", "Lückendialog", t("gap"), "linear-gradient(135deg,#AF52DE,#8A6CF0)"], ["read", "📖", "Vorlesen", t("readSub2"), "linear-gradient(135deg,#5856D6,#0A84FF)"]];
     $("#phSpeak").innerHTML = SP.map(([k, ic, de, fa, bg]) => `<button class="c" data-open="${k}" style="background:${bg}"><span class="sc">${dl[k] != null ? dl[k] + "%" : "—"}</span><span class="ic">${ic}</span><span class="nm"><b>${de}</b><small class="fa">${esc(fa)}</small></span></button>`).join("");
+    const fsBest = store.get("fs", {});
+    const FS = [["free", "🗣️", "Frei sprechen", t("fsFreeSub"), "linear-gradient(135deg,#FF9F0A,#FF6B3D)"], ["topic", "💡", "Thema", t("fsTopicSub"), "linear-gradient(135deg,#30B0C7,#0A84FF)"], ["cue", "📝", "Stichpunkte", t("fsCueSub"), "linear-gradient(135deg,#34C759,#30B0C7)"]];
+    $("#phFree").innerHTML = FS.map(([k, ic, de, fa, bg]) => `<button class="c" data-open="${k}" style="background:${bg}"><span class="sc">${fsBest[k] != null ? fsBest[k] + (k === "free" ? "" : "%") : "—"}</span><span class="ic">${ic}</span><span class="nm"><b>${de}</b><small class="fa">${esc(fa)}</small></span></button>`).join("");
     const due = dueWords(), kn = vocabList.filter(v => state.known.has(v.key)).length;
     $("#phDue").textContent = due.length ? `${due.length} fällig` : "✓";
     $("#phDue").classList.toggle("none", !due.length);
@@ -844,7 +850,7 @@
     $("#pTitle").innerHTML = title; $("#pProg").textContent = "";
   }
   function closeView() {
-    exam.active = false; dlg.run++; stopListening(); recCancel(); $("#dlgSheet").hidden = true;
+    exam.active = false; dlg.run++; fs.run++; stopListening(); recCancel(); $("#dlgSheet").hidden = true;
     if (!player.paused) player.pause();
     $("#pView").hidden = true; $("#pView").classList.remove("exam"); $("#pHub").hidden = false; renderHub();
   }
@@ -861,6 +867,7 @@
       showPanel("pEx", `${de} <span class="fa">· ${fa}</span>`); renderExercise();
     } else if (k === "fc") { showPanel("pFc", `Karteikarten <span class="fa">· ${t("flashcards")}</span>`); fc.right = fc.wrong = fc.streak = 0; nextCard(); }
     else if (k === "exam") startExam();
+    else if (k === "free" || k === "topic" || k === "cue") startFree(k);
     else startDialog(k);
   });
 
@@ -958,17 +965,20 @@
     rec.r = r;
     try { r.start(); } catch { rec.r = null; recDone(); }
   }
+  let recOpts = {};
   function recStart(onUpdate, onDone) {
     stopListening();
     rec.id = (rec.id || 0) + 1;
-    Object.assign(rec, { on: true, finals: [], interim: "", locked: false, t0: Date.now(), last: 0, err: null, onUpdate, onDone, finished: false });
+    Object.assign(rec, { on: true, finals: [], interim: "", locked: false, t0: Date.now(), last: 0, err: null, onUpdate, onDone, finished: false, max: 30000, silence: 2000 }, recOpts);
+    recOpts = {};
     document.body.classList.add("recording");
     srSession();
     clearInterval(rec.tick);
     rec.tick = setInterval(() => {
       const el = $("#rpTime"); if (el) el.textContent = fmt((Date.now() - rec.t0) / 1000);
-      if (rec.locked && rec.last && Date.now() - rec.last > 2000) recStop();
-      if (Date.now() - rec.t0 > 30000) recStop();
+      $$(".js-rectime").forEach(e => e.textContent = fmt((Date.now() - rec.t0) / 1000));
+      if (rec.locked && Date.now() - (rec.last || rec.t0) > rec.silence) recStop();
+      if (Date.now() - rec.t0 > rec.max) recStop();
     }, 200);
   }
   function recStop() {
@@ -989,6 +999,181 @@
     cb?.([...new Set(alts)].filter(Boolean), rec.err);
   }
   const recText = () => [...rec.finals.map(sg => sg[0]), rec.interim].join(" ");
+
+  /* ---------- Free speaking: free · topic · cue prompts ----------
+     Every spoken word is looked up in the whole dictionary (including verb forms)
+     and coloured live: blue = topic word, green = this lesson, yellow = other lesson. */
+  const fs = { run: 0, mode: "", scope: "lesson", auto: store.get("fsAuto", false), topic: null, set: null, qi: 0, answers: [], text: "" };
+  let formIdx = null;
+  function formIndex() {
+    if (formIdx) return formIdx;
+    formIdx = {};
+    for (const [k, v] of Object.entries(DICT)) if ((v.p || "").includes("فعل") && window.Grammar) {
+      try { const vb = window.Grammar.verb(k); vb.rows.forEach(r => [r.pr, r.pt].forEach(f => { const w = f.split(" ")[0].toLowerCase(); formIdx[w] ??= k; })); formIdx[vb.pp.toLowerCase()] ??= k; } catch {}
+    }
+    return formIdx;
+  }
+  const wordKey = w => w && (dictKey(w) || formIndex()[w.toLowerCase()] || null);
+  let kLess = null, kLessFor = -1;
+  function keyLessons() {
+    if (kLess && kLessFor === state.idx) return kLess;
+    kLess = {}; kLessFor = state.idx;
+    LESSONS.forEach((L, i) => (Array.isArray(L.words) ? L.words : i === state.idx ? lessonKeys(L, lines) : []).forEach(k => (kLess[k] ||= []).push(i)));
+    return kLess;
+  }
+  const speakData = () => (LESSONS[state.idx] || {}).speak || { topics: [], cues: [] };
+  function classify(text) {
+    const toks = text.split(/\s+/).filter(Boolean), kl = keyLessons();
+    const topicSet = fs.mode === "topic" && fs.topic ? new Set(fs.topic.words.split(" ").map(w => w.toLowerCase())) : null;
+    return toks.map(tok => {
+      const w = cleanWord(tok), k = wordKey(w);
+      let cls = "";
+      if (k) {
+        const ls = kl[k] || [];
+        if (topicSet && (topicSet.has(k.replace(/_.*/, "").toLowerCase()) || topicSet.has(w.toLowerCase()))) cls = "tw";
+        else if (fs.scope === "all" && fs.mode === "free") cls = "lw";
+        else cls = ls.includes(state.idx) ? "lw" : ls.length ? "ow" : "dw";
+      } else if (topicSet && topicSet.has(w.toLowerCase())) cls = "tw";
+      return { tok, w, k, cls };
+    });
+  }
+  // interim words are coloured too (slightly faded) so feedback is immediate
+  const liveHtml = (fin, interim) => {
+    const part = (txt, extra) => classify(txt).map(x => `<span class="${x.cls} ${extra}">${esc(x.tok)}</span>`).join(" ");
+    return part(fin, "") + (interim ? " " + part(interim, "int") : "") + `<span class="cursor"></span>`;
+  };
+  function startFree(mode) {
+    stopListening(); recCancel(); fs.run++; fs.mode = mode; fs.qi = 0; fs.answers = []; fs.text = "";
+    const sd = speakData();
+    if (mode === "topic") fs.topic = sd.topics[Math.floor(Math.random() * sd.topics.length)];
+    if (mode === "cue") fs.set = sd.cues[Math.floor(Math.random() * sd.cues.length)];
+    const T = { free: ["Frei sprechen", t("fsFreeSub")], topic: ["Thema", t("fsTopicSub")], cue: ["Stichpunkte", t("fsCueSub")] }[mode];
+    showPanel("pFree", `${T[0]} <span class="fa">· ${esc(T[1])}</span>`);
+    $("#fsRes").hidden = true; $("#fsLive").hidden = false; $("#fsBar").hidden = false; $("#fsCnt").hidden = false;
+    renderFreeTop(); renderFreeLive("", "");
+    $("#fsAuto").classList.toggle("on", fs.auto);
+    $("#fsMic").innerHTML = MIC_SVG;
+    freeGate();
+  }
+  // ask for the microphone once, with a clear message if it is blocked
+  function freeGate() {
+    $("#fsLive").innerHTML = `<div class="fs-gate"><button class="btn big" id="fsStart">🎤 Start</button></div>`;
+    $("#fsBar").hidden = true;
+    $("#fsStart").onclick = async () => {
+      unlockAudio();
+      const r = await ensureMic();
+      if (!r.ok) { $("#fsLive").innerHTML = `<div class="fs-gate"><p class="fa warn mic-msg">${MIC_MSG[r.why]}</p><button class="btn big" id="fsStart">🎤 ${t("allowAgain")}</button></div>`; $("#fsStart").onclick = freeGate; return; }
+      $("#fsBar").hidden = false; $("#fsLive").innerHTML = ""; renderFreeLive("", ""); freeRecStart();
+    };
+  }
+  function renderFreeTop() {
+    const lang = I18N.lang, sd = speakData();
+    if (fs.mode === "free") $("#fsTop").innerHTML = `<div class="ly-seg" id="fsScope"><button data-sc="lesson" class="${fs.scope === "lesson" ? "on" : ""}">Lektion ${state.idx + 1}</button><button data-sc="all" class="${fs.scope === "all" ? "on" : ""}">Alle Wörter</button></div><p class="fa fs-hint">${t("fsHintFree")}</p>`;
+    if (fs.mode === "topic") { const tp = fs.topic || {}; $("#fsTop").innerHTML = `<div class="topic"><div class="k">THEMA · <span class="fa">موضوع</span></div><b>${esc(tp.de || "")}</b><div class="fa">${esc(tp[lang] || tp.fa || "")}</div><button class="tp-new" id="fsNewTopic" aria-label="anderes Thema">↻</button></div>`; }
+    if (fs.mode === "cue") $("#fsTop").innerHTML = `<div class="prompts">${fs.set.items.map((q, i) => { const a = fs.answers[i]; const st = a ? (a.ok ? "done" : "part") : i === fs.qi ? "cur" : ""; return `<div class="q ${st}"><span class="n">${a ? (a.ok ? "✓" : "~") : i + 1}</span><span><b>${esc(q.q)}</b> <small class="fa">${esc(q.fa)}</small></span></div>`; }).join("")}</div>`;
+    $("#fsNext").hidden = fs.mode !== "cue";
+  }
+  $("#fsTop").addEventListener("click", e => {
+    const sc = e.target.closest("[data-sc]"); if (sc) { fs.scope = sc.dataset.sc; renderFreeTop(); renderFreeLive(fs.text, ""); return; }
+    if (e.target.closest("#fsNewTopic")) { const tps = speakData().topics; fs.topic = tps[(tps.indexOf(fs.topic) + 1) % tps.length]; renderFreeTop(); renderFreeLive(fs.text, ""); }
+  });
+  function renderFreeLive(fin, interim) {
+    const cl = classify(fin), words = cl.filter(x => /[a-zäöüß]/i.test(x.w));
+    const uniq = new Set(cl.filter(x => x.k).map(x => x.k));
+    const lessonU = new Set(cl.filter(x => x.cls === "lw" || x.cls === "tw").map(x => x.k || x.w));
+    const legend = fs.mode === "topic" ? `<span class="c-tw">● Thema</span> <span class="c-lw">● Lektion</span>` : fs.mode === "free" && fs.scope === "all" ? `<span class="c-lw">● Wörterbuch</span>` : `<span class="c-lw">● Lektion ${state.idx + 1}</span> <span class="c-ow">● andere</span>`;
+    $("#fsCnt").innerHTML = `<div><b>${words.length}</b>Wörter gesagt</div><div><b class="c-lw">${fs.mode === "topic" ? cl.filter(x => x.cls === "tw").length : lessonU.size}</b>${fs.mode === "topic" ? "zum Thema" : fs.scope === "all" && fs.mode === "free" ? "im Wörterbuch" : "aus Lektion " + (state.idx + 1)}</div><div><b>${uniq.size}</b>verschiedene</div>`;
+    if (!$("#fsLive .fs-gate")) $("#fsLive").innerHTML = `<div class="k"><span>LIVE · <span class="fa">هم‌زمان</span></span><span id="fsLegend">${legend}</span></div><div class="lv" dir="ltr">${fin || interim ? liveHtml(fin, interim) : `<span class="ph fa">${fs.mode === "cue" ? t("fsHintCue") : "🎤 …"}</span>`}</div>`;
+    const lv = $("#fsLive .lv"); if (lv) lv.scrollTop = lv.scrollHeight;
+  }
+  function freeRecStart() {
+    if (rec.on) return;
+    const run = fs.run;
+    recOpts = fs.mode === "cue" ? { max: 60000, silence: 2500 } : { max: 300000, silence: 6000 };
+    recStart(() => { if (run !== fs.run) return; renderFreeLive(fs.text + " " + rec.finals.map(sg => sg[0]).join(" "), rec.interim); },
+      (alts, err) => { if (run === fs.run) freeDone(alts, err); });
+    if (fs.auto) { rec.locked = true; document.body.classList.add("rec-locked"); }
+  }
+  $("#fsMic").addEventListener("click", () => { unlockAudio(); rec.on ? recStop() : freeRecStart(); });
+  $("#fsAuto").addEventListener("click", () => { fs.auto = !fs.auto; store.set("fsAuto", fs.auto); $("#fsAuto").classList.toggle("on", fs.auto); if (rec.on) { rec.locked = fs.auto; document.body.classList.toggle("rec-locked", fs.auto); } });
+  $("#fsNext").addEventListener("click", () => { if (rec.on) { recStop(); return; } if (fs.mode === "cue") { fs.answers[fs.qi] ||= { ok: false, said: "" }; nextCue(); } });
+  function freeDone(alts, err) {
+    document.body.classList.remove("rec-locked");
+    if (err === "not-allowed" || err === "service-not-allowed") { $("#fsLive").innerHTML = `<p class="fa warn mic-msg">${MIC_MSG.denied}</p>`; return; }
+    const said = (alts[0] || "").trim();
+    if (fs.mode === "cue") {
+      const q = fs.set.items[fs.qi], ok = said && cueMatch(q, alts);
+      fs.answers[fs.qi] = { ok: !!ok, said };
+      if (ok) logDay("s", 1);
+      renderFreeTop();
+      renderFreeLive(said, "");
+      const lg = $("#fsLegend"); if (lg) lg.innerHTML = ok ? `<span class="c-lw">✓ passt zur Frage</span>` : `<span class="c-ow">~ ${said ? "Beispiel: " + esc(q.ex) : t("fsNotHeard")}</span>`;
+      const run = fs.run;
+      if (ok) { setTimeout(() => run === fs.run && nextCue(), 1400); return; }
+      // not yet: one more try, then show the example and move on
+      fs.tries = (fs.tries || 0) + 1;
+      if (fs.tries >= 2) setTimeout(() => run === fs.run && nextCue(), 2600);
+      else { fs.answers[fs.qi] = undefined; renderFreeTop(); if (fs.auto) setTimeout(() => run === fs.run && freeRecStart(), 1800); }
+      return;
+    }
+    fs.text = (fs.text + " " + said).trim();
+    renderFreeLive(fs.text, "");
+    if (fs.text) showFreeResult();
+  }
+  function cueMatch(q, alts) {
+    return alts.some(a => { const ws = new Set(window.Practice.words(window.Practice.norm(a))); return q.need.some(group => group.every(pat => pat.split("|").some(p => ws.has(window.Practice.norm(p))))); });
+  }
+  function nextCue() {
+    fs.tries = 0; fs.qi++;
+    if (fs.qi >= fs.set.items.length) { showFreeResult(); return; }
+    renderFreeTop(); renderFreeLive("", "");
+    if (fs.auto) freeRecStart();
+  }
+  function showFreeResult() {
+    stopListening(); recCancel();
+    const kl = keyLessons(), best = store.get("fs", {});
+    let html = "";
+    if (fs.mode === "cue") {
+      const ok = fs.answers.filter(a => a && a.ok).length, n = fs.set.items.length, pct = Math.round(ok / n * 100);
+      best.cue = Math.max(best.cue || 0, pct);
+      html = `<div class="big">${ringSvgP(pct)}<div><b>${ok} / ${n}</b><span>Antworten passen</span></div></div>` + fs.set.items.map((q, i) => { const a = fs.answers[i] || {}; return `<div class="qres"><span class="s" style="color:${a.ok ? "#30D158" : "#FF9F0A"}">${a.ok ? "✓" : "~"}</span><div><b>${esc(q.q)}</b><small>${a.said ? "„" + esc(a.said) + "“" : `<span class="fa">${t("fsNotHeard")}</span>`}${a.ok ? "" : ` · <i>${esc(q.ex)}</i>`}</small></div></div>`; }).join("");
+    } else {
+      const cl = classify(fs.text), words = cl.filter(x => /[a-zäöüß]/i.test(x.w)).length;
+      const used = [...new Map(cl.filter(x => x.k).map(x => [x.k, x])).values()];
+      const inL = used.filter(x => (kl[x.k] || []).includes(state.idx)), other = used.filter(x => !(kl[x.k] || []).includes(state.idx));
+      const chip = x => `<button class="${x.cls}" data-entry="${esc(x.k)}">${esc(x.k.replace(/_.*/, ""))}</button>`;
+      const notUsed = shuffleArr(vocabList.filter(v => !used.some(u => u.k === v.key) && /^(اسم|فعل|صفت)/.test(v.p || ""))).slice(0, 8);
+      if (fs.mode === "topic") {
+        const tw = used.filter(x => x.cls === "tw"), content = used.filter(x => /^(اسم|فعل|صفت)/.test(DICT[x.k]?.p || ""));
+        const rel = content.length ? Math.round(tw.length / content.length * 100) : 0;
+        best.topic = Math.max(best.topic || 0, rel);
+        const miss = fs.topic.words.split(" ").filter(w => !used.some(u => u.k.replace(/_.*/, "").toLowerCase() === w.toLowerCase())).slice(0, 8);
+        html = `<div class="big">${ringSvgP(rel)}<div><b>${tw.length} Themenwörter</b><span class="fa">${tw.length >= 3 ? t("fsTopicOk") : t("fsTopicLow")} · ${rel}% · ${words} Wörter</span></div></div>
+          <div class="rh">THEMA · <span class="fa">${t("fsUsed")}</span></div><div class="chipsw">${tw.map(chip).join("") || "—"}</div>
+          <div class="rh">ANDERE WÖRTER</div><div class="chipsw">${used.filter(x => x.cls !== "tw").map(chip).join("") || "—"}</div>
+          <div class="rh">${t("fsTry").toUpperCase()}</div><div class="chipsw">${miss.map(w => `<span class="m">${esc(w)}</span>`).join("")}</div>`;
+      } else if (fs.scope === "all") {
+        best.free = Math.max(best.free || 0, used.length);
+        html = `<div class="big">${ringSvgP(Math.min(100, used.length * 2))}<div><b>${used.length} Wörter</b><span class="fa">از دیکشنری · ${words} کلمه گفتی · روی هر کلمه بزن تا سطح و درسش را ببینی</span></div></div>
+          <div class="rh">${t("fsUsed").toUpperCase()}</div><div class="chipsw">${used.map(chip).join("") || "—"}</div>`;
+      } else {
+        best.free = Math.max(best.free || 0, inL.length);
+        html = `<div class="big">${ringSvgP(Math.round(inL.length / (vocabList.length || 1) * 100 * 5))}<div><b>${inL.length} aus Lektion ${state.idx + 1}</b><span>${other.length} aus anderen Lektionen / Wörterbuch · ${words} Wörter gesagt</span></div></div>
+          <div class="rh">LEKTION ${state.idx + 1}</div><div class="chipsw">${inL.map(chip).join("") || "—"}</div>
+          ${other.length ? `<div class="rh">ANDERE</div><div class="chipsw">${other.map(chip).join("")}</div>` : ""}
+          <div class="rh">${t("fsTry").toUpperCase()}</div><div class="chipsw">${notUsed.map(v => `<button class="m" data-entry="${esc(v.key)}">${esc(v.de)}</button>`).join("")}</div>`;
+      }
+      const sentences = (fs.text.match(/[^.!?]+/g) || []).filter(x => x.trim().split(/\s+/).length >= 3).length || Math.floor(words / 6);
+      if (sentences) logDay("s", Math.min(sentences, 20));
+    }
+    store.set("fs", best);
+    $("#fsRes").innerHTML = html + `<div class="fs-acts"><button class="vs-b sec" id="fsAgain">↻ Nochmal</button></div>`;
+    $("#fsRes").hidden = false; $("#fsLive").hidden = true; $("#fsBar").hidden = true; $("#fsCnt").hidden = true;
+    if (fs.mode === "cue") $("#fsTop").innerHTML = "";
+    $("#fsAgain").onclick = () => startFree(fs.mode);
+  }
+  $("#fsRes").addEventListener("click", e => { const b = e.target.closest("[data-entry]"); if (b) openEntry(b.dataset.entry); });
+  const ringSvgP = pct => `<svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" stroke-width="4" opacity=".12"/><circle cx="18" cy="18" r="15" fill="none" stroke="#30D158" stroke-width="4" stroke-linecap="round" pathLength="100" stroke-dasharray="${Math.min(100, pct)} 100" transform="rotate(-90 18 18)" ${pct ? "" : 'opacity="0"'}/></svg>`;
 
   /* ---------- Dialog as a chat: partner lines play, your line waits for the mic ---------- */
   function bubble(it, k) {
