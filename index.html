@@ -16,7 +16,7 @@
   <meta name="description" content="LAPP — آموزش زبان آلمانی با دیالوگ صوتی، واژگان و تمرین.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=muicas93">
+  <link rel="stylesheet" href="style.css?v=muigxayh">
 </head>
 <body data-screen="home">
   <div class="frame">
@@ -132,19 +132,18 @@
       <!-- PRACTICE -->
       <section class="screen" id="practice">
         <div class="p-hub" id="pHub">
-          <div class="screen-head"><h1>Üben <small class="fa" data-i18n="speakNotWrite"></small></h1><div class="ex-stats" id="exStats"></div></div>
-          <div class="hub-scroll">
-            <h3 class="hub-h">Sprechen · <span class="fa" data-i18n="speaking"></span></h3>
-            <div class="hub-grid">
-              <button class="hub-tile speak" data-open="role"><span class="ht-ico">🎭</span><b>Rollenspiel</b><span class="fa" data-i18n="roleSub"></span></button>
-              <button class="hub-tile speak" data-open="gap"><span class="ht-ico">🧩</span><b>Lückendialog</b><span class="fa" data-i18n="gapSub"></span></button>
-              <button class="hub-tile speak" data-open="read"><span class="ht-ico">📖</span><b>Vorlesen</b><span class="fa" data-i18n="readSub"></span></button>
-              <button class="hub-tile speak" data-open="fc"><span class="ht-ico">🃏</span><b>Karteikarten</b><span class="fa" data-i18n="fcSub"></span></button>
-            </div>
-            <h3 class="hub-h">Übungen · <span class="fa" data-i18n="exercises"></span></h3>
-            <div class="hub-grid" id="hubEx"></div>
+          <div class="ph-head">
+            <div><h1 class="dc-title">Üben</h1><div class="dc-sub" id="phSub"></div></div>
+            <div class="ph-ring" id="phRing"></div>
+            <div class="ex-stats ph-hide" id="exStats"></div>
           </div>
-          <button class="exam-btn" data-open="exam"><span>🏁 Prüfung</span><span class="fa" data-i18n="examSub"></span></button>
+          <div class="hub-scroll ph-grid">
+            <button class="ph-rec" id="phRec"></button>
+            <div class="ph-col ph-speak"><h3 class="ph-h"><span>SPRECHEN · <span class="fa" data-i18n="speaking"></span></span></h3><div class="sp3" id="phSpeak"></div></div>
+            <button class="ph-fc" data-open="fc"><span class="ic">🃏</span><span class="tx"><b>Karteikarten</b><small class="fa" id="phFcSub"></small></span><span class="due" id="phDue"></span></button>
+            <div class="ph-col ph-ex"><h3 class="ph-h"><span>ÜBUNGEN · <span class="fa" data-i18n="exercises"></span></span><span id="phExCount"></span></h3><div class="ex6" id="hubEx"></div></div>
+            <button class="ph-exam" data-open="exam"><span class="ic">🏁</span><span class="tx"><b>Prüfung</b><small class="fa" id="phExamSub"></small></span><span class="go">Start</span></button>
+          </div>
         </div>
 
         <div class="p-view" id="pView" hidden>
@@ -254,18 +253,18 @@
     </div>
   </div>
 
-  <script src="data/lessons.js?v=muicas93"></script>
-  <script src="data/lesson1-fa.js?v=muicas93"></script>
-  <script src="data/lesson1-times.js?v=muicas93"></script>
-  <script src="data/lesson1-words.js?v=muicas93"></script>
-  <script src="data/dict-de.js?v=muicas93"></script>
-  <script src="data/dict-tr.js?v=muicas93"></script>
-  <script src="data/lesson1-ru.js?v=muicas93"></script>
-  <script src="data/lesson1-uk.js?v=muicas93"></script>
-  <script src="i18n.js?v=muicas93"></script>
-  <script src="data/verbs-de.js?v=muicas93"></script>
-  <script src="grammar.js?v=muicas93"></script>
-  <script src="exercises.js?v=muicas93"></script>
-  <script src="app.js?v=muicas93"></script>
+  <script src="data/lessons.js?v=muigxayh"></script>
+  <script src="data/lesson1-fa.js?v=muigxayh"></script>
+  <script src="data/lesson1-times.js?v=muigxayh"></script>
+  <script src="data/lesson1-words.js?v=muigxayh"></script>
+  <script src="data/dict-de.js?v=muigxayh"></script>
+  <script src="data/dict-tr.js?v=muigxayh"></script>
+  <script src="data/lesson1-ru.js?v=muigxayh"></script>
+  <script src="data/lesson1-uk.js?v=muigxayh"></script>
+  <script src="i18n.js?v=muigxayh"></script>
+  <script src="data/verbs-de.js?v=muigxayh"></script>
+  <script src="grammar.js?v=muigxayh"></script>
+  <script src="exercises.js?v=muigxayh"></script>
+  <script src="app.js?v=muigxayh"></script>
 </body>
 </html>

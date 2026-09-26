@@ -56,6 +56,7 @@
     $$(".nav button").forEach(b => b.classList.toggle("on", b.dataset.go === tab));
     document.body.dataset.screen = id;
     if (location.hash !== "#" + id) history.replaceState(null, "", "#" + id);
+    if (id === "practice" && typeof renderHub === "function" && !$("#pHub").hidden) renderHub();
     const on = $(".nav button.on");
     if (on) $("#dockTabsBtn").innerHTML = on.querySelector("svg").outerHTML;
   }
@@ -799,13 +800,42 @@
 
   /* ---------- Practice hub: tiles → one exercise view ---------- */
   const TYPE_ICON = { translate: "🔁", fill: "✏️", order: "🧱", listen: "👂", respond: "💬", speak: "🗣️" };
+  // words that need review: practised with < 70% right, or looked up but never practised
+  function dueWords() {
+    const st = fcStats(), seen = seenMap();
+    return vocabList.filter(v => { const [r = 0, w = 0] = st[v.key] || []; return (r + w && r / (r + w) < 0.7) || (!(r + w) && seen[v.key] && !state.known.has(v.key)); });
+  }
+  const tf = (k, o) => t(k).replace(/\{(\w+)\}/g, (m, x) => o[x]);
   function renderHub() {
     const res = exResults(), counts = {}, done = {};
     ex.list.forEach(e => { counts[e.type] = (counts[e.type] || 0) + 1; if (res[e.id] === true) done[e.type] = (done[e.type] || 0) + 1; });
-    $("#hubEx").innerHTML = Object.keys(counts).map(t => {
-      const [de, fa] = window.Practice.TYPE_LABEL[t];
-      return `<button class="hub-tile" data-open="ex:${t}"><span class="ht-ico">${TYPE_ICON[t] || "•"}</span><b>${de}</b><span class="fa">${fa}</span><span class="ht-prog">✓ ${done[t] || 0}/${counts[t]}</span></button>`;
+    const COL = { translate: "#007AFF", fill: "#FF9500", order: "#30B0C7", listen: "#AF52DE", respond: "#34C759", speak: "#FF2D55" };
+    $("#hubEx").innerHTML = Object.keys(counts).map(tp => {
+      const [de, fa] = window.Practice.TYPE_LABEL[tp], d = done[tp] || 0;
+      return `<button class="e" data-open="ex:${tp}"><span class="ic" style="background:${COL[tp]}">${TYPE_ICON[tp] || "•"}</span><span class="tx"><b>${de}</b><small><span class="fa">${fa}</span> · ${d}/${counts[tp]}</small><span class="bar"><i style="width:${d / counts[tp] * 100}%;background:${COL[tp]}"></i></span></span></button>`;
     }).join("");
+    const okAll = Object.values(res).filter(Boolean).length, n = ex.list.length || 1, pct = Math.round(okAll / n * 100);
+    $("#phSub").textContent = `${okAll} / ${ex.list.length} Übungen · Lektion ${state.idx + 1}`;
+    $("#phExCount").textContent = `${okAll} / ${ex.list.length}`;
+    $("#phRing").innerHTML = `<svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" stroke-width="4" opacity=".12"/><circle cx="18" cy="18" r="15" fill="none" stroke="var(--accent)" stroke-width="4" stroke-linecap="round" pathLength="100" stroke-dasharray="${pct} 100" transform="rotate(-90 18 18)" ${pct ? "" : 'opacity="0"'}/></svg><b>${pct}%</b>`;
+    const dl = store.get("dlg", {});
+    const SP = [["role", "🎭", "Rollenspiel", t("role"), "linear-gradient(135deg,#FF2D55,#FF6B9A)"], ["gap", "🧩", "Lückendialog", t("gap"), "linear-gradient(135deg,#AF52DE,#8A6CF0)"], ["read", "📖", "Vorlesen", t("readSub2"), "linear-gradient(135deg,#5856D6,#0A84FF)"]];
+    $("#phSpeak").innerHTML = SP.map(([k, ic, de, fa, bg]) => `<button class="c" data-open="${k}" style="background:${bg}"><span class="sc">${dl[k] != null ? dl[k] + "%" : "—"}</span><span class="ic">${ic}</span><span class="nm"><b>${de}</b><small class="fa">${esc(fa)}</small></span></button>`).join("");
+    const due = dueWords(), kn = vocabList.filter(v => state.known.has(v.key)).length;
+    $("#phDue").textContent = due.length ? `${due.length} fällig` : "✓";
+    $("#phDue").classList.toggle("none", !due.length);
+    $("#phFcSub").textContent = tf("fcKnown", { k: kn, n: vocabList.length });
+    const eb = store.get("exam" + (LESSONS[state.idx] || {}).id, null);
+    $("#phExamSub").textContent = tf("examBest", { b: eb != null ? eb + "%" : "—" });
+    // recommendation: speaking first until today's goal, then words to review, then the weakest exercise type
+    const today = daily()[dayKey()] || {}, left = GOAL.speak - (today.s || 0);
+    let rec;
+    if (left > 0) rec = { open: "role", k: "Rollenspiel", s: tf("recSpeak", { n: left }), bg: "linear-gradient(135deg,#FF9F0A,#FF375F)" };
+    else if (due.length) rec = { open: "fc", k: "Karteikarten", s: tf("recReview", { n: due.length }), bg: "linear-gradient(135deg,#FFB340,#FF9500)" };
+    else { const tp = Object.keys(counts).sort((a, b) => (done[a] || 0) / counts[a] - (done[b] || 0) / counts[b])[0]; rec = tp && { open: "ex:" + tp, k: window.Practice.TYPE_LABEL[tp][0], s: t("recEx"), bg: "linear-gradient(135deg,#30B0C7,#007AFF)" }; }
+    const r = $("#phRec");
+    r.hidden = !rec;
+    if (rec) { r.dataset.open = rec.open; r.style.background = rec.bg; r.innerHTML = `<span class="tx"><span class="k">EMPFOHLEN · <span class="fa">${t("recToday")}</span></span><b>${esc(rec.k)}</b><span class="s fa">${esc(rec.s)}</span></span><span class="go">›</span>`; }
     renderMap();
   }
   function showPanel(id, title) {

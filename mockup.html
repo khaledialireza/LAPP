@@ -544,6 +544,42 @@ button { font: inherit; color: inherit; background: none; border: 0; }
 .cont .ln { font-size: 15px; line-height: 1.45; } .cont .ln b { font-size: 11px; display: block; letter-spacing: .5px; } .cont .ln.cur { font-size: 18px; font-weight: 700; } .cont .ln.dim { color: var(--label3); }
 .dockD { position: absolute; left: 50%; transform: translateX(-50%); bottom: 22px; display: flex; gap: 10px; align-items: center; width: 560px; }
 .dockD .tabbar { flex: 1; }
+
+/* practice hub v2 */
+.pr { position: absolute; inset: 0; overflow: hidden; padding: 50px 16px 120px; display: flex; flex-direction: column; gap: 12px; }
+.pr .hd { display: flex; justify-content: space-between; align-items: flex-end; } .pr .hd .t { font-size: 32px; font-weight: 800; letter-spacing: -.4px; line-height: 1; } .pr .hd small { display: block; font-size: 13px; color: var(--label2); font-weight: 600; margin-top: 4px; }
+.pr .ovr { width: 54px; height: 54px; position: relative; } .pr .ovr b { position: absolute; inset: 0; display: grid; place-items: center; font-size: 13px; }
+.rec5 { border-radius: 24px; padding: 16px; color: #fff; display: flex; align-items: center; gap: 14px; background: linear-gradient(135deg, #FF9F0A, #FF375F); position: relative; overflow: hidden; }
+.rec5 .k { font-size: 11px; font-weight: 800; letter-spacing: .6px; opacity: .85; } .rec5 b { display: block; font-size: 20px; } .rec5 span.s { font-size: 13px; opacity: .9; }
+.rec5 .go { margin-left: auto; width: 46px; height: 46px; border-radius: 23px; background: #fff; color: #FF375F; display: grid; place-items: center; font-size: 22px; font-weight: 800; flex: 0 0 46px; }
+.pr .sec { font-size: 13px; font-weight: 800; color: var(--label2); letter-spacing: .4px; margin: 4px 2px -4px; display: flex; justify-content: space-between; }
+.sp3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.sp3 .c { border-radius: 20px; padding: 12px; color: #fff; display: flex; flex-direction: column; gap: 6px; min-height: 118px; position: relative; }
+.sp3 .c .ic { font-size: 24px; } .sp3 .c b { font-size: 15px; } .sp3 .c small { font-size: 11px; opacity: .9; }
+.sp3 .c .sc { position: absolute; right: 10px; top: 10px; font-size: 12px; font-weight: 800; background: rgba(255,255,255,.25); border-radius: 9px; padding: 2px 7px; }
+.fcw { background: var(--card); border-radius: 20px; padding: 12px 14px; display: flex; align-items: center; gap: 12px; }
+.fcw .ic { width: 46px; height: 46px; border-radius: 13px; background: linear-gradient(135deg,#FF9F0A,#FFCC00); display: grid; place-items: center; font-size: 22px; }
+.fcw b { display: block; font-size: 16px; } .fcw small { font-size: 12px; color: var(--label2); } .fcw .due { margin-left: auto; font-size: 12px; font-weight: 800; color: #FF9F0A; background: rgba(255,159,10,.15); padding: 4px 9px; border-radius: 10px; }
+.ex6 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ex6 .e { background: var(--card); border-radius: 18px; padding: 11px 12px; display: flex; gap: 10px; align-items: center; }
+.ex6 .e .ic { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; color: #fff; font-size: 16px; flex: 0 0 34px; }
+.ex6 .e .tx { flex: 1; min-width: 0; } .ex6 .e b { font-size: 14px; display: block; } .ex6 .e small { font-size: 11px; color: var(--label2); }
+.ex6 .e .bar { height: 4px; border-radius: 2px; background: var(--fill); margin-top: 5px; } .ex6 .e .bar i { display: block; height: 100%; border-radius: 2px; }
+.exm { border-radius: 20px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; background: var(--card); border: 1.5px dashed var(--tint); }
+.exm b { font-size: 16px; display: block; } .exm small { font-size: 12px; color: var(--label2); } .exm .btn5 { margin-left: auto; background: var(--tint); color: #fff; font-weight: 700; font-size: 14px; padding: 9px 14px; border-radius: 14px; }
+/* desktop */
+.prd { position: absolute; inset: 0; padding: 32px 44px 120px; display: grid; grid-template-columns: 1.1fr 1fr 1fr; grid-template-rows: auto auto 1fr auto; gap: 16px; }
+.prd .hd { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: flex-end; } .prd .hd .t { font-size: 38px; font-weight: 800; }
+.prd .rec5 { grid-column: 1; } .prd .fcw { grid-column: 2; } .prd .exm { grid-column: 3; }
+.prd .sp3 { grid-column: 1; grid-row: 3; grid-template-columns: 1fr; } .prd .sp3 .c { min-height: 0; flex-direction: row; align-items: center; gap: 14px; }
+.prd .ex6 { grid-column: 2 / -1; grid-row: 3; grid-template-columns: 1fr 1fr; align-content: start; } .prd .ex6 .e { padding: 16px; }
+.prd .col { display: flex; flex-direction: column; gap: 8px; min-height: 0; }
+
+.pr > * { flex-shrink: 0; }
+.sp3 .c b { font-size: 13px; word-break: break-word; } .sp3 .c { min-height: 108px; }
+.prd { grid-template-rows: auto auto minmax(0, 1fr); padding-bottom: 110px; }
+.prd .col { grid-row: 3; } .prd .col .sp3, .prd .col .ex6 { flex: 1; } .prd .sp3 { grid-template-rows: repeat(3, 1fr); } .prd .ex6 { grid-auto-rows: 1fr; }
+.prd .sp3 .c b { font-size: 20px; } .prd .sp3 .c .ic { font-size: 36px; } .prd .ex6 .e b { font-size: 17px; } .prd .ex6 .e .ic { width: 48px; height: 48px; flex-basis: 48px; font-size: 22px; }
 </style>
 </head>
 <body>
@@ -662,7 +698,20 @@ const dictList = sel => `${sb}<div class="hd"><div class="t">Wörterbuch<small>L
   <div class="sec">V</div><div class="grp">${[["s","das","Vorbild","-er","N-das","الگو"],["p","","vorstellen","","V","خود را معرفی کردن"]].map((r, i) => drow(r, sel && i === 0)).join("")}</div></div>`;
 const STATS2 = `<div class="stats2"><div><span style="font-size:26px">👁</span><div><div class="n">3×</div><div class="l">gesehen</div></div></div>
       <div><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="var(--sep)" stroke-width="4"/><circle cx="18" cy="18" r="15" fill="none" stroke="#30D158" stroke-width="4" stroke-linecap="round" stroke-dasharray="${0.67*94} 94" transform="rotate(-90 18 18)"/></svg><div><div class="n">67%</div><div class="l">2 von 3 richtig</div></div></div></div>`;
+
+const OVR = pct => `<svg viewBox="0 0 36 36" style="width:54px;height:54px"><circle cx="18" cy="18" r="15" fill="none" stroke="var(--fill)" stroke-width="4"/><circle cx="18" cy="18" r="15" fill="none" stroke="var(--tint)" stroke-width="4" stroke-linecap="round" stroke-dasharray="${pct*.94} 94" transform="rotate(-90 18 18)"/></svg>`;
+const REC = `<div class="rec5"><div><div class="k">EMPFOHLEN · پیشنهاد امروز</div><b>Rollenspiel weiterführen</b><span class="s fa">۳ جملهٔ دیگر تا هدف امروز</span></div><span class="go">›</span></div>`;
+const SP3 = `<div class="sp3">${[["🎭","Rollenspiel","نقش‌آفرینی","60%","linear-gradient(135deg,#FF2D55,#FF6B9A)"],["🧩","Lückendialog","جای خالی","40%","linear-gradient(135deg,#AF52DE,#8A6CF0)"],["📖","Vorlesen","بلند خواندن","—","linear-gradient(135deg,#5856D6,#0A84FF)"]].map(c => `<div class="c" style="background:${c[4]}"><span class="sc">${c[3]}</span><span class="ic">${c[0]}</span><div><b>${c[1]}</b><br><small class="fa">${c[2]}</small></div></div>`).join("")}</div>`;
+const FCW = `<div class="fcw"><span class="ic">🃏</span><div><b>Karteikarten</b><small class="fa">فلش‌کارت · ۳۸ از ۳۱۳ بلدی</small></div><span class="due">12 fällig</span></div>`;
+const EX6 = `<div class="ex6">${[["🔁","Übersetzen","ترجمه",12,20,"#007AFF"],["✏️","Lücke füllen","جای خالی",8,20,"#FF9500"],["🧱","Satz bauen","ساختن جمله",5,20,"#30B0C7"],["🎧","Hören","شنیدن",10,15,"#AF52DE"],["💬","Antworten","جواب دادن",3,15,"#34C759"],["🎤","Sprechen","گفتن",6,10,"#FF2D55"]].map(e => `<div class="e"><span class="ic" style="background:${e[5]}">${e[0]}</span><div class="tx"><b>${e[1]}</b><small><span class="fa">${e[2]}</span> · ${e[3]}/${e[4]}</small><div class="bar"><i style="width:${e[3]/e[4]*100}%;background:${e[5]}"></i></div></div></div>`).join("")}</div>`;
+const EXM = `<div class="exm"><span style="font-size:28px">🏁</span><div><b>Prüfung</b><small class="fa">۱۰ تا ۱۵ سؤال · بهترین: ۷۰٪</small></div><span class="btn5">Start</span></div>`;
 const screens = {
+  prac: () => `${sb}<div class="pr"><div class="hd"><div><div class="t">Üben</div><small>44 / 100 Übungen · Lektion 1</small></div><div class="ovr">${OVR(44)}<b>44%</b></div></div>
+    ${REC}<div class="sec"><span>SPRECHEN · صحبت</span></div>${SP3}<div class="sec"><span>WORTSCHATZ</span></div>${FCW}<div class="sec"><span>ÜBUNGEN · تمرین‌ها</span><span>44 / 100</span></div>${EX6}${EXM}
+    </div><div class="chrome"><div class="dk">${tabs("practice")}${playRound()}</div></div>`,
+  pracD: () => `<div class="prd"><div class="hd"><div><div class="t">Üben</div><small style="color:var(--label2);font-weight:600">44 / 100 Übungen · Lektion 1</small></div><div class="ovr" style="position:relative;width:54px;height:54px">${OVR(44)}<b style="position:absolute;inset:0;display:grid;place-items:center;font-size:13px">44%</b></div></div>
+    ${REC}${FCW}${EXM}<div class="col"><div class="sec" style="font-size:13px;font-weight:800;color:var(--label2)">SPRECHEN · صحبت</div>${SP3}</div><div class="col" style="grid-column:2/-1"><div class="sec" style="font-size:13px;font-weight:800;color:var(--label2)">ÜBUNGEN · تمرین‌ها</div>${EX6}</div>
+    </div><div class="dockD">${tabs("practice")}${playRound()}</div>`,
   desk: () => {
     const heroD = `<div class="hero5"><div class="chips"><span class="chip5">L1 ${I.down}</span><span class="chip5">A1</span></div>
       <div class="lbl">Lektion 1 · Weitermachen</div><div class="ttl">Sich<br>vorstellen</div><div class="sub fa">معرفی خود — امروز ۵ جمله را بلند بگو</div>
