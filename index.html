@@ -16,7 +16,7 @@
   <meta name="description" content="LAPP — آموزش زبان آلمانی با دیالوگ صوتی، واژگان و تمرین.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=muishe96">
+  <link rel="stylesheet" href="style.css?v=muitebnw">
 </head>
 <body data-screen="home">
   <div class="frame">
@@ -89,12 +89,13 @@
       <!-- AUDIO -->
       <section class="screen" id="audio">
         <div class="ly-head">
-          <div><h1 class="ly-title">Dialog</h1><div class="ly-meta">Daily German Talk · <span id="mNum"></span></div></div>
-          <button class="ly-chip fa" id="faBtn" aria-pressed="true" data-i18n="showTranslation"></button>
+          <div><h1 class="ly-title" id="lyTitle">Dialog</h1><div class="ly-meta"><span id="lySrc">Daily German Talk</span> · <span id="mNum"></span></div></div>
+          <div class="ly-acts"><button class="ly-chip" id="lyVidBtn" aria-pressed="false" hidden>▶︎ Video</button><button class="ly-chip fa" id="faBtn" aria-pressed="true" data-i18n="showTranslation"></button></div>
         </div>
+        <div class="ly-video" id="lyVideo" hidden></div>
         <div class="lyrics" id="mTranscript"></div>
         <div class="ly-tools">
-          <div class="ly-seg" id="mSpkTabs"><button class="on" data-spk="all">Alle</button><button data-spk="anna">Anna</button><button data-spk="ben">Ben</button></div>
+          <div class="ly-seg" id="mSpkTabs"></div>
           <button class="ly-chip" data-speed-cycle aria-label="Tempo">🐢 <span class="js-speed">1×</span></button>
           <button class="ly-chip" id="lyRepeat">↻ Satz</button>
         </div>
@@ -252,27 +253,34 @@
     </div>
   </div>
 
-  <script src="data/lessons.js?v=muishe96"></script>
-  <script src="data/lesson1-fa.js?v=muishe96"></script>
-  <script src="data/lesson1-times.js?v=muishe96"></script>
-  <script src="data/lesson1-speak.js?v=muishe96"></script>
-  <script src="data/lesson1-focus.js?v=muishe96"></script>
-  <script src="data/lesson1-words.js?v=muishe96"></script>
-  <script src="data/dict-de.js?v=muishe96"></script>
-  <script src="data/dict-tr.js?v=muishe96"></script>
-  <script src="data/lesson1-ru.js?v=muishe96"></script>
-  <script src="data/lesson1-uk.js?v=muishe96"></script>
-  <script src="data/lesson2-fa.js?v=muishe96"></script>
-  <script src="data/lesson2-times.js?v=muishe96"></script>
-  <script src="data/lesson2-speak.js?v=muishe96"></script>
-  <script src="data/lesson2-focus.js?v=muishe96"></script>
-  <script src="data/lesson2-words.js?v=muishe96"></script>
-  <script src="data/lesson2-ru.js?v=muishe96"></script>
-  <script src="data/lesson2-uk.js?v=muishe96"></script>
-  <script src="i18n.js?v=muishe96"></script>
-  <script src="data/verbs-de.js?v=muishe96"></script>
-  <script src="grammar.js?v=muishe96"></script>
-  <script src="exercises.js?v=muishe96"></script>
-  <script src="app.js?v=muishe96"></script>
+  <script src="data/lessons.js?v=muitebnw"></script>
+  <script src="data/lesson1-fa.js?v=muitebnw"></script>
+  <script src="data/lesson1-times.js?v=muitebnw"></script>
+  <script src="data/lesson1-speak.js?v=muitebnw"></script>
+  <script src="data/lesson1-focus.js?v=muitebnw"></script>
+  <script src="data/lesson1-words.js?v=muitebnw"></script>
+  <script src="data/dict-de.js?v=muitebnw"></script>
+  <script src="data/dict-tr.js?v=muitebnw"></script>
+  <script src="data/lesson1-ru.js?v=muitebnw"></script>
+  <script src="data/lesson1-uk.js?v=muitebnw"></script>
+  <script src="data/lesson2-fa.js?v=muitebnw"></script>
+  <script src="data/lesson2-times.js?v=muitebnw"></script>
+  <script src="data/lesson2-speak.js?v=muitebnw"></script>
+  <script src="data/lesson2-focus.js?v=muitebnw"></script>
+  <script src="data/lesson2-words.js?v=muitebnw"></script>
+  <script src="data/lesson2-ru.js?v=muitebnw"></script>
+  <script src="data/lesson2-uk.js?v=muitebnw"></script>
+  <script src="data/lesson3-fa.js?v=muitebnw"></script>
+  <script src="data/lesson3-times.js?v=muitebnw"></script>
+  <script src="data/lesson3-speak.js?v=muitebnw"></script>
+  <script src="data/lesson3-focus.js?v=muitebnw"></script>
+  <script src="data/lesson3-words.js?v=muitebnw"></script>
+  <script src="data/lesson3-ru.js?v=muitebnw"></script>
+  <script src="data/lesson3-uk.js?v=muitebnw"></script>
+  <script src="i18n.js?v=muitebnw"></script>
+  <script src="data/verbs-de.js?v=muitebnw"></script>
+  <script src="grammar.js?v=muitebnw"></script>
+  <script src="exercises.js?v=muitebnw"></script>
+  <script src="app.js?v=muitebnw"></script>
 </body>
 </html>

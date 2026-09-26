@@ -1580,3 +1580,30 @@ body.no-fa .ly-line.cur .ly-fa { max-height: 0; opacity: 0; }
 .lhero .lchip { height: 30px; gap: 6px; padding: 0 10px; }
 .lhero .lchip i { width: 34px; height: 4px; border-radius: 2px; background: linear-gradient(90deg, currentColor var(--p), rgba(255,255,255,.3) var(--p)); display: inline-block; }
 .lhero .lchip small { font-size: 11px; opacity: .9; }
+
+/* ---------- Story lessons: more speakers, YouTube video in sync ---------- */
+.ly-acts { display: flex; gap: 6px; align-items: center; }
+.ly-line.heinrich .ly-who { color: #FF9F0A; } .ly-line.maria .ly-who { color: #FF2D55; }
+.ly-line.wanderer .ly-who { color: #30B0C7; } .ly-line.großvater .ly-who { color: #5E5CE6; }
+.ly-line.erzähler .ly-who { color: var(--muted); }
+.ly-seg { max-width: 100%; overflow-x: auto; scrollbar-width: none; }
+.ly-seg::-webkit-scrollbar { display: none; }
+.ly-seg button { flex-shrink: 0; }
+.ly-seg[hidden] { display: none !important; }
+.ly-video { flex-shrink: 0; width: 100%; max-width: min(100%, calc(34vh * 16 / 9)); align-self: center; aspect-ratio: 16 / 9; border-radius: 18px; overflow: hidden; background: #000; box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+.ly-video[hidden] { display: none !important; }
+.ly-video iframe, .ly-video > div { width: 100%; height: 100%; border: 0; display: block; }
+#audio.video-on .lyrics { padding-top: 16vh; padding-bottom: 24vh; }
+#audio.video-on .ly-line.cur .ly-de { font-size: 22px; }
+@media (min-width: 901px) and (min-height: 521px) {
+  #audio.video-on .ly-video { max-width: min(760px, calc(40vh * 16 / 9)); }
+  #audio.video-on .ly-line.cur .ly-de { font-size: 26px; }
+}
+@media (max-height: 520px) and (orientation: landscape) {
+  #audio.video-on .ly-video { grid-column: 2; grid-row: 2; width: 42vw; max-width: none; align-self: start; }
+  #audio.video-on .ly-tools { display: none; }
+}
+.ly-head { gap: 10px; } .ly-head > div:first-child { min-width: 0; }
+.ly-meta { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ly-chip { white-space: nowrap; flex-shrink: 0; }
+.yt-wait { display: flex !important; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 15px; text-decoration: none; opacity: .75; }

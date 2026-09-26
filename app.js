@@ -26,6 +26,7 @@
   let lines = [], timed = false;
   // seconds where a line starts: real timings if present, else proportional estimate
   const lineStart = l => timed ? l.t0 : l.start * (player.duration || 0);
+  const yt = { p: null, id: "", on: false, timer: 0, last: null }; // YouTube video mode (story lessons)
   const lineAt = t => timed ? lines.findIndex(l => t < l.next) : lines.findIndex(l => t / (player.duration || 1) < l.end);
 
   const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -58,6 +59,7 @@
     if (location.hash !== "#" + id) history.replaceState(null, "", "#" + id);
     if (id === "practice" && typeof renderHub === "function" && !$("#pHub").hidden) renderHub();
     if (id === "lesson" && typeof renderLesson === "function") renderLesson();
+    if (id !== "audio" && yt.on) videoOff();
     const on = $(".nav button.on");
     if (on) $("#dockTabsBtn").innerHTML = on.querySelector("svg").outerHTML;
   }
@@ -131,7 +133,17 @@
     $("#mTranscript").innerHTML = lines.map((l, j) => `
       <div class="ly-line ${l.who.toLowerCase()}" data-i="${j}"><span class="ly-who">${esc(l.who)}</span>
       <div class="ly-de">${esc(l.text)}</div><div class="ly-fa fa">${esc(l.fa || "")}</div></div>`).join("");
+    // speaker filter: one tab per speaker of this lesson
+    const whos = [...new Set(lines.map(l => l.who).filter(Boolean))];
+    if (!whos.some(w => w.toLowerCase() === state.spk)) state.spk = "all";
+    $("#mSpkTabs").innerHTML = ["all", ...whos].map(w => `<button class="${(w === "all" ? "all" : w.toLowerCase()) === state.spk ? "on" : ""}" data-spk="${w === "all" ? "all" : esc(w.toLowerCase())}">${w === "all" ? "Alle" : esc(w)}</button>`).join("");
+    $("#mSpkTabs").hidden = whos.length < 2;
     filterSpeakers();
+    const story = L.type === "story";
+    $("#lyTitle").textContent = story ? "Geschichte" : "Dialog";
+    $("#lySrc").textContent = story ? `${L.title} · ${L.level}` : "Daily German Talk";
+    $("#lyVidBtn").hidden = !L.video;
+    videoOff();
 
     // audio
     player.src = L.audio; player.playbackRate = SPEEDS[state.speed];
@@ -178,13 +190,14 @@
   $("#mTranscript").addEventListener("click", e => {
     const row = e.target.closest(".ly-line"); if (!row) return;
     const w = e.target.closest(".w");
-    if (w && row.classList.contains("cur")) { if (!player.paused) player.pause(); openWord(w.dataset.w); return; }
+    if (w && row.classList.contains("cur")) { if (!player.paused) player.pause(); if (ytPlaying()) yt.p.pauseVideo(); openWord(w.dataset.w); return; }
     const i = Number(row.dataset.i), l = lines[i];
     followPause = 0; showNow(i);
-    if (player.duration) { player.currentTime = lineStart(l); player.play(); }
+    if (yt.on && yt.p?.seekTo) { yt.p.seekTo(lineStart(l), true); yt.p.playVideo(); }
+    else if (player.duration) { player.currentTime = lineStart(l); player.play(); }
     else speak(l.text);
   });
-  $("#lyRepeat").onclick = () => { unlockAudio(); playClip(curLine); };
+  $("#lyRepeat").onclick = () => { if (yt.on && yt.p?.seekTo) { yt.p.seekTo(lineStart(lines[curLine]), true); yt.p.playVideo(); return; } unlockAudio(); playClip(curLine); };
   $("#mSpkTabs").addEventListener("click", e => {
     const b = e.target.closest("button"); if (!b) return;
     state.spk = b.dataset.spk; $$("#mSpkTabs button").forEach(x => x.classList.toggle("on", x === b)); filterSpeakers();
@@ -193,8 +206,60 @@
     $$("#mTranscript .ly-line").forEach(r => r.classList.toggle("hide", state.spk !== "all" && !r.classList.contains(state.spk)));
   }
 
+  /* ---------- Video (YouTube) in sync with the text ---------- */
+  const ytApi = () => window.YT && YT.Player ? Promise.resolve() : new Promise(res => {
+    const prev = window.onYouTubeIframeAPIReady; window.onYouTubeIframeAPIReady = () => { prev?.(); res(); };
+    if (!document.getElementById("ytApi")) { const sc = document.createElement("script"); sc.id = "ytApi"; sc.src = "https://www.youtube.com/iframe_api"; document.head.appendChild(sc); }
+  });
+  const ytPlaying = () => yt.p?.getPlayerState?.() === 1;
+  async function videoOn() {
+    const L = LESSONS[state.idx]; if (!L.video) return;
+    const t0 = lines[curLine] && timed ? lines[curLine].t0 : player.currentTime || 0;
+    player.pause(); yt.on = true;
+    $("#audio").classList.add("video-on"); $("#lyVideo").hidden = false; $("#lyVidBtn").setAttribute("aria-pressed", "true");
+    followPause = 0; requestAnimationFrame(() => showNow(curLine));
+    if (!yt.p || yt.id !== L.video) $("#lyVideo").innerHTML = `<a class="yt-wait" href="https://youtu.be/${esc(L.video)}" target="_blank" rel="noopener">▶︎ YouTube …</a>`;
+    await ytApi(); if (!yt.on) return;
+    if (!yt.p || yt.id !== L.video) {
+      yt.p?.destroy?.(); $("#lyVideo").innerHTML = '<div id="ytBox"></div>'; yt.id = L.video;
+      yt.p = new YT.Player("ytBox", { videoId: L.video, host: "https://www.youtube-nocookie.com",
+        playerVars: { start: Math.floor(t0), playsinline: 1, rel: 0, modestbranding: 1 },
+        events: { onReady: e => { e.target.setPlaybackRate(SPEEDS[state.speed]); } } });
+    } else if (yt.p.seekTo) yt.p.seekTo(t0, true);
+    clearInterval(yt.timer); yt.timer = setInterval(ytTick, 200);
+  }
+  function videoOff() {
+    if (!yt.on) return;
+    if (yt.p?.getCurrentTime) { try { player.currentTime = yt.p.getCurrentTime(); yt.p.pauseVideo(); } catch {} }
+    yt.on = false; clearInterval(yt.timer); yt.last = null;
+    $("#audio").classList.remove("video-on"); $("#lyVideo").hidden = true; $("#lyVidBtn").setAttribute("aria-pressed", "false");
+    requestAnimationFrame(() => showNow(curLine));
+  }
+  function ytTick() {
+    if (!yt.p?.getCurrentTime) return;
+    const tm = yt.p.getCurrentTime(), playing = ytPlaying();
+    document.body.classList.toggle("playing", playing);
+    const i = lineAt(tm);
+    if (i >= 0 && i !== curLine) showNow(i);
+    singWords(tm);
+    // count what was heard, like the audio player does
+    if (playing) {
+      const d = yt.last == null ? 0 : tm - yt.last; if (d > 0 && d < 2) { heard += d; if (heard >= 10) { logDay("l", Math.round(heard)); heard = 0; } }
+      if (i >= 0 && timed) { const k = lsKey("heard"), arr = store.get(k, []); if (!arr.includes(i)) { arr.push(i); store.set(k, arr); } }
+    }
+    yt.last = playing ? tm : null;
+  }
+  $("#lyVidBtn").onclick = () => yt.on ? videoOff() : videoOn();
+
   /* ---------- Audio ---------- */
   function act(a) {
+    if (yt.on && yt.p?.getCurrentTime) {
+      const tm = yt.p.getCurrentTime();
+      if (a === "toggle") ytPlaying() ? yt.p.pauseVideo() : yt.p.playVideo();
+      if (a === "back10" || a === "fwd10") yt.p.seekTo(Math.max(0, tm + (a === "fwd10" ? 10 : -10)), true);
+      if (a === "prev" || a === "next") { const j = Math.max(0, Math.min(lines.length - 1, curLine + (a === "next" ? 1 : -1))); showNow(j); yt.p.seekTo(lineStart(lines[j]), true); }
+      return;
+    }
     if (a === "toggle") {
       if (!player.src || player.error) return toast(t("noAudio"));
       player.paused ? player.play().catch(() => toast(t("playFailed"))) : player.pause();
@@ -210,6 +275,7 @@
   function setSpeed(i) {
     state.speed = Math.max(0, Math.min(SPEEDS.length - 1, i));
     player.playbackRate = SPEEDS[state.speed];
+    if (yt.p?.setPlaybackRate) yt.p.setPlaybackRate(SPEEDS[state.speed]);
     const label = SPEEDS[state.speed].toFixed(2).replace(/0$/, "") + "×";
     $$(".js-speed").forEach(e => e.textContent = label);
   }
@@ -1468,7 +1534,7 @@
     const kn = keys.filter(k => state.known.has(k)).length, dl = store.get(bestKey("dlg", i), {}), fsb = store.get(bestKey("fs", i), {}), exb = store.get(lsKey("exam", i), null);
     const best = (v, goal = 70) => Math.min(1, (v || 0) / goal);
     return [
-      { ic: "🎧", de: "Dialog hören", sub: tf("lsStepDialog", { a: heard, b: nLines }), f: Math.min(1, heard / (nLines * 0.8 || 1)), go: () => go("audio") },
+      { ic: "🎧", de: L.type === "story" ? "Geschichte hören" : "Dialog hören", sub: tf("lsStepDialog", { a: heard, b: nLines }), f: Math.min(1, heard / (nLines * 0.8 || 1)), go: () => go("audio") },
       { ic: "📖", de: "Wichtige Sätze", sub: tf("lsStepPhr", { a: phr, b: nPh }), f: Math.min(1, phr / (nPh * 0.8 || 1)), go: () => $("#phrases").scrollIntoView({ behavior: "smooth", block: "center" }) },
       { ic: "🔤", de: "Wörter lernen", sub: tf("lsStepWords", { a: kn, b: keys.length }), f: Math.min(1, kn / (keys.length * 0.5 || 1)), go: () => go("vocab") },
       { ic: "🎭", de: "Rollenspiel", sub: tf("lsStepBest", { b: dl.role != null ? dl.role + "%" : "—" }), f: best(dl.role), go: () => { go("practice"); $('#pHub [data-open="role"]')?.click(); } },
@@ -1482,7 +1548,7 @@
     const L = LESSONS[state.idx]; if (!L) return;
     const TR = lessonTr(L), steps = lessonSteps(), pct = Math.round(steps.reduce((a, s) => a + s.f, 0) / steps.length * 100);
     const cur = steps.findIndex(s => s.f < 1), mins = player.duration ? Math.round(player.duration / 60) : "–";
-    $("#lsHero").innerHTML = `<div class="row"><span class="chip5">Lektion ${L.id}</span><span class="chip5">${esc(L.level)}</span></div>
+    $("#lsHero").innerHTML = `<div class="row"><span class="chip5">${L.type === "story" ? "Geschichte" : "Lektion " + L.id}</span><span class="chip5">${esc(L.level)}</span></div>
       <div class="tt">${esc(L.title)}</div><div class="fa">${esc(TR.title)} — ${esc(TR.summary)}</div>
       <div class="meta"><span>🎧 ${mins} Min</span><span>💬 ${lines.length} Sätze</span><span>🔤 ${vocabList.length} Wörter</span></div>
       <div class="pb"><i style="width:${pct}%"></i></div><div class="meta"><span class="fa">${tf("lsProgress", { p: pct })}</span></div>
