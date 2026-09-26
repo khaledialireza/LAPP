@@ -420,7 +420,28 @@
     $("#lgListen").textContent = `${mins}/${GOAL.listen}`;
     $("#lgWords").textContent = `${k}/${vocabList.length}`;
     $("#hStreak").textContent = `🔥 ${streak()}`;
+    renderHomeExtras();
   }
+  // wide screens: this week, words to review, practice shortcuts
+  function renderHomeExtras() {
+    const all = daily(), now = new Date(), days = [];
+    const monday = new Date(now); monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+    for (let k = 0; k < 7; k++) { const d = new Date(monday); d.setDate(monday.getDate() + k); const r = all[dayKey(d)] || {}; days.push({ n: ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"][k], min: Math.round((r.l || 0) / 60), s: r.s || 0, today: dayKey(d) === dayKey(now) }); }
+    const score = d => d.min + d.s, max = Math.max(1, ...days.map(score));
+    $("#hWeek").innerHTML = days.map(d => `<div class="d ${d.today ? "today" : ""}"><i class="${score(d) ? "" : "z"}" style="height:${Math.max(4, score(d) / max * 100)}%" title="${d.min} Min · ${d.s} Sätze"></i>${d.n}</div>`).join("");
+    $("#hWeekSum").textContent = `${days.reduce((a, d) => a + d.min, 0)} Min · ${days.reduce((a, d) => a + d.s, 0)} Sätze`;
+    const st = fcStats();
+    const weak = vocabList.map(v => { const [r = 0, w = 0] = st[v.key] || []; return { v, n: r + w, pct: r + w ? Math.round(r / (r + w) * 100) : 0 }; })
+      .filter(x => x.n && x.pct < 70).sort((a, b) => a.pct - b.pct).slice(0, 5);
+    $("#hReview").innerHTML = weak.length ? weak.map(x => `<button class="r" data-entry="${esc(x.v.key)}"><b>${esc(x.v.de)}</b><span class="fa">${esc(x.v.fa)}</span><span class="sc">${x.pct}%</span></button>`).join("")
+      : `<p class="fa muted rev-empty">${t("nothingHere")}</p>`;
+    const dl = store.get("dlg", {}), fcAll = Object.values(st).reduce((a, [r = 0, w = 0]) => [a[0] + r, a[1] + r + w], [0, 0]);
+    const best = { role: dl.role, gap: dl.gap, read: dl.read, fc: fcAll[1] ? Math.round(fcAll[0] / fcAll[1] * 100) : undefined, exam: store.get("exam" + (LESSONS[state.idx] || {}).id, undefined) };
+    const P = [["role", "🎭", "Rollenspiel", "#FF2D55"], ["gap", "🧩", "Lückendialog", "#AF52DE"], ["read", "📖", "Vorlesen", "#5856D6"], ["fc", "🃏", "Karteikarten", "#FF9500"], ["exam", "🏁", "Prüfung", "#34C759"]];
+    $("#hPrac").innerHTML = P.map(([k, ic, name, col]) => `<button class="pt" data-prac="${k}"><span class="ic" style="background:${col}">${ic}</span><span class="tx"><b>${name}</b><small>Bestes: ${best[k] != null ? best[k] + "%" : "—"}</small><span class="bar"><i style="width:${best[k] || 0}%"></i></span></span></button>`).join("");
+  }
+  $("#hReview").addEventListener("click", e => { const b = e.target.closest("[data-entry]"); if (b) openEntry(b.dataset.entry); });
+  $("#hPrac").addEventListener("click", e => { const b = e.target.closest("[data-prac]"); if (!b) return; go("practice"); $(`#pHub [data-open="${b.dataset.prac}"]`)?.click(); });
 
   /* ---------- Vocab scope ---------- */
   state.vscope = "lesson";

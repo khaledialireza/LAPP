@@ -520,6 +520,30 @@ button { font: inherit; color: inherit; background: none; border: 0; }
 .stats2 > div { flex: 1; background: var(--fill); border-radius: 18px; padding: 12px; display: flex; align-items: center; gap: 12px; }
 .stats2 .n { font-size: 24px; font-weight: 800; line-height: 1; } .stats2 .l { font-size: 12px; color: var(--label2); font-weight: 600; margin-top: 3px; }
 .stats2 svg { width: 44px; height: 44px; flex: 0 0 44px; }
+
+/* desktop home */
+.dk5 { position: absolute; inset: 0; padding: 34px 44px 120px; display: grid; grid-template-columns: 1.15fr 1fr 1fr; grid-template-rows: auto 1fr 1fr auto; gap: 16px; }
+.dk5 .hdr { grid-column: 1 / -1; display: flex; align-items: flex-end; justify-content: space-between; }
+.dk5 .hdr .g { font-size: 38px; font-weight: 800; letter-spacing: -.5px; } .dk5 .hdr .d { font-size: 15px; color: var(--label2); }
+.dk5 .hdr .r { display: flex; gap: 10px; align-items: center; } .pill3 { white-space: nowrap; } .pill3 svg { width: 12px; height: 12px; } .dk5 .pill3 { height: 36px; padding: 0 14px; border-radius: 18px; background: var(--card); font-weight: 700; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; }
+.dk5 .hero5 { grid-row: 2 / span 2; min-height: 0; }
+.dk5 .cd { background: var(--card); border-radius: 22px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; min-height: 0; overflow: hidden; }
+.dk5 .cd .k { font-size: 12px; font-weight: 800; color: var(--label2); letter-spacing: .4px; display: flex; justify-content: space-between; } .dk5 .cd .k a { color: var(--tint); font-weight: 700; }
+.dk5 .ringrow { display: flex; align-items: center; gap: 18px; flex: 1; } .dk5 .ringrow svg { width: 120px; height: 120px; }
+.dk5 .lg { display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: var(--label2); } .dk5 .lg b { font-size: 22px; }
+.week { display: flex; align-items: flex-end; gap: 10px; flex: 1; padding-top: 6px; }
+.week .d { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 12px; color: var(--label2); font-weight: 600; height: 100%; justify-content: flex-end; }
+.week .d i { width: 100%; border-radius: 8px; background: linear-gradient(#FF2D55, #8A6CF0); } .week .d.today { color: var(--tint); } .week .d i.z { background: var(--fill); }
+.rev .r { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: .5px solid var(--sep); font-size: 15px; } .rev .r:first-of-type { border: 0; }
+.rev .r .fa { margin-left: auto; color: var(--label2); font-size: 13px; } .rev .r .sc { font-size: 12px; font-weight: 800; padding: 2px 7px; border-radius: 8px; background: rgba(255,55,95,.14); color: #FF375F; }
+.dk5 .wd { font-size: 30px; font-weight: 800; }
+.prac { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+.prac .t { background: var(--card); border-radius: 20px; padding: 14px; display: flex; gap: 12px; align-items: center; }
+.prac .t .ic { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; color: #fff; font-size: 20px; flex: 0 0 44px; }
+.prac .t b { display: block; font-size: 15px; } .prac .t small { font-size: 12px; color: var(--label2); } .prac .t .bar { height: 4px; border-radius: 2px; background: var(--fill); margin-top: 6px; } .prac .t .bar i { display: block; height: 100%; border-radius: 2px; background: var(--green); }
+.cont .ln { font-size: 15px; line-height: 1.45; } .cont .ln b { font-size: 11px; display: block; letter-spacing: .5px; } .cont .ln.cur { font-size: 18px; font-weight: 700; } .cont .ln.dim { color: var(--label3); }
+.dockD { position: absolute; left: 50%; transform: translateX(-50%); bottom: 22px; display: flex; gap: 10px; align-items: center; width: 560px; }
+.dockD .tabbar { flex: 1; }
 </style>
 </head>
 <body>
@@ -639,6 +663,20 @@ const dictList = sel => `${sb}<div class="hd"><div class="t">Wörterbuch<small>L
 const STATS2 = `<div class="stats2"><div><span style="font-size:26px">👁</span><div><div class="n">3×</div><div class="l">gesehen</div></div></div>
       <div><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="var(--sep)" stroke-width="4"/><circle cx="18" cy="18" r="15" fill="none" stroke="#30D158" stroke-width="4" stroke-linecap="round" stroke-dasharray="${0.67*94} 94" transform="rotate(-90 18 18)"/></svg><div><div class="n">67%</div><div class="l">2 von 3 richtig</div></div></div></div>`;
 const screens = {
+  desk: () => {
+    const heroD = `<div class="hero5"><div class="chips"><span class="chip5">L1 ${I.down}</span><span class="chip5">A1</span></div>
+      <div class="lbl">Lektion 1 · Weitermachen</div><div class="ttl">Sich<br>vorstellen</div><div class="sub fa">معرفی خود — امروز ۵ جمله را بلند بگو</div>
+      <div class="orbrow"><div class="orb">${MIC}</div><div class="orbtxt"><b>Jetzt sprechen</b><span>Rollenspiel · 3 Min</span></div><span class="listen">▶ Hören</span></div></div>`;
+    const days = [["Mo", 40], ["Di", 70], ["Mi", 0], ["Do", 55], ["Fr", 85], ["Sa", 30, 1], ["So", 0]];
+    return `<div class="dk5"><div class="hdr"><div><div class="g">Guten Abend</div><div class="d">Samstag, 26. September</div></div><div class="r"><span class="pill3">🔥 3 Tage</span><span class="pill3">L1 · Sich vorstellen ${I.down}</span></div></div>
+      ${heroD}
+      <div class="cd"><div class="k"><span>HEUTE</span><span>Ziel 80%</span></div><div class="ringrow">${rings3}<div class="lg"><div><b style="color:#FF2D55">5/8</b> Sätze gesprochen</div><div><b style="color:#5E5CE6">12/15</b> Min gehört</div><div><b style="color:#30D158">38/313</b> Wörter</div></div></div></div>
+      <div class="cd"><div class="k"><span>DIESE WOCHE</span><span>47 Min</span></div><div class="week">${days.map(d => `<div class="d ${d[2] ? "today" : ""}"><i class="${d[1] ? "" : "z"}" style="height:${Math.max(6, d[1])}%"></i>${d[0]}</div>`).join("")}</div></div>
+      <div class="cd"><div class="k"><span>WORT DES TAGES</span><span style="color:var(--tint)">🔊</span></div><div class="wd">das Vorbild</div><div class="fa" style="color:var(--label2)">الگو · اسم خنثی</div><div style="font-style:italic;color:var(--label2);font-size:14px">„Sei ein Vorbild!“</div></div>
+      <div class="cd rev"><div class="k"><span>WIEDERHOLEN · مرور</span><a>Alle ›</a></div>${[["fragen","پرسیدن","33%"],["die Entspannung","آرامش","40%"],["ehrlich","صادق","50%"],["beobachten","دقت کردن","50%"]].map(r => `<div class="r"><b>${r[0]}</b><span class="fa">${r[1]}</span><span class="sc">${r[2]}</span></div>`).join("")}</div>
+      <div class="prac">${[["🎭","Rollenspiel","60%","#FF2D55"],["🧩","Lückendialog","40%","#AF52DE"],["📖","Vorlesen","20%","#5856D6"],["🃏","Karteikarten","35%","#FF9500"],["🏁","Prüfung","—","#34C759"]].map(p => `<div class="t"><span class="ic" style="background:${p[3]}">${p[0]}</span><div style="flex:1"><b>${p[1]}</b><small>Bestes: ${p[2]}</small><div class="bar"><i style="width:${parseInt(p[2]) || 0}%"></i></div></div></div>`).join("")}</div>
+    </div><div class="dockD">${tabs("home")}${playRound()}</div>`;
+  },
   wcVerb: () => `${sb}<div class="wc"></div><div class="wcs"><div class="grab"></div>
     <div class="top"><span class="big">kommen</span><span class="circ">${I.speaker}</span><span class="x">✕</span></div>
     <div class="tags"><span class="v">Verb · unregelmäßig</span><span>Perfekt mit „sein“</span></div>
