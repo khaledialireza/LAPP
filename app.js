@@ -64,6 +64,7 @@
     if (id === "practice" && typeof renderHub === "function" && !$("#pHub").hidden) renderHub();
     if (id === "lesson" && typeof renderLesson === "function") renderLesson();
     if (id === "library" && typeof renderLibrary === "function") renderLibrary();
+    if (id === "audio") { document.body.classList.add("dock-collapsed"); requestAnimationFrame(() => showNow(curLine)); }
     const on = $(".nav button.on");
     if (on) $("#dockTabsBtn").innerHTML = on.querySelector("svg").outerHTML;
   }
@@ -135,7 +136,8 @@
     const whos = [...new Set(lines.map(l => l.who).filter(Boolean))];
     if (!whos.some(w => w.toLowerCase() === state.spk)) state.spk = "all";
     $("#mSpkTabs").innerHTML = ["all", ...whos].map(w => `<button class="${(w === "all" ? "all" : w.toLowerCase()) === state.spk ? "on" : ""}" data-spk="${w === "all" ? "all" : esc(w.toLowerCase())}">${w === "all" ? "Alle" : esc(w)}</button>`).join("");
-    $("#mSpkTabs").hidden = whos.length < 2;
+    $(".spk-pick").hidden = whos.length < 2;
+    $("#spkLbl").textContent = $("#mSpkTabs button.on")?.textContent || "Alle";
     filterSpeakers();
     const story = L.type === "story";
     $("#lyTitle").textContent = story ? "Geschichte" : "Dialog";
@@ -193,9 +195,14 @@
     else speak(l.text);
   });
   $("#lyRepeat").onclick = () => { unlockAudio(); playClip(curLine); };
+  // speaker filter: a small menu in the header
+  const spkMenu = open => { $("#mSpkTabs").hidden = !open; $("#spkBtn").setAttribute("aria-expanded", open); };
+  $("#spkBtn").addEventListener("click", e => { e.stopPropagation(); spkMenu($("#mSpkTabs").hidden); });
+  document.addEventListener("click", e => { if (!e.target.closest(".spk-pick")) spkMenu(false); });
   $("#mSpkTabs").addEventListener("click", e => {
     const b = e.target.closest("button"); if (!b) return;
     state.spk = b.dataset.spk; $$("#mSpkTabs button").forEach(x => x.classList.toggle("on", x === b)); filterSpeakers();
+    $("#spkLbl").textContent = b.textContent; spkMenu(false);
   });
   function filterSpeakers() {
     $$("#mTranscript .ly-line").forEach(r => r.classList.toggle("hide", state.spk !== "all" && !r.classList.contains(state.spk)));

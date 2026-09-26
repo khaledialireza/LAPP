@@ -16,7 +16,7 @@
   <meta name="description" content="LAPP — آموزش زبان آلمانی با دیالوگ صوتی، واژگان و تمرین.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=muixafsc">
+  <link rel="stylesheet" href="style.css?v=muixkrut">
 </head>
 <body data-screen="home">
   <div class="frame">
@@ -98,14 +98,9 @@
       <section class="screen" id="audio">
         <div class="ly-head">
           <div><h1 class="ly-title" id="lyTitle">Dialog</h1><div class="ly-meta"><span id="lySrc">Daily German Talk</span> · <span id="mNum"></span></div></div>
-          <div class="ly-acts"><button class="ly-chip fa" id="faBtn" aria-pressed="true" data-i18n="showTranslation"></button></div>
+          <div class="ly-acts"><div class="spk-pick"><button class="ly-chip" id="spkBtn" aria-haspopup="listbox" aria-expanded="false">👤 <span id="spkLbl">Alle</span> ▾</button><div class="spk-menu" id="mSpkTabs" hidden></div></div><button class="ly-chip fa" id="faBtn" aria-pressed="true" data-i18n="showTranslation"></button></div>
         </div>
         <div class="lyrics" id="mTranscript"></div>
-        <div class="ly-tools">
-          <div class="ly-seg" id="mSpkTabs"></div>
-          <button class="ly-chip" data-speed-cycle aria-label="Tempo">🐢 <span class="js-speed">1×</span></button>
-          <button class="ly-chip" id="lyRepeat">↻ Satz</button>
-        </div>
         <aside class="word-side" id="wordSide" aria-label="Wort"><div class="ws-body" id="wsBody"></div></aside>
       </section>
 
@@ -219,6 +214,8 @@
       <div class="dock-player">
         <button class="dp-cover" data-go="audio" aria-label="Dialog"><svg class="dring" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" class="ring-bg"/><circle cx="18" cy="18" r="16" class="ring-fg" pathLength="100"/></svg><span class="js-lesson-num">L1</span></button>
         <button class="dp-text" data-go="audio"><span class="dp-line" id="dpLine"></span><span class="dp-sub"><span id="dpWho"></span> · <span class="tCur">0:00</span> / <span class="tDur">0:00</span></span></button>
+        <button class="dp-chip" data-speed-cycle aria-label="Tempo"><span class="js-speed">1×</span></button>
+        <button class="icon-btn dp-rep" id="lyRepeat" aria-label="Satz wiederholen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.6-5.9"/><path d="M4 4v5h5"/></svg></button>
         <button class="icon-btn" data-act="toggle" aria-label="play"><svg class="ico-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l12-7z"/></svg></button>
         <button class="icon-btn" data-act="next" aria-label="weiter"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 5v14l8-7zM12 5v14l8-7z"/></svg></button>
         <div class="progress dp-prog" data-seek><i class="bar"></i></div>
@@ -260,34 +257,34 @@
     </div>
   </div>
 
-  <script src="data/lessons.js?v=muixafsc"></script>
-  <script src="data/lesson1-fa.js?v=muixafsc"></script>
-  <script src="data/lesson1-times.js?v=muixafsc"></script>
-  <script src="data/lesson1-speak.js?v=muixafsc"></script>
-  <script src="data/lesson1-focus.js?v=muixafsc"></script>
-  <script src="data/lesson1-words.js?v=muixafsc"></script>
-  <script src="data/dict-de.js?v=muixafsc"></script>
-  <script src="data/dict-tr.js?v=muixafsc"></script>
-  <script src="data/lesson1-ru.js?v=muixafsc"></script>
-  <script src="data/lesson1-uk.js?v=muixafsc"></script>
-  <script src="data/lesson2-fa.js?v=muixafsc"></script>
-  <script src="data/lesson2-times.js?v=muixafsc"></script>
-  <script src="data/lesson2-speak.js?v=muixafsc"></script>
-  <script src="data/lesson2-focus.js?v=muixafsc"></script>
-  <script src="data/lesson2-words.js?v=muixafsc"></script>
-  <script src="data/lesson2-ru.js?v=muixafsc"></script>
-  <script src="data/lesson2-uk.js?v=muixafsc"></script>
-  <script src="data/lesson3-fa.js?v=muixafsc"></script>
-  <script src="data/lesson3-times.js?v=muixafsc"></script>
-  <script src="data/lesson3-speak.js?v=muixafsc"></script>
-  <script src="data/lesson3-focus.js?v=muixafsc"></script>
-  <script src="data/lesson3-words.js?v=muixafsc"></script>
-  <script src="data/lesson3-ru.js?v=muixafsc"></script>
-  <script src="data/lesson3-uk.js?v=muixafsc"></script>
-  <script src="i18n.js?v=muixafsc"></script>
-  <script src="data/verbs-de.js?v=muixafsc"></script>
-  <script src="grammar.js?v=muixafsc"></script>
-  <script src="exercises.js?v=muixafsc"></script>
-  <script src="app.js?v=muixafsc"></script>
+  <script src="data/lessons.js?v=muixkrut"></script>
+  <script src="data/lesson1-fa.js?v=muixkrut"></script>
+  <script src="data/lesson1-times.js?v=muixkrut"></script>
+  <script src="data/lesson1-speak.js?v=muixkrut"></script>
+  <script src="data/lesson1-focus.js?v=muixkrut"></script>
+  <script src="data/lesson1-words.js?v=muixkrut"></script>
+  <script src="data/dict-de.js?v=muixkrut"></script>
+  <script src="data/dict-tr.js?v=muixkrut"></script>
+  <script src="data/lesson1-ru.js?v=muixkrut"></script>
+  <script src="data/lesson1-uk.js?v=muixkrut"></script>
+  <script src="data/lesson2-fa.js?v=muixkrut"></script>
+  <script src="data/lesson2-times.js?v=muixkrut"></script>
+  <script src="data/lesson2-speak.js?v=muixkrut"></script>
+  <script src="data/lesson2-focus.js?v=muixkrut"></script>
+  <script src="data/lesson2-words.js?v=muixkrut"></script>
+  <script src="data/lesson2-ru.js?v=muixkrut"></script>
+  <script src="data/lesson2-uk.js?v=muixkrut"></script>
+  <script src="data/lesson3-fa.js?v=muixkrut"></script>
+  <script src="data/lesson3-times.js?v=muixkrut"></script>
+  <script src="data/lesson3-speak.js?v=muixkrut"></script>
+  <script src="data/lesson3-focus.js?v=muixkrut"></script>
+  <script src="data/lesson3-words.js?v=muixkrut"></script>
+  <script src="data/lesson3-ru.js?v=muixkrut"></script>
+  <script src="data/lesson3-uk.js?v=muixkrut"></script>
+  <script src="i18n.js?v=muixkrut"></script>
+  <script src="data/verbs-de.js?v=muixkrut"></script>
+  <script src="grammar.js?v=muixkrut"></script>
+  <script src="exercises.js?v=muixkrut"></script>
+  <script src="app.js?v=muixkrut"></script>
 </body>
 </html>

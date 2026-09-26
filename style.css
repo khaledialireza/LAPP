@@ -1185,10 +1185,8 @@ body.no-fa .ly-line.cur .ly-fa { display: none; }
 .ly-seg button.on { background: var(--tile); color: var(--text); box-shadow: 0 2px 6px rgba(0,0,0,.12); }
 @media (min-width: 901px) and (min-height: 521px) { .lyrics { padding-left: 10%; padding-right: 10%; } .ly-line.cur .ly-de { font-size: 32px; } .ly-de { font-size: 24px; } }
 @media (max-height: 520px) and (orientation: landscape) {
-  #audio.active { display: grid !important; grid-template-columns: 1fr auto; grid-template-rows: auto minmax(0, 1fr); }
-  .ly-head { grid-column: 1 / -1; } .ly-title { font-size: 22px; }
-  .lyrics { grid-column: 1; }
-  .ly-tools { grid-column: 2; grid-row: 2; flex-direction: column; justify-content: center; }
+  #audio.active { display: flex !important; }
+  .ly-title { font-size: 22px; }
   .ly-line.cur .ly-de { font-size: 22px; } .ly-de { font-size: 17px; }
 }
 
@@ -1560,7 +1558,7 @@ body.no-fa .ly-line.cur .ly-fa { max-height: 0; opacity: 0; }
 .ly-line.cur .w.picked { background: color-mix(in srgb, var(--accent) 22%, transparent); border-radius: 6px; color: var(--text); opacity: 1; }
 /* phones (portrait): panel from the bottom, lyrics shrink above it */
 .word-side { left: 8px; right: 8px; bottom: calc(var(--dock-space) + 4px); height: 56%; border-radius: 24px; transform: translateY(40px); }
-#audio > .ly-head, #audio > .lyrics, #audio > .ly-tools { transition: margin .35s cubic-bezier(.2,.8,.2,1); }
+#audio > .ly-head, #audio > .lyrics { transition: margin .35s cubic-bezier(.2,.8,.2,1); }
 #audio.side-open > .ly-tools { display: none; }
 #audio.side-open > .lyrics { margin-bottom: calc(56% - var(--dock-space) + 10px); }
 /* wide screens and landscape: panel on the right, content moves left */
@@ -1568,12 +1566,12 @@ body.no-fa .ly-line.cur .ly-fa { max-height: 0; opacity: 0; }
   .word-side { left: auto; right: 12px; top: 12px; bottom: calc(var(--dock-space) + 6px); width: min(400px, 42%); height: auto; border-radius: 26px; transform: translateX(40px); }
   #audio.side-open > .ly-tools { display: flex; }
   #audio.side-open > .lyrics { margin-bottom: 0; }
-  #audio.side-open > .ly-head, #audio.side-open > .lyrics, #audio.side-open > .ly-tools { margin-right: calc(min(400px, 42%) + 12px); }
+  #audio.side-open > .ly-head, #audio.side-open > .lyrics { margin-right: calc(min(400px, 42%) + 12px); }
 }
 @media (max-height: 520px) and (orientation: landscape) {
   .word-side { top: 6px; bottom: 6px; }
   #audio.side-open > .ly-tools { display: none; }
-  #audio.side-open > .lyrics { grid-column: 1 / -1; }
+  
 }
 .ls-overall { display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 700; opacity: .95; margin-top: 4px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,.25); }
 .ls-overall b { font-size: 16px; }
@@ -1647,3 +1645,22 @@ body.no-fa .ly-line.cur .ly-fa { max-height: 0; opacity: 0; }
 /* story cover on the lesson page */
 .lhero.story { background: radial-gradient(circle at calc(100% + 40px) -50px, rgba(255,255,255,.13) 0 150px, transparent 151px), linear-gradient(160deg, #FF9F0A, #FF2D55 55%, #5E5CE6); }
 .lp-caret { font-size: 12px; }
+
+/* ---------- Lyrics: speaker menu in the header; speed and repeat live in the player ---------- */
+.spk-pick { position: relative; }
+.spk-pick[hidden] { display: none; }
+.spk-menu { position: absolute; right: 0; top: calc(100% + 6px); z-index: 30; min-width: 170px; padding: 4px; border-radius: 14px; display: flex; flex-direction: column;
+  background: var(--glass); -webkit-backdrop-filter: saturate(180%) blur(30px); backdrop-filter: saturate(180%) blur(30px); border: .5px solid var(--glass-border); box-shadow: 0 16px 40px rgba(0,0,0,.3); }
+.spk-menu[hidden] { display: none; }
+.spk-menu button { text-align: left; padding: 10px 12px; border-radius: 10px; font-size: 14px; font-weight: 600; color: var(--text); }
+.spk-menu button.on { background: var(--tile); color: var(--accent); }
+.dp-chip { height: 28px; min-width: 40px; padding: 0 8px; border-radius: 14px; background: var(--tile-2); color: var(--text); font-size: 12px; font-weight: 800; flex-shrink: 0; }
+.dock-player .dp-rep svg { width: 20px; height: 20px; }
+@media (max-height: 520px) and (orientation: landscape) {
+  .dp-chip { min-width: 0; width: 44px; padding: 0; font-size: 11px; }
+  .dock-player .dp-rep { width: 36px; height: 36px; flex: 0 0 36px; }
+}
+/* on the lyrics screen the text is already big above, so the player shows its controls; elsewhere it shows the line */
+body:not([data-screen="audio"]) .dp-chip, body:not([data-screen="audio"]) .dp-rep { display: none; }
+body[data-screen="audio"] .dock-player .dp-text { flex: 1 1 auto; min-width: 0; visibility: hidden; }
+@media (min-width: 600px) { body[data-screen="audio"] .dock-player .dp-text { visibility: visible; } }
