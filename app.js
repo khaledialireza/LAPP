@@ -1490,6 +1490,17 @@
   player.addEventListener("play", () => { if (clipStop == null) setDock(true); });
   $("#dockTabsBtn").addEventListener("click", () => setDock(false));
 
+  /* ---------- iOS home-screen app: fill the whole screen ---------- */
+  if (navigator.standalone || matchMedia("(display-mode: standalone)").matches) {
+    const fit = () => {
+      const long = Math.max(screen.width, screen.height), short = Math.min(screen.width, screen.height);
+      const h = innerWidth > innerHeight ? short : long;
+      document.documentElement.classList.add("standalone");
+      document.documentElement.style.setProperty("--app-h", Math.max(h, innerHeight) + "px");
+    };
+    fit(); addEventListener("resize", fit); addEventListener("orientationchange", () => setTimeout(fit, 300));
+  }
+
   /* ---------- Init ---------- */
   tick(); setInterval(tick, 10000);
   setSpeed(state.speed);
