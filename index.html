@@ -16,7 +16,7 @@
   <meta name="description" content="LAPP — آموزش زبان آلمانی با دیالوگ صوتی، واژگان و تمرین.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=muipf6ha">
+  <link rel="stylesheet" href="style.css?v=muiqaapg">
 </head>
 <body data-screen="home">
   <div class="frame">
@@ -77,29 +77,12 @@
 
       <!-- LESSON -->
       <section class="screen" id="lesson">
-        <div class="screen-head">
-          <button class="back-btn" data-go="home"><span class="back-chev">‹</span><span data-i18n="tabHome"></span></button>
-          <h1 id="lTitle"></h1>
-          <div class="lessons-row" id="lessonList"></div>
-        </div>
-        <div class="lesson-grid">
-          <div class="tile intro">
-            <span class="chip" id="lLevel" style="align-self:flex-start"></span>
-            <div class="big" id="lDe"></div>
-            <p class="fa" id="lSum" style="line-height:1.9;margin:0;color:var(--muted)"></p>
-            <div style="margin-top:auto;display:flex;gap:8px;flex-wrap:wrap">
-              <button class="btn" data-go="audio">▶ Dialog hören</button>
-              <button class="btn ghost" data-go="practice">Üben</button>
-            </div>
-            <div class="tile" style="background:var(--tile-2);margin-top:6px">
-              <h3>du vs. Sie</h3>
-              <div class="fa" style="font-size:13px;line-height:1.9"><b>du</b> = <span data-i18n="duInfo"></span><br><b>Sie</b> = <span data-i18n="sieInfo"></span></div>
-            </div>
-          </div>
-          <div class="tile phr">
-            <h3>Wichtige Sätze · <span class="fa" data-i18n="keyPhrases"></span></h3>
-            <div id="phrases"></div>
-          </div>
+        <button class="back-btn" data-go="home"><span class="back-chev">‹</span><span data-i18n="tabHome"></span></button>
+        <div class="ls-grid">
+          <div class="lhero" id="lsHero"></div>
+          <div class="ls-col ls-path"><h3 class="ph-h"><span>LERNPFAD · <span class="fa" data-i18n="lsPath"></span></span><span id="lsPathN"></span></h3><div class="path" id="lsPath"></div></div>
+          <div class="ls-col ls-phr"><h3 class="ph-h"><span>WICHTIGE SÄTZE · <span class="fa" data-i18n="keyPhrases"></span></span><span id="lsPhrN"></span></h3><div class="phr" id="phrases"></div></div>
+          <div class="ls-col ls-gram"><h3 class="ph-h"><span>GRAMMATIK IM FOKUS</span></h3><div class="gfocus" id="lsGram"></div></div>
         </div>
       </section>
 
@@ -268,19 +251,20 @@
     </div>
   </div>
 
-  <script src="data/lessons.js?v=muipf6ha"></script>
-  <script src="data/lesson1-fa.js?v=muipf6ha"></script>
-  <script src="data/lesson1-times.js?v=muipf6ha"></script>
-  <script src="data/lesson1-speak.js?v=muipf6ha"></script>
-  <script src="data/lesson1-words.js?v=muipf6ha"></script>
-  <script src="data/dict-de.js?v=muipf6ha"></script>
-  <script src="data/dict-tr.js?v=muipf6ha"></script>
-  <script src="data/lesson1-ru.js?v=muipf6ha"></script>
-  <script src="data/lesson1-uk.js?v=muipf6ha"></script>
-  <script src="i18n.js?v=muipf6ha"></script>
-  <script src="data/verbs-de.js?v=muipf6ha"></script>
-  <script src="grammar.js?v=muipf6ha"></script>
-  <script src="exercises.js?v=muipf6ha"></script>
-  <script src="app.js?v=muipf6ha"></script>
+  <script src="data/lessons.js?v=muiqaapg"></script>
+  <script src="data/lesson1-fa.js?v=muiqaapg"></script>
+  <script src="data/lesson1-times.js?v=muiqaapg"></script>
+  <script src="data/lesson1-speak.js?v=muiqaapg"></script>
+  <script src="data/lesson1-focus.js?v=muiqaapg"></script>
+  <script src="data/lesson1-words.js?v=muiqaapg"></script>
+  <script src="data/dict-de.js?v=muiqaapg"></script>
+  <script src="data/dict-tr.js?v=muiqaapg"></script>
+  <script src="data/lesson1-ru.js?v=muiqaapg"></script>
+  <script src="data/lesson1-uk.js?v=muiqaapg"></script>
+  <script src="i18n.js?v=muiqaapg"></script>
+  <script src="data/verbs-de.js?v=muiqaapg"></script>
+  <script src="grammar.js?v=muiqaapg"></script>
+  <script src="exercises.js?v=muiqaapg"></script>
+  <script src="app.js?v=muiqaapg"></script>
 </body>
 </html>

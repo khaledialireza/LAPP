@@ -609,6 +609,37 @@ button { font: inherit; color: inherit; background: none; border: 0; }
 .chipsw { display: flex; flex-wrap: wrap; gap: 6px; } .chipsw span { padding: 5px 10px; border-radius: 12px; font-size: 14px; font-weight: 700; }
 .chipsw .u { background: rgba(48,209,88,.16); color: #28B24B; } .chipsw .m { background: var(--fill); color: var(--label2); font-weight: 600; }
 .qres { background: var(--card); border-radius: 16px; padding: 10px 12px; display: flex; gap: 10px; align-items: flex-start; font-size: 14px; } .qres .s { font-weight: 800; } .qres small { display: block; color: var(--label2); font-size: 12px; margin-top: 2px; }
+
+/* lesson page */
+.ls { position: absolute; inset: 0; overflow: hidden; padding: 50px 16px 120px; display: flex; flex-direction: column; gap: 12px; }
+.ls > * { flex-shrink: 0; }
+.lhero { border-radius: 26px; padding: 16px; color: #fff; background: radial-gradient(circle at calc(100% + 40px) -50px, rgba(255,255,255,.13) 0 150px, transparent 151px), linear-gradient(135deg,#FF2D55,#7B3FF2); display: flex; flex-direction: column; gap: 6px; }
+.lhero .row { display: flex; gap: 6px; } .lhero .chip5 { height: 26px; padding: 0 10px; border-radius: 13px; background: rgba(255,255,255,.22); font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; }
+.lhero .tt { font-size: 30px; font-weight: 800; line-height: 1.05; margin-top: 6px; } .lhero .fa { font-size: 14px; opacity: .92; }
+.lhero .meta { display: flex; gap: 14px; font-size: 12px; font-weight: 700; opacity: .9; margin-top: 4px; }
+.lhero .pb { height: 6px; border-radius: 3px; background: rgba(255,255,255,.25); margin-top: 6px; } .lhero .pb i { display: block; height: 100%; width: 38%; border-radius: 3px; background: #fff; }
+.path { background: var(--card); border-radius: 22px; padding: 6px 14px; }
+.step { display: flex; align-items: center; gap: 12px; padding: 10px 0; position: relative; }
+.step + .step { border-top: .5px solid var(--sep); }
+.step .ic { width: 36px; height: 36px; border-radius: 18px; display: grid; place-items: center; font-size: 17px; flex: 0 0 36px; }
+.step.done .ic { background: #30D158; color: #fff; font-weight: 800; } .step.cur .ic { background: var(--tint); color: #fff; box-shadow: 0 0 0 4px var(--tint-soft); } .step.todo .ic { background: var(--fill); }
+.step .tx { flex: 1; } .step b { font-size: 15px; display: block; } .step small { font-size: 12px; color: var(--label2); }
+.step .go { font-size: 12px; font-weight: 800; color: var(--tint); } .step.done .go { color: #30D158; }
+.ls .sec { font-size: 12px; font-weight: 800; color: var(--label2); letter-spacing: .4px; margin: 2px 2px -4px; display: flex; justify-content: space-between; } .ls .sec a { color: var(--tint); }
+.phr { display: flex; gap: 10px; overflow: hidden; }
+.phr .p { flex: 0 0 230px; background: var(--card); border-radius: 18px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; position: relative; }
+.phr .p b { font-size: 16px; } .phr .p .fa { font-size: 13px; color: var(--label2); } .phr .p .tag { align-self: flex-start; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 8px; background: var(--tint-soft); color: var(--tint); }
+.phr .p .sp { position: absolute; right: 10px; top: 10px; width: 30px; height: 30px; border-radius: 15px; background: var(--fill); display: grid; place-items: center; color: var(--tint); } .phr .p .sp svg { width: 13px; height: 13px; }
+.gfocus { background: var(--card); border-radius: 18px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+.gfocus .r { display: flex; gap: 10px; align-items: center; font-size: 14px; } .gfocus .r b { min-width: 110px; } .gfocus .r .fa { color: var(--label2); font-size: 13px; }
+.lnext { display: flex; gap: 10px; } .lnext .l { flex: 1; background: var(--card); border-radius: 16px; padding: 10px 12px; font-size: 13px; color: var(--label2); } .lnext .l b { display: block; color: var(--label); font-size: 15px; } .lnext .l.lock { opacity: .55; }
+/* desktop */
+.lsd { position: absolute; inset: 0; padding: 32px 44px 110px; display: grid; grid-template-columns: 1fr 1fr 1fr; grid-template-rows: auto auto minmax(0,1fr); gap: 16px; }
+.lsd .lhero { grid-column: 1; grid-row: 1 / span 2; justify-content: flex-end; } .lsd .lhero .tt { font-size: 40px; }
+.lsd .path { grid-column: 2; grid-row: 1 / span 3; } .lsd .rightc { grid-column: 3; grid-row: 1 / span 3; display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+.lsd .phr { flex-direction: column; } .lsd .phr .p { flex: none; }
+.lsd .leftb { grid-column: 1; grid-row: 3; display: flex; flex-direction: column; gap: 10px; }
+.lsd .step { padding: 16px 0; } .lsd .step .ic { width: 44px; height: 44px; flex-basis: 44px; font-size: 20px; } .lsd .step b { font-size: 17px; }
 </style>
 </head>
 <body>
@@ -734,7 +765,19 @@ const SP3 = `<div class="sp3">${[["🎭","Rollenspiel","نقش‌آفرینی","
 const FCW = `<div class="fcw"><span class="ic">🃏</span><div><b>Karteikarten</b><small class="fa">فلش‌کارت · ۳۸ از ۳۱۳ بلدی</small></div><span class="due">12 fällig</span></div>`;
 const EX6 = `<div class="ex6">${[["🔁","Übersetzen","ترجمه",12,20,"#007AFF"],["✏️","Lücke füllen","جای خالی",8,20,"#FF9500"],["🧱","Satz bauen","ساختن جمله",5,20,"#30B0C7"],["🎧","Hören","شنیدن",10,15,"#AF52DE"],["💬","Antworten","جواب دادن",3,15,"#34C759"],["🎤","Sprechen","گفتن",6,10,"#FF2D55"]].map(e => `<div class="e"><span class="ic" style="background:${e[5]}">${e[0]}</span><div class="tx"><b>${e[1]}</b><small><span class="fa">${e[2]}</span> · ${e[3]}/${e[4]}</small><div class="bar"><i style="width:${e[3]/e[4]*100}%;background:${e[5]}"></i></div></div></div>`).join("")}</div>`;
 const EXM = `<div class="exm"><span style="font-size:28px">🏁</span><div><b>Prüfung</b><small class="fa">۱۰ تا ۱۵ سؤال · بهترین: ۷۰٪</small></div><span class="btn5">Start</span></div>`;
+
+const STEPS = [["done","🎧","Dialog hören","۱۷۳ جمله · ۱۸ دقیقه","✓"],["done","📖","Wichtige Sätze","۱۷ عبارت کلیدی","✓"],["cur","🔤","Wörter lernen","۳۸ از ۳۱۳ بلدی","Weiter ›"],["todo","🎭","Rollenspiel","بهترین: ۶۰٪","Start"],["todo","🗣️","Frei sprechen","دربارهٔ خودت حرف بزن","Start"],["todo","🏁","Prüfung","۱۰ تا ۱۵ سؤال","Start"]];
+const stepsH = () => `<div class="path">${STEPS.map((s, i) => `<div class="step ${s[0]}"><span class="ic">${s[0] === "done" ? "✓" : s[1]}</span><div class="tx"><b>${i + 1}. ${s[2]}</b><small class="fa">${s[3]}</small></div><span class="go">${s[4]}</span></div>`).join("")}</div>`;
+const PHR = [["Ich heiße …","اسمم … است",""],["Woher kommst du?","اهل کجایی؟","du"],["Woher kommen Sie?","اهل کجا هستید؟","Sie"],["Ich wohne in …","در … زندگی می‌کنم",""],["Was machst du beruflich?","شغلت چیست؟","du"]];
+const phrH = n => `<div class="phr">${PHR.slice(0, n).map(p => `<div class="p"><span class="sp">${I.speaker}</span><b>${p[0]}</b><span class="fa">${p[1]}</span>${p[2] ? `<span class="tag">${p[2]}</span>` : ""}</div>`).join("")}</div>`;
+const heroL = `<div class="lhero"><div class="row"><span class="chip5">Lektion 1</span><span class="chip5">A1</span></div><div class="tt">Sich vorstellen</div><div class="fa">معرفی خود — نام، سن، اهل کجا، محل زندگی، شغل و سرگرمی؛ رسمی (Sie) و دوستانه (du)</div><div class="meta"><span>🎧 18 Min</span><span>💬 173 Sätze</span><span>🔤 313 Wörter</span></div><div class="pb"><i></i></div><div class="meta"><span>38% geschafft</span></div></div>`;
+const gfH = `<div class="gfocus">${[["ich heiße / du heißt","صرف فعل heißen"],["Sie ↔ du","رسمی ↔ دوستانه"],["kommen aus + Dativ","اهل جایی بودن"],["wohnen in + Dativ","زندگی کردن در"]].map(r => `<div class="r"><b>${r[0]}</b><span class="fa">${r[1]}</span></div>`).join("")}</div>`;
 const screens = {
+  lessonP: () => `${sb}<div class="ls">${heroL}<div class="sec"><span>LERNPFAD · مسیر یادگیری</span><span>2 / 6</span></div>${stepsH()}
+    <div class="sec"><span>WICHTIGE SÄTZE · عبارت‌های کلیدی</span><a>Alle 17 ›</a></div>${phrH(3)}
+    <div class="sec"><span>GRAMMATIK IM FOKUS</span></div>${gfH}</div><div class="chrome"><div class="dk">${tabs("home")}${playRound()}</div></div>`,
+  lessonD: () => `<div class="lsd">${heroL}${stepsH()}<div class="rightc"><div class="sec" style="font-size:12px;font-weight:800;color:var(--label2)">WICHTIGE SÄTZE · عبارت‌های کلیدی</div>${phrH(5)}</div>
+    <div class="leftb"><div class="sec" style="font-size:12px;font-weight:800;color:var(--label2)">GRAMMATIK IM FOKUS</div>${gfH}</div></div><div class="dockD">${tabs("home")}${playRound()}</div>`,
   fsA: () => { const wv = Array.from({length: 26}, (_, i) => `<i style="height:${6+Math.abs(Math.sin(i*.8)*22)}px"></i>`).join("");
     return `${sb}<div class="fs"><div class="top"><span class="x">✕</span><div class="t">Frei sprechen<small class="fa">مکالمهٔ آزاد · هر چه می‌خواهی بگو</small></div></div>
     <div class="cnt"><div><b>14</b>Wörter gesagt</div><div><b style="color:#28B24B">9</b>aus Lektion 1</div><div><b>1:12</b>Zeit</div></div>

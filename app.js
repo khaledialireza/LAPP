@@ -57,6 +57,7 @@
     document.body.dataset.screen = id;
     if (location.hash !== "#" + id) history.replaceState(null, "", "#" + id);
     if (id === "practice" && typeof renderHub === "function" && !$("#pHub").hidden) renderHub();
+    if (id === "lesson" && typeof renderLesson === "function") renderLesson();
     const on = $(".nav button.on");
     if (on) $("#dockTabsBtn").innerHTML = on.querySelector("svg").outerHTML;
   }
@@ -111,13 +112,9 @@
       <b>L${x.id}</b><span>${esc(x.title)}</span><span class="fa">${esc(x.fa)}</span></button>`).join("");
     const TR = lessonTr(L);
     $("#hLessonTitle").textContent = L.title; $("#hLessonFa").textContent = TR.title; $("#hLevel").textContent = L.level;
-    $("#lTitle").innerHTML = `Lektion ${L.id} <small>${esc(L.title)}</small>`;
-    $("#lLevel").textContent = L.level; $("#lDe").textContent = L.title; $("#lSum").textContent = TR.summary;
-    $("#lessonList").innerHTML = LESSONS.map((x, j) => `<button class="chip" style="${j === i ? "background:var(--accent);color:#1b1024" : ""}" data-lesson="${j - i}">L${x.id}</button>`).join("");
-    $("#phrases").innerHTML = L.phrases.map(([de], pi) => [de, TR.phrases[pi] || "", TR.notes[pi] || ""]).map(([de, fa, note]) => `
-      <div class="phrase"><button class="say" data-say="${esc(de)}">${SAY_ICON}</button>
-      <span class="de">${esc(de)}</span><span class="fa">${esc(fa)}</span><span class="note fa">${esc(note)}</span></div>`).join("");
-
+    $("#phrases").innerHTML = L.phrases.map(([de], pi) => [de, TR.phrases[pi] || "", TR.notes[pi] || ""]).map(([de, fa, note], pi) => `
+      <button class="p" data-phr="${pi}" data-say="${esc(de)}"><span class="sp">${SAY_ICON}</span><b dir="ltr">${esc(de)}</b><span class="fa">${esc(fa)}</span>${note ? `<span class="tag fa">${esc(note)}</span>` : ""}</button>`).join("");
+    $("#lsGram").innerHTML = (L.focus || []).map((g, gi) => `<details class="gf"${gi ? "" : " open"}><summary><b dir="ltr">${esc(g.de)}</b><span class="fa">${esc(g.fa)}</span><span class="chev">›</span></summary><ul class="fa">${g.points.map(p => `<li>${p}</li>`).join("")}</ul></details>`).join("");
     // transcript
     lines = parseTranscript(L.transcript);
     lines.forEach((l, j) => l.fa = TR.lines[j] || "");
@@ -141,6 +138,7 @@
     showNow(0);
 
     buildVocab(); buildPractice(); renderVocab(); renderProgress(); renderWotd();
+    if (document.body.dataset.screen === "lesson") renderLesson();
   }
 
   let curLine = 0;
@@ -1435,6 +1433,52 @@
     if (!player.paused && d > 0 && d < 2) { heard += d; if (heard >= 10) { logDay("l", Math.round(heard)); heard = 0; } }
   });
   player.addEventListener("pause", () => { lastT = null; if (heard >= 1) { logDay("l", Math.round(heard)); heard = 0; } });
+
+  /* ---------- Lesson page: hero, learning path, key phrases, grammar focus ---------- */
+  const lsKey = k => k + (LESSONS[state.idx] || {}).id;
+  function lessonSteps() {
+    const L = LESSONS[state.idx], heard = store.get(lsKey("heard"), []).length, nPh = L.phrases.length, phr = store.get(lsKey("phr"), []).length;
+    const kn = vocabList.filter(v => state.known.has(v.key)).length, dl = store.get("dlg", {}), fsb = store.get("fs", {}), exb = store.get(lsKey("exam"), null);
+    const best = (v, goal = 70) => Math.min(1, (v || 0) / goal);
+    return [
+      { ic: "🎧", de: "Dialog hören", sub: tf("lsStepDialog", { a: heard, b: lines.length }), f: Math.min(1, heard / (lines.length * 0.8 || 1)), go: () => go("audio") },
+      { ic: "📖", de: "Wichtige Sätze", sub: tf("lsStepPhr", { a: phr, b: nPh }), f: Math.min(1, phr / (nPh * 0.8 || 1)), go: () => $("#phrases").scrollIntoView({ behavior: "smooth", block: "center" }) },
+      { ic: "🔤", de: "Wörter lernen", sub: tf("lsStepWords", { a: kn, b: vocabList.length }), f: Math.min(1, kn / (vocabList.length * 0.5 || 1)), go: () => go("vocab") },
+      { ic: "🎭", de: "Rollenspiel", sub: tf("lsStepBest", { b: dl.role != null ? dl.role + "%" : "—" }), f: best(dl.role), go: () => { go("practice"); $('#pHub [data-open="role"]')?.click(); } },
+      { ic: "🗣️", de: "Frei sprechen", sub: tf("lsStepBest", { b: fsb.cue != null ? fsb.cue + "%" : fsb.topic != null ? fsb.topic + "%" : "—" }), f: best(Math.max(fsb.cue || 0, fsb.topic || 0)), go: () => { go("practice"); $('#pHub [data-open="cue"]')?.click(); } },
+      { ic: "🏁", de: "Prüfung", sub: tf("lsStepBest", { b: exb != null ? exb + "%" : "—" }), f: best(exb), go: () => { go("practice"); $('#pHub [data-open="exam"]')?.click(); } }
+    ];
+  }
+  function renderLesson() {
+    const L = LESSONS[state.idx]; if (!L) return;
+    const TR = lessonTr(L), steps = lessonSteps(), pct = Math.round(steps.reduce((a, s) => a + s.f, 0) / steps.length * 100);
+    const cur = steps.findIndex(s => s.f < 1), mins = player.duration ? Math.round(player.duration / 60) : "–";
+    $("#lsHero").innerHTML = `<div class="row"><span class="chip5">Lektion ${L.id}</span><span class="chip5">${esc(L.level)}</span></div>
+      <div class="tt">${esc(L.title)}</div><div class="fa">${esc(TR.title)} — ${esc(TR.summary)}</div>
+      <div class="meta"><span>🎧 ${mins} Min</span><span>💬 ${lines.length} Sätze</span><span>🔤 ${vocabList.length} Wörter</span></div>
+      <div class="pb"><i style="width:${pct}%"></i></div><div class="meta"><span class="fa">${tf("lsProgress", { p: pct })}</span></div>
+      <div class="ls-lessons">${LESSONS.map((x, j) => `<button class="chip5 ${j === state.idx ? "on" : ""}" data-lesson="${j - state.idx}">L${x.id}</button>`).join("")}</div>`;
+    $("#lsPath").innerHTML = steps.map((s, i) => { const st = s.f >= 1 ? "done" : i === cur ? "cur" : "todo";
+      return `<button class="step ${st}" data-step="${i}"><span class="ic">${st === "done" ? "✓" : s.ic}</span><span class="tx"><b>${i + 1}. ${s.de}</b><small class="fa">${esc(s.sub)}</small><span class="sbar"><i style="width:${Math.round(s.f * 100)}%"></i></span></span><span class="go">${st === "done" ? "✓" : st === "cur" ? "Weiter ›" : "Start"}</span></button>`; }).join("");
+    $("#lsPathN").textContent = `${steps.filter(s => s.f >= 1).length} / ${steps.length}`;
+    const done = new Set(store.get(lsKey("phr"), []));
+    $$("#phrases .p").forEach(p => p.classList.toggle("done", done.has(Number(p.dataset.phr))));
+    $("#lsPhrN").textContent = `${done.size} / ${L.phrases.length}`;
+  }
+  player.addEventListener("loadedmetadata", () => { if (document.body.dataset.screen === "lesson") renderLesson(); });
+  $("#lsPath").addEventListener("click", e => { const b = e.target.closest("[data-step]"); if (b) lessonSteps()[b.dataset.step].go(); });
+  $("#phrases").addEventListener("click", e => {
+    const b = e.target.closest("[data-phr]"); if (!b) return;
+    const k = lsKey("phr"), set = new Set(store.get(k, [])); set.add(Number(b.dataset.phr)); store.set(k, [...set]); renderLesson();
+  });
+  // lines of the dialog that were actually heard (lesson audio, not practice clips)
+  let lastHeard = -1;
+  player.addEventListener("timeupdate", () => {
+    if (player.paused || clipStop != null || !timed) return;
+    const i = lineAt(player.currentTime); if (i < 0 || i === lastHeard) return;
+    lastHeard = i;
+    const k = lsKey("heard"), arr = store.get(k, []); if (!arr.includes(i)) { arr.push(i); store.set(k, arr); }
+  });
 
   /* ---------- Home: speak now, word of the day ---------- */
   $("#hSpeak").addEventListener("click", () => { go("practice"); $('#pHub [data-open="role"]')?.click(); });
