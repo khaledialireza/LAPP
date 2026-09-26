@@ -54,7 +54,14 @@
   }
 
   /* ---------- Navigation ---------- */
+  // dialogs and stories are separate: the dialog screen and home always show a lesson, never a story
+  function backToLesson() {
+    if (!isStory(LESSONS[state.idx])) return;
+    const last = store.get("lastLesson", -1), i = last >= 0 && !isStory(LESSONS[last]) ? last : LESSONS.findIndex(x => !isStory(x));
+    if (i >= 0) { if (!player.paused) player.pause(); setLesson(i); }
+  }
   function go(id) {
+    if ((id === "audio" || id === "home") && !night.open) backToLesson();
     $$(".screen").forEach(s => s.classList.toggle("active", s.id === id));
     // the lesson page opens from the home tile, so home stays lit
     const tab = id === "lesson" || id === "library" ? "home" : id;
@@ -107,6 +114,7 @@
   function setLesson(i) {
     if (i < 0 || i >= LESSONS.length) return toast(t("moreLessonsSoon"));
     state.idx = i; store.set("lesson", i);
+    if (!isStory(LESSONS[i])) store.set("lastLesson", i);
     const L = LESSONS[i];
     $$(".js-lesson-num").forEach(e => e.textContent = lsCode(i));
     $$(".js-lesson-word").forEach(e => e.textContent = lsKind(i));
@@ -214,9 +222,11 @@
   /* ---------- Background video: the story's film plays muted and dim behind the text, in sync with the audio ---------- */
   const bgv = { p: null, id: "", ready: false, timer: 0 };
   const bgvOn = () => store.get("bgVideo", true);
-  const ytApi = () => window.YT && YT.Player ? Promise.resolve() : new Promise(res => {
+  const ytApi = () => window.YT && YT.Player ? Promise.resolve() : new Promise((res, rej) => {
     const prev = window.onYouTubeIframeAPIReady; window.onYouTubeIframeAPIReady = () => { prev?.(); res(); };
-    if (!document.getElementById("ytApi")) { const sc = document.createElement("script"); sc.id = "ytApi"; sc.src = "https://www.youtube.com/iframe_api"; document.head.appendChild(sc); }
+    let sc = document.getElementById("ytApi");
+    if (!sc) { sc = document.createElement("script"); sc.id = "ytApi"; sc.src = "https://www.youtube.com/iframe_api"; document.head.appendChild(sc); }
+    sc.addEventListener("error", () => { sc.remove(); rej(); }, { once: true });
   });
   function bgvSet(L) {
     $("#bgvBtn").hidden = !L.video;
@@ -232,14 +242,15 @@
     $("#bgv").innerHTML = '<div id="bgvBox"></div>';
     ytApi().then(() => {
       if (bgv.id !== want) return;
-      bgv.p = new YT.Player("bgvBox", { videoId: want, host: "https://www.youtube-nocookie.com",
-        playerVars: { controls: 0, disablekb: 1, fs: 0, iv_load_policy: 3, modestbranding: 1, playsinline: 1, rel: 0, mute: 1, cc_load_policy: 0 },
+      bgv.p = new YT.Player("bgvBox", { videoId: want,
+        playerVars: { controls: 0, disablekb: 1, fs: 0, iv_load_policy: 3, modestbranding: 1, playsinline: 1, rel: 0, mute: 1, cc_load_policy: 0, ...(/^https?:/.test(location.origin) ? { origin: location.origin } : {}) },
         events: {
           onReady: e => { bgv.ready = true; e.target.mute(); bgvSync(true); },
-          onStateChange: e => { if (e.data === 1) $("#bgv").classList.add("live"); }
+          onStateChange: e => { if (e.data === 1) $("#bgv").classList.add("live"); },
+          onError: e => toast(`Video: YouTube-Fehler ${e.data}` + (e.data === 101 || e.data === 150 ? " (Einbetten nicht erlaubt)" : ""))
         } });
       bgv.timer = setInterval(() => bgvSync(false), 2000);
-    });
+    }, () => toast("Video: YouTube nicht erreichbar"));
   }
   // follow the audio: same position, same speed, play/pause together
   function bgvSync(force) {
@@ -294,7 +305,7 @@
   function nightClose() {
     night.open = false; $("#night").hidden = true; document.body.classList.remove("night-on"); clearTimeout(night.idle);
     try { if (document.fullscreenElement) document.exitFullscreen(); } catch {}
-    nightLock(false); requestAnimationFrame(() => showNow(curLine));
+    nightLock(false);
   }
   // sleep timer: minutes, or "end" = stop when the current story ends
   const SLEEP = [0, 15, 30, 45, "end"];
@@ -308,7 +319,7 @@
     const left = night.sleepEnd ? Math.max(0, Math.ceil((night.sleepEnd - Date.now()) / 60000)) : 0;
     $("#ntSleepL").textContent = night.sleepMode === "end" ? "Ende" : night.sleepEnd ? `${left} Min` : "Aus";
   }
-  $("#ntClose").onclick = () => { night.queue = null; nightClose(); };
+  $("#ntClose").onclick = () => storyClose();
   $("#ntRep").onclick = () => { if (!player.duration) return; player.currentTime = lineStart(lines[curLine]); player.play(); };
   $("#ntSleep").onclick = () => {
     const k = SLEEP.indexOf(night.sleepMode ?? 0);
@@ -322,7 +333,7 @@
   player.addEventListener("play", () => { if (night.open) { nightLock(true); nightWake(); } });
   player.addEventListener("pause", () => { if (night.open && !night.gapWait) { $("#night").classList.remove("idle"); nightLock(false); } });
   document.addEventListener("visibilitychange", () => { if (night.open && !document.hidden && !player.paused) nightLock(true); });
-  document.addEventListener("keydown", e => { if (!night.open) return; if (e.key === "Escape") nightClose(); if (e.key === " ") { e.preventDefault(); act("toggle"); } if (e.key === "ArrowRight") act("next"); if (e.key === "ArrowLeft") act("prev"); });
+  document.addEventListener("keydown", e => { if (!night.open) return; if (e.key === "Escape") storyClose(); if (e.key === " ") { e.preventDefault(); act("toggle"); } if (e.key === "ArrowRight") act("next"); if (e.key === "ArrowLeft") act("prev"); });
 
   /* ---------- Story playlist (dock tab): pick, order, settings, then night-mode playback ---------- */
   const PL_MODES = { mine: "Meine Liste", level: "Niveau ↑", newest: "Neueste", random: "Zufall" };
@@ -400,18 +411,34 @@
     const id = night.queue[qi], i = LESSONS.findIndex(x => x.id === id); if (i < 0) return;
     night.qi = qi; night.gapDone = -1;
     if (i !== state.idx) setLesson(i);
-    go("audio"); if (!night.open) nightOpen(); night.shown = -1;
+    if (!night.open) nightOpen(); night.shown = -1;
     const start = () => { player.currentTime = at || 0; showNow(Math.max(0, lineAt(at || 0))); player.play().catch(() => toast(t("playFailed"))); };
     player.readyState >= 1 ? start() : player.addEventListener("loadedmetadata", start, { once: true });
+  }
+  function startQueue(q, id, at) {
+    const pl = plGet();
+    night.queue = q; setSpeed(pl.speed); $("#night").classList.toggle("no-tr", !pl.tr); night.gap = pl.gap;
+    unlockAudio(); nightSleep(pl.sleep);
+    playStory(q.indexOf(id), at);
   }
   $("#plStart").onclick = () => {
     const pl = plGet(); let q = plOrdered(pl).filter(id => !pl.off.includes(id)); if (!q.length) return;
     if (pl.mode === "random") q = shuffleArr(q);
     const st = plStartPoint(pl, q);
-    night.queue = q; setSpeed(pl.speed); $("#night").classList.toggle("no-tr", !pl.tr); night.gap = pl.gap;
-    unlockAudio(); nightSleep(pl.sleep);
-    playStory(q.indexOf(st.id), st.t);
+    startQueue(q, st.id, st.t);
   };
+  // one story on its own (from its page or the library), resuming if it was left halfway
+  function playOneStory(i, fromStart) {
+    const id = LESSONS[i].id, pos = plGet().pos;
+    startQueue([id], id, !fromStart && pos && pos.id === id ? pos.t : 0);
+  }
+  // closing a story stops it and goes back to the playlist
+  function storyClose() {
+    clearTimeout(night.gapWait); night.gapWait = 0;
+    if (!player.paused) player.pause();
+    night.queue = null; nightClose(); nightSleep(0);
+    backToLesson(); go("stories");
+  }
   // remember where we are; move on to the next story at the end; optional pause after each sentence
   let plSaveT = 0;
   player.addEventListener("timeupdate", () => {
@@ -1710,7 +1737,7 @@
     const kn = keys.filter(k => state.known.has(k)).length, dl = store.get(bestKey("dlg", i), {}), fsb = store.get(bestKey("fs", i), {}), exb = store.get(lsKey("exam", i), null);
     const best = (v, goal = 70) => Math.min(1, (v || 0) / goal);
     if (isStory(L)) return [
-      { ic: "🎧", de: "Geschichte hören", sub: tf("lsStepDialog", { a: heard, b: nLines }), f: Math.min(1, heard / (nLines * 0.8 || 1)), go: () => go("audio") },
+      { ic: "🎧", de: "Geschichte hören", sub: tf("lsStepDialog", { a: heard, b: nLines }), f: Math.min(1, heard / (nLines * 0.8 || 1)), go: () => playOneStory(i) },
       { ic: "🔤", de: "Neue Wörter", sub: tf("lsStepWords", { a: kn, b: keys.length }), f: Math.min(1, kn / (keys.length * 0.5 || 1)), go: () => go("vocab") },
       { ic: "❓", de: "Fragen zur Geschichte", sub: tf("lsStepBest", { b: fsb.cue != null ? fsb.cue + "%" : "—" }), f: best(fsb.cue), go: () => { go("practice"); $('#pHub [data-open="cue"]')?.click(); } },
       { ic: "🗣️", de: "Nacherzählen", sub: tf("lsStepBest", { b: fsb.topic != null ? fsb.topic + "%" : "—" }), f: best(fsb.topic), go: () => { go("practice"); $('#pHub [data-open="topic"]')?.click(); } },
@@ -1853,7 +1880,8 @@
   $("#libMenu").addEventListener("click", e => {
     const b = e.target.closest("[data-m]"); if (!b) return;
     const i = Number($("#libMenu").dataset.i), L = LESSONS[i], m = b.dataset.m; libMenuClose();
-    if (m === "play" || m === "restart") { if (i !== state.idx) setLesson(i); if (m === "restart") { player.currentTime = 0; showNow(0); } go("audio"); }
+    if ((m === "play" || m === "restart") && isStory(L)) playOneStory(i, m === "restart");
+    else if (m === "play" || m === "restart") { if (i !== state.idx) setLesson(i); if (m === "restart") { player.currentTime = 0; showNow(0); } go("audio"); }
     if (m === "open") { if (i !== state.idx) setLesson(i); go("lesson"); }
     if (m === "done") { const d = store.get("done", []); store.set("done", d.includes(L.id) ? d.filter(x => x !== L.id) : [...d, L.id]); renderLibrary(); renderProgress?.(); }
     if (m === "reset" && confirm(`${lsName(i)}: Fortschritt löschen?`)) { libReset(L); if (i === state.idx) setLesson(i); renderLibrary(); }

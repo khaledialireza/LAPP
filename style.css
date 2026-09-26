@@ -1700,11 +1700,7 @@ body.night-on .dock { display: none !important; }
 .bgv iframe { position: absolute; top: 50%; left: 50%; border: 0; pointer-events: none;
   width: max(100cqw, calc(100cqh * 16 / 9)); height: max(100cqh, calc(100cqw * 9 / 16)); transform: translate(-50%, -50%) scale(1.18); }
 .bgv::after { content: ""; position: absolute; inset: 0; background: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.15) 40%, rgba(0,0,0,.45)); }
-#audio > .ly-head, #audio > .lyrics { position: relative; z-index: 1; }
-#audio .word-side { z-index: 5; }
-.ly-chip[aria-pressed="false"]#bgvBtn { opacity: .45; }
 /* night mode shows the film through a darker veil */
-body.has-bgv .night { background: radial-gradient(90% 55% at 15% 25%, rgba(255,45,85,.08), transparent 60%), radial-gradient(80% 55% at 90% 85%, rgba(94,92,230,.09), transparent 60%), rgba(0,0,0,.66); }
 
 .night.no-tr .nt-tr { display: none; }
 .nt-num { text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
@@ -1765,7 +1761,6 @@ body[data-screen="stories"] .dock .nav, body[data-screen="stories"] .dock-round,
 .prof5 b { font-size: 16px; } .prof5 .fa { font-size: 12px; color: var(--muted); text-align: left; }
 .prof5 .p5c { color: var(--muted); font-size: 22px; }
 /* under the night view only the film may show through */
-body.night-on #audio > :not(.bgv) { visibility: hidden; }
 .pl-a, .pl-b { display: flex; flex-direction: column; gap: 6px; }
 @media (min-width: 901px) and (min-height: 521px) { .pl-b { margin-top: 4px; } }
 /* ---------- Video only: no text, film at normal brightness ---------- */
@@ -1773,6 +1768,9 @@ body.night-on #audio > :not(.bgv) { visibility: hidden; }
 .nt-txt[hidden] { display: none; }
 body.video-only .bgv.live, body.video-only .bgv.live.paused { opacity: .92; }
 body.video-only .bgv::after { background: linear-gradient(rgba(0,0,0,.25), transparent 22%, transparent 78%, rgba(0,0,0,.35)); }
-body.video-only #audio > .lyrics, body.video-only .nt-stage > * { visibility: hidden; }
-body.video-only .night, body.video-only.has-bgv .night { background: transparent; }
-body.video-only #audio.active { background: #000; }
+/* the film lives inside the night view, under its text and controls */
+.night > .bgv { z-index: 0; }
+.night > .nt-top, .night > .nt-stage, .night > .nt-ctl { position: relative; z-index: 1; }
+#bgvBtn[aria-pressed="false"] { opacity: .45; }
+#bgvBtn[hidden] { display: none; }
+body.video-only .nt-stage > * { visibility: hidden; }
