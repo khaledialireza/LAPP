@@ -16,7 +16,7 @@
   <meta name="description" content="LAPP — آموزش زبان آلمانی با دیالوگ صوتی، واژگان و تمرین.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=muixkrut">
+  <link rel="stylesheet" href="style.css?v=muiy9yj2">
 </head>
 <body data-screen="home">
   <div class="frame">
@@ -61,6 +61,7 @@
               <div><b class="c-w" id="lgWords">0</b> <span>Wörter</span></div>
             </div>
           </div>
+          <button class="prof5" data-profile><span class="avatar-btn js-avatar">?</span><span class="p5t"><span class="kk">Profil · <span class="fa">من</span></span><b id="p5Name"></b><span class="fa" id="p5Sub"></span></span><span class="p5c">›</span></button>
           <button class="word5" data-go="vocab">
             <span class="kk">Wort des Tages</span>
             <span class="sp" id="wotdSay" role="button" aria-label="anhören"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 4V5L7 9zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4z"/></svg></span>
@@ -75,6 +76,19 @@
       </section>
 
       <!-- LESSON -->
+      <section class="screen" id="stories">
+        <div class="pl-head"><div class="pl-k">GUTE-NACHT-PLAYLIST</div><h1 class="pl-title">Geschichten</h1><div class="pl-sub fa">پلی‌لیست داستان — قبل از خواب گوش کن و بخوان</div></div>
+        <div class="pl-scroll">
+          <div class="pl-a"><div class="pl-sec">REIHENFOLGE · <span class="fa">ترتیب پخش</span></div>
+          <div class="pl-seg" id="plMode"></div>
+          <div class="pl-sec" id="plCount"></div>
+          <div class="pl-list" id="plList"></div></div>
+          <div class="pl-b"><div class="pl-sec">EINSTELLUNGEN</div>
+          <div class="pl-opts" id="plOpts"></div></div>
+        </div>
+        <button class="pl-start" id="plStart"></button>
+      </section>
+
       <section class="screen" id="library">
         <div class="lib-head"><div><div class="lib-k">BIBLIOTHEK · <span class="fa">کتابخانه</span></div><h1 class="lib-title">Mediathek</h1></div><span class="lib-n" id="libCount"></span></div>
         <div class="lib-seg" id="libSeg"></div>
@@ -98,8 +112,9 @@
       <section class="screen" id="audio">
         <div class="ly-head">
           <div><h1 class="ly-title" id="lyTitle">Dialog</h1><div class="ly-meta"><span id="lySrc">Daily German Talk</span> · <span id="mNum"></span></div></div>
-          <div class="ly-acts"><div class="spk-pick"><button class="ly-chip" id="spkBtn" aria-haspopup="listbox" aria-expanded="false">👤 <span id="spkLbl">Alle</span> ▾</button><div class="spk-menu" id="mSpkTabs" hidden></div></div><button class="ly-chip fa" id="faBtn" aria-pressed="true" data-i18n="showTranslation"></button></div>
+          <div class="ly-acts"><div class="spk-pick"><button class="ly-chip" id="spkBtn" aria-haspopup="listbox" aria-expanded="false">👤 <span id="spkLbl">Alle</span> ▾</button><div class="spk-menu" id="mSpkTabs" hidden></div></div><button class="ly-chip" id="bgvBtn" aria-pressed="true" aria-label="Video im Hintergrund" hidden>🎬</button><button class="ly-chip fa" id="faBtn" aria-pressed="true" data-i18n="showTranslation"></button></div>
         </div>
+        <div class="bgv" id="bgv" aria-hidden="true"></div>
         <div class="lyrics" id="mTranscript"></div>
         <aside class="word-side" id="wordSide" aria-label="Wort"><div class="ws-body" id="wsBody"></div></aside>
       </section>
@@ -204,7 +219,7 @@
     <footer class="dock">
       <button class="dock-round dock-tabs-btn" id="dockTabsBtn" aria-label="Tabs"></button>
       <nav class="nav">
-        <button class="tab-me" data-profile aria-label="Profile"><span class="avatar-btn js-avatar">?</span><span class="tab-l fa" data-i18n="tabMe"></span></button>
+        <button data-go="stories" aria-label="Geschichten"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg><span class="tab-l fa" data-i18n="tabStory"></span></button>
         <button data-go="vocab" aria-label="Vokabeln"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 20 12 4l7 16M8 14h8"/></svg><span class="tab-l fa" data-i18n="tabVocab"></span></button>
         <button data-go="home" class="on" aria-label="Start"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11 12 4l9 7v9H3z"/><path d="M9 20v-6h6v6"/></svg><span class="tab-l fa" data-i18n="tabHome"></span></button>
         <button data-go="audio" aria-label="Audio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg><span class="tab-l fa" data-i18n="tabDialog"></span></button>
@@ -224,6 +239,18 @@
     </footer>
   </div>
 
+  <!-- Night mode: one line at a time, dark and calm, for reading before sleep -->
+  <div class="night" id="night" hidden>
+    <div class="nt-top"><button class="nt-x" id="ntClose" aria-label="schließen">✕</button><span class="nt-num"><span id="ntTitle"></span> · <span id="ntNum"></span><span class="nt-next" id="ntNext"></span></span><button class="nt-sleep" id="ntSleep">⏾ <span id="ntSleepL">Aus</span></button></div>
+    <div class="nt-stage" id="ntStage"><div class="nt-card" id="ntCard"><div class="nt-who" id="ntWho"></div><div class="nt-de" id="ntDe"></div><div class="nt-tr" id="ntTr"></div></div></div>
+    <div class="nt-ctl">
+      <button class="nt-b nt-sp" data-speed-cycle aria-label="Tempo"><span class="js-speed">1×</span></button>
+      <button class="nt-b" data-act="prev" aria-label="zurück"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
+      <button class="nt-b nt-play" data-act="toggle" aria-label="play"><svg class="ico-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l12-7z"/></svg></button>
+      <button class="nt-b" data-act="next" aria-label="weiter"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg></button>
+      <button class="nt-b" id="ntRep" aria-label="Satz wiederholen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.6-5.9"/><path d="M4 4v5h5"/></svg></button>
+    </div>
+  </div>
   <audio id="player" preload="metadata"></audio>
   <div class="toast" id="toast"></div>
   <div class="lang-menu" id="langMenu" hidden></div>
@@ -257,34 +284,34 @@
     </div>
   </div>
 
-  <script src="data/lessons.js?v=muixkrut"></script>
-  <script src="data/lesson1-fa.js?v=muixkrut"></script>
-  <script src="data/lesson1-times.js?v=muixkrut"></script>
-  <script src="data/lesson1-speak.js?v=muixkrut"></script>
-  <script src="data/lesson1-focus.js?v=muixkrut"></script>
-  <script src="data/lesson1-words.js?v=muixkrut"></script>
-  <script src="data/dict-de.js?v=muixkrut"></script>
-  <script src="data/dict-tr.js?v=muixkrut"></script>
-  <script src="data/lesson1-ru.js?v=muixkrut"></script>
-  <script src="data/lesson1-uk.js?v=muixkrut"></script>
-  <script src="data/lesson2-fa.js?v=muixkrut"></script>
-  <script src="data/lesson2-times.js?v=muixkrut"></script>
-  <script src="data/lesson2-speak.js?v=muixkrut"></script>
-  <script src="data/lesson2-focus.js?v=muixkrut"></script>
-  <script src="data/lesson2-words.js?v=muixkrut"></script>
-  <script src="data/lesson2-ru.js?v=muixkrut"></script>
-  <script src="data/lesson2-uk.js?v=muixkrut"></script>
-  <script src="data/lesson3-fa.js?v=muixkrut"></script>
-  <script src="data/lesson3-times.js?v=muixkrut"></script>
-  <script src="data/lesson3-speak.js?v=muixkrut"></script>
-  <script src="data/lesson3-focus.js?v=muixkrut"></script>
-  <script src="data/lesson3-words.js?v=muixkrut"></script>
-  <script src="data/lesson3-ru.js?v=muixkrut"></script>
-  <script src="data/lesson3-uk.js?v=muixkrut"></script>
-  <script src="i18n.js?v=muixkrut"></script>
-  <script src="data/verbs-de.js?v=muixkrut"></script>
-  <script src="grammar.js?v=muixkrut"></script>
-  <script src="exercises.js?v=muixkrut"></script>
-  <script src="app.js?v=muixkrut"></script>
+  <script src="data/lessons.js?v=muiy9yj2"></script>
+  <script src="data/lesson1-fa.js?v=muiy9yj2"></script>
+  <script src="data/lesson1-times.js?v=muiy9yj2"></script>
+  <script src="data/lesson1-speak.js?v=muiy9yj2"></script>
+  <script src="data/lesson1-focus.js?v=muiy9yj2"></script>
+  <script src="data/lesson1-words.js?v=muiy9yj2"></script>
+  <script src="data/dict-de.js?v=muiy9yj2"></script>
+  <script src="data/dict-tr.js?v=muiy9yj2"></script>
+  <script src="data/lesson1-ru.js?v=muiy9yj2"></script>
+  <script src="data/lesson1-uk.js?v=muiy9yj2"></script>
+  <script src="data/lesson2-fa.js?v=muiy9yj2"></script>
+  <script src="data/lesson2-times.js?v=muiy9yj2"></script>
+  <script src="data/lesson2-speak.js?v=muiy9yj2"></script>
+  <script src="data/lesson2-focus.js?v=muiy9yj2"></script>
+  <script src="data/lesson2-words.js?v=muiy9yj2"></script>
+  <script src="data/lesson2-ru.js?v=muiy9yj2"></script>
+  <script src="data/lesson2-uk.js?v=muiy9yj2"></script>
+  <script src="data/lesson3-fa.js?v=muiy9yj2"></script>
+  <script src="data/lesson3-times.js?v=muiy9yj2"></script>
+  <script src="data/lesson3-speak.js?v=muiy9yj2"></script>
+  <script src="data/lesson3-focus.js?v=muiy9yj2"></script>
+  <script src="data/lesson3-words.js?v=muiy9yj2"></script>
+  <script src="data/lesson3-ru.js?v=muiy9yj2"></script>
+  <script src="data/lesson3-uk.js?v=muiy9yj2"></script>
+  <script src="i18n.js?v=muiy9yj2"></script>
+  <script src="data/verbs-de.js?v=muiy9yj2"></script>
+  <script src="grammar.js?v=muiy9yj2"></script>
+  <script src="exercises.js?v=muiy9yj2"></script>
+  <script src="app.js?v=muiy9yj2"></script>
 </body>
 </html>

@@ -64,6 +64,7 @@
     if (id === "practice" && typeof renderHub === "function" && !$("#pHub").hidden) renderHub();
     if (id === "lesson" && typeof renderLesson === "function") renderLesson();
     if (id === "library" && typeof renderLibrary === "function") renderLibrary();
+    if (id === "stories" && typeof renderStories === "function") renderStories();
     if (id === "audio") { document.body.classList.add("dock-collapsed"); requestAnimationFrame(() => showNow(curLine)); }
     const on = $(".nav button.on");
     if (on) $("#dockTabsBtn").innerHTML = on.querySelector("svg").outerHTML;
@@ -139,6 +140,7 @@
     $(".spk-pick").hidden = whos.length < 2;
     $("#spkLbl").textContent = $("#mSpkTabs button.on")?.textContent || "Alle";
     filterSpeakers();
+    bgvSet(L);
     const story = L.type === "story";
     $("#lyTitle").textContent = story ? "Geschichte" : "Dialog";
     $("#lySrc").textContent = story ? `${L.title} · ${L.level}` : "Daily German Talk";
@@ -174,6 +176,7 @@
       // the previous translation collapses at once and this one grows in, so the final position is known now
       if (Date.now() > followPause && box.clientHeight) box.scrollTo({ top: row.offsetTop - box.clientHeight * 0.38, behavior: "smooth" });
     }
+    if (night.open) nightShow(i);
     $("#dpLine").textContent = l ? l.text : "";
     $("#dpWho").textContent = l ? l.who : "";
   }
@@ -208,8 +211,220 @@
     $$("#mTranscript .ly-line").forEach(r => r.classList.toggle("hide", state.spk !== "all" && !r.classList.contains(state.spk)));
   }
 
+  /* ---------- Background video: the story's film plays muted and dim behind the text, in sync with the audio ---------- */
+  const bgv = { p: null, id: "", ready: false, timer: 0 };
+  const bgvOn = () => store.get("bgVideo", true);
+  const ytApi = () => window.YT && YT.Player ? Promise.resolve() : new Promise(res => {
+    const prev = window.onYouTubeIframeAPIReady; window.onYouTubeIframeAPIReady = () => { prev?.(); res(); };
+    if (!document.getElementById("ytApi")) { const sc = document.createElement("script"); sc.id = "ytApi"; sc.src = "https://www.youtube.com/iframe_api"; document.head.appendChild(sc); }
+  });
+  function bgvSet(L) {
+    $("#bgvBtn").hidden = !L.video;
+    $("#bgvBtn").setAttribute("aria-pressed", bgvOn());
+    const want = L.video && bgvOn() ? L.video : "";
+    if (want === bgv.id) return;
+    try { bgv.p?.destroy?.(); } catch {}
+    bgv.p = null; bgv.ready = false; bgv.id = want; clearInterval(bgv.timer);
+    $("#bgv").innerHTML = ""; $("#bgv").classList.remove("live");
+    document.body.classList.toggle("has-bgv", !!want);
+    if (!want) return;
+    $("#bgv").innerHTML = '<div id="bgvBox"></div>';
+    ytApi().then(() => {
+      if (bgv.id !== want) return;
+      bgv.p = new YT.Player("bgvBox", { videoId: want, host: "https://www.youtube-nocookie.com",
+        playerVars: { controls: 0, disablekb: 1, fs: 0, iv_load_policy: 3, modestbranding: 1, playsinline: 1, rel: 0, mute: 1, cc_load_policy: 0 },
+        events: {
+          onReady: e => { bgv.ready = true; e.target.mute(); bgvSync(true); },
+          onStateChange: e => { if (e.data === 1) $("#bgv").classList.add("live"); }
+        } });
+      bgv.timer = setInterval(() => bgvSync(false), 2000);
+    });
+  }
+  // follow the audio: same position, same speed, play/pause together
+  function bgvSync(force) {
+    const p = bgv.p; if (!bgv.ready || !p?.getCurrentTime) return;
+    try {
+      if (Math.abs(p.getCurrentTime() - player.currentTime) > (force ? 0.3 : 0.8)) p.seekTo(player.currentTime, true);
+      if (p.getPlaybackRate?.() !== player.playbackRate) p.setPlaybackRate(player.playbackRate);
+      const playing = p.getPlayerState?.() === 1;
+      if (!player.paused && !playing) p.playVideo();
+      if (player.paused && playing) p.pauseVideo();
+    } catch {}
+    $("#bgv").classList.toggle("paused", player.paused);
+  }
+  ["play", "pause", "seeked", "ratechange"].forEach(ev => player.addEventListener(ev, () => bgvSync(true)));
+  $("#bgvBtn").onclick = () => { store.set("bgVideo", !bgvOn()); bgvSet(LESSONS[state.idx]); };
+
+  /* ---------- Night mode: calm, one line at a time, big translation, big controls ---------- */
+  const night = { open: false, lock: null, idle: 0, sleepEnd: 0, sleepT: 0, shown: -1 };
+  function nightShow(i) {
+    const l = lines[i]; if (!l || night.shown === i) return;
+    night.shown = i;
+    const card = $("#ntCard"); card.classList.add("out");
+    setTimeout(() => {
+      $("#ntWho").textContent = l.who || ""; $("#ntDe").textContent = l.text; $("#ntTr").textContent = l.fa || "";
+      $("#ntNum").textContent = `${i + 1} / ${lines.length}`;
+      $("#ntTitle").textContent = `${lsCode(state.idx)} · ${LESSONS[state.idx].title}`;
+      const q = night.queue, nx = q && q[night.qi + 1] != null ? LESSONS.findIndex(x => x.id === q[night.qi + 1]) : -1;
+      $("#ntNext").textContent = nx >= 0 ? ` · Als Nächstes: ${lsCode(nx)} ›` : "";
+      card.classList.remove("out");
+    }, 280);
+  }
+  function nightWake() {
+    $("#night").classList.remove("idle"); clearTimeout(night.idle);
+    night.idle = setTimeout(() => { if (!player.paused) $("#night").classList.add("idle"); }, 4000);
+  }
+  async function nightLock(on) {
+    try { if (on && !night.lock && navigator.wakeLock) { night.lock = await navigator.wakeLock.request("screen"); night.lock.addEventListener?.("release", () => night.lock = null); }
+      if (!on && night.lock) { await night.lock.release(); night.lock = null; } } catch {}
+  }
+  function nightOpen() {
+    night.open = true; night.shown = -1; $("#night").hidden = false; document.body.classList.add("night-on");
+    try { document.documentElement.requestFullscreen?.().catch(() => {}); } catch {}
+    nightShow(curLine); nightWake(); nightLock(!player.paused);
+  }
+  function nightClose() {
+    night.open = false; $("#night").hidden = true; document.body.classList.remove("night-on"); clearTimeout(night.idle);
+    try { if (document.fullscreenElement) document.exitFullscreen(); } catch {}
+    nightLock(false); requestAnimationFrame(() => showNow(curLine));
+  }
+  // sleep timer: minutes, or "end" = stop when the current story ends
+  const SLEEP = [0, 15, 30, 45, "end"];
+  function nightSleep(v) {
+    night.sleepMode = v; clearInterval(night.sleepT);
+    night.sleepEnd = typeof v === "number" && v ? Date.now() + v * 60000 : 0;
+    if (night.sleepEnd) night.sleepT = setInterval(() => { nightSleepLabel(); if (Date.now() >= night.sleepEnd) { player.pause(); nightSleep(0); } }, 15000);
+    nightSleepLabel();
+  }
+  function nightSleepLabel() {
+    const left = night.sleepEnd ? Math.max(0, Math.ceil((night.sleepEnd - Date.now()) / 60000)) : 0;
+    $("#ntSleepL").textContent = night.sleepMode === "end" ? "Ende" : night.sleepEnd ? `${left} Min` : "Aus";
+  }
+  $("#ntClose").onclick = () => { night.queue = null; nightClose(); };
+  $("#ntRep").onclick = () => { if (!player.duration) return; player.currentTime = lineStart(lines[curLine]); player.play(); };
+  $("#ntSleep").onclick = () => {
+    const k = SLEEP.indexOf(night.sleepMode ?? 0);
+    nightSleep(SLEEP[(k + 1) % SLEEP.length]);
+  };
+  // while the controls are dimmed, the first tap only wakes them
+  let ntWoke = false;
+  $("#night").addEventListener("pointerdown", () => { ntWoke = $("#night").classList.contains("idle"); nightWake(); }, true);
+  $("#night").addEventListener("click", e => { if (ntWoke) { ntWoke = false; e.stopPropagation(); e.preventDefault(); } }, true);
+  $("#night").addEventListener("keydown", nightWake);
+  player.addEventListener("play", () => { if (night.open) { nightLock(true); nightWake(); } });
+  player.addEventListener("pause", () => { if (night.open && !night.gapWait) { $("#night").classList.remove("idle"); nightLock(false); } });
+  document.addEventListener("visibilitychange", () => { if (night.open && !document.hidden && !player.paused) nightLock(true); });
+  document.addEventListener("keydown", e => { if (!night.open) return; if (e.key === "Escape") nightClose(); if (e.key === " ") { e.preventDefault(); act("toggle"); } if (e.key === "ArrowRight") act("next"); if (e.key === "ArrowLeft") act("prev"); });
+
+  /* ---------- Story playlist (dock tab): pick, order, settings, then night-mode playback ---------- */
+  const PL_MODES = { mine: "Meine Liste", level: "Niveau ↑", newest: "Neueste", random: "Zufall" };
+  const plGet = () => ({ order: [], off: [], mode: "mine", sleep: 0, speed: 2, tr: true, gap: 0, pos: null, ...store.get("pl", {}) });
+  const plSet = v => store.set("pl", v);
+  const storyIdx = () => LESSONS.map((L, i) => i).filter(i => isStory(LESSONS[i]));
+  function plOrdered(pl) {
+    const ids = storyIdx().map(i => LESSONS[i].id);
+    const mine = [...pl.order.filter(id => ids.includes(id)), ...ids.filter(id => !pl.order.includes(id))];
+    const byId = id => LESSONS.find(x => x.id === id);
+    if (pl.mode === "level") return [...mine].sort((a, b) => LEVELS.indexOf(byId(a).level) - LEVELS.indexOf(byId(b).level));
+    if (pl.mode === "newest") return [...mine].sort((a, b) => LESSONS.indexOf(byId(b)) - LESSONS.indexOf(byId(a)));
+    return mine;
+  }
+  function renderStories() {
+    const pl = plGet(), ids = plOrdered(pl), on = ids.filter(id => !pl.off.includes(id));
+    const mins = on.reduce((a, id) => a + (libMins(LESSONS.find(x => x.id === id)) || 0), 0);
+    $("#plMode").innerHTML = Object.entries(PL_MODES).map(([k, v]) => `<button data-mode="${k}" class="${pl.mode === k ? "on" : ""}">${v}</button>`).join("");
+    $("#plCount").innerHTML = `IN DER PLAYLIST · ${on.length} von ${ids.length} · ${mins} Min`;
+    let n = 0;
+    $("#plList").innerHTML = ids.map(id => { const i = LESSONS.findIndex(x => x.id === id), L = LESSONS[i], sel = !pl.off.includes(id), p = lessonPct(i), m = libMins(L);
+      return `<div class="pl-it ${sel ? "" : "off"}" data-id="${id}">
+        <span class="n">${sel && pl.mode !== "random" ? ++n : ""}</span><span class="cv cv${i % 4}">📖</span>
+        <span class="t"><b>${esc(L.title)}</b><span>${lsCode(i)} · ${esc(L.level)}${m ? ` · ${m} Min` : ""} · ${p >= 100 ? "fertig" : p ? p + "%" : "neu"}</span></span>
+        <button class="ck" data-ck aria-pressed="${sel}">${sel ? "✓" : ""}</button>${pl.mode === "mine" ? `<span class="hd" data-drag>≡</span>` : ""}</div>`; }).join("")
+      || `<div class="pl-empty fa">هنوز داستانی نیست.</div>`;
+    const chips = (key, vals, lab = v => v) => vals.map(v => `<button data-opt="${key}" data-v="${v}" class="${String(pl[key]) === String(v) ? "on" : ""}">${lab(v)}</button>`).join("");
+    const hasVid = on.some(id => LESSONS.find(x => x.id === id).video);
+    $("#plOpts").innerHTML = `
+      <div class="pl-opt"><span>Schlaf-Timer<small class="fa">توقف خودکار</small></span><span class="pl-chips">${chips("sleep", SLEEP, v => v === 0 ? "Aus" : v === "end" ? "Ende" : v)}</span></div>
+      <div class="pl-opt"><span>Tempo<small class="fa">سرعت</small></span><span class="pl-chips">${chips("speed", [1, 2, 3], v => SPEEDS[v] + "×")}</span></div>
+      <div class="pl-opt"><span>Übersetzung<small class="fa">نمایش ترجمه</small></span><button class="tg" data-tg="tr" aria-pressed="${pl.tr}"></button></div>
+      <div class="pl-opt"><span>Pause zwischen Sätzen<small class="fa">مکث بین جمله‌ها</small></span><span class="pl-chips">${chips("gap", [0, 2, 4], v => v ? v + " s" : "0")}</span></div>
+      ${hasVid ? `<div class="pl-opt"><span>Video im Hintergrund<small class="fa">ویدیو در پس‌زمینه (کم‌نور)</small></span><button class="tg" data-tg="video" aria-pressed="${bgvOn()}"></button></div>` : ""}`;
+    const st = plStartPoint(pl);
+    $("#plStart").disabled = !st;
+    $("#plStart").innerHTML = st ? `▶︎ Start <small>${st.t > 5 ? `ab ${lsCode(st.i)} · Satz ${st.line + 1}` : `${on.length} ${on.length === 1 ? "Geschichte" : "Geschichten"} · ${mins} Min`}</small>` : "Keine Geschichte gewählt";
+  }
+  // where Start begins: the saved position if that story is still in the list
+  function plStartPoint(pl, queue) {
+    const q = queue || plOrdered(pl).filter(id => !pl.off.includes(id)); if (!q.length) return null;
+    const pos = pl.pos && q.includes(pl.pos.id) ? pl.pos : { id: q[0], t: 0 };
+    const i = LESSONS.findIndex(x => x.id === pos.id), L = LESSONS[i];
+    const line = Array.isArray(L.timings) ? Math.max(0, L.timings.findIndex(x => (Array.isArray(x) ? x[1] : x) > pos.t)) : 0;
+    return { id: pos.id, i, t: pos.t || 0, line };
+  }
+  $("#plMode").addEventListener("click", e => { const b = e.target.closest("[data-mode]"); if (!b) return; const pl = plGet(); pl.mode = b.dataset.mode; plSet(pl); renderStories(); });
+  $("#plOpts").addEventListener("click", e => {
+    const pl = plGet(), b = e.target.closest("button"); if (!b) return;
+    if (b.dataset.tg === "video") { store.set("bgVideo", !bgvOn()); bgvSet(LESSONS[state.idx]); }
+    else if (b.dataset.tg) pl[b.dataset.tg] = !pl[b.dataset.tg];
+    else if (b.dataset.opt) { const v = b.dataset.v; pl[b.dataset.opt] = isNaN(v) ? v : Number(v); }
+    plSet(pl); renderStories();
+  });
+  $("#plList").addEventListener("click", e => {
+    const ck = e.target.closest("[data-ck]"); if (!ck) return;
+    const id = Number(ck.closest("[data-id]").dataset.id), pl = plGet();
+    pl.off = pl.off.includes(id) ? pl.off.filter(x => x !== id) : [...pl.off, id]; plSet(pl); renderStories();
+  });
+  // reorder by dragging ≡
+  let plDrag = null;
+  $("#plList").addEventListener("pointerdown", e => {
+    const h = e.target.closest("[data-drag]"); if (!h) return;
+    e.preventDefault(); plDrag = h.closest(".pl-it"); plDrag.classList.add("drag"); h.setPointerCapture(e.pointerId);
+  });
+  $("#plList").addEventListener("pointermove", e => {
+    if (!plDrag) return;
+    const over = [...$$("#plList .pl-it")].find(x => x !== plDrag && (r => e.clientY > r.top && e.clientY < r.bottom)(x.getBoundingClientRect()));
+    if (over) { const r = over.getBoundingClientRect(); $("#plList").insertBefore(plDrag, e.clientY < r.top + r.height / 2 ? over : over.nextSibling); }
+  });
+  const plDrop = () => { if (!plDrag) return; plDrag.classList.remove("drag"); plDrag = null; const pl = plGet(); pl.order = [...$$("#plList .pl-it")].map(x => Number(x.dataset.id)); plSet(pl); renderStories(); };
+  ["pointerup", "pointercancel"].forEach(ev => $("#plList").addEventListener(ev, plDrop));
+
+  function playStory(qi, t) {
+    const id = night.queue[qi], i = LESSONS.findIndex(x => x.id === id); if (i < 0) return;
+    night.qi = qi; night.gapDone = -1;
+    if (i !== state.idx) setLesson(i);
+    go("audio"); if (!night.open) nightOpen(); night.shown = -1;
+    const start = () => { player.currentTime = t || 0; showNow(Math.max(0, lineAt(t || 0))); player.play().catch(() => toast(t("playFailed"))); };
+    player.readyState >= 1 ? start() : player.addEventListener("loadedmetadata", start, { once: true });
+  }
+  $("#plStart").onclick = () => {
+    const pl = plGet(); let q = plOrdered(pl).filter(id => !pl.off.includes(id)); if (!q.length) return;
+    if (pl.mode === "random") q = shuffleArr(q);
+    const st = plStartPoint(pl, q);
+    night.queue = q; setSpeed(pl.speed); $("#night").classList.toggle("no-tr", !pl.tr); night.gap = pl.gap;
+    unlockAudio(); nightSleep(pl.sleep);
+    playStory(q.indexOf(st.id), st.t);
+  };
+  // remember where we are; move on to the next story at the end; optional pause after each sentence
+  let plSaveT = 0;
+  player.addEventListener("timeupdate", () => {
+    if (!night.open || !night.queue || player.ended) return;
+    if (Date.now() - plSaveT > 4000) { plSaveT = Date.now(); const pl = plGet(); pl.pos = { id: LESSONS[state.idx].id, t: player.currentTime }; plSet(pl); }
+    const l = lines[curLine];
+    if (night.gap && timed && l && !player.paused && !night.gapWait && night.gapDone !== curLine && player.currentTime >= l.t1 - 0.05 && player.currentTime < l.t1 + 0.6) {
+      night.gapDone = curLine; player.pause();
+      night.gapWait = setTimeout(() => { night.gapWait = 0; player.play(); }, night.gap * 1000);
+    }
+  });
+  player.addEventListener("ended", () => {
+    if (!night.open || !night.queue) return;
+    const pl = plGet(); pl.pos = null; plSet(pl);
+    if (night.sleepMode === "end") { nightSleep(0); return; }
+    if (night.qi + 1 < night.queue.length) setTimeout(() => playStory(night.qi + 1, 0), 1500);
+  });
+
   /* ---------- Audio ---------- */
   function act(a) {
+    if (a === "toggle" && night.gapWait) { clearTimeout(night.gapWait); night.gapWait = 0; player.pause(); return; }
     if (a === "toggle") {
       if (!player.src || player.error) return toast(t("noAudio"));
       player.paused ? player.play().catch(() => toast(t("playFailed"))) : player.pause();
@@ -1422,7 +1637,11 @@
 
   /* ---------- Profile ---------- */
   const initial = n => (n || "").trim().charAt(0).toUpperCase() || "🙂";
-  const paintAvatar = () => $$(".js-avatar").forEach(e => e.textContent = initial(store.get("name", "")));
+  const paintAvatar = () => {
+    $$(".js-avatar").forEach(e => e.textContent = initial(store.get("name", "")));
+    $("#p5Name").textContent = store.get("name", "") || t("learner");
+    $("#p5Sub").textContent = `${I18N.name(I18N.lang)} · 🔥 ${streak()} · ${state.known.size} ✓`;
+  };
   function renderProfile() {
     const L = LESSONS[state.idx];
     const known = vocabList.filter(v => state.known.has(v.key)).length;

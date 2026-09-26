@@ -137,6 +137,7 @@
     tabLesson: { fa: "درس", ru: "Урок", uk: "Урок" },
     tabHome: { fa: "خانه", ru: "Главная", uk: "Головна" },
     tabMe: { fa: "من", ru: "Я", uk: "Я" },
+    tabStory: { fa: "داستان", ru: "Истории", uk: "Історії" },
     lessonMore: { fa: "درس ›", ru: "Урок ›", uk: "Урок ›" },
     speakHint: { fa: "۳ دقیقه", ru: "3 мин", uk: "3 хв" },
     tabDialog: { fa: "دیالوگ", ru: "Диалог", uk: "Діалог" },
