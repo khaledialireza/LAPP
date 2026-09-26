@@ -227,6 +227,7 @@
     bgv.p = null; bgv.ready = false; bgv.id = want; clearInterval(bgv.timer);
     $("#bgv").innerHTML = ""; $("#bgv").classList.remove("live");
     document.body.classList.toggle("has-bgv", !!want);
+    vidOnly(want && store.get("vidOnly", false));
     if (!want) return;
     $("#bgv").innerHTML = '<div id="bgvBox"></div>';
     ytApi().then(() => {
@@ -253,6 +254,13 @@
     $("#bgv").classList.toggle("paused", player.paused);
   }
   ["play", "pause", "seeked", "ratechange"].forEach(ev => player.addEventListener(ev, () => bgvSync(true)));
+  // video only: the text disappears and the film shows at normal brightness
+  function vidOnly(on) {
+    on = !!on && document.body.classList.contains("has-bgv");
+    document.body.classList.toggle("video-only", on);
+    $$("[data-vidonly]").forEach(b => { b.setAttribute("aria-pressed", on); b.hidden = !document.body.classList.contains("has-bgv"); b.textContent = on ? "Aa ✕" : "Aa"; });
+  }
+  document.addEventListener("click", e => { if (!e.target.closest("[data-vidonly]")) return; const on = !document.body.classList.contains("video-only"); store.set("vidOnly", on); vidOnly(on); });
   $("#bgvBtn").onclick = () => { store.set("bgVideo", !bgvOn()); bgvSet(LESSONS[state.idx]); };
 
   /* ---------- Night mode: calm, one line at a time, big translation, big controls ---------- */
@@ -388,12 +396,12 @@
   const plDrop = () => { if (!plDrag) return; plDrag.classList.remove("drag"); plDrag = null; const pl = plGet(); pl.order = [...$$("#plList .pl-it")].map(x => Number(x.dataset.id)); plSet(pl); renderStories(); };
   ["pointerup", "pointercancel"].forEach(ev => $("#plList").addEventListener(ev, plDrop));
 
-  function playStory(qi, t) {
+  function playStory(qi, at) {
     const id = night.queue[qi], i = LESSONS.findIndex(x => x.id === id); if (i < 0) return;
     night.qi = qi; night.gapDone = -1;
     if (i !== state.idx) setLesson(i);
     go("audio"); if (!night.open) nightOpen(); night.shown = -1;
-    const start = () => { player.currentTime = t || 0; showNow(Math.max(0, lineAt(t || 0))); player.play().catch(() => toast(t("playFailed"))); };
+    const start = () => { player.currentTime = at || 0; showNow(Math.max(0, lineAt(at || 0))); player.play().catch(() => toast(t("playFailed"))); };
     player.readyState >= 1 ? start() : player.addEventListener("loadedmetadata", start, { once: true });
   }
   $("#plStart").onclick = () => {
