@@ -142,7 +142,7 @@
   }
 
   let curLine = 0;
-  const cleanWord = tok => tok.replace(/^[^A-Za-zÄÖÜäöüß]+|[^A-Za-zÄÖÜäöüß'-]+$/g, "");
+  const cleanWord = tok => tok.replace(/^[^A-Za-zÄÖÜäöüßé]+|[^A-Za-zÄÖÜäöüßé'-]+$/g, "");
   const wordHtml = text => text.split(/(\s+)/).map(tok => {
     const w = cleanWord(tok);
     if (!w) return esc(tok);
@@ -1317,7 +1317,14 @@
   for (const [k, v] of Object.entries(DICT)) {
     for (const f of [k.replace(/_.*/, ""), ...(v.f || [])]) { dictIdx[f] = k; dictIdx[f.toLowerCase()] ??= k; }
   }
-  function dictKey(w) { return dictIdx[w] || dictIdx[w.toLowerCase()]; }
+  function dictKey(w) {
+    if (!w) return undefined;
+    const hit = x => dictIdx[x] || dictIdx[x.toLowerCase()];
+    if (hit(w)) return hit(w);
+    // inflected adjectives, articles and nouns: tolles → toll, Freunden → Freund, keinen → kein
+    for (const end of ["en", "em", "er", "es", "e", "n", "s"]) if (w.length > end.length + 2 && w.endsWith(end) && hit(w.slice(0, -end.length))) return hit(w.slice(0, -end.length));
+    return undefined;
+  }
   function lookup(w) {
     if (NAMES[w]) return { lemma: w, p: "اسم خاص", fa: NAMES[w], g: "" };
     const k = dictIdx[w] || dictIdx[w.toLowerCase()];

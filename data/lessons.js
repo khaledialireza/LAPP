@@ -245,5 +245,260 @@ window.LESSONS = [
 **Ben:** Vielen Dank, dass ihr heute dabei wart! Ihr habt das großartig gemacht!
 **Anna:** Macht's gut, übt weiter und bis zum nächsten Mal!
 `
+  },
+  {
+    id: 2,
+    title: "Über Hobbys sprechen",
+    fa: "صحبت دربارهٔ سرگرمی‌ها",
+    level: "A1",
+    audio: "audio/lesson2.mp3",
+    summary: "پرسیدن و گفتن سرگرمی‌ها، دوست داشتن و ترجیح دادن، ورزش و ساز، و گفتن اینکه کاری خوش می‌گذرد یا خسته‌کننده است.",
+    phrases: [
+      ["Was sind deine Hobbys?", "سرگرمی‌هایت چیست؟", ""],
+      ["Was machst du gern in deiner Freizeit?", "در وقت آزادت چه کاری دوست داری؟", "Freizeit = وقت آزاد"],
+      ["Mein Lieblingshobby ist …", "سرگرمی مورد علاقه‌ام … است", "Lieblings- = مورد علاقه"],
+      ["Meine Hobbys sind Lesen und Schwimmen.", "سرگرمی‌های من خواندن و شنا هستند", ""],
+      ["Ich lese gern. / Ich koche gern.", "خواندن دوست دارم / آشپزی دوست دارم", "فعل + gern"],
+      ["Ich koche nicht gern.", "آشپزی دوست ندارم", "nicht gern"],
+      ["Ich mache lieber Sport.", "ترجیح می‌دهم ورزش کنم", "lieber = ترجیحاً"],
+      ["Was kochst du am liebsten?", "بیشتر از همه چه می‌پزی؟", "am liebsten = بیش از همه"],
+      ["Was für Musik hörst du gern?", "چه جور موسیقی دوست داری؟", "Was für …? = چه جور …؟"],
+      ["Welches Instrument spielst du?", "چه سازی می‌زنی؟", ""],
+      ["Ich spiele Gitarre. / Ich spiele Fußball.", "گیتار می‌زنم / فوتبال بازی می‌کنم", "spielen: ساز و ورزش"],
+      ["Ich gehe schwimmen.", "شنا می‌روم", "نه «spiele schwimmen»"],
+      ["Das macht Spaß!", "خوش می‌گذرد!", ""],
+      ["Das ist langweilig / entspannend / aufregend.", "خسته‌کننده / آرام‌بخش / هیجان‌انگیز است", ""],
+      ["Ich treffe meine Freunde.", "دوستانم را می‌بینم", "treffen"],
+      ["Wir gehen ins Kino.", "می‌رویم سینما", "in + das = ins"],
+      ["Ich interessiere mich für Fotografie.", "به عکاسی علاقه دارم", "für + Akkusativ"]
+    ],
+    vocab: [],
+    quiz: [],
+    transcript: `
+**Anna:** Hallo zusammen! Willkommen bei „Daily German Talk“!
+**Ben:** Hallo, schön, dass ihr da seid.
+**Anna:** Ich bin die Anna.
+**Ben:** Und ich bin der Ben. Wir helfen euch, Deutsch zu üben.
+**Anna:** Genau! Bitte abonniert unseren Kanal und gebt unserem Video ein Like!
+**Ben:** Das hilft uns sehr. Heute sprechen wir über Hobbys.
+**Anna:** Today's topic is … „Hobbies“.
+**Anna:** So, Ben, wie geht's dir heute?
+**Ben:** Mir geht's gut, danke. Und dir?
+**Anna:** Sehr gut. Ich habe heute Morgen Kaffee getrunken und Musik gehört. Das war schön.
+**Ben:** Oh, Musik, das ist ein gutes Stichwort. Was hast du am Wochenende gemacht?
+**Anna:** Am Samstag war das Wetter super. Ich war im Park. Die Sonne hat geschienen.
+**Ben:** Das klingt wunderbar. Am Sonntag habe ich ferngesehen. Ganz viel.
+**Anna:** Klingt auch entspannt.
+**Ben:** Ja, sehr entspannt. Aber heute sprechen wir über Hobbys, richtig?
+**Anna:** Richtig! Lass uns anfangen.
+**Ben:** Also, Anna, was sind deine Hobbys?
+**Anna:** Ich habe viele Hobbys. Mein Lieblingshobby ist Lesen.
+**Ben:** Lesen? Was liest du gern?
+**Anna:** Ich lese gern Romane. Und manchmal lese ich auch Zeitungen.
+**Anna:** Und du, Ben? Liest du gern?
+**Ben:** Nein, Lesen ist langweilig. Ich mache lieber Sport.
+**Anna:** Ach ja? Was für Sport machst du?
+**Ben:** Ich spiele Fußball. Einmal pro Woche. Mit meinen Freunden.
+**Anna:** Das ist ein tolles Hobby. Wie interessant! Ist es anstrengend?
+**Ben:** Ja, sehr anstrengend. Aber es macht Spaß.
+**Anna:** Machst du nur Fußball?
+**Ben:** Nein. Ich gehe auch gern schwimmen. Im Sommer gehe ich oft ins Schwimmbad.
+**Anna:** Schwimmen ist gesund. Ich gehe manchmal schwimmen, aber nicht oft.
+**Ben:** Und? Hast du noch ein Hobby?
+**Anna:** Ja, ich liebe Musik.
+**Ben:** Hörst du Musik?
+**Anna:** Ich höre nicht nur Musik, ich spiele auch ein Instrument.
+**Ben:** Das ist super! Welches Instrument spielst du?
+**Anna:** Ich spiele Gitarre.
+**Ben:** Wow! Kannst du mir etwas vorspielen? Vielleicht nächstes Mal?
+**Anna:** Vielleicht. Spielst du ein Instrument?
+**Ben:** Nein. Ich spiele kein Instrument. Ich bin nicht musikalisch. Aber ich höre sehr gern Musik.
+**Anna:** Was hörst du für Musik?
+**Ben:** Ich höre gern Popmusik und Rock. Und du?
+**Anna:** Ich mag Jazz. Jazz ist mein Lieblingsgenre.
+**Ben:** Jazz? Das ist … überraschend.
+**Anna:** Warum? Ist Jazz nicht gut?
+**Ben:** Jazz ist gut, aber es ist … ruhig! Und du bist nicht immer ruhig.
+**Anna:** Das stimmt. Aber Musik ist entspannend für mich.
+**Ben:** Verstehe. Sag mal … kochst du gern? Das ist auch ein Hobby, oder?
+**Anna:** Kochen? Ja, Kochen ist ein Hobby. Ich koche sehr gern.
+**Ben:** Was kochst du am liebsten?
+**Anna:** Ich koche gern italienisches Essen. Nudeln, Pizza.
+**Ben:** Ich esse gern Pizza. Aber ich koche nicht gern.
+**Anna:** Was machst du dann? Isst du immer im Restaurant?
+**Ben:** Nein. Das ist teuer. Ich bestelle oft Essen. Oder ich kaufe etwas im Supermarkt.
+**Anna:** Du solltest mehr kochen. Es ist nicht schwer.
+**Ben:** Vielleicht. Aber mein Hobby ist das … Essen. (grinst)
+**Anna:** Essen ist kein Hobby, Ben!
+**Ben:** Warum nicht? Ich mache es sehr oft.
+**Anna:** Okay, okay. Was ist ein kreatives Hobby?
+**Ben:** Kreativ … Ich fotografiere gern.
+**Anna:** Das ist ein schönes Hobby. Was fotografierst du?
+**Ben:** Ich fotografiere die Stadt. Gebäude, Menschen, Straßen. Alles.
+**Anna:** Zeigst du mir mal deine Fotos?
+**Ben:** Klar. Ich habe viele Fotos auf meinem Handy.
+**Anna:** Perfekt. Ich male manchmal.
+**Ben:** Du malst? Das wusste ich nicht. Das ist sehr kreativ.
+**Anna:** Ja, ich male mit Wasserfarben. Es ist schwierig, aber schön.
+**Ben:** Malst du Menschen?
+**Anna:** Nein. Ich male Landschaften. Bäume, Berge, das Meer.
+**Ben:** Sehr interessant! Ich kann nicht malen. Meine Bilder sind schrecklich.
+**Anna:** Übung macht den Meister.
+**Ben:** Vielleicht. Ich bleibe lieber bei der Fotografie.
+**Anna:** Gehst du gern spazieren?
+**Ben:** Spazieren? Ja, das mache ich gern. Besonders im Wald.
+**Anna:** Das ist ein entspannendes Hobby. Ich gehe auch gern im Wald spazieren. Die Luft ist frisch.
+**Ben:** Genau. Und es ist ruhig, kein Stress.
+**Anna:** Und Hobbys zu Hause? Indoor-Hobbys?
+**Ben:** Ja. Ich sehe gern Filme und Serien.
+**Anna:** Ah, ein Couch-Potato!
+**Ben:** Ja, das bin ich. Und ich spiele manchmal Videospiele.
+**Anna:** Videospiele? Welche Spiele spielst du?
+**Ben:** Ich spiele gern Abenteuerspiele. Und du? Spielst du Videospiele?
+**Anna:** Nein, das ist nicht mein Hobby. Ich finde es langweilig.
+**Ben:** Langweilig? Nein, es macht Spaß. Du musst es probieren.
+**Anna:** Vielleicht. Aber ich habe keine Zeit. Ich habe zu viele Hobbys.
+**Ben:** Das stimmt. Lesen, Gitarre spielen, Malen, Kochen, Schwimmen.
+**Anna:** Ja, ich bin eine vielbeschäftigte Frau.
+**Ben:** Was ist dein Hobby für den Winter?
+**Anna:** Im Winter? Ich mache gern Schneeballschlachten.
+**Ben:** Wirklich? Das ist ein lustiges Hobby.
+**Anna:** Ich fahre gern Ski. Skifahren ist mein Winterhobby.
+**Ben:** Skifahren? Das kann ich nicht. Das ist zu gefährlich.
+**Anna:** Es ist nicht gefährlich. Es ist aufregend.
+**Ben:** Für dich vielleicht. Ich bleibe lieber im warmen Haus.
+**Anna:** Du und dein warmes Haus.
+**Ben:** Ja. Mein Haus ist mein Hobby.
+**Anna:** Ben, ein Haus ist kein Hobby.
+**Ben:** Alles kann ein Hobby sein.
+**Anna:** Okay, Philosoph. Was ist dein Hobby mit Freunden?
+**Ben:** Mit Freunden? Ich spiele Fußball, das weißt du. Und wir gehen oft ins Kino.
+**Anna:** Kino! Das mag ich auch. Welche Filme magst du?
+**Ben:** Ich mag Komödien. Komödien sind sehr lustig.
+**Anna:** Ich auch. Lass uns nächste Woche ins Kino gehen!
+**Ben:** Gute Idee. Was ist dein Hobby mit deinen Freunden?
+**Anna:** Wir treffen uns in einem Café. Wir trinken Kaffee und reden.
+**Ben:** Reden ist ein Hobby?
+**Anna:** Ja, mit guten Freunden ist Reden ein wunderbares Hobby.
+**Ben:** Das stimmt. Ich rede auch gern mit dir.
+**Anna:** Oh, das ist nett. Danke, Ben.
+**Ben:** Sag mal, lernst du gern Sprachen?
+**Anna:** Ja, natürlich. Deutsch ist nicht meine Muttersprache.
+**Ben:** Wirklich? Dein Deutsch ist perfekt.
+**Anna:** Sprachen lernen ist ein wichtiges Hobby für mich.
+**Ben:** Ich lerne ein bisschen Spanisch. Aber es ist schwierig.
+**Anna:** Sprachen lernen ist nicht einfach. Aber es ist sehr nützlich.
+**Ben:** Das finde ich auch. Übrigens … backst du gern?
+**Anna:** Ja, ich backe gern Kuchen. Schokoladenkuchen ist meine Spezialität.
+**Ben:** Kuchen! Mein Lieblingskuchen! Kann ich etwas probieren?
+**Anna:** Vielleicht nächstes Mal. Ich habe keinen Kuchen hier.
+**Ben:** Schade.
+**Anna:** Ben, was machst du am liebsten an einem regnerischen Tag?
+**Ben:** An einem regnerischen Tag … Ich lese ein Buch.
+**Anna:** Einen Moment mal, du sagtest, Lesen ist langweilig.
+**Ben:** Äh, ja, aber nur manchmal. Manchmal ist es nicht langweilig.
+**Anna:** Du bist lustig.
+**Ben:** Danke. Lustig sein ist auch mein Hobby.
+**Anna:** Das glaube ich sofort.
+**Anna:** So, Ben, wir haben über viele Hobbys gesprochen. Vielleicht können wir jetzt ein paar wichtige Wörter wiederholen für unsere Zuschauer.
+**Ben:** Gute Idee, Anna. Das ist sehr nützlich. Sollen wir anfangen mit dem Wort „Hobby“?
+**Anna:** Perfekt. Also, was ist ein Hobby?
+**Ben:** Ein Hobby ist etwas, was du in deiner Freizeit machst. Zum Beispiel Lesen, Fußball, Musik.
+**Anna:** Genau. Es ist etwas, was du für die Freude, für die Freizeit machst.
+**Anna:** Und was ist der Plural? Mehr als ein Hobby?
+**Ben:** Hobbys. Ich habe viele Hobbys. Du hast viele Hobbys.
+**Anna:** Richtig, sehr gut! Okay, nächstes wichtiges Wort: Lieblingshobby.
+**Ben:** (denkt nach) Lieblings … Hobby … Ah! Favourite hobby! Mein Lieblingshobby ist …
+**Anna:** Ja. „Lieblings“ bedeutet „favourite“. Wir können auch sagen: Lieblingsbuch, Lieblingsfilm oder Lieblingsessen.
+**Ben:** Mein Lieblingsessen ist Pizza. (lacht)
+**Anna:** Natürlich ist das dein Lieblingsessen. Aber bleiben wir beim Thema. Ein sehr, sehr wichtiger Ausdruck ist: Spaß machen.
+**Ben:** Das bedeutet … to be fun. Oder „to make fun“?
+**Anna:** Ja. Was macht dir Spaß, Ben?
+**Ben:** Fußball macht Spaß, Videospiele machen Spaß.
+**Anna:** Und was macht keinen Spaß?
+**Ben:** Aufräumen macht keinen Spaß. Das ist langweilig.
+**Anna:** Langweilig! Das ist das Gegenteil von Spaß machen! Langweilig means „boring“.
+**Ben:** Ja. Lesen ist manchmal langweilig. (grinst Anna an)
+**Anna:** Ben! Immer das gleiche Lied. Lesen ist nicht langweilig.
+**Ben:** Okay, okay. Lesen ist nicht langweilig. Es ist … ähm … entspannend.
+**Anna:** Oh, entspannend. Das ist ein fantastisches neues Wort. Entspannend means „relaxing“.
+**Ben:** Ja. Musik hören ist entspannend. Ein Spaziergang im Wald ist entspannend.
+**Anna:** Was ist nicht entspannend?
+**Ben:** Fußball ist nicht entspannend. Weil es aufregend ist.
+**Anna:** Another good word: exciting. Skifahren ist aufregend.
+**Ben:** Angsteinflößend, für mich.
+**Anna:** Lass uns bei den einfachen Wörtern bleiben. Sagen wir noch ein paar Verben.
+**Anna:** Was machst du mit einem Buch?
+**Ben:** Ich lese ein Buch.
+**Anna:** Was machst du mit einem Film?
+**Ben:** Ich sehe einen Film. Oder ich schaue einen Film.
+**Anna:** Beides ist richtig. Was machst du mit einer Gitarre?
+**Ben:** Ich spiele Gitarre.
+**Anna:** Genau. Spielen kann man für Instrumente und für Sport. Ich spiele Gitarre, ich spiele Fußball.
+**Ben:** Aber Achtung! Man sagt nicht: „Ich spiele schwimmen.“ Man sagt: „Ich gehe schwimmen.“
+**Anna:** Sehr gut, Ben. Das ist ein wichtiger Unterschied: „Ich gehe schwimmen.“
+**Anna:** Und was ist mit „treffen“?
+**Ben:** Das ist auch ein wichtiges Wort.
+**Anna:** Ja. Ich treffe meine Freunde.
+**Anna:** Ich treffe meine Freunde.
+**Anna:** Das ist ein soziales Hobby.
+**Ben:** Ich treffe meine Freunde. Wir gehen ins Kino. Oder wir gehen in ein Café.
+**Anna:** Super! Ein letztes Wort für heute: sich interessieren für.
+**Ben:** Ich interessiere mich … für …
+**Ben:** Das bedeutet: „I am interested in.“
+**Anna:** Wofür interessierst du dich, Ben?
+**Ben:** Ich interessiere mich für Fotografie. Und für Filme. Und für Pizza.
+**Anna:** (seufzt lachend) Immer Pizza. Und ich interessiere mich für Kunst und für Sprachen.
+**Ben:** Das wissen wir.
+**Ben:** So. Das waren viele Wörter: Hobby, Lieblingshobby, Spaß machen, langweilig, entspannend, aufregend, lesen, spielen, treffen, sich interessieren für.
+**Anna:** Jetzt seid ihr dran! Schreibt einen Satz mit einem dieser Wörter in die Kommentare.
+**Anna:** So, Ben, das war ein langes, schönes Gespräch über Hobbys.
+**Ben:** Ja, wirklich, wir haben so viel geredet. Ich weiß jetzt, dass du Gitarre spielst, malst, liest und Ski fährst.
+**Anna:** Und ich weiß, dass du Fußball spielst, fotografierst, Filme liebst und … ein Couch-Potato bist.
+**Ben:** Hey, das ist mein entspannendes Hobby. Aber im Ernst, wir haben heute viele wichtige Sätze geübt.
+**Anna:** Lass uns das noch einmal zusammenfassen. What did we practice today?
+**Anna:** Zuerst: wie man nach einem Hobby fragt.
+**Ben:** Die einfachste Frage ist: „Was sind deine Hobbys?“
+**Anna:** „Was machst du gern in deiner Freizeit?“
+**Ben:** Freizeit, das ist „free time“. Und dann kann man antworten: „Meine Hobbys sind …“ und dann die Hobbys aufzählen.
+**Anna:** Zum Beispiel: „Meine Hobbys sind Lesen und Schwimmen.“
+**Ben:** Oder man sagt: „Ich“ plus Verb plus „gern“. Ich lese gern. Ich schwimme gern. Ich spiele gern Fußball.
+**Anna:** „Gern“ ist sehr, sehr wichtig. „Ich lese gern“ bedeutet „I like to read“. Es zeigt, dass es dir Spaß macht.
+**Ben:** Und wenn du etwas nicht magst, dann sagst du: „Ich lese nicht gern.“
+**Anna:** Oder: „Ich finde Lesen langweilig.“ Wir haben auch gelernt, wie man nach Details fragt. Zum Beispiel: „Was liest du gern?“
+**Ben:** „Was für Musik hörst du gern?“ What kind of music do you like to listen to?
+**Anna:** „Welches Instrument spielst du?“
+**Ben:** Und dann haben wir über Gefühle gesprochen.
+**Ben:** „Das macht Spaß!“ That's fun.
+**Anna:** „Das ist entspannend.“ That's relaxing.
+**Ben:** „Das ist langweilig.“ That's boring.
+**Anna:** „Das ist aufregend.“ That's exciting.
+**Ben:** Und ich habe gelernt, dass Essen vielleicht kein offizielles Hobby ist.
+**Anna:** Das haben wir geklärt. Aber du hast recht, wir haben die wichtigsten Verben wiederholt: lesen, spielen, treffen, hören, machen.
+**Ben:** Ich spiele Gitarre. Ich spiele Fußball. Ich treffe meine Freunde. Ich höre Musik.
+**Anna:** Wunderbar. Jetzt ist es Zeit für unsere berühmte Frage des Tages.
+**Anna:** Ich bin so aufgeregt. Ich liebe diesen Teil.
+**Anna:** Die Frage des Tages ist heute nicht nur eine Frage, es sind drei. So könnt ihr üben.
+**Ben:** Oh, Action! Okay. Die erste Frage ist: Was ist dein Lieblingshobby?
+**Anna:** Die zweite Frage ist: Was machst du gern mit deinen Freunden?
+**Ben:** Und die dritte Frage ist: Was ist ein Hobby, das du lernen möchtest? Ein neues Hobby.
+**Anna:** Das sind tolle Fragen. Also, liebe Zuschauer: Was ist dein Lieblingshobby? Was machst du gern mit deinen Freunden?
+**Ben:** Und was ist ein Hobby, das du lernen möchtest? Bitte, bitte, schreibt eure Antworten in die Kommentare unter diesem Video. Wir lesen wirklich jeden Kommentar.
+**Anna:** Ja, das machen wir. Wir antworten auch oft. Wir wollen von euch lernen: Was sind eure Hobbys? Es ist so interessant.
+**Ben:** Vielleicht habt ihr ein Hobby, das wir nicht kennen. Vielleicht Yoga oder Gartenarbeit.
+**Anna:** Oder Programmieren. Alles ist möglich. Egal, was es ist, schreibt es uns. Ihr könnt auf Deutsch schreiben oder auf Englisch oder in einer Mischung.
+**Anna:** Hauptsache, ihr versucht es. Und wenn ihr Hilfe braucht, fragt uns einfach in den Kommentaren. Wir helfen euch gern.
+**Ben:** Bevor wir gehen, eine wichtige Erinnerung: Wenn euch dieses Video gefallen hat und ihr mehr deutsche Gespräche sehen wollt, dann …
+**Anna:** … klickt auf den Abonnieren-Button und auf das „Gefällt mir“-Herz.
+**Ben:** Das ist sehr wichtig für unseren Kanal. Wenn ihr abonniert, verpasst ihr keine neue Lektion.
+**Anna:** Nächstes Mal sprechen wir über ein neues Thema. Wir gehen einkaufen. Going shopping.
+**Ben:** Oh ja, wir lernen, wie man auf Deutsch im Supermarkt oder im Kleidungsgeschäft spricht.
+**Anna:** Das wird lustig. Also nicht verpassen, abonniert den Kanal.
+**Ben:** Vielen Dank, dass ihr heute mit uns Deutsch gelernt habt. Ihr seid großartig.
+**Anna:** Wir sind so stolz auf euch. Weiter so! Denkt daran, jeder kleine Schritt ist wichtig.
+**Ben:** Macht's gut, bis zum nächsten Mal.
+**Anna:** Tschüss!
+**Ben:** Auf Wiedersehen!
+`
   }
 ];

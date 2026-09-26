@@ -13,11 +13,17 @@ for (const f of fs.readdirSync(path.join(root, "data")).filter(f => /^lesson\d+-
 load("data/dict-de.js");
 const { DICT, NAMES = {}, LESSONS = [] } = window;
 
-const clean = t => t.replace(/^[^A-Za-zÄÖÜäöüß]+|[^A-Za-zÄÖÜäöüß'-]+$/g, "");
+const clean = t => t.replace(/^[^A-Za-zÄÖÜäöüßé]+|[^A-Za-zÄÖÜäöüßé'-]+$/g, "");
 const base = k => k.replace(/_.*/, "");
+load("data/verbs-de.js"); load("grammar.js");
 function index() {
   const idx = {};
   for (const [k, v] of Object.entries(DICT)) for (const f of [base(k), ...(v.f || [])]) { idx[f] ??= k; idx[f.toLowerCase()] ??= k; }
+  // conjugated verb forms (present, past, participle) point to the infinitive — same as the app does
+  for (const [k, v] of Object.entries(DICT)) if ((v.p || "").includes("فعل") && window.Grammar) {
+    const vb = window.Grammar.verb(k), add = f => { f = f.split(" ")[0]; idx[f] ??= k; idx[f.toLowerCase()] ??= k; };
+    vb.rows.forEach(r => { add(r.pr); add(r.pt); }); add(vb.pp);
+  }
   return idx;
 }
 
@@ -48,6 +54,13 @@ function check() {
   return problems.length;
 }
 
+// inflected adjectives, articles and nouns: tolles → toll, Freunden → Freund, keinen → kein
+function lookupKey(idx, w) {
+  const hit = x => idx[x] || idx[x.toLowerCase()];
+  if (hit(w)) return hit(w);
+  for (const end of ["en", "em", "er", "es", "e", "n", "s"]) if (w.length > end.length + 2 && w.endsWith(end) && hit(w.slice(0, -end.length))) return hit(w.slice(0, -end.length));
+  return null;
+}
 function build() {
   const idx = index();
   LESSONS.forEach((L, li) => {
@@ -55,7 +68,7 @@ function build() {
     L.transcript.split("\n").map(s => s.trim()).filter(Boolean).forEach(line => {
       line.replace(/^\*\*.+?:\*\*\s*/, "").split(/\s+/).forEach(tok => {
         const w = clean(tok); if (!w || NAMES[w]) return;
-        const k = idx[w] || idx[w.toLowerCase()];
+        const k = lookupKey(idx, w);
         if (!k) { missing.add(w); return; }
         if (DICT[k].p !== "انگلیسی" && !keys.includes(k)) keys.push(k);
       });
