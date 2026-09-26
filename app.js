@@ -320,6 +320,20 @@
     $("#ntSleepL").textContent = night.sleepMode === "end" ? "Ende" : night.sleepEnd ? `${left} Min` : "Aus";
   }
   $("#ntClose").onclick = () => storyClose();
+  // time bar: drag to any point; swipe on the text for the next/previous sentence
+  const ntBar = $("#ntSeek"); let ntDrag = false;
+  const fmtT = x => `${Math.floor(x / 60)}:${String(Math.floor(x % 60)).padStart(2, "0")}`;
+  const ntTime = v => { $("#ntCur").textContent = fmtT(v); $("#ntDur").textContent = fmtT(player.duration || 0); ntBar.style.setProperty("--p", (player.duration ? v / player.duration * 100 : 0) + "%"); };
+  ntBar.addEventListener("input", () => { ntDrag = true; ntTime(Number(ntBar.value)); const i = lineAt(Number(ntBar.value)); if (i >= 0) nightShow(i); });
+  ntBar.addEventListener("change", () => { ntDrag = false; player.currentTime = Number(ntBar.value); });
+  player.addEventListener("timeupdate", () => { if (!night.open || ntDrag) return; ntBar.max = Math.floor(player.duration || 0); ntBar.value = player.currentTime; ntTime(player.currentTime); });
+  player.addEventListener("loadedmetadata", () => { ntBar.max = Math.floor(player.duration || 0); ntTime(player.currentTime); });
+  let ntSx = null;
+  $("#ntStage").addEventListener("pointerdown", e => { ntSx = [e.clientX, e.clientY]; });
+  $("#ntStage").addEventListener("pointerup", e => {
+    if (!ntSx) return; const dx = e.clientX - ntSx[0], dy = e.clientY - ntSx[1]; ntSx = null;
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) act(dx < 0 ? "next" : "prev");
+  });
   $("#ntRep").onclick = () => { if (!player.duration) return; player.currentTime = lineStart(lines[curLine]); player.play(); };
   $("#ntSleep").onclick = () => {
     const k = SLEEP.indexOf(night.sleepMode ?? 0);
@@ -339,9 +353,11 @@
   const PL_MODES = { mine: "Meine Liste", level: "Niveau ↑", newest: "Neueste", random: "Zufall" };
   const plGet = () => ({ order: [], off: [], mode: "mine", sleep: 0, speed: 2, tr: true, gap: 0, pos: null, ...store.get("pl", {}) });
   const plSet = v => store.set("pl", v);
-  const storyIdx = () => LESSONS.map((L, i) => i).filter(i => isStory(LESSONS[i]));
+  // stories are in the playlist unless switched off; lesson dialogs only when switched on
+  const plItems = () => [...LESSONS.filter(isStory), ...LESSONS.filter(x => !isStory(x))];
+  const plSel = (pl, id) => isStory(LESSONS.find(x => x.id === id)) ? !pl.off.includes(id) : (pl.dOn || []).includes(id);
   function plOrdered(pl) {
-    const ids = storyIdx().map(i => LESSONS[i].id);
+    const ids = plItems().map(L => L.id);
     const mine = [...pl.order.filter(id => ids.includes(id)), ...ids.filter(id => !pl.order.includes(id))];
     const byId = id => LESSONS.find(x => x.id === id);
     if (pl.mode === "level") return [...mine].sort((a, b) => LEVELS.indexOf(byId(a).level) - LEVELS.indexOf(byId(b).level));
@@ -349,15 +365,15 @@
     return mine;
   }
   function renderStories() {
-    const pl = plGet(), ids = plOrdered(pl), on = ids.filter(id => !pl.off.includes(id));
+    const pl = plGet(), ids = plOrdered(pl), on = ids.filter(id => plSel(pl, id));
     const mins = on.reduce((a, id) => a + (libMins(LESSONS.find(x => x.id === id)) || 0), 0);
     $("#plMode").innerHTML = Object.entries(PL_MODES).map(([k, v]) => `<button data-mode="${k}" class="${pl.mode === k ? "on" : ""}">${v}</button>`).join("");
     $("#plCount").innerHTML = `IN DER PLAYLIST · ${on.length} von ${ids.length} · ${mins} Min`;
     let n = 0;
-    $("#plList").innerHTML = ids.map(id => { const i = LESSONS.findIndex(x => x.id === id), L = LESSONS[i], sel = !pl.off.includes(id), p = lessonPct(i), m = libMins(L);
+    $("#plList").innerHTML = ids.map(id => { const i = LESSONS.findIndex(x => x.id === id), L = LESSONS[i], sel = plSel(pl, id), p = lessonPct(i), m = libMins(L);
       return `<div class="pl-it ${sel ? "" : "off"}" data-id="${id}">
-        <span class="n">${sel && pl.mode !== "random" ? ++n : ""}</span><span class="cv cv${i % 4}">📖</span>
-        <span class="t"><b>${esc(L.title)}</b><span>${lsCode(i)} · ${esc(L.level)}${m ? ` · ${m} Min` : ""} · ${p >= 100 ? "fertig" : p ? p + "%" : "neu"}</span></span>
+        <span class="n">${sel && pl.mode !== "random" ? ++n : ""}</span><span class="cv cv${i % 4}">${isStory(L) ? "📖" : "💬"}</span>
+        <span class="t"><b>${esc(L.title)}</b><span>${isStory(L) ? "" : "Dialog · "}${lsCode(i)} · ${esc(L.level)}${m ? ` · ${m} Min` : ""} · ${p >= 100 ? "fertig" : p ? p + "%" : "neu"}</span></span>
         <button class="ck" data-ck aria-pressed="${sel}">${sel ? "✓" : ""}</button>${pl.mode === "mine" ? `<span class="hd" data-drag>≡</span>` : ""}</div>`; }).join("")
       || `<div class="pl-empty fa">هنوز داستانی نیست.</div>`;
     const chips = (key, vals, lab = v => v) => vals.map(v => `<button data-opt="${key}" data-v="${v}" class="${String(pl[key]) === String(v) ? "on" : ""}">${lab(v)}</button>`).join("");
@@ -370,11 +386,11 @@
       ${hasVid ? `<div class="pl-opt"><span>Video im Hintergrund<small class="fa">ویدیو در پس‌زمینه (کم‌نور)</small></span><button class="tg" data-tg="video" aria-pressed="${bgvOn()}"></button></div>` : ""}`;
     const st = plStartPoint(pl);
     $("#plStart").disabled = !st;
-    $("#plStart").innerHTML = st ? `▶︎ Start <small>${st.t > 5 ? `ab ${lsCode(st.i)} · Satz ${st.line + 1}` : `${on.length} ${on.length === 1 ? "Geschichte" : "Geschichten"} · ${mins} Min`}</small>` : "Keine Geschichte gewählt";
+    $("#plStart").innerHTML = st ? `▶︎ Start <small>${st.t > 5 ? `ab ${lsCode(st.i)} · Satz ${st.line + 1}` : `${on.length} ${on.length === 1 ? "Titel" : "Titel"} · ${mins} Min`}</small>` : "Keine Geschichte gewählt";
   }
   // where Start begins: the saved position if that story is still in the list
   function plStartPoint(pl, queue) {
-    const q = queue || plOrdered(pl).filter(id => !pl.off.includes(id)); if (!q.length) return null;
+    const q = queue || plOrdered(pl).filter(id => plSel(pl, id)); if (!q.length) return null;
     const pos = pl.pos && q.includes(pl.pos.id) ? pl.pos : { id: q[0], t: 0 };
     const i = LESSONS.findIndex(x => x.id === pos.id), L = LESSONS[i];
     const line = Array.isArray(L.timings) ? Math.max(0, L.timings.findIndex(x => (Array.isArray(x) ? x[1] : x) > pos.t)) : 0;
@@ -391,7 +407,9 @@
   $("#plList").addEventListener("click", e => {
     const ck = e.target.closest("[data-ck]"); if (!ck) return;
     const id = Number(ck.closest("[data-id]").dataset.id), pl = plGet();
-    pl.off = pl.off.includes(id) ? pl.off.filter(x => x !== id) : [...pl.off, id]; plSet(pl); renderStories();
+    if (isStory(LESSONS.find(x => x.id === id))) pl.off = pl.off.includes(id) ? pl.off.filter(x => x !== id) : [...pl.off, id];
+    else { const d = pl.dOn || []; pl.dOn = d.includes(id) ? d.filter(x => x !== id) : [...d, id]; }
+    plSet(pl); renderStories();
   });
   // reorder by dragging ≡
   let plDrag = null;
@@ -422,7 +440,7 @@
     playStory(q.indexOf(id), at);
   }
   $("#plStart").onclick = () => {
-    const pl = plGet(); let q = plOrdered(pl).filter(id => !pl.off.includes(id)); if (!q.length) return;
+    const pl = plGet(); let q = plOrdered(pl).filter(id => plSel(pl, id)); if (!q.length) return;
     if (pl.mode === "random") q = shuffleArr(q);
     const st = plStartPoint(pl, q);
     startQueue(q, st.id, st.t);
