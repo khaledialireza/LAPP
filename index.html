@@ -16,7 +16,7 @@
   <meta name="description" content="LAPP — آموزش زبان آلمانی با دیالوگ صوتی، واژگان و تمرین.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=muitzov4">
+  <link rel="stylesheet" href="style.css?v=muixafsc">
 </head>
 <body data-screen="home">
   <div class="frame">
@@ -28,12 +28,11 @@
         <div class="home-hero hero5">
           <div class="h5-chips">
             <div class="lesson-pick">
-              <button class="lp-btn chip5" id="lpBtn" aria-haspopup="listbox" aria-expanded="false"><b class="js-lesson-num">L1</b> <span class="lp-name" id="lpName"></span> <span class="lp-caret">▾</span></button>
+              <button class="lp-btn chip5" id="lpBtn" aria-haspopup="listbox" aria-expanded="false"><b class="js-lesson-num">L1</b> <span class="lp-name" id="lpName"></span> <span class="lp-caret">📚</span></button>
             </div>
             <span class="chip5" id="hLevel"></span>
             <button class="chip5 h5-more" data-go="lesson" data-i18n="lessonMore"></button>
           </div>
-          <div class="lp-menu" id="lpMenu" role="listbox" hidden></div>
           <div class="h5-lbl"><span class="js-lesson-word">Lektion</span> · Weitermachen</div>
           <div class="h5-ttl" id="hLessonTitle"></div>
           <div class="h5-sub fa" id="hLessonFa"></div>
@@ -76,6 +75,15 @@
       </section>
 
       <!-- LESSON -->
+      <section class="screen" id="library">
+        <div class="lib-head"><div><div class="lib-k">BIBLIOTHEK · <span class="fa">کتابخانه</span></div><h1 class="lib-title">Mediathek</h1></div><span class="lib-n" id="libCount"></span></div>
+        <div class="lib-seg" id="libSeg"></div>
+        <div class="lib-chips" id="libChips"></div>
+        <div class="lib-list" id="libList"></div>
+        <div class="lib-back" id="libBack" hidden></div>
+        <div class="lib-menu" id="libMenu" hidden></div>
+      </section>
+
       <section class="screen" id="lesson">
         <button class="back-btn" data-go="home"><span class="back-chev">‹</span><span data-i18n="tabHome"></span></button>
         <div class="ls-grid">
@@ -252,34 +260,34 @@
     </div>
   </div>
 
-  <script src="data/lessons.js?v=muitzov4"></script>
-  <script src="data/lesson1-fa.js?v=muitzov4"></script>
-  <script src="data/lesson1-times.js?v=muitzov4"></script>
-  <script src="data/lesson1-speak.js?v=muitzov4"></script>
-  <script src="data/lesson1-focus.js?v=muitzov4"></script>
-  <script src="data/lesson1-words.js?v=muitzov4"></script>
-  <script src="data/dict-de.js?v=muitzov4"></script>
-  <script src="data/dict-tr.js?v=muitzov4"></script>
-  <script src="data/lesson1-ru.js?v=muitzov4"></script>
-  <script src="data/lesson1-uk.js?v=muitzov4"></script>
-  <script src="data/lesson2-fa.js?v=muitzov4"></script>
-  <script src="data/lesson2-times.js?v=muitzov4"></script>
-  <script src="data/lesson2-speak.js?v=muitzov4"></script>
-  <script src="data/lesson2-focus.js?v=muitzov4"></script>
-  <script src="data/lesson2-words.js?v=muitzov4"></script>
-  <script src="data/lesson2-ru.js?v=muitzov4"></script>
-  <script src="data/lesson2-uk.js?v=muitzov4"></script>
-  <script src="data/lesson3-fa.js?v=muitzov4"></script>
-  <script src="data/lesson3-times.js?v=muitzov4"></script>
-  <script src="data/lesson3-speak.js?v=muitzov4"></script>
-  <script src="data/lesson3-focus.js?v=muitzov4"></script>
-  <script src="data/lesson3-words.js?v=muitzov4"></script>
-  <script src="data/lesson3-ru.js?v=muitzov4"></script>
-  <script src="data/lesson3-uk.js?v=muitzov4"></script>
-  <script src="i18n.js?v=muitzov4"></script>
-  <script src="data/verbs-de.js?v=muitzov4"></script>
-  <script src="grammar.js?v=muitzov4"></script>
-  <script src="exercises.js?v=muitzov4"></script>
-  <script src="app.js?v=muitzov4"></script>
+  <script src="data/lessons.js?v=muixafsc"></script>
+  <script src="data/lesson1-fa.js?v=muixafsc"></script>
+  <script src="data/lesson1-times.js?v=muixafsc"></script>
+  <script src="data/lesson1-speak.js?v=muixafsc"></script>
+  <script src="data/lesson1-focus.js?v=muixafsc"></script>
+  <script src="data/lesson1-words.js?v=muixafsc"></script>
+  <script src="data/dict-de.js?v=muixafsc"></script>
+  <script src="data/dict-tr.js?v=muixafsc"></script>
+  <script src="data/lesson1-ru.js?v=muixafsc"></script>
+  <script src="data/lesson1-uk.js?v=muixafsc"></script>
+  <script src="data/lesson2-fa.js?v=muixafsc"></script>
+  <script src="data/lesson2-times.js?v=muixafsc"></script>
+  <script src="data/lesson2-speak.js?v=muixafsc"></script>
+  <script src="data/lesson2-focus.js?v=muixafsc"></script>
+  <script src="data/lesson2-words.js?v=muixafsc"></script>
+  <script src="data/lesson2-ru.js?v=muixafsc"></script>
+  <script src="data/lesson2-uk.js?v=muixafsc"></script>
+  <script src="data/lesson3-fa.js?v=muixafsc"></script>
+  <script src="data/lesson3-times.js?v=muixafsc"></script>
+  <script src="data/lesson3-speak.js?v=muixafsc"></script>
+  <script src="data/lesson3-focus.js?v=muixafsc"></script>
+  <script src="data/lesson3-words.js?v=muixafsc"></script>
+  <script src="data/lesson3-ru.js?v=muixafsc"></script>
+  <script src="data/lesson3-uk.js?v=muixafsc"></script>
+  <script src="i18n.js?v=muixafsc"></script>
+  <script src="data/verbs-de.js?v=muixafsc"></script>
+  <script src="grammar.js?v=muixafsc"></script>
+  <script src="exercises.js?v=muixafsc"></script>
+  <script src="app.js?v=muixafsc"></script>
 </body>
 </html>

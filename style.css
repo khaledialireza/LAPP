@@ -1593,3 +1593,57 @@ body.no-fa .ly-line.cur .ly-fa { max-height: 0; opacity: 0; }
 .ly-head { gap: 10px; } .ly-head > div:first-child { min-width: 0; }
 .ly-meta { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ly-chip { white-space: nowrap; flex-shrink: 0; }
+
+/* ---------- Mediathek (library): lessons and stories ---------- */
+#library.active { display: flex !important; flex-direction: column; gap: 10px; height: 100%; min-height: 0; box-sizing: border-box; overflow: hidden; position: relative; }
+.lib-head { display: flex; justify-content: space-between; align-items: flex-end; flex-shrink: 0; }
+.lib-k { font-size: 11px; font-weight: 800; letter-spacing: .6px; color: var(--muted); }
+.lib-title { margin: 0; font-size: 30px; font-weight: 800; letter-spacing: -.3px; line-height: 1.1; }
+.lib-n { font-size: 12px; font-weight: 700; color: var(--muted); }
+.lib-seg { display: flex; padding: 2px; border-radius: 11px; background: var(--tile-2); flex-shrink: 0; }
+.lib-seg button { flex: 1; height: 32px; border-radius: 9px; font-size: 13px; font-weight: 700; color: var(--muted); white-space: nowrap; }
+.lib-seg button.on { background: var(--tile); color: var(--text); box-shadow: 0 2px 6px rgba(0,0,0,.12); }
+.lib-chips { display: flex; gap: 6px; flex-shrink: 0; overflow-x: auto; scrollbar-width: none; }
+.lib-chips button { height: 30px; padding: 0 12px; border-radius: 15px; background: var(--tile); color: var(--muted); font-size: 12px; font-weight: 800; flex-shrink: 0; }
+.lib-chips button.on { background: var(--accent); color: #fff; }
+.lib-chips .srt { margin-left: auto; background: none; color: var(--accent); }
+.lib-list { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; align-content: start;
+  margin-bottom: calc(-1 * var(--dock-space)); padding-bottom: calc(var(--dock-space) + 12px) !important; }
+.lib-sec { font-size: 11px; font-weight: 800; letter-spacing: .6px; color: var(--muted); margin: 4px 2px -2px; grid-column: 1 / -1; }
+.lib-it { display: flex; gap: 12px; align-items: center; background: var(--tile); border-radius: 18px; padding: 10px; cursor: pointer; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; transition: transform .15s; }
+.lib-it:active { transform: scale(.98); }
+.lib-it.cur { box-shadow: inset 0 0 0 2px var(--accent); }
+.lib-it .cv { width: 62px; height: 62px; border-radius: 14px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; font-size: 20px; line-height: 1; }
+.lib-it .cv b { font-size: 20px; font-weight: 800; }
+.lib-it .cv.book b { font-size: 11px; margin-top: 4px; opacity: .95; }
+.cv0 { background: linear-gradient(135deg, #5E5CE6, #BF5AF2); } .cv1 { background: linear-gradient(135deg, #30B0C7, #34C759); }
+.cv2 { background: linear-gradient(135deg, #FF9F0A, #FF2D55); } .cv3 { background: linear-gradient(135deg, #0A84FF, #5E5CE6); }
+.lib-it .tx { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.lib-it .tx > b { font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lib-it .tx .fa { font-size: 12px; color: var(--muted); text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lib-it .mt { display: flex; gap: 8px; overflow: hidden; white-space: nowrap; font-size: 11px; font-weight: 700; color: var(--muted); }
+.lib-it .mt .lv { color: #5E5CE6; }
+.lib-it .pb { height: 4px; border-radius: 2px; background: var(--tile-2); overflow: hidden; margin-top: 4px; }
+.lib-it .pb i { display: block; height: 100%; background: #30D158; border-radius: 2px; }
+.lib-it .st { font-size: 12px; font-weight: 800; color: var(--accent); } .lib-it .st.ok { color: #30D158; } .lib-it .st.new { color: #0A84FF; }
+.lib-it .more { width: 30px; height: 30px; border-radius: 15px; color: var(--muted); font-size: 18px; font-weight: 800; flex-shrink: 0; }
+.lib-empty { text-align: center; color: var(--muted); padding: 30px; }
+.lib-back { position: absolute; inset: -40px; background: rgba(0,0,0,.25); z-index: 20; }
+.lib-menu { position: absolute; right: 8px; width: min(270px, calc(100% - 16px)); z-index: 21; border-radius: 16px; overflow: hidden;
+  background: var(--glass); -webkit-backdrop-filter: saturate(180%) blur(30px); backdrop-filter: saturate(180%) blur(30px); border: .5px solid var(--glass-border); box-shadow: 0 20px 50px rgba(0,0,0,.3); }
+.lib-menu[hidden], .lib-back[hidden] { display: none !important; }
+.lib-menu .lm-h { padding: 10px 14px; font-size: 12px; color: var(--muted); border-bottom: .5px solid var(--glass-border); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lib-menu button { display: flex; justify-content: space-between; width: 100%; padding: 12px 14px; font-size: 15px; color: var(--text); text-align: left; border-bottom: .5px solid var(--glass-border); }
+.lib-menu button:last-child { border-bottom: 0; } .lib-menu button.red { color: #FF3B30; }
+.lib-menu button .fa { font-size: 12px; color: var(--muted); }
+@media (min-width: 901px) and (min-height: 521px) {
+  #library.active { max-width: 980px; margin: 0 auto; width: 100%; }
+  .lib-list { display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: min-content; }
+  .lib-seg { max-width: 420px; }
+}
+@media (max-height: 520px) and (orientation: landscape) {
+  .lib-list { margin-bottom: 0; padding-bottom: 12px !important; display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: min-content; }
+}
+/* story cover on the lesson page */
+.lhero.story { background: radial-gradient(circle at calc(100% + 40px) -50px, rgba(255,255,255,.13) 0 150px, transparent 151px), linear-gradient(160deg, #FF9F0A, #FF2D55 55%, #5E5CE6); }
+.lp-caret { font-size: 12px; }

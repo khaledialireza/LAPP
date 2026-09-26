@@ -26,6 +26,11 @@
   let lines = [], timed = false;
   // seconds where a line starts: real timings if present, else proportional estimate
   const lineStart = l => timed ? l.t0 : l.start * (player.duration || 0);
+  // lessons and stories share one list; each category is numbered on its own (L1, L2 … / G1, G2 …)
+  const isStory = L => L && L.type === "story";
+  const lsCode = i => { const L = LESSONS[i], same = LESSONS.filter(x => isStory(x) === isStory(L)); return (isStory(L) ? "G" : "L") + (same.indexOf(L) + 1); };
+  const lsKind = i => isStory(LESSONS[i]) ? "Geschichte" : "Lektion";
+  const lsName = i => lsKind(i) + " " + lsCode(i).slice(1);
   const lineAt = t => timed ? lines.findIndex(l => t < l.next) : lines.findIndex(l => t / (player.duration || 1) < l.end);
 
   const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -52,12 +57,13 @@
   function go(id) {
     $$(".screen").forEach(s => s.classList.toggle("active", s.id === id));
     // the lesson page opens from the home tile, so home stays lit
-    const tab = id === "lesson" ? "home" : id;
+    const tab = id === "lesson" || id === "library" ? "home" : id;
     $$(".nav button").forEach(b => b.classList.toggle("on", b.dataset.go === tab));
     document.body.dataset.screen = id;
     if (location.hash !== "#" + id) history.replaceState(null, "", "#" + id);
     if (id === "practice" && typeof renderHub === "function" && !$("#pHub").hidden) renderHub();
     if (id === "lesson" && typeof renderLesson === "function") renderLesson();
+    if (id === "library" && typeof renderLibrary === "function") renderLibrary();
     const on = $(".nav button.on");
     if (on) $("#dockTabsBtn").innerHTML = on.querySelector("svg").outerHTML;
   }
@@ -71,13 +77,7 @@
   });
 
   /* ---------- Lesson picker (top-left) ---------- */
-  const setMenu = open => { $("#lpMenu").hidden = !open; $("#lpBtn").setAttribute("aria-expanded", open); };
-  $("#lpBtn").addEventListener("click", e => { e.stopPropagation(); setMenu($("#lpMenu").hidden); });
-  $("#lpMenu").addEventListener("click", e => {
-    const b = e.target.closest("[data-pick]"); if (!b) return;
-    setLesson(Number(b.dataset.pick)); setMenu(false);
-  });
-  document.addEventListener("click", e => { if (!e.target.closest("#lpMenu")) setMenu(false); });
+  $("#lpBtn").addEventListener("click", () => go("library"));
 
   /* ---------- Clock ---------- */
   function tick() {
@@ -106,10 +106,10 @@
     if (i < 0 || i >= LESSONS.length) return toast(t("moreLessonsSoon"));
     state.idx = i; store.set("lesson", i);
     const L = LESSONS[i];
-    $$(".js-lesson-num").forEach(e => e.textContent = "L" + L.id);
+    $$(".js-lesson-num").forEach(e => e.textContent = lsCode(i));
+    $$(".js-lesson-word").forEach(e => e.textContent = lsKind(i));
+    const seen = store.get("libSeen", {}); seen[L.id] = Date.now(); store.set("libSeen", seen);
     $("#lpName").textContent = L.title;
-    $("#lpMenu").innerHTML = LESSONS.map((x, j) => `<button role="option" aria-selected="${j === i}" data-pick="${j}">
-      <b>L${x.id}</b><span>${esc(x.title)}</span><span class="fa">${esc(x.fa)}</span></button>`).join("");
     const TR = lessonTr(L);
     $("#hLessonTitle").textContent = L.title; $("#hLessonFa").textContent = TR.title; $("#hLevel").textContent = L.level;
     $("#phrases").innerHTML = L.phrases.map(([de], pi) => [de, TR.phrases[pi] || "", TR.notes[pi] || ""]).map(([de, fa, note], pi) => `
@@ -365,7 +365,7 @@
       notes.push(...sm.notes);
       if (sm.table) table = `<div class="vs-sec">FORMEN · <span class="fa">صورت‌ها</span></div><div class="conj"><table><tr>${sm.table.head.map(h => `<th>${h}</th>`).join("")}</tr>${sm.table.rows.map(r => `<tr>${r.map((c, i) => i ? `<td>${esc(c)}</td>` : `<td><b>${esc(c)}</b></td>`).join("")}</tr>`).join("")}</table></div>`;
     }
-    const inL = (keyLessons()[key] || []).map(i => `L${i + 1} · ${LESSONS[i].level || ""}`);
+    const inL = (keyLessons()[key] || []).map(i => `${lsCode(i)} · ${LESSONS[i].level || ""}`);
     tags.push(inL.length ? `<span class="pos P">${inL.join(" · ")}</span>` : `<span class="pos P">nicht in den Lektionen</span>`);
     // notes from the dictionary first (usage, idioms), then the rules
     const own = (v.g || "").split(" · ").filter(x => x && x !== v.de && !/^جمع:/.test(x) && !(pg === "V" && /^(ich|du|er|sie|es|wir|ihr|Sie) \S+$/.test(x))).map(x => `<bdi dir="auto">${esc(x)}</bdi>`);
@@ -832,7 +832,7 @@
       return `<button class="e" data-open="ex:${tp}"><span class="ic" style="background:${COL[tp]}">${TYPE_ICON[tp] || "•"}</span><span class="tx"><b>${de}</b><small><span class="fa">${fa}</span> · ${d}/${counts[tp]}</small><span class="bar"><i style="width:${d / counts[tp] * 100}%;background:${COL[tp]}"></i></span></span></button>`;
     }).join("");
     const okAll = Object.values(res).filter(Boolean).length, n = ex.list.length || 1, pct = Math.round(okAll / n * 100);
-    $("#phSub").textContent = `${okAll} / ${ex.list.length} Übungen · Lektion ${state.idx + 1}`;
+    $("#phSub").textContent = `${okAll} / ${ex.list.length} Übungen · ${lsName(state.idx)}`;
     $("#phExCount").textContent = `${okAll} / ${ex.list.length}`;
     $("#phRing").innerHTML = `<svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" stroke-width="4" opacity=".12"/><circle cx="18" cy="18" r="15" fill="none" stroke="var(--accent)" stroke-width="4" stroke-linecap="round" pathLength="100" stroke-dasharray="${pct} 100" transform="rotate(-90 18 18)" ${pct ? "" : 'opacity="0"'}/></svg><b>${pct}%</b>`;
     const dl = store.get(bestKey("dlg"), {});
@@ -1082,7 +1082,7 @@
   }
   function renderFreeTop() {
     const lang = I18N.lang, sd = speakData();
-    if (fs.mode === "free") $("#fsTop").innerHTML = `<div class="ly-seg" id="fsScope"><button data-sc="lesson" class="${fs.scope === "lesson" ? "on" : ""}">Lektion ${state.idx + 1}</button><button data-sc="all" class="${fs.scope === "all" ? "on" : ""}">Alle Wörter</button></div><p class="fa fs-hint">${t("fsHintFree")}</p>`;
+    if (fs.mode === "free") $("#fsTop").innerHTML = `<div class="ly-seg" id="fsScope"><button data-sc="lesson" class="${fs.scope === "lesson" ? "on" : ""}">${lsName(state.idx)}</button><button data-sc="all" class="${fs.scope === "all" ? "on" : ""}">Alle Wörter</button></div><p class="fa fs-hint">${t("fsHintFree")}</p>`;
     if (fs.mode === "topic") { const tp = fs.topic || {}; $("#fsTop").innerHTML = `<div class="topic"><div class="k">THEMA · <span class="fa">موضوع</span></div><b>${esc(tp.de || "")}</b><div class="fa">${esc(tp[lang] || tp.fa || "")}</div><button class="tp-new" id="fsNewTopic" aria-label="anderes Thema">↻</button></div>`; }
     if (fs.mode === "cue") $("#fsTop").innerHTML = `<div class="prompts">${fs.set.items.map((q, i) => { const a = fs.answers[i]; const st = a ? (a.ok ? "done" : "part") : i === fs.qi ? "cur" : ""; return `<div class="q ${st}"><span class="n">${a ? (a.ok ? "✓" : "~") : i + 1}</span><span><b>${esc(q.q)}</b> <small class="fa">${esc(q.fa)}</small></span></div>`; }).join("")}</div>`;
     $("#fsNext").hidden = fs.mode !== "cue";
@@ -1095,7 +1095,7 @@
     const cl = classify(fin), words = cl.filter(x => /[a-zäöüß]/i.test(x.w));
     const uniq = new Set(cl.filter(x => x.k).map(x => x.k));
     const lessonU = new Set(cl.filter(x => x.cls === "lw" || x.cls === "tw").map(x => x.k || x.w));
-    const legend = fs.mode === "topic" ? `<span class="c-tw">● Thema</span> <span class="c-lw">● Lektion</span>` : fs.mode === "free" && fs.scope === "all" ? `<span class="c-lw">● Wörterbuch</span>` : `<span class="c-lw">● Lektion ${state.idx + 1}</span> <span class="c-ow">● andere</span>`;
+    const legend = fs.mode === "topic" ? `<span class="c-tw">● Thema</span> <span class="c-lw">● Lektion</span>` : fs.mode === "free" && fs.scope === "all" ? `<span class="c-lw">● Wörterbuch</span>` : `<span class="c-lw">● ${lsName(state.idx)}</span> <span class="c-ow">● andere</span>`;
     $("#fsCnt").innerHTML = `<div><b>${words.length}</b>Wörter gesagt</div><div><b class="c-lw">${fs.mode === "topic" ? cl.filter(x => x.cls === "tw").length : lessonU.size}</b>${fs.mode === "topic" ? "zum Thema" : fs.scope === "all" && fs.mode === "free" ? "im Wörterbuch" : "aus Lektion " + (state.idx + 1)}</div><div><b>${uniq.size}</b>verschiedene</div>`;
     if (!$("#fsLive .fs-gate")) $("#fsLive").innerHTML = `<div class="k"><span>LIVE · <span class="fa">هم‌زمان</span></span><span id="fsLegend">${legend}</span></div><div class="lv" dir="ltr">${fin || interim ? liveHtml(fin, interim) : `<span class="ph fa">${fs.mode === "cue" ? t("fsHintCue") : "🎤 …"}</span>`}</div>`;
     const lv = $("#fsLive .lv"); if (lv) lv.scrollTop = lv.scrollHeight;
@@ -1172,8 +1172,8 @@
           <div class="rh">${t("fsUsed").toUpperCase()}</div><div class="chipsw">${used.map(chip).join("") || "—"}</div>`;
       } else {
         best.free = Math.max(best.free || 0, inL.length);
-        html = `<div class="big">${ringSvgP(Math.round(inL.length / (vocabList.length || 1) * 100 * 5))}<div><b>${inL.length} aus Lektion ${state.idx + 1}</b><span>${other.length} aus anderen Lektionen / Wörterbuch · ${words} Wörter gesagt</span></div></div>
-          <div class="rh">LEKTION ${state.idx + 1}</div><div class="chipsw">${inL.map(chip).join("") || "—"}</div>
+        html = `<div class="big">${ringSvgP(Math.round(inL.length / (vocabList.length || 1) * 100 * 5))}<div><b>${inL.length} aus ${lsName(state.idx)}</b><span>${other.length} aus anderen Lektionen / Wörterbuch · ${words} Wörter gesagt</span></div></div>
+          <div class="rh">${lsName(state.idx).toUpperCase()}</div><div class="chipsw">${inL.map(chip).join("") || "—"}</div>
           ${other.length ? `<div class="rh">ANDERE</div><div class="chipsw">${other.map(chip).join("")}</div>` : ""}
           <div class="rh">${t("fsTry").toUpperCase()}</div><div class="chipsw">${notUsed.map(v => `<button class="m" data-entry="${esc(v.key)}">${esc(v.de)}</button>`).join("")}</div>`;
       }
@@ -1475,6 +1475,13 @@
     const heard = store.get(lsKey("heard", i), []).length, nPh = L.phrases.length, phr = store.get(lsKey("phr", i), []).length;
     const kn = keys.filter(k => state.known.has(k)).length, dl = store.get(bestKey("dlg", i), {}), fsb = store.get(bestKey("fs", i), {}), exb = store.get(lsKey("exam", i), null);
     const best = (v, goal = 70) => Math.min(1, (v || 0) / goal);
+    if (isStory(L)) return [
+      { ic: "🎧", de: "Geschichte hören", sub: tf("lsStepDialog", { a: heard, b: nLines }), f: Math.min(1, heard / (nLines * 0.8 || 1)), go: () => go("audio") },
+      { ic: "🔤", de: "Neue Wörter", sub: tf("lsStepWords", { a: kn, b: keys.length }), f: Math.min(1, kn / (keys.length * 0.5 || 1)), go: () => go("vocab") },
+      { ic: "❓", de: "Fragen zur Geschichte", sub: tf("lsStepBest", { b: fsb.cue != null ? fsb.cue + "%" : "—" }), f: best(fsb.cue), go: () => { go("practice"); $('#pHub [data-open="cue"]')?.click(); } },
+      { ic: "🗣️", de: "Nacherzählen", sub: tf("lsStepBest", { b: fsb.topic != null ? fsb.topic + "%" : "—" }), f: best(fsb.topic), go: () => { go("practice"); $('#pHub [data-open="topic"]')?.click(); } },
+      { ic: "🏁", de: "Prüfung", sub: tf("lsStepBest", { b: exb != null ? exb + "%" : "—" }), f: best(exb), go: () => { go("practice"); $('#pHub [data-open="exam"]')?.click(); } }
+    ];
     return [
       { ic: "🎧", de: L.type === "story" ? "Geschichte hören" : "Dialog hören", sub: tf("lsStepDialog", { a: heard, b: nLines }), f: Math.min(1, heard / (nLines * 0.8 || 1)), go: () => go("audio") },
       { ic: "📖", de: "Wichtige Sätze", sub: tf("lsStepPhr", { a: phr, b: nPh }), f: Math.min(1, phr / (nPh * 0.8 || 1)), go: () => $("#phrases").scrollIntoView({ behavior: "smooth", block: "center" }) },
@@ -1484,18 +1491,19 @@
       { ic: "🏁", de: "Prüfung", sub: tf("lsStepBest", { b: exb != null ? exb + "%" : "—" }), f: best(exb), go: () => { go("practice"); $('#pHub [data-open="exam"]')?.click(); } }
     ];
   }
-  const lessonPct = (i = state.idx) => { const st = lessonSteps(i); return Math.round(st.reduce((a, x) => a + x.f, 0) / st.length * 100); };
+  const lessonPct = (i = state.idx) => { if (store.get("done", []).includes(LESSONS[i].id)) return 100; const st = lessonSteps(i); return Math.round(st.reduce((a, x) => a + x.f, 0) / st.length * 100); };
   const overallPct = () => Math.round(LESSONS.reduce((a, x, i) => a + lessonPct(i), 0) / (LESSONS.length || 1));
   function renderLesson() {
     const L = LESSONS[state.idx]; if (!L) return;
-    const TR = lessonTr(L), steps = lessonSteps(), pct = Math.round(steps.reduce((a, s) => a + s.f, 0) / steps.length * 100);
+    const TR = lessonTr(L), steps = lessonSteps(), pct = lessonPct();
     const cur = steps.findIndex(s => s.f < 1), mins = player.duration ? Math.round(player.duration / 60) : "–";
-    $("#lsHero").innerHTML = `<div class="row"><span class="chip5">${L.type === "story" ? "Geschichte" : "Lektion " + L.id}</span><span class="chip5">${esc(L.level)}</span></div>
+    $("#lsHero").innerHTML = `<div class="row"><span class="chip5">${lsName(state.idx)}</span><span class="chip5">${esc(L.level)}</span></div>
       <div class="tt">${esc(L.title)}</div><div class="fa">${esc(TR.title)} — ${esc(TR.summary)}</div>
       <div class="meta"><span>🎧 ${mins} Min</span><span>💬 ${lines.length} Sätze</span><span>🔤 ${vocabList.length} Wörter</span></div>
       <div class="pb"><i style="width:${pct}%"></i></div><div class="meta"><span class="fa">${tf("lsProgress", { p: pct })}</span></div>
       <div class="ls-overall"><span>Gesamt · <span class="fa">${t("lsOverall")}</span></span><b>${overallPct()}%</b></div>
-      <div class="ls-lessons">${LESSONS.map((x, j) => { const p = lessonPct(j); return `<button class="chip5 lchip ${j === state.idx ? "on" : ""}" data-lesson="${j - state.idx}"><span>L${x.id}</span><i style="--p:${p}%"></i><small>${p}%</small></button>`; }).join("")}</div>`;
+      <div class="ls-lessons">${LESSONS.map((x, j) => isStory(x) !== isStory(L) ? "" : `<button class="chip5 lchip ${j === state.idx ? "on" : ""}" data-lesson="${j - state.idx}"><span>${lsCode(j)}</span><i style="--p:${lessonPct(j)}%"></i><small>${lessonPct(j)}%</small></button>`).join("")}<button class="chip5 lchip" data-go="library">📚 Mediathek</button></div>`;
+    $("#lsHero").classList.toggle("story", isStory(L));
     $("#lsPath").innerHTML = steps.map((s, i) => { const st = s.f >= 1 ? "done" : i === cur ? "cur" : "todo";
       return `<button class="step ${st}" data-step="${i}"><span class="ic">${st === "done" ? "✓" : s.ic}</span><span class="tx"><b>${i + 1}. ${s.de}</b><small class="fa">${esc(s.sub)}</small><span class="sbar"><i style="width:${Math.round(s.f * 100)}%"></i></span></span><span class="go">${st === "done" ? "✓" : st === "cur" ? "Weiter ›" : "Start"}</span></button>`; }).join("");
     $("#lsPathN").textContent = `${steps.filter(s => s.f >= 1).length} / ${steps.length}`;
@@ -1542,6 +1550,92 @@
 
   /* ---------- Init ---------- */
   tick(); setInterval(tick, 10000);
+
+  /* ---------- Mediathek: lessons and stories as separate, manageable lists ---------- */
+  const lib = { tab: store.get("libTab", "lesson"), lvl: "all", sort: store.get("libSort", "order") };
+  const LIB_SORT = { order: "Reihenfolge", level: "Niveau", recent: "Zuletzt" };
+  const LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2"];
+  const libMins = L => { const tm = L.timings; const e = Array.isArray(tm) && tm.length ? (Array.isArray(tm[tm.length - 1]) ? tm[tm.length - 1][1] : tm[tm.length - 1]) : 0; return e ? Math.max(1, Math.round(e / 60)) : null; };
+  const libLines = L => L.transcript.split("\n").filter(x => x.trim()).length;
+  function renderLibrary() {
+    const all = LESSONS.map((L, i) => ({ L, i, story: isStory(L), p: lessonPct(i), done: store.get("done", []).includes(L.id) }));
+    const nL = all.filter(x => !x.story).length, nS = all.length - nL;
+    const inTab = all.filter(x => lib.tab === "all" || (lib.tab === "story") === x.story);
+    const lvls = LEVELS.filter(l => inTab.some(x => x.L.level === l));
+    if (lib.lvl !== "all" && !lvls.includes(lib.lvl)) lib.lvl = "all";
+    const seen = store.get("libSeen", {});
+    const items = inTab.filter(x => lib.lvl === "all" || x.L.level === lib.lvl).sort((a, b) =>
+      lib.sort === "level" ? LEVELS.indexOf(a.L.level) - LEVELS.indexOf(b.L.level) || a.i - b.i
+      : lib.sort === "recent" ? (seen[b.L.id] || 0) - (seen[a.L.id] || 0) || a.i - b.i
+      : (a.story - b.story) || a.i - b.i);
+    $("#libCount").textContent = `${all.length} Titel`;
+    $("#libSeg").innerHTML = [["lesson", `Lektionen · ${nL}`], ["story", `Geschichten · ${nS}`], ["all", "Alle"]].map(([k, v]) => `<button data-tab="${k}" class="${lib.tab === k ? "on" : ""}">${v}</button>`).join("");
+    $("#libChips").innerHTML = ["all", ...lvls].map(l => `<button data-lvl="${l}" class="${lib.lvl === l ? "on" : ""}">${l === "all" ? "Alle" : l}</button>`).join("") + `<button class="srt" data-sort>↕ ${LIB_SORT[lib.sort]}</button>`;
+    const row = x => { const TR = lessonTr(x.L), m = libMins(x.L), cur = x.i === state.idx;
+      const st = x.p >= 100 ? `<span class="st ok">✓</span>` : x.p > 0 ? `<span class="st">${x.p}%</span>` : `<span class="st new">Neu</span>`;
+      return `<div class="lib-it ${cur ? "cur" : ""}" data-li="${x.i}" role="button" tabindex="0">
+        <div class="cv cv${x.i % 4} ${x.story ? "book" : ""}">${x.story ? "📖" : ""}<b>${lsCode(x.i)}</b></div>
+        <div class="tx"><b>${esc(x.L.title)}</b><span class="fa">${esc(TR.title)}</span>
+          <span class="mt"><span class="lv">${esc(x.L.level)}</span>${m ? `<span>${m} Min</span>` : ""}<span>${libLines(x.L)} Sätze</span>${x.L.words ? `<span>${x.L.words.length} Wörter</span>` : ""}</span>
+          <span class="pb"><i style="width:${x.p}%"></i></span></div>
+        ${st}<button class="more" data-more="${x.i}" aria-label="Mehr">⋯</button></div>`; };
+    const groups = lib.sort !== "order" ? [["", items]] : [
+      ["WEITERMACHEN · <span class=\"fa\">ادامه</span>", items.filter(x => x.p > 0 && x.p < 100)],
+      ["NEU · <span class=\"fa\">شروع نشده</span>", items.filter(x => x.p === 0)],
+      ["FERTIG · <span class=\"fa\">تمام‌شده</span>", items.filter(x => x.p >= 100)]];
+    $("#libList").innerHTML = groups.filter(g => g[1].length).map(([h, xs]) => (h ? `<div class="lib-sec">${h}</div>` : "") + xs.map(row).join("")).join("")
+      || `<div class="lib-empty fa">چیزی اینجا نیست.</div>`;
+  }
+  $("#libSeg").addEventListener("click", e => { const b = e.target.closest("[data-tab]"); if (!b) return; lib.tab = b.dataset.tab; store.set("libTab", lib.tab); renderLibrary(); });
+  $("#libChips").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    if (b.dataset.sort != null) { const ks = Object.keys(LIB_SORT); lib.sort = ks[(ks.indexOf(lib.sort) + 1) % ks.length]; store.set("libSort", lib.sort); }
+    else lib.lvl = b.dataset.lvl;
+    renderLibrary();
+  });
+  // tap = open, long press / right click / ⋯ = manage
+  let libPress = 0, libLong = false;
+  function libMenu(i, anchor) {
+    const L = LESSONS[i], done = store.get("done", []).includes(L.id), r = anchor.getBoundingClientRect(), box = $("#library").getBoundingClientRect();
+    $("#libMenu").innerHTML = `<div class="lm-h"><b>${lsCode(i)} · ${esc(L.title)}</b></div>
+      <button data-m="play">▶︎ ${lessonPct(i) > 0 ? "Weiterhören" : "Anhören"} <span class="fa">${lessonPct(i) > 0 ? "ادامه" : "گوش دادن"}</span></button>
+      <button data-m="open">☰ Übersicht <span class="fa">صفحهٔ درس</span></button>
+      <button data-m="done">${done ? "○ Nicht erledigt" : "✓ Als erledigt"} <span class="fa">${done ? "برگرداندن" : "تمام شد"}</span></button>
+      <button data-m="restart">↺ Von vorn <span class="fa">از اول</span></button>
+      <button data-m="reset" class="red">Fortschritt löschen <span class="fa">پاک کردن</span></button>`;
+    $("#libMenu").dataset.i = i;
+    const top = Math.min(r.bottom - box.top + 4, box.height - 300);
+    $("#libMenu").style.top = Math.max(8, top) + "px";
+    $("#libBack").hidden = false; $("#libMenu").hidden = false;
+  }
+  const libMenuClose = () => { $("#libBack").hidden = true; $("#libMenu").hidden = true; };
+  $("#libBack").onclick = libMenuClose;
+  function libReset(L) {
+    const id = L.id;
+    ["heard", "phr", "exam", "dlg", "fs", "ex"].forEach(k => { try { localStorage.removeItem("lapp:" + k + id); } catch {} });
+    try { localStorage.removeItem("lapp:ex" + id + ":i"); } catch {}
+    store.set("done", store.get("done", []).filter(x => x !== id));
+  }
+  $("#libMenu").addEventListener("click", e => {
+    const b = e.target.closest("[data-m]"); if (!b) return;
+    const i = Number($("#libMenu").dataset.i), L = LESSONS[i], m = b.dataset.m; libMenuClose();
+    if (m === "play" || m === "restart") { if (i !== state.idx) setLesson(i); if (m === "restart") { player.currentTime = 0; showNow(0); } go("audio"); }
+    if (m === "open") { if (i !== state.idx) setLesson(i); go("lesson"); }
+    if (m === "done") { const d = store.get("done", []); store.set("done", d.includes(L.id) ? d.filter(x => x !== L.id) : [...d, L.id]); renderLibrary(); renderProgress?.(); }
+    if (m === "reset" && confirm(`${lsName(i)}: Fortschritt löschen?`)) { libReset(L); if (i === state.idx) setLesson(i); renderLibrary(); }
+  });
+  $("#libList").addEventListener("pointerdown", e => {
+    const it = e.target.closest("[data-li]"); if (!it || e.target.closest("[data-more]")) return;
+    libLong = false; clearTimeout(libPress);
+    libPress = setTimeout(() => { libLong = true; navigator.vibrate?.(10); libMenu(Number(it.dataset.li), it); }, 500);
+  });
+  ["pointerup", "pointerleave", "pointercancel", "scroll"].forEach(ev => $("#libList").addEventListener(ev, () => clearTimeout(libPress), true));
+  $("#libList").addEventListener("contextmenu", e => { const it = e.target.closest("[data-li]"); if (!it) return; e.preventDefault(); clearTimeout(libPress); libMenu(Number(it.dataset.li), it); });
+  $("#libList").addEventListener("click", e => {
+    const mo = e.target.closest("[data-more]"); if (mo) { e.stopPropagation(); libMenu(Number(mo.dataset.more), mo.closest("[data-li]")); return; }
+    const it = e.target.closest("[data-li]"); if (!it || libLong) { libLong = false; return; }
+    const i = Number(it.dataset.li); if (i !== state.idx) setLesson(i); go("lesson");
+  });
   setSpeed(state.speed);
   if (LESSONS.length) setLesson(state.idx);
   const start = location.hash.slice(1);
