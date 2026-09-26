@@ -398,6 +398,99 @@ button { font: inherit; color: inherit; background: none; border: 0; }
 .scrub .tr .mk { position: absolute; width: 2px; height: 10px; background: var(--label3); border-radius: 1px; }
 .scrub .tr .kn { position: absolute; left: 30%; width: 16px; height: 16px; border-radius: 8px; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,.3); transform: translateX(-8px); }
 .scrub .tm { display: flex; justify-content: space-between; font-size: 12px; color: var(--label2); }
+
+/* vocab ideas */
+.vc { position: absolute; inset: 0; display: flex; flex-direction: column; padding-bottom: 112px; }
+.vc .hd { padding: 52px 18px 4px; } .vc .hd .t { font-size: 32px; font-weight: 800; letter-spacing: -.4px; display: flex; justify-content: space-between; align-items: center; }
+.vc .hd .t small { font-size: 13px; font-weight: 700; color: var(--tint); background: var(--tint-soft); padding: 4px 10px; border-radius: 12px; }
+.vc .srch { margin: 8px 16px; height: 38px; border-radius: 12px; background: var(--fill); display: flex; align-items: center; gap: 6px; padding: 0 10px; color: var(--label2); font-size: 16px; }
+.art-der { color: #0A84FF; } .art-die { color: #FF375F; } .art-das { color: #30D158; }
+.dot { width: 8px; height: 8px; border-radius: 4px; display: inline-block; }
+.seg3 { display: flex; margin: 4px 16px 8px; background: var(--fill); border-radius: 9px; padding: 2px; } .seg3 span { flex: 1; text-align: center; font-size: 13px; font-weight: 600; padding: 6px 0; border-radius: 7px; } .seg3 .on { background: var(--card); box-shadow: 0 2px 6px rgba(0,0,0,.1); }
+/* 1 list + index */
+.v1 .lst { flex: 1; overflow: hidden; margin: 0 16px; position: relative; }
+.v1 .sec { font-size: 13px; font-weight: 700; color: var(--label2); padding: 10px 4px 4px; }
+.v1 .grp { background: var(--card); border-radius: 14px; overflow: hidden; }
+.v1 .row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-top: .5px solid var(--sep); } .v1 .row:first-child { border-top: 0; }
+.v1 .row .de { font-size: 17px; font-weight: 600; } .v1 .row .de i { font-style: normal; font-weight: 700; margin-right: 4px; }
+.v1 .row .fa { flex: 1; text-align: left; color: var(--label2); font-size: 14px; }
+.v1 .row .ok { color: var(--green); font-weight: 800; }
+.v1 .idx { position: absolute; right: 2px; top: 30px; display: flex; flex-direction: column; font-size: 10px; font-weight: 700; color: var(--tint); gap: 1px; }
+/* 2 swipe stack */
+.v2 .stack { flex: 1; position: relative; margin: 10px 24px 0; }
+.v2 .card { position: absolute; inset: 0 0 60px; border-radius: 30px; background: var(--card); box-shadow: 0 20px 50px rgba(0,0,0,.15); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 24px; text-align: center; }
+.v2 .card.b1 { transform: translateY(18px) scale(.94); opacity: .6; } .v2 .card.b2 { transform: translateY(34px) scale(.88); opacity: .3; }
+.v2 .card.top { transform: rotate(-4deg) translateX(-8px); }
+.v2 .card .w { font-size: 40px; font-weight: 800; letter-spacing: -.5px; } .v2 .card .pos { font-size: 13px; font-weight: 700; padding: 4px 10px; border-radius: 12px; background: var(--fill); }
+.v2 .card .ex { font-size: 15px; color: var(--label2); font-style: italic; }
+.v2 .card .tapnote { position: static; background: none; color: var(--label3); font-weight: 600; }
+.v2 .stamp { position: absolute; top: 24px; left: 22px; border: 3px solid var(--green); color: var(--green); font-weight: 900; font-size: 20px; padding: 2px 10px; border-radius: 10px; transform: rotate(-14deg); }
+.v2 .acts { position: absolute; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; gap: 26px; }
+.v2 .acts span { width: 58px; height: 58px; border-radius: 29px; background: var(--card); box-shadow: var(--shadow); display: grid; place-items: center; font-size: 24px; font-weight: 800; }
+.v2 .meter { margin: 0 24px; display: flex; justify-content: space-between; font-size: 13px; color: var(--label2); font-weight: 600; }
+/* 3 collections */
+.v3 .cols { flex: 1; overflow: hidden; padding: 4px 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-content: start; }
+.v3 .col { border-radius: 22px; padding: 14px; color: #fff; height: 128px; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; }
+.v3 .col b { font-size: 19px; } .v3 .col small { font-size: 12px; opacity: .9; font-weight: 600; } .v3 .col .n { font-size: 30px; font-weight: 800; }
+.v3 .col .bar { height: 4px; background: rgba(255,255,255,.3); border-radius: 2px; } .v3 .col .bar i { display: block; height: 100%; background: #fff; border-radius: 2px; }
+.v3 .col::after { content: attr(data-g); position: absolute; right: -6px; bottom: -18px; font-size: 76px; font-weight: 900; opacity: .15; }
+/* 4 mastery cloud */
+.v4 .mast { margin: 6px 16px 10px; background: var(--card); border-radius: 18px; padding: 14px; }
+.v4 .mast .bars { display: flex; height: 10px; border-radius: 5px; overflow: hidden; gap: 2px; margin: 8px 0; } .v4 .mast .bars i { display: block; }
+.v4 .mast .lg { display: flex; justify-content: space-between; font-size: 12px; color: var(--label2); font-weight: 600; }
+.v4 .cloud { flex: 1; overflow: hidden; padding: 0 16px; display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start; }
+.v4 .ch { padding: 8px 12px; border-radius: 14px; font-size: 16px; font-weight: 600; background: var(--card); border: 1.5px solid transparent; }
+.v4 .ch.k { background: rgba(48,209,88,.14); color: var(--green); } .v4 .ch.l { background: rgba(255,159,10,.14); color: #FF9F0A; } .v4 .ch.n { border-color: var(--sep); }
+.v4 .ch.sel { background: var(--tint); color: #fff; }
+.pop4 { position: absolute; left: 16px; right: 16px; bottom: 122px; border-radius: 22px; padding: 14px 16px; display: flex; gap: 12px; align-items: center; }
+.pop4 .w { font-size: 22px; font-weight: 800; } .pop4 .m { font-size: 14px; color: var(--label2); }
+.pop4 .b { margin-left: auto; height: 36px; padding: 0 12px; border-radius: 18px; background: var(--green); color: #fff; font-weight: 700; font-size: 13px; display: grid; place-items: center; }
+/* 5 today + carousel */
+.v5 .car { display: flex; gap: 12px; padding: 6px 16px 12px; overflow: hidden; }
+.v5 .fc { flex: 0 0 280px; height: 200px; border-radius: 26px; padding: 18px; color: #fff; display: flex; flex-direction: column; gap: 6px; position: relative; }
+.v5 .fc .k { font-size: 11px; font-weight: 800; letter-spacing: .6px; opacity: .85; } .v5 .fc .w { font-size: 30px; font-weight: 800; } .v5 .fc .m { font-size: 15px; opacity: .92; }
+.v5 .fc .ex { margin-top: auto; font-size: 13px; font-style: italic; opacity: .9; } .v5 .fc .sp { position: absolute; right: 14px; top: 14px; width: 34px; height: 34px; border-radius: 17px; background: rgba(255,255,255,.25); display: grid; place-items: center; }
+.v5 .h2 { padding: 0 18px; font-size: 20px; font-weight: 800; display: flex; justify-content: space-between; align-items: baseline; } .v5 .h2 small { font-size: 14px; color: var(--tint); font-weight: 600; }
+.v5 .mini3 { margin: 8px 16px; background: var(--card); border-radius: 16px; overflow: hidden; }
+.v5 .mini3 .r { display: flex; align-items: center; gap: 10px; padding: 11px 12px; border-top: .5px solid var(--sep); font-size: 16px; } .v5 .mini3 .r:first-child { border: 0; }
+.v5 .mini3 .r .fa { margin-left: auto; color: var(--label2); font-size: 14px; }
+.sp2 { width: 30px; height: 30px; border-radius: 15px; background: var(--fill); display: grid; place-items: center; color: var(--tint); } .sp2 svg, .v5 .fc .sp svg { width: 14px; height: 14px; }
+
+/* dictionary v2 */
+.dc { position: absolute; inset: 0; display: flex; flex-direction: column; padding-bottom: 104px; }
+.dc .hd { padding: 50px 18px 2px; display: flex; justify-content: space-between; align-items: flex-end; }
+.dc .hd .t { font-size: 32px; font-weight: 800; letter-spacing: -.4px; line-height: 1; } .dc .hd .t small { display: block; font-size: 13px; font-weight: 600; color: var(--label2); margin-top: 4px; letter-spacing: 0; }
+.mbar { margin: 10px 16px 6px; } .mbar .b { display: flex; height: 8px; border-radius: 4px; overflow: hidden; gap: 2px; } .mbar .b i { display: block; }
+.mbar .lg { display: flex; gap: 12px; font-size: 12px; color: var(--label2); font-weight: 600; margin-top: 6px; } .mbar .lg b { color: var(--label); }
+.dc .srch { margin: 6px 16px; height: 38px; border-radius: 12px; background: var(--fill); display: flex; align-items: center; gap: 6px; padding: 0 10px; color: var(--label2); font-size: 16px; }
+.chips { display: flex; gap: 6px; padding: 6px 16px; overflow: hidden; flex-shrink: 0; }
+.chips span { flex: 0 0 auto; height: 32px; padding: 0 12px; border-radius: 16px; background: var(--card); font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; border: .5px solid var(--sep); }
+.chips span b { font-weight: 600; color: var(--label2); } .chips span.on { background: var(--label); color: var(--bg); border-color: transparent; } .chips span.on b { color: inherit; opacity: .7; }
+.dlist { flex: 1; overflow: hidden; margin: 2px 16px 0; }
+.dlist .sec { font-size: 13px; font-weight: 700; color: var(--label2); padding: 10px 4px 5px; }
+.dlist .grp { background: var(--card); border-radius: 16px; overflow: hidden; }
+.drow { display: flex; align-items: center; gap: 11px; padding: 10px 12px; position: relative; }
+.drow + .drow::before { content: ""; position: absolute; top: 0; left: 44px; right: 0; height: .5px; background: var(--sep); }
+.drow.sel { background: var(--tint-soft); }
+.st { width: 22px; height: 22px; flex: 0 0 22px; }
+.drow .tx { flex: 1; min-width: 0; } .drow .w { font-size: 17px; font-weight: 600; } .drow .w .ar { font-weight: 700; margin-right: 4px; } .drow .w .pl { font-size: 12px; color: var(--label3); font-weight: 500; margin-left: 4px; }
+.drow .m { font-size: 13px; color: var(--label2); margin-top: 1px; text-align: left !important; }
+.pos { font-size: 11px; font-weight: 800; padding: 3px 7px; border-radius: 7px; flex: 0 0 auto; }
+.pos.N-der { background: rgba(10,132,255,.14); color: #0A84FF; } .pos.N-die { background: rgba(255,55,95,.14); color: #FF375F; } .pos.N-das { background: rgba(48,209,88,.16); color: #28B24B; }
+.pos.V { background: rgba(255,159,10,.16); color: #E08600; } .pos.A { background: rgba(191,90,242,.15); color: #A64BD6; } .pos.Adv { background: rgba(64,200,224,.16); color: #1A9CB4; } .pos.P { background: var(--fill); color: var(--label2); }
+.ar.der { color: #0A84FF; } .ar.die { color: #FF375F; } .ar.das { color: #28B24B; }
+.drow .spk { width: 30px; height: 30px; border-radius: 15px; background: var(--fill); display: grid; place-items: center; color: var(--tint); flex: 0 0 30px; } .drow .spk svg { width: 14px; height: 14px; }
+/* detail sheet */
+.dsh { position: absolute; left: 0; right: 0; bottom: 0; top: 300px; background: var(--card); border-radius: 30px 30px 0 0; box-shadow: 0 -16px 40px rgba(0,0,0,.2); padding: 10px 20px 110px; display: flex; flex-direction: column; gap: 10px; z-index: 4; }
+.dsh .grab { width: 38px; height: 5px; border-radius: 3px; background: var(--fill); margin: 0 auto 4px; }
+.dsh .top { display: flex; align-items: center; gap: 10px; } .dsh .top .big { font-size: 34px; font-weight: 800; letter-spacing: -.5px; flex: 1; }
+.dsh .gender { display: flex; gap: 8px; flex-wrap: wrap; } .dsh .gender span { font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 10px; }
+.dsh .mean { font-size: 20px; font-weight: 600; } .dsh .box { background: var(--fill); border-radius: 14px; padding: 10px 12px; font-size: 14px; line-height: 1.6; }
+.dsh .box b { color: var(--tint); } .dsh .k { font-size: 11px; font-weight: 800; color: var(--label2); letter-spacing: .5px; }
+.dsh .hist { display: flex; gap: 8px; } .dsh .hist div { flex: 1; background: var(--fill); border-radius: 12px; padding: 8px; text-align: center; font-size: 12px; color: var(--label2); } .dsh .hist b { display: block; font-size: 18px; color: var(--label); }
+.dsh .acts { display: flex; gap: 10px; margin-top: auto; } .dsh .acts span { flex: 1; height: 50px; border-radius: 14px; display: grid; place-items: center; font-weight: 700; }
+.dsh .acts .a1 { background: var(--fill); color: var(--tint); } .dsh .acts .a2 { background: var(--green); color: #fff; }
+.dimbg { position: absolute; inset: 0; background: rgba(0,0,0,.25); z-index: 3; }
 </style>
 </head>
 <body>
@@ -493,7 +586,51 @@ const h5 = mode => {
 const wv = (n, seed = 3) => Array.from({ length: n }, (_, i) => `<i style="height:${6 + Math.abs(Math.sin(i * 0.7 + seed) * 26 + Math.sin(i * 1.9) * 6)}px"></i>`).join("");
 const rpTop = (step) => `<div class="top"><span class="x">✕</span><div class="ttl">Rollenspiel<small>Du bist Anna · Satz ${step} / 10</small></div><span class="rec">0:04</span></div><div class="steps">${Array.from({ length: 10 }, (_, i) => `<i class="${i < step - 1 ? "d" : i === step - 1 ? "c" : ""}"></i>`).join("")}</div>`;
 const MIC2 = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-3.1A7 7 0 0 0 19 11z"/></svg>';
+
+const VW = [["der","Name","اسم","N"],["die","Schule","مدرسه","N"],["das","Vorbild","الگو","N"],["","wohnen","زندگی کردن","V"],["","herzlich","صمیمانه","A"],["der","Lehrer","معلم","N"],["","kommen","آمدن","V"],["die","Stadt","شهر","N"],["","freundlich","مهربان","A"],["das","Gespräch","گفتگو","N"]];
+const vHead = (t = "Vokabeln") => `${sb}<div class="hd"><div class="t">${t}<small>38 / 313</small></div></div>`;
+const dockV = `<div class="chrome"><div class="dk">${""}</div></div>`;
+const vDock = () => `<div class="chrome"><div class="dk">${tabs("vocab")}${playRound()}</div></div>`;
+
+const ST = k => ({ n: '<svg class="st" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="var(--label3)" stroke-width="2" stroke-dasharray="3 3"/></svg>',
+  s: '<svg class="st" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="var(--fill)" stroke-width="3"/><circle cx="12" cy="12" r="9" fill="none" stroke="#0A84FF" stroke-width="3" stroke-dasharray="19 57" transform="rotate(-90 12 12)" stroke-linecap="round"/><circle cx="12" cy="12" r="2.5" fill="#0A84FF"/></svg>',
+  p: '<svg class="st" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="var(--fill)" stroke-width="3"/><circle cx="12" cy="12" r="9" fill="none" stroke="#FF9F0A" stroke-width="3" stroke-dasharray="40 57" transform="rotate(-90 12 12)" stroke-linecap="round"/></svg>',
+  k: '<svg class="st" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#30D158"/><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>' })[k];
+const POSL = { "N-der": "Nomen", "N-die": "Nomen", "N-das": "Nomen", V: "Verb", A: "Adj.", Adv: "Adv.", P: "Präp." };
+const drow = ([st, ar, w, pl, pos, m], sel) => `<div class="drow ${sel ? "sel" : ""}">${ST(st)}<div class="tx"><div class="w">${ar ? `<span class="ar ${ar}">${ar}</span>` : ""}${w}${pl ? `<span class="pl">${pl}</span>` : ""}</div><div class="m fa">${m}</div></div><span class="pos ${pos}">${POSL[pos]}</span><span class="spk">${I.speaker}</span></div>`;
+const dictList = sel => `${sb}<div class="hd"><div class="t">Wörterbuch<small>Lektion 1 · 313 Wörter</small></div></div>
+  <div class="mbar"><div class="b"><i style="flex:38;background:#30D158"></i><i style="flex:44;background:#FF9F0A"></i><i style="flex:71;background:#0A84FF"></i><i style="flex:160;background:var(--fill)"></i></div>
+  <div class="lg"><span><b>38</b> kann ich</span><span><b>44</b> übe</span><span><b>71</b> gesehen</span><span><b>160</b> neu</span></div></div>
+  <div class="srch">⌕ <span>Suchen · جستجو</span></div>
+  <div class="chips"><span class="on">Alle <b>313</b></span><span>Nomen <b>91</b></span><span>Verben <b>63</b></span><span>Adjektive <b>57</b></span><span>Adverbien <b>39</b></span></div>
+  <div class="dlist"><div class="sec">B</div><div class="grp">${[["k","","bei","","P","نزد، در"],["p","der","Beruf","-e","N-der","شغل"],["n","","beruflich","","A","شغلی"]].map(r => drow(r)).join("")}</div>
+  <div class="sec">E</div><div class="grp">${[["s","","ehrlich","","A","صادق"],["n","die","Entspannung","-en","N-die","آرامش"]].map(r => drow(r)).join("")}</div>
+  <div class="sec">F</div><div class="grp">${[["k","","freundlich","","A","دوستانه، مهربان"],["p","","fragen","","V","پرسیدن"],["n","die","Freizeit","","N-die","اوقات فراغت"]].map(r => drow(r)).join("")}</div>
+  <div class="sec">V</div><div class="grp">${[["s","das","Vorbild","-er","N-das","الگو"],["p","","vorstellen","","V","خود را معرفی کردن"]].map((r, i) => drow(r, sel && i === 0)).join("")}</div></div>`;
 const screens = {
+  dictA: () => `<div class="dc">${dictList(false)}<div class="chrome"><div class="dk">${tabs("vocab")}${playRound()}</div></div></div>`,
+  dictB: () => `<div class="dc">${dictList(true)}<div class="dimbg"></div><div class="dsh"><div class="grab"></div>
+    <div class="top"><span class="big"><span class="ar das">das</span> Vorbild</span><span class="spk" style="width:44px;height:44px;border-radius:22px;background:var(--fill);display:grid;place-items:center;color:var(--tint)">${I.speaker}</span></div>
+    <div class="gender"><span class="pos N-das">das · neutral · خنثی</span><span class="pos P">Plural: die Vorbilder</span><span class="pos P">Vor·bild</span></div>
+    <div class="mean fa">الگو، سرمشق</div>
+    <div><div class="k">AUS DER LEKTION</div><div class="box">„Sei ein <b>Vorbild</b>!“ <span class="fa" style="color:var(--label2)">— الگو باش!</span></div></div>
+    <div class="hist"><div><b>3×</b>gesehen</div><div><b>2 / 3</b>richtig</div><div><b>gestern</b>zuletzt</div></div>
+    <div class="acts"><span class="a1">🃏 Üben</span><span class="a2">✓ Kann ich</span></div></div></div>`,
+  voc1: () => `<div class="vc v1">${vHead()}<div class="srch">⌕ <span>Suchen · جستجو</span></div><div class="seg3"><span class="on">Alle</span><span>Neu</span><span>Gelernt</span></div>
+    <div class="lst"><div class="sec">D</div><div class="grp">${[["das","Vorbild","الگو",1],["","danke","ممنون",1],["das","Deutsch","آلمانی",0]].map(r => `<div class="row"><span class="de"><i class="art-${r[0]}">${r[0]}</i>${r[1]}</span><span class="fa">${r[2]}</span>${r[3] ? '<span class="ok">✓</span>' : ""}<span class="sp2">${I.speaker}</span></div>`).join("")}</div>
+    <div class="sec">F</div><div class="grp">${[["","freundlich","مهربان",0],["die","Frau","زن / خانم",1],["","fragen","پرسیدن",0]].map(r => `<div class="row"><span class="de"><i class="art-${r[0]}">${r[0]}</i>${r[1]}</span><span class="fa">${r[2]}</span>${r[3] ? '<span class="ok">✓</span>' : ""}<span class="sp2">${I.speaker}</span></div>`).join("")}</div>
+    <div class="sec">G</div><div class="grp">${[["das","Gespräch","گفتگو",0],["","gehen","رفتن",1]].map(r => `<div class="row"><span class="de"><i class="art-${r[0]}">${r[0]}</i>${r[1]}</span><span class="fa">${r[2]}</span>${r[3] ? '<span class="ok">✓</span>' : ""}<span class="sp2">${I.speaker}</span></div>`).join("")}</div>
+    <div class="idx">${"ABCDEFGHIKLMNOPRSTUVWZ".split("").map(c => `<span>${c}</span>`).join("")}</div></div>${vDock()}</div>`,
+  voc2: () => `<div class="vc v2">${vHead("Lernen")}<div class="meter"><span>🔥 12 heute</span><span>Karte 13 / 313</span></div>
+    <div class="stack"><div class="card b2"></div><div class="card b1"></div><div class="card top"><span class="stamp">KANN ICH</span><span class="pos art-das">das · Nomen</span><div class="w">Vorbild</div><div class="ex">„Sie ist mein Vorbild.“</div><span class="tapnote fa">برای دیدن معنی بزن · ← بلد نیستم · بلدم →</span></div>
+    <div class="acts"><span style="color:var(--red)">✕</span><span style="color:var(--tint)">🔊</span><span style="color:var(--green)">✓</span></div></div>${vDock()}</div>`,
+  voc3: () => `<div class="vc v3">${vHead()}<div class="srch">⌕ <span>Suchen · جستجو</span></div>
+    <div class="cols">${[["der-Wörter","maskulin · مذکر",42,.4,"linear-gradient(135deg,#0A84FF,#5E5CE6)","der"],["die-Wörter","feminin · مؤنث",37,.2,"linear-gradient(135deg,#FF375F,#FF6B9A)","die"],["das-Wörter","neutral · خنثی",29,.3,"linear-gradient(135deg,#30D158,#34C7A0)","das"],["Verben","فعل‌ها",64,.15,"linear-gradient(135deg,#FF9F0A,#FF6B3D)","V"],["Adjektive","صفت‌ها",48,.1,"linear-gradient(135deg,#BF5AF2,#8A6CF0)","A"],["Wendungen","عبارت‌ها",23,.5,"linear-gradient(135deg,#40C8E0,#0A84FF)","…"]].map(c => `<div class="col" style="background:${c[4]}" data-g="${c[5]}"><div><b>${c[0]}</b><br><small class="fa">${c[1]}</small></div><div><div class="n">${c[2]}</div><div class="bar"><i style="width:${c[3]*100}%"></i></div></div></div>`).join("")}</div>${vDock()}</div>`,
+  voc4: () => `<div class="vc v4">${vHead()}<div class="mast"><b>Dein Wortschatz</b><div class="bars"><i style="flex:38;background:var(--green)"></i><i style="flex:61;background:#FF9F0A"></i><i style="flex:214;background:var(--fill)"></i></div><div class="lg"><span>● 38 kann ich</span><span>● 61 übe ich</span><span>● 214 neu</span></div></div>
+    <div class="cloud">${["hallo","k:zusammen","herzlich","l:willkommen","k:bei","wie","l:gehen","euch","k:wir","freuen","l:uns","dass","k:ihr","da","seid","l:Name","sel:Vorbild","Lehrer","l:Schule","kommen","k:aus","wohnen","l:Stadt","freundlich","Gespräch","k:ich","k:bin","Frau","l:Herr","sprechen","verstehen","Beruf","l:Hobby","lernen","k:gut","danke"].map(x => { const [c, w] = x.includes(":") ? x.split(":") : ["n", x]; return `<span class="ch ${c}">${w}</span>`; }).join("")}</div>
+    <div class="pop4 glass"><div><div class="w"><span class="art-das">das</span> Vorbild</div><div class="m fa">الگو · «Sie ist mein Vorbild.»</div></div><span class="b">✓ Kann ich</span></div>${vDock()}</div>`,
+  voc5: () => `<div class="vc v5">${vHead()}<div class="car">${[["WORT DES TAGES","das Vorbild","الگو","„Sie ist mein Vorbild.“","linear-gradient(135deg,#FF2D55,#8A6CF0)"],["WIEDERHOLEN","wohnen","زندگی کردن","„Ich wohne in Berlin.“","linear-gradient(135deg,#FF9F0A,#FF375F)"]].map(c => `<div class="fc" style="background:${c[4]}"><span class="sp">${I.speaker}</span><span class="k">${c[0]}</span><span class="w">${c[1]}</span><span class="m fa">${c[2]}</span><span class="ex">${c[3]}</span></div>`).join("")}</div>
+    <div class="h2">Neu in Lektion 1 <small>Alle 313 ›</small></div><div class="mini3">${VW.slice(0, 5).map(v => `<div class="r"><span class="dot" style="background:${v[0] === "der" ? "#0A84FF" : v[0] === "die" ? "#FF375F" : v[0] === "das" ? "#30D158" : "var(--label3)"}"></span><b>${v[0] ? v[0] + " " : ""}${v[1]}</b><span class="fa">${v[2]}</span></div>`).join("")}</div>${vDock()}</div>`,
   dlgA: () => { const L = (i, c) => { const l = lines[i]; const cls = l.who.toLowerCase(); if (!c) return `<div class="l ${cls}"><span class="who">${l.who.toUpperCase()}</span>${l.text}</div>`; const w = l.text.split(" "); const k = Math.ceil(w.length * .55); return `<div class="l cur ${cls}"><span class="who">${l.who.toUpperCase()}</span><span class="sung">${w.slice(0, k).join(" ")}</span> <span class="rest">${w.slice(k).join(" ")}</span><span class="fa" dir="rtl">${l.fa}</span></div>`; };
     return `${sb}<div class="dg dgA"><div class="hd"><div class="t">Dialog<small>Daily German Talk · 52 / 173</small></div><span class="pill2">FA ⇄</span></div>
     <div class="ly">${L(49)}${L(50)}${L(51, 1)}${L(52)}${L(53)}</div>

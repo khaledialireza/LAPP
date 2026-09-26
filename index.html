@@ -16,7 +16,7 @@
   <meta name="description" content="LAPP — آموزش زبان آلمانی با دیالوگ صوتی، واژگان و تمرین.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=muhjhubb">
+  <link rel="stylesheet" href="style.css?v=muib1hav">
 </head>
 <body data-screen="home">
   <div class="frame">
@@ -116,24 +116,14 @@
 
       <!-- VOCAB -->
       <section class="screen" id="vocab">
-        <div class="screen-head">
-          <h1>Vokabeln <small class="fa" data-i18n="lessonDict"></small> <small id="vocabCount" dir="ltr" class="chip"></small></h1>
-          <div class="tabs" id="vocabScope">
-            <button class="on" data-scope="lesson">Lektion</button>
-            <button data-scope="all">Alle Lektionen</button>
-          </div>
+        <div class="dc-head">
+          <div><h1 class="dc-title">Wörterbuch</h1><div class="dc-sub" id="vocabSub"></div></div>
+          <div class="ly-seg" id="vocabScope"><button class="on" data-scope="lesson">Lektion</button><button data-scope="all">Alle</button></div>
         </div>
-        <div class="v-list" id="vList">
-          <div class="v-tools">
-            <input class="v-search" id="vocabSearch" type="search" placeholder="Suchen · جستجو" data-i18n-ph="Suchen · {search}" aria-label="Suchen">
-            <div class="tabs" id="vocabTabs">
-              <button class="on" data-vf="all">Alle</button>
-              <button data-vf="new">Neu</button>
-              <button data-vf="known">Gelernt</button>
-            </div>
-          </div>
-          <div class="vocab-grid" id="vocabGrid"></div>
-        </div>
+        <div class="mbar"><div class="mbar-b" id="vMbar"></div><div class="mbar-lg" id="vMleg"></div></div>
+        <input class="v-search" id="vocabSearch" type="search" placeholder="Suchen · جستجو" data-i18n-ph="Suchen · {search}" aria-label="Suchen">
+        <div class="pchips" id="vocabPos"></div>
+        <div class="dlist" id="vocabGrid"></div>
       </section>
 
       <!-- PRACTICE -->
@@ -245,6 +235,8 @@
       <button class="btn ghost prof-reset" id="profReset" data-i18n="resetProgress"></button>
     </div>
   </div>
+  <div class="pop-back vs-back" id="vBack" hidden><div class="vsheet" id="vSheet" role="dialog" aria-modal="true"></div></div>
+
   <div class="pop-back" id="popBack" hidden>
     <div class="pop" role="dialog" aria-modal="true" aria-labelledby="popWord">
       <div class="pop-head">
@@ -259,16 +251,16 @@
     </div>
   </div>
 
-  <script src="data/lessons.js?v=muhjhubb"></script>
-  <script src="data/lesson1-fa.js?v=muhjhubb"></script>
-  <script src="data/lesson1-times.js?v=muhjhubb"></script>
-  <script src="data/lesson1-words.js?v=muhjhubb"></script>
-  <script src="data/dict-de.js?v=muhjhubb"></script>
-  <script src="data/dict-tr.js?v=muhjhubb"></script>
-  <script src="data/lesson1-ru.js?v=muhjhubb"></script>
-  <script src="data/lesson1-uk.js?v=muhjhubb"></script>
-  <script src="i18n.js?v=muhjhubb"></script>
-  <script src="exercises.js?v=muhjhubb"></script>
-  <script src="app.js?v=muhjhubb"></script>
+  <script src="data/lessons.js?v=muib1hav"></script>
+  <script src="data/lesson1-fa.js?v=muib1hav"></script>
+  <script src="data/lesson1-times.js?v=muib1hav"></script>
+  <script src="data/lesson1-words.js?v=muib1hav"></script>
+  <script src="data/dict-de.js?v=muib1hav"></script>
+  <script src="data/dict-tr.js?v=muib1hav"></script>
+  <script src="data/lesson1-ru.js?v=muib1hav"></script>
+  <script src="data/lesson1-uk.js?v=muib1hav"></script>
+  <script src="i18n.js?v=muib1hav"></script>
+  <script src="exercises.js?v=muib1hav"></script>
+  <script src="app.js?v=muib1hav"></script>
 </body>
 </html>

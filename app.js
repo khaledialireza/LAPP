@@ -258,32 +258,93 @@
       : lessonKeys(L, lines);
     vocabList = keys.map(vocabEntry).filter(Boolean);
   }
+  /* Dictionary: every word with its status (new → seen → practising → known),
+     gender colour for nouns and its word type. */
+  const POSG = [["N", "Nomen", "Nomen"], ["V", "Verben", "Verb"], ["A", "Adjektive", "Adj."], ["Adv", "Adverbien", "Adv."], ["Pro", "Pronomen", "Pron."],
+    ["Pr", "Präpositionen", "Präp."], ["K", "Konjunktionen", "Konj."], ["F", "Fragewörter", "Frage"], ["X", "Andere", "Andere"]];
+  const wordType = p => !p ? "X" : p.startsWith("اسم") ? "N" : p.includes("فعل") ? "V" : p.startsWith("صفت") ? "A" : p.startsWith("قید") ? "Adv"
+    : /ضمیر|حرف تعریف/.test(p) ? "Pro" : p.startsWith("حرف اضافه") ? "Pr" : p.startsWith("حرف ربط") ? "K" : p.startsWith("کلمهٔ پرسشی") ? "F" : "X";
+  const seenMap = () => store.get("seen", {});
+  function markSeen(key) { if (!key) return; const m = seenMap(); m[key] = (m[key] || 0) + 1; store.set("seen", m); }
+  function wordStatus(key) {
+    if (state.known.has(key)) return "k";
+    const f = fcStats()[key]; if (f && (f[0] || f[1])) return "p";
+    return seenMap()[key] ? "s" : "n";
+  }
+  const ST_SVG = {
+    n: '<svg class="st" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="3 3" opacity=".45"/></svg>',
+    s: '<svg class="st" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="3" opacity=".15"/><circle cx="12" cy="12" r="9" fill="none" stroke="#0A84FF" stroke-width="3" stroke-dasharray="19 57" transform="rotate(-90 12 12)" stroke-linecap="round"/><circle cx="12" cy="12" r="2.5" fill="#0A84FF"/></svg>',
+    p: '<svg class="st" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="3" opacity=".15"/><circle cx="12" cy="12" r="9" fill="none" stroke="#FF9F0A" stroke-width="3" stroke-dasharray="40 57" transform="rotate(-90 12 12)" stroke-linecap="round"/></svg>',
+    k: '<svg class="st" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#30D158"/><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+  };
+  const ST_NAME = { k: "kann ich", p: "übe", s: "gesehen", n: "neu" };
+  const ST_COL = { k: "#30D158", p: "#FF9F0A", s: "#0A84FF", n: "var(--tile-2)" };
+  const articleOf = v => (v.de.match(/^(der|die|das) /) || [])[1] || "";
+  const pluralOf = v => { const m = (v.g || "").match(/جمع:\s*die\s+([^\s·]+)/); return m ? m[1] : ""; };
+  const baseWord = v => v.de.replace(/^(der|die|das) /, "");
+  function exampleFor(v) {
+    const forms = [baseWord(v), ...((DICT[v.key] || {}).f || [])].filter(f => f && f.length > 1);
+    const esc2 = x => x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const re = new RegExp(`(^|[^\\wäöüß])(${forms.map(esc2).join("|")})([^\\wäöüß]|$)`, "i");
+    for (let i = 0; i < lines.length; i++) {
+      const hit = (lines[i].text.match(/[^.!?]+[.!?]*/g) || []).find(x => re.test(x));
+      if (hit) return { de: hit.trim(), fa: lines[i].fa || "", re };
+    }
+    return null;
+  }
+  const letterOf = v => baseWord(v)[0].toUpperCase().replace("Ä", "A").replace("Ö", "O").replace("Ü", "U");
+  state.vpos = "all";
   function renderVocab() {
     const q = ($("#vocabSearch").value || "").trim().toLowerCase();
-    const list = vocabList.filter(v => (state.vf === "all" || (state.vf === "known") === state.known.has(v.key))
-      && (!q || v.de.toLowerCase().includes(q) || v.fa.includes(q)));
-    const known = vocabList.filter(v => state.known.has(v.key)).length;
-    $("#vocabCount").textContent = `${known} / ${vocabList.length}`;
-    $("#vocabGrid").innerHTML = list.map(v => `
-      <div class="card ${state.known.has(v.key) ? "known" : ""}" data-de="${esc(v.key)}"><div class="in">
-        <div class="face front"><button class="say" data-say="${esc(v.de)}">${SAY_ICON}</button><div class="de">${esc(v.de)}</div><div class="en fa">${esc(I18N.pos(v.p))}</div></div>
-        <div class="face back"><div class="fa v-fa">${esc(v.fa)}</div>
-          ${v.g ? `<div class="fa v-g">${esc(v.g.split(" · ").slice(0, 2).join(" · "))}</div>` : ""}
-          <button class="btn ghost" data-known style="font-size:12px;padding:6px 10px">${state.known.has(v.key) ? "✓ Gelernt" : "Als gelernt markieren"}</button></div>
-      </div></div>`).join("") || `<p class="fa notice">${t("nothingHere")}</p>`;
+    const stats = { k: 0, p: 0, s: 0, n: 0 }, byPos = {};
+    vocabList.forEach(v => { v.st = wordStatus(v.key); v.pg = wordType(v.p); stats[v.st]++; byPos[v.pg] = (byPos[v.pg] || 0) + 1; });
+    $("#vocabSub").textContent = `${LESSONS[state.idx] ? "Lektion " + (state.idx + 1) + " · " : ""}${vocabList.length} Wörter`;
+    $("#vMbar").innerHTML = ["k", "p", "s", "n"].map(k => `<i style="flex:${stats[k]};background:${ST_COL[k]}"></i>`).join("");
+    $("#vMleg").innerHTML = ["k", "p", "s", "n"].map(k => `<button data-vf="${k}" class="${state.vf === k ? "on" : ""}"><i style="background:${ST_COL[k]}"></i><b>${stats[k]}</b> ${ST_NAME[k]}</button>`).join("");
+    $("#vocabPos").innerHTML = `<button data-pos="all" class="${state.vpos === "all" ? "on" : ""}">Alle <b>${vocabList.length}</b></button>` +
+      POSG.filter(([k]) => byPos[k]).map(([k, name]) => `<button data-pos="${k}" class="${state.vpos === k ? "on" : ""}">${name} <b>${byPos[k]}</b></button>`).join("");
+    const list = vocabList.filter(v => (state.vf === "all" || v.st === state.vf) && (state.vpos === "all" || v.pg === state.vpos)
+      && (!q || v.de.toLowerCase().includes(q) || v.fa.includes(q)))
+      .sort((a, b) => baseWord(a).localeCompare(baseWord(b), "de", { sensitivity: "base" }));
+    const groups = [];
+    list.forEach(v => { const L = letterOf(v); if (!groups.length || groups[groups.length - 1][0] !== L) groups.push([L, []]); groups[groups.length - 1][1].push(v); });
+    $("#vocabGrid").innerHTML = groups.map(([L, vs]) => `<div class="dsec">${esc(L)}</div><div class="dgrp">${vs.map(v => {
+      const ar = articleOf(v), pl = pluralOf(v), [, , short] = POSG.find(x => x[0] === v.pg);
+      return `<div class="drow" data-de="${esc(v.key)}">${ST_SVG[v.st]}<div class="dtx"><div class="dw">${ar ? `<span class="ar ${ar}">${ar}</span> ` : ""}${esc(baseWord(v))}${pl ? `<span class="pl">· ${esc(pl)}</span>` : ""}</div><div class="dm fa">${esc(v.fa)}</div></div>
+        <span class="pos ${v.pg === "N" ? "N-" + (ar || "die") : v.pg}">${short}</span><button class="spk" data-say="${esc(v.de)}" aria-label="anhören">${SAY_ICON}</button></div>`;
+    }).join("")}</div>`).join("") || `<p class="fa notice">${t("nothingHere")}</p>`;
   }
+  function openEntry(key) {
+    const v = vocabList.find(x => x.key === key) || vocabEntry(key); if (!v) return;
+    markSeen(key);
+    const ar = articleOf(v), pl = pluralOf(v), pg = wordType(v.p), ex = exampleFor(v), f = fcStats()[key] || [0, 0], seen = seenMap()[key] || 0;
+    const GEN = { der: "maskulin · مذکر", die: "feminin · مؤنث", das: "neutral · خنثی" };
+    // grammar notes without what the header already says (article + word, plural)
+    const gParts = (v.g || "").split(" · ").filter(x => x && x !== v.de && !/^جمع:/.test(x));
+    const exHtml = ex ? esc(ex.de).replace(ex.re, (m, a, w, c) => `${a}<b>${w}</b>${c}`) : "";
+    $("#vSheet").innerHTML = `<div class="vs-grab"></div>
+      <div class="vs-top"><span class="vs-big">${ar ? `<span class="ar ${ar}">${ar}</span> ` : ""}${esc(baseWord(v))}</span>
+        <button class="spk big" data-say="${esc(v.de)}" aria-label="anhören">${SAY_ICON}</button><button class="vs-x" id="vsClose" aria-label="schließen">✕</button></div>
+      <div class="vs-tags">${ar ? `<span class="pos N-${ar}">${ar} · ${GEN[ar]}</span>` : `<span class="pos ${pg}">${POSG.find(x => x[0] === pg)[1]}</span>`}
+        ${pl ? `<span class="pos P">Plural: die ${esc(pl)}</span>` : ""}${ar ? "" : `<span class="pos P fa">${esc(I18N.pos(v.p))}</span>`}</div>
+      <div class="vs-mean fa">${esc(v.fa)}</div>
+      ${gParts.length ? `<div class="vs-g">${gParts.map(x => `<div dir="auto">${esc(x)}</div>`).join("")}</div>` : ""}
+      ${ex ? `<div class="vs-k">AUS DER LEKTION</div><div class="vs-ex">„${exHtml}“<div class="fa">${esc(ex.fa)}</div></div>` : ""}
+      <div class="vs-hist"><div><b>${seen}×</b>gesehen</div><div><b>${f[0]} / ${f[0] + f[1]}</b>richtig</div><div><b>${ST_NAME[wordStatus(key)]}</b>Status</div></div>
+      <div class="vs-acts"><button class="vs-b sec" id="vsPractice">🃏 Üben</button><button class="vs-b ${state.known.has(key) ? "sec" : "ok"}" id="vsKnown">${state.known.has(key) ? "↺ Doch nicht" : "✓ Kann ich"}</button></div>`;
+    $("#vBack").hidden = false;
+    $("#vsClose").onclick = closeEntry;
+    $("#vsKnown").onclick = () => { state.known.has(key) ? state.known.delete(key) : state.known.add(key); store.set("known", [...state.known]); renderProgress(); closeEntry(); };
+    $("#vsPractice").onclick = () => { closeEntry(); go("practice"); $('#pHub [data-open="fc"]')?.click(); };
+  }
+  function closeEntry() { $("#vBack").hidden = true; renderVocab(); }
+  $("#vBack").addEventListener("click", e => { if (e.target.id === "vBack") closeEntry(); });
   $("#vocabGrid").addEventListener("click", e => {
-    const c = e.target.closest(".card"); if (!c || e.target.closest("[data-say]")) return;
-    if (e.target.closest("[data-known]")) {
-      const de = c.dataset.de; state.known.has(de) ? state.known.delete(de) : state.known.add(de);
-      store.set("known", [...state.known]); renderVocab(); renderProgress(); return;
-    }
-    c.classList.toggle("flip");
+    if (e.target.closest("[data-say]")) return;
+    const r = e.target.closest(".drow"); if (r) openEntry(r.dataset.de);
   });
-  $("#vocabTabs").addEventListener("click", e => {
-    const b = e.target.closest("button"); if (!b) return;
-    state.vf = b.dataset.vf; $$("#vocabTabs button").forEach(x => x.classList.toggle("on", x === b)); renderVocab();
-  });
+  $("#vMleg").addEventListener("click", e => { const b = e.target.closest("[data-vf]"); if (!b) return; state.vf = state.vf === b.dataset.vf ? "all" : b.dataset.vf; renderVocab(); });
+  $("#vocabPos").addEventListener("click", e => { const b = e.target.closest("[data-pos]"); if (!b) return; state.vpos = b.dataset.pos; renderVocab(); });
   $("#vocabSearch").addEventListener("input", () => renderVocab());
 
   function renderWotd() {
@@ -993,6 +1054,7 @@
   }
   function openWord(w) {
     const d = lookup(w), l = lines[curLine];
+    markSeen(dictKey(w));
     $("#popWord").textContent = w;
     $("#popLemma").textContent = d.lemma.toLowerCase() !== w.toLowerCase() ? `← ${d.lemma}` : "";
     $("#popPos").textContent = I18N.pos(d.p); $("#popPos").hidden = !d.p;
