@@ -508,7 +508,6 @@ window.LESSONS = [
     fa: "داستان: چطور شاد باشیم",
     level: "B1",
     audio: "audio/story1.mp3",
-    video: "IkTGm15TQXQ",
     summary: "داستان هاینریش، کشاورز پیری که دو سبد نامرئی حمل می‌کند؛ ماریا به او یاد می‌دهد بدی‌ها را رها کند. روایت در گذشتهٔ ساده، گفت‌وگوی رسمی با Sie و Konjunktiv II.",
     phrases: [
       ["Es war einmal ein alter Bauer.", "روزی روزگاری کشاورز پیری بود.", "شروع کلاسیک قصه"],
