@@ -1914,3 +1914,6 @@ body:not([data-screen="audio"]) .dp-q { display: none; }
 .kc-done[hidden], .kc-log[hidden] { display: none !important; }
 .sk-card .tg, .sk-card .tg[aria-pressed="false"] { background: var(--tile-2); }
 .sk-card .tg[aria-pressed="true"] { background: #34C759; }
+
+/* UI only in the learner's language: Persian text falls back to Vazirmatn everywhere */
+html[data-ui="fa"] body { font-family: -apple-system, "Inter", "Vazirmatn", system-ui, sans-serif; }

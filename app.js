@@ -29,10 +29,14 @@
   // lessons and stories share one list; each category is numbered on its own (L1, L2 … / G1, G2 …)
   const isStory = L => L && L.type === "story";
   const lsCode = i => { const L = LESSONS[i], same = LESSONS.filter(x => isStory(x) === isStory(L)); return (isStory(L) ? "G" : "L") + (same.indexOf(L) + 1); };
-  const lsKind = i => isStory(LESSONS[i]) ? "Geschichte" : "Lektion";
-  const lsName = i => lsKind(i) + " " + lsCode(i).slice(1);
+  const lsKind = i => isStory(LESSONS[i]) ? t("story") : t("lesson");
+  const lsName = i => iso(lsKind(i) + " " + lsCode(i).slice(1));
   const lineAt = t => timed ? lines.findIndex(l => t < l.next) : lines.findIndex(l => t / (player.duration || 1) < l.end);
 
+  // Persian pieces are bidi-isolated so numbers and Latin codes keep their order inside LTR lines
+  const iso = s => I18N.lang === "fa" ? "\u2068" + s + "\u2069" : s;
+  const tf = (k, o) => iso(t(k).replace(/\{(\w+)\}/g, (m, x) => o[x]));
+  const uiLocale = () => ({ fa: "fa-IR", ru: "ru-RU", uk: "uk-UA" })[I18N.lang] || "fa-IR";
   const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const fmt = t => isFinite(t) ? `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, "0")}` : "0:00";
   const SAY_ICON = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 4V5L7 9zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4z"/></svg>';
@@ -85,10 +89,9 @@
   /* ---------- Clock ---------- */
   function tick() {
     const d = new Date();
-    const t = d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
     const h = d.getHours();
-    $("#hGreet").textContent = h < 5 ? "Gute Nacht" : h < 11 ? "Guten Morgen" : h < 17 ? "Guten Tag" : h < 22 ? "Guten Abend" : "Gute Nacht";
-    $("#homeDate").textContent = d.toLocaleDateString("de-DE", { weekday: "long", day: "2-digit", month: "long" });
+    $("#hGreet").textContent = t(h < 5 ? "greetNight" : h < 11 ? "greetMorning" : h < 17 ? "greetDay" : h < 22 ? "greetEvening" : "greetNight");
+    $("#homeDate").textContent = d.toLocaleDateString(uiLocale(), { weekday: "long", day: "numeric", month: "long" });
   }
 
   /* ---------- Lesson ---------- */
@@ -140,13 +143,13 @@
     // speaker filter: one tab per speaker of this lesson
     const whos = [...new Set(lines.map(l => l.who).filter(Boolean))];
     if (!whos.some(w => whoCls(w) === state.spk)) state.spk = "all";
-    $("#mSpkTabs").innerHTML = ["all", ...whos].map(w => `<button class="${(w === "all" ? "all" : whoCls(w)) === state.spk ? "on" : ""}" data-spk="${w === "all" ? "all" : esc(whoCls(w))}">${w === "all" ? "Alle" : esc(w)}</button>`).join("");
+    $("#mSpkTabs").innerHTML = ["all", ...whos].map(w => `<button class="${(w === "all" ? "all" : whoCls(w)) === state.spk ? "on" : ""}" data-spk="${w === "all" ? "all" : esc(whoCls(w))}">${w === "all" ? t("all") : esc(w)}</button>`).join("");
     $(".spk-pick").hidden = whos.length < 2;
-    $("#spkLbl").textContent = $("#mSpkTabs button.on")?.textContent || "Alle";
+    $("#spkLbl").textContent = $("#mSpkTabs button.on")?.textContent || t("all");
     filterSpeakers();
     bgvSet(L);
     const story = L.type === "story";
-    $("#lyTitle").textContent = story ? "Geschichte" : "Dialog";
+    $("#lyTitle").textContent = story ? t("story") : t("dialog");
     $("#lySrc").textContent = story ? `${L.title} · ${L.level}` : "Daily German Talk";
 
     // audio: every lesson and story remembers where you stopped
@@ -244,10 +247,10 @@
         events: {
           onReady: e => { bgv.ready = true; e.target.mute(); bgvSync(true); },
           onStateChange: e => { if (e.data === 1) $("#bgv").classList.add("live"); },
-          onError: e => toast(`Video: YouTube-Fehler ${e.data}` + (e.data === 101 || e.data === 150 ? " (Einbetten nicht erlaubt)" : ""))
+          onError: e => toast(tf("videoErr", { c: e.data }) + (e.data === 101 || e.data === 150 ? t("videoNoEmbed") : ""))
         } });
       bgv.timer = setInterval(() => bgvSync(false), 2000);
-    }, () => toast("Video: YouTube nicht erreichbar"));
+    }, () => toast(t("videoUnreach")));
   }
   // follow the audio: same position, same speed, play/pause together
   function bgvSync(force) {
@@ -282,7 +285,7 @@
       $("#ntNum").textContent = `${i + 1} / ${lines.length}`;
       $("#ntTitle").textContent = `${lsCode(state.idx)} · ${LESSONS[state.idx].title}`;
       const q = night.queue, nx = q && q[night.qi + 1] != null ? LESSONS.findIndex(x => x.id === q[night.qi + 1]) : -1;
-      $("#ntNext").textContent = nx >= 0 ? ` · Als Nächstes: ${lsCode(nx)} ›` : "";
+      $("#ntNext").textContent = nx >= 0 ? tf("upNext", { c: lsCode(nx) }) : "";
       card.classList.remove("out");
     }, 280);
   }
@@ -314,7 +317,7 @@
   }
   function nightSleepLabel() {
     const left = night.sleepEnd ? Math.max(0, Math.ceil((night.sleepEnd - Date.now()) / 60000)) : 0;
-    $("#ntSleepL").textContent = night.sleepMode === "end" ? "Ende" : night.sleepEnd ? `${left} Min` : "Aus";
+    $("#ntSleepL").textContent = night.sleepMode === "end" ? t("endL") : night.sleepEnd ? tf("minN", { n: left }) : t("off");
   }
   $("#ntClose").onclick = () => nightClose();
   $("#nightBtn").onclick = () => nightOpen();
@@ -348,7 +351,7 @@
   document.addEventListener("keydown", e => { if (!night.open) return; if (e.key === "Escape") nightClose(); if (e.key === " ") { e.preventDefault(); act("toggle"); } if (e.key === "ArrowRight") act("next"); if (e.key === "ArrowLeft") act("prev"); });
 
   /* ---------- Story playlist (dock tab): pick, order, settings, then night-mode playback ---------- */
-  const PL_MODES = { mine: "Meine Liste", level: "Niveau ↑", newest: "Neueste", random: "Zufall" };
+  const PL_MODES = { mine: "plMine", level: "plLevel", newest: "plNewest", random: "plRandom" };
   const plGet = () => ({ order: [], off: [], mode: "mine", sleep: 0, speed: 2, tr: true, gap: 0, pos: null, ...store.get("pl", {}) });
   const plSet = v => store.set("pl", v);
   // stories are in the playlist unless switched off; lesson dialogs only when switched on
@@ -365,26 +368,26 @@
   function renderStories() {
     const pl = plGet(), ids = plOrdered(pl), on = ids.filter(id => plSel(pl, id));
     const mins = on.reduce((a, id) => a + (libMins(LESSONS.find(x => x.id === id)) || 0), 0);
-    $("#plMode").innerHTML = Object.entries(PL_MODES).map(([k, v]) => `<button data-mode="${k}" class="${pl.mode === k ? "on" : ""}">${v}</button>`).join("");
-    $("#plCount").innerHTML = `IN DER PLAYLIST · ${on.length} von ${ids.length} · ${mins} Min`;
+    $("#plMode").innerHTML = Object.entries(PL_MODES).map(([k, v]) => `<button data-mode="${k}" class="${pl.mode === k ? "on" : ""}">${t(v)}</button>`).join("");
+    $("#plCount").innerHTML = tf("plCount", { a: on.length, b: ids.length, m: mins });
     let n = 0;
     $("#plList").innerHTML = ids.map(id => { const i = LESSONS.findIndex(x => x.id === id), L = LESSONS[i], sel = plSel(pl, id), p = lessonPct(i), m = libMins(L);
       return `<div class="pl-it ${sel ? "" : "off"}" data-id="${id}">
         <span class="n">${sel && pl.mode !== "random" ? ++n : ""}</span><span class="cv cv${i % 4}">${isStory(L) ? "📖" : "💬"}</span>
-        <span class="t"><b>${esc(L.title)}</b><span>${isStory(L) ? "" : "Dialog · "}${lsCode(i)} · ${esc(L.level)}${m ? ` · ${m} Min` : ""} · ${p >= 100 ? "fertig" : p ? p + "%" : "neu"}</span></span>
+        <span class="t"><b>${esc(L.title)}</b><span>${isStory(L) ? "" : t("dialog") + " · "}${lsCode(i)} · ${esc(L.level)}${m ? " · " + tf("minN", { n: m }) : ""} · ${p >= 100 ? t("stDone") : p ? p + "%" : t("stNew")}</span></span>
         <button class="ck" data-ck aria-pressed="${sel}">${sel ? "✓" : ""}</button>${pl.mode === "mine" ? `<span class="hd" data-drag>≡</span>` : ""}</div>`; }).join("")
-      || `<div class="pl-empty fa">هنوز داستانی نیست.</div>`;
+      || `<div class="pl-empty">${t("plEmpty")}</div>`;
     const chips = (key, vals, lab = v => v) => vals.map(v => `<button data-opt="${key}" data-v="${v}" class="${String(pl[key]) === String(v) ? "on" : ""}">${lab(v)}</button>`).join("");
     const hasVid = on.some(id => LESSONS.find(x => x.id === id).video);
     $("#plOpts").innerHTML = `
-      <div class="pl-opt"><span>Schlaf-Timer<small class="fa">توقف خودکار</small></span><span class="pl-chips">${chips("sleep", SLEEP, v => v === 0 ? "Aus" : v === "end" ? "Ende" : v)}</span></div>
-      <div class="pl-opt"><span>Tempo<small class="fa">سرعت</small></span><span class="pl-chips">${chips("speed", [1, 2, 3], v => SPEEDS[v] + "×")}</span></div>
-      <div class="pl-opt"><span>Übersetzung<small class="fa">نمایش ترجمه</small></span><button class="tg" data-tg="tr" aria-pressed="${pl.tr}"></button></div>
-      <div class="pl-opt"><span>Pause zwischen Sätzen<small class="fa">مکث بین جمله‌ها</small></span><span class="pl-chips">${chips("gap", [0, 2, 4], v => v ? v + " s" : "0")}</span></div>
-      ${hasVid ? `<div class="pl-opt"><span>Video im Hintergrund<small class="fa">ویدیو در پس‌زمینه (کم‌نور)</small></span><button class="tg" data-tg="video" aria-pressed="${bgvOn()}"></button></div>` : ""}`;
+      <div class="pl-opt"><span>${t("sleepTimer")}</span><span class="pl-chips">${chips("sleep", SLEEP, v => v === 0 ? t("off") : v === "end" ? t("endL") : v)}</span></div>
+      <div class="pl-opt"><span>${t("speed")}</span><span class="pl-chips">${chips("speed", [1, 2, 3], v => SPEEDS[v] + "×")}</span></div>
+      <div class="pl-opt"><span>${t("plTr")}</span><button class="tg" data-tg="tr" aria-pressed="${pl.tr}"></button></div>
+      <div class="pl-opt"><span>${t("plGap")}</span><span class="pl-chips">${chips("gap", [0, 2, 4], v => v ? v + " s" : "0")}</span></div>
+      ${hasVid ? `<div class="pl-opt"><span>${t("bgVideoDim")}</span><button class="tg" data-tg="video" aria-pressed="${bgvOn()}"></button></div>` : ""}`;
     const st = plStartPoint(pl);
     $("#plStart").disabled = !st;
-    $("#plStart").innerHTML = st ? `▶︎ Start <small>${st.t > 5 ? `ab ${lsCode(st.i)} · Satz ${st.line + 1}` : `${on.length} ${on.length === 1 ? "Titel" : "Titel"} · ${mins} Min`}</small>` : "Keine Geschichte gewählt";
+    $("#plStart").innerHTML = st ? `▶︎ ${t("start")} <small>${st.t > 5 ? tf("plFrom", { c: lsCode(st.i), n: st.line + 1 }) : tf("plItems", { n: on.length, m: mins })}</small>` : t("plNone");
   }
   // where Start begins: the saved position if that story is still in the list
   function plStartPoint(pl, queue) {
@@ -545,8 +548,7 @@
   }
   /* Dictionary: every word with its status (new → seen → practising → known),
      gender colour for nouns and its word type. */
-  const POSG = [["N", "Nomen", "Nomen"], ["V", "Verben", "Verb"], ["A", "Adjektive", "Adj."], ["Adv", "Adverbien", "Adv."], ["Pro", "Pronomen", "Pron."],
-    ["Pr", "Präpositionen", "Präp."], ["K", "Konjunktionen", "Konj."], ["F", "Fragewörter", "Frage"], ["X", "Andere", "Andere"]];
+  const POSG = ["N", "V", "A", "Adv", "Pro", "Pr", "K", "F", "X"].map(k => [k, "pos" + k]);
   const wordType = p => !p ? "X" : p.startsWith("اسم") ? "N" : p.includes("فعل") ? "V" : p.startsWith("صفت") ? "A" : p.startsWith("قید") ? "Adv"
     : /ضمیر|حرف تعریف/.test(p) ? "Pro" : p.startsWith("حرف اضافه") ? "Pr" : p.startsWith("حرف ربط") ? "K" : p.startsWith("کلمهٔ پرسشی") ? "F" : "X";
   const seenMap = () => store.get("seen", {});
@@ -562,7 +564,7 @@
     p: '<svg class="st" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="3" opacity=".15"/><circle cx="12" cy="12" r="9" fill="none" stroke="#FF9F0A" stroke-width="3" stroke-dasharray="40 57" transform="rotate(-90 12 12)" stroke-linecap="round"/></svg>',
     k: '<svg class="st" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#30D158"/><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
   };
-  const ST_NAME = { k: "kann ich", p: "übe", s: "gesehen", n: "neu" };
+  const ST_NAME = { get k() { return t("stK"); }, get p() { return t("stP"); }, get s() { return t("stS"); }, get n() { return t("stN"); } };
   const ST_COL = { k: "#30D158", p: "#FF9F0A", s: "#0A84FF", n: "var(--tile-2)" };
   const articleOf = v => (v.de.match(/^(der|die|das) /) || [])[1] || "";
   const pluralOf = v => { const m = (v.g || "").match(/جمع:\s*die\s+([^\s·]+)/); return m ? m[1] : ""; };
@@ -583,11 +585,11 @@
     const q = ($("#vocabSearch").value || "").trim().toLowerCase();
     const stats = { k: 0, p: 0, s: 0, n: 0 }, byPos = {};
     vocabList.forEach(v => { v.st = wordStatus(v.key); v.pg = wordType(v.p); stats[v.st]++; byPos[v.pg] = (byPos[v.pg] || 0) + 1; });
-    $("#vocabSub").textContent = `${LESSONS[state.idx] ? "Lektion " + (state.idx + 1) + " · " : ""}${vocabList.length} Wörter`;
+    $("#vocabSub").textContent = `${LESSONS[state.idx] ? lsName(state.idx) + " · " : ""}${tf("nWords", { n: vocabList.length })}`;
     $("#vMbar").innerHTML = ["k", "p", "s", "n"].map(k => `<i style="flex:${stats[k]};background:${ST_COL[k]}"></i>`).join("");
     $("#vMleg").innerHTML = ["k", "p", "s", "n"].map(k => `<button data-vf="${k}" class="${state.vf === k ? "on" : ""}"><i style="background:${ST_COL[k]}"></i><b>${stats[k]}</b> ${ST_NAME[k]}</button>`).join("");
-    $("#vocabPos").innerHTML = `<button data-pos="all" class="${state.vpos === "all" ? "on" : ""}">Alle <b>${vocabList.length}</b></button>` +
-      POSG.filter(([k]) => byPos[k]).map(([k, name]) => `<button data-pos="${k}" class="${state.vpos === k ? "on" : ""}">${name} <b>${byPos[k]}</b></button>`).join("");
+    $("#vocabPos").innerHTML = `<button data-pos="all" class="${state.vpos === "all" ? "on" : ""}">${t("all")} <b>${vocabList.length}</b></button>` +
+      POSG.filter(([k]) => byPos[k]).map(([k, name]) => `<button data-pos="${k}" class="${state.vpos === k ? "on" : ""}">${t(name)} <b>${byPos[k]}</b></button>`).join("");
     const list = vocabList.filter(v => (state.vf === "all" || v.st === state.vf) && (state.vpos === "all" || v.pg === state.vpos)
       && (!q || v.de.toLowerCase().includes(q) || v.fa.includes(q)))
       .sort((a, b) => baseWord(a).localeCompare(baseWord(b), "de", { sensitivity: "base" }));
@@ -596,7 +598,7 @@
     $("#vocabGrid").innerHTML = groups.map(([L, vs]) => `<div class="dsec">${esc(L)}</div><div class="dgrp">${vs.map(v => {
       const ar = articleOf(v), pl = pluralOf(v), [, , short] = POSG.find(x => x[0] === v.pg);
       return `<div class="drow" data-de="${esc(v.key)}">${ST_SVG[v.st]}<div class="dtx"><div class="dw">${ar ? `<span class="ar ${ar}">${ar}</span> ` : ""}${esc(baseWord(v))}${pl ? `<span class="pl">· ${esc(pl)}</span>` : ""}</div><div class="dm fa">${esc(v.fa)}</div></div>
-        <span class="pos ${v.pg === "N" ? "N-" + (ar || "die") : v.pg}">${short}</span><button class="spk" data-say="${esc(v.de)}" aria-label="anhören">${SAY_ICON}</button></div>`;
+        <span class="pos ${v.pg === "N" ? "N-" + (ar || "die") : v.pg}">${short}</span><button class="spk" data-say="${esc(v.de)}" aria-label="${t("listenAria")}">${SAY_ICON}</button></div>`;
     }).join("")}</div>`).join("") || `<p class="fa notice">${t("nothingHere")}</p>`;
   }
   // every line of the lesson where the word (or one of its forms) appears
@@ -616,52 +618,53 @@
     const ar = articleOf(v), pl = pluralOf(v), pg = wordType(v.p), word = baseWord(v);
     const seen = seenMap()[key] || 0, [right = 0, wrong = 0] = fcStats()[key] || [];
     const tries = right + wrong, pct = tries ? Math.round(right / tries * 100) : 0;
-    const GEN = { der: "maskulin · مذکر", die: "feminin · مؤنث", das: "neutral · خنثی" };
+    const GEN = { der: t("masc"), die: t("fem"), das: t("neut") };
     let tags = [], table = "", notes = [], forms = [word, ...((DICT[key] || {}).f || [])];
     if (pg === "V") {
       const vb = G.verb(key);
-      tags = [`<span class="pos V">Verb · ${vb.irr ? "unregelmäßig" : "regelmäßig"}</span>`, `<span class="pos P">Perfekt mit „${vb.aux}“</span>`];
-      if (vb.sep) tags.push(`<span class="pos P">trennbar</span>`); if (vb.refl) tags.push(`<span class="pos P">reflexiv</span>`); if (vb.modal) tags.push(`<span class="pos P">Modalverb</span>`);
-      table = `<div class="vs-sec">KONJUGATION · <span class="fa">صرف فعل</span></div><div class="conj"><table><tr><th></th><th>Präsens</th><th>Präteritum</th><th>Perfekt</th></tr>${vb.rows.map(r => `<tr><td>${r.p}</td><td><b>${esc(r.pr)}</b></td><td>${esc(r.pt)}</td><td><span class="aux">${esc(r.pf)}</span> ${esc(r.pp)}</td></tr>`).join("")}</table></div>`;
+      tags = [`<span class="pos V">${t("tVerb")} · ${t(vb.irr ? "irregular" : "regular")}</span>`, `<span class="pos P">${tf("perfWith", { a: vb.aux })}</span>`];
+      if (vb.sep) tags.push(`<span class="pos P">${t("separable")}</span>`); if (vb.refl) tags.push(`<span class="pos P">${t("reflexive")}</span>`); if (vb.modal) tags.push(`<span class="pos P">${t("modalV")}</span>`);
+      table = `<div class="vs-sec">${t("conjugation")}</div><div class="conj"><table><tr><th></th><th>Präsens</th><th>Präteritum</th><th>Perfekt</th></tr>${vb.rows.map(r => `<tr><td>${r.p}</td><td><b>${esc(r.pr)}</b></td><td>${esc(r.pt)}</td><td><span class="aux">${esc(r.pf)}</span> ${esc(r.pp)}</td></tr>`).join("")}</table></div>`;
       notes = G.verbNotes(vb);
       vb.rows.forEach(r => { forms.push(r.pr.split(" ")[0], r.pt.split(" ")[0]); }); forms.push(vb.pp);
     } else if (pg === "N" && ar) {
-      tags = [`<span class="pos N-${ar}">${ar} · ${GEN[ar]}</span>`]; if (pl) tags.push(`<span class="pos P">Plural: die ${esc(pl)}</span>`);
+      tags = [`<span class="pos N-${ar}">${ar} · ${GEN[ar]}</span>`]; if (pl) tags.push(`<span class="pos P">${tf("pluralP", { p: esc(pl) })}</span>`);
       const nn = G.noun(word, ar, pl);
-      table = `<div class="vs-sec">DEKLINATION · <span class="fa">صرف اسم</span></div><div class="conj"><table><tr><th></th><th>Singular</th><th></th>${nn.hasPlural ? "<th>Plural</th>" : ""}</tr>${nn.rows.map(r => `<tr><td>${r.c.slice(0, 3)}.</td><td><b>${esc(r.def)}</b></td><td>${esc(r.ind)}</td>${nn.hasPlural ? `<td>${esc(r.pl)}</td>` : ""}</tr>`).join("")}</table></div>`;
+      table = `<div class="vs-sec">${t("declension")}</div><div class="conj"><table><tr><th></th><th>Singular</th><th></th>${nn.hasPlural ? "<th>Plural</th>" : ""}</tr>${nn.rows.map(r => `<tr><td>${r.c.slice(0, 3)}.</td><td><b>${esc(r.def)}</b></td><td>${esc(r.ind)}</td>${nn.hasPlural ? `<td>${esc(r.pl)}</td>` : ""}</tr>`).join("")}</table></div>`;
       notes = nn.notes; if (pl) forms.push(pl);
     } else {
       const [, name] = POSG.find(x => x[0] === pg);
-      tags = [`<span class="pos ${pg}">${name}</span>`, `<span class="pos P fa">${esc(I18N.pos(v.p))}</span>`];
+      tags = [`<span class="pos P fa">${esc(I18N.pos(v.p) || t(name))}</span>`];
       if (pg === "A") {
         const a = G.adj(word);
-        if (a) { table = `<div class="vs-sec">STEIGERUNG · <span class="fa">صفت برتر و برترین</span></div><div class="conj"><table><tr><th>Positiv</th><th>Komparativ</th><th>Superlativ</th></tr><tr><td><b>${esc(a.pos)}</b></td><td>${esc(a.comp)}</td><td>${esc(a.sup)}</td></tr></table></div>`;
-          notes.push(`قبل از اسم پسوند می‌گیرد: ${a.attr.map(G.de).join(" · ")}`, `بعد از فعل‌های ${G.de("sein/werden")} بدون پسوند می‌آید: ${G.de(`Das ist ${a.pos}.`)}`); }
+        if (a) { table = `<div class="vs-sec">${t("comparison")}</div><div class="conj"><table><tr><th>Positiv</th><th>Komparativ</th><th>Superlativ</th></tr><tr><td><b>${esc(a.pos)}</b></td><td>${esc(a.comp)}</td><td>${esc(a.sup)}</td></tr></table></div>`;
+          notes.push(tf("adjAttr", { x: a.attr.map(G.de).join(" · ") }), tf("adjPred", { v: G.de("sein/werden"), x: G.de(`Das ist ${a.pos}.`) })); }
       }
       const sm = G.smallNotes(key, v.p || "");
       notes.push(...sm.notes);
-      if (sm.table) table = `<div class="vs-sec">FORMEN · <span class="fa">صورت‌ها</span></div><div class="conj"><table><tr>${sm.table.head.map(h => `<th>${h}</th>`).join("")}</tr>${sm.table.rows.map(r => `<tr>${r.map((c, i) => i ? `<td>${esc(c)}</td>` : `<td><b>${esc(c)}</b></td>`).join("")}</tr>`).join("")}</table></div>`;
+      if (sm.table) table = `<div class="vs-sec">${t("forms")}</div><div class="conj"><table><tr>${sm.table.head.map(h => `<th>${h}</th>`).join("")}</tr>${sm.table.rows.map(r => `<tr>${r.map((c, i) => i ? `<td>${esc(c)}</td>` : `<td><b>${esc(c)}</b></td>`).join("")}</tr>`).join("")}</table></div>`;
     }
     const inL = (keyLessons()[key] || []).map(i => `${lsCode(i)} · ${LESSONS[i].level || ""}`);
-    tags.push(inL.length ? `<span class="pos P">${inL.join(" · ")}</span>` : `<span class="pos P">nicht in den Lektionen</span>`);
+    tags.push(inL.length ? `<span class="pos P">${inL.join(" · ")}</span>` : `<span class="pos P">${t("notInLessons")}</span>`);
     // notes from the dictionary first (usage, idioms), then the rules
     const own = (v.g || "").split(" · ").filter(x => x && x !== v.de && !/^جمع:/.test(x) && !(pg === "V" && /^(ich|du|er|sie|es|wir|ihr|Sie) \S+$/.test(x))).map(x => `<bdi dir="auto">${esc(x)}</bdi>`);
-    const all = [...own, ...notes];
+    // rule notes from grammar.js are written in Persian only; hide them in other UI languages
+    const all = [...own, ...(I18N.lang === "fa" ? notes : notes.filter(n => !/[\u0600-\u06FF]/.test(n.replace(/<[^>]*>/g, ""))))];
     const ex = examplesFor(v, forms);
     const target = into || $("#vSheet");
     target.innerHTML = `<div class="vs-grab"></div>
       <div class="vs-scroll">
       <div class="vs-top"><span class="vs-big">${ar ? `<span class="ar ${ar}">${ar}</span> ` : ""}${esc(word)}</span>
-        <button class="spk big" data-say="${esc(v.de)}" aria-label="anhören">${SAY_ICON}</button><button class="vs-x" id="vsClose" aria-label="schließen">✕</button></div>
+        <button class="spk big" data-say="${esc(v.de)}" aria-label="${t("listenAria")}">${SAY_ICON}</button><button class="vs-x" id="vsClose" aria-label="${t("close")}">✕</button></div>
       <div class="vs-tags">${tags.join("")}</div>
       <div class="vs-mean fa">${esc(v.fa)}</div>
       ${table}
-      ${all.length ? `<div class="vs-sec">GRAMMATIK · <span class="fa">نکتهٔ دستوری</span></div><div class="gram fa">${all.map(n => `<div class="li"><span>${n}</span></div>`).join("")}</div>` : ""}
-      ${ex.length ? `<div class="vs-sec">AUS DER LEKTION · <span class="fa">در درس</span></div>${ex.map(e => `<div class="quote ${whoCls(e.who)}"><span class="who">${esc(e.who.toUpperCase())} · Satz ${e.i + 1}</span><span class="qde">${e.html}</span><span class="qfa fa">${esc(e.fa)}</span></div>`).join("")}` : ""}
+      ${all.length ? `<div class="vs-sec">${t("grammarNote")}</div><div class="gram fa">${all.map(n => `<div class="li"><span>${n}</span></div>`).join("")}</div>` : ""}
+      ${ex.length ? `<div class="vs-sec">${t("fromLesson")}</div>${ex.map(e => `<div class="quote ${whoCls(e.who)}"><span class="who">${esc(e.who.toUpperCase())} · ${tf("lineN", { n: e.i + 1 })}</span><span class="qde">${e.html}</span><span class="qfa fa">${esc(e.fa)}</span></div>`).join("")}` : ""}
       </div>
-      <div class="vs-stats"><div><span class="vs-ico">👁</span><div><b>${seen}×</b><span>gesehen</span></div></div>
+      <div class="vs-stats"><div><span class="vs-ico">👁</span><div><b>${seen}×</b><span>${t("seenL")}</span></div></div>
         <div><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" stroke-width="4" opacity=".15"/>${tries ? "" : "<!--"}<circle cx="18" cy="18" r="15" fill="none" stroke="${pct >= 70 ? "#30D158" : pct >= 40 ? "#FF9F0A" : "#FF375F"}" stroke-width="4" stroke-linecap="round" pathLength="100" stroke-dasharray="${pct} 100" transform="rotate(-90 18 18)"/>${tries ? "" : "-->"}</svg>
-          <div><b>${tries ? pct + "%" : "—"}</b><span>${tries ? `${right} von ${tries} richtig` : "noch nicht geübt"}</span></div></div></div>`;
+          <div><b>${tries ? pct + "%" : "—"}</b><span>${tries ? tf("rightOf", { a: right, b: tries }) : t("notPracticed")}</span></div></div></div>`;
     if (into) { target.querySelector("#vsClose").onclick = closeSide; return; }
     $("#vBack").hidden = false;
     $("#vsClose").onclick = closeEntry;
@@ -716,10 +719,10 @@
   function renderHomeExtras() {
     const all = daily(), now = new Date(), days = [];
     const monday = new Date(now); monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
-    for (let k = 0; k < 7; k++) { const d = new Date(monday); d.setDate(monday.getDate() + k); const r = all[dayKey(d)] || {}; days.push({ n: ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"][k], min: Math.round((r.l || 0) / 60), s: r.s || 0, today: dayKey(d) === dayKey(now) }); }
+    for (let k = 0; k < 7; k++) { const d = new Date(monday); d.setDate(monday.getDate() + k); const r = all[dayKey(d)] || {}; days.push({ n: d.toLocaleDateString(uiLocale(), { weekday: "narrow" }), min: Math.round((r.l || 0) / 60), s: r.s || 0, today: dayKey(d) === dayKey(now) }); }
     const score = d => d.min + d.s, max = Math.max(1, ...days.map(score));
-    $("#hWeek").innerHTML = days.map(d => `<div class="d ${d.today ? "today" : ""}"><i class="${score(d) ? "" : "z"}" style="height:${Math.max(4, score(d) / max * 100)}%" title="${d.min} Min · ${d.s} Sätze"></i>${d.n}</div>`).join("");
-    $("#hWeekSum").textContent = `${days.reduce((a, d) => a + d.min, 0)} Min · ${days.reduce((a, d) => a + d.s, 0)} Sätze`;
+    $("#hWeek").innerHTML = days.map(d => `<div class="d ${d.today ? "today" : ""}"><i class="${score(d) ? "" : "z"}" style="height:${Math.max(4, score(d) / max * 100)}%" title="${tf("weekSum", { m: d.min, s: d.s })}"></i>${d.n}</div>`).join("");
+    $("#hWeekSum").textContent = tf("weekSum", { m: days.reduce((a, d) => a + d.min, 0), s: days.reduce((a, d) => a + d.s, 0) });
     const st = fcStats();
     const weak = vocabList.map(v => { const [r = 0, w = 0] = st[v.key] || []; return { v, n: r + w, pct: r + w ? Math.round(r / (r + w) * 100) : 0 }; })
       .filter(x => x.n && x.pct < 70).sort((a, b) => a.pct - b.pct).slice(0, 5);
@@ -727,11 +730,10 @@
       : `<p class="fa muted rev-empty">${t("nothingHere")}</p>`;
     const dl = store.get(bestKey("dlg"), {}), fcAll = Object.values(st).reduce((a, [r = 0, w = 0]) => [a[0] + r, a[1] + r + w], [0, 0]);
     const best = { role: dl.role, gap: dl.gap, read: dl.read, fc: fcAll[1] ? Math.round(fcAll[0] / fcAll[1] * 100) : undefined, exam: store.get("exam" + (LESSONS[state.idx] || {}).id, undefined) };
-    const P = [["role", "🎭", "Rollenspiel", "#FF2D55"], ["gap", "🧩", "Lückendialog", "#AF52DE"], ["read", "📖", "Vorlesen", "#5856D6"], ["fc", "🃏", "Karteikarten", "#FF9500"], ["exam", "🏁", "Prüfung", "#34C759"]];
     // the four skills and the final exam, like the practice page
     const eb = store.get("exam" + (LESSONS[state.idx] || {}).id, null);
-    $("#hPrac").innerHTML = SKILLS.map(k => { const p = skillPct(k.id); return `<button class="pt" data-prac="skill:${k.id}"><span class="ic" style="background:${k.color}">${k.ic}</span><span class="tx"><b>${k.de}</b><small class="fa">${t(k.fa)}</small><span class="bar"><i style="width:${p}%"></i></span></span></button>`; }).join("")
-      + `<button class="pt" data-prac="exam"><span class="ic" style="background:linear-gradient(135deg,#FF2D55,#7B3FF2)">🏁</span><span class="tx"><b>Prüfung</b><small>${eb != null ? eb + "%" : "—"}</small><span class="bar"><i style="width:${eb || 0}%"></i></span></span></button>`;
+    $("#hPrac").innerHTML = SKILLS.map(k => { const p = skillPct(k.id); return `<button class="pt" data-prac="skill:${k.id}"><span class="ic" style="background:${k.color}">${k.ic}</span><span class="tx"><b>${t(k.fa)}</b><span class="bar"><i style="width:${p}%"></i></span></span></button>`; }).join("")
+      + `<button class="pt" data-prac="exam"><span class="ic" style="background:linear-gradient(135deg,#FF2D55,#7B3FF2)">🏁</span><span class="tx"><b>${t("examTitle")}</b><small>${eb != null ? eb + "%" : "—"}</small><span class="bar"><i style="width:${eb || 0}%"></i></span></span></button>`;
   }
   $("#hReview").addEventListener("click", e => { const b = e.target.closest("[data-entry]"); if (b) openEntry(b.dataset.entry); });
   $("#hPrac").addEventListener("click", e => { const b = e.target.closest("[data-prac]"); if (!b) return; practiceOpen(b.dataset.prac); });
@@ -786,7 +788,7 @@
     get "no-mic"() { return t("micNone"); }
   };
   function micGate(onReady) {
-    $("#dlgFoot").innerHTML = `<button class="btn big" id="dlgStart">🎤 Start</button>`;
+    $("#dlgFoot").innerHTML = `<button class="btn big" id="dlgStart">🎤 ${t("start")}</button>`;
     $("#dlgStart").onclick = async () => {
       unlockAudio();
       const r = await ensureMic();
@@ -892,7 +894,7 @@
   function openCards(from) {
     fc.from = from || "";
     if (document.body.dataset.screen !== "practice") go("practice");
-    showPanel("pFc", `Karteikarten <span class="fa">· ${t("flashcards")}</span>`);
+    showPanel("pFc", t("fcTitle"));
     fcSession();
   }
   function fcSession() {
@@ -905,13 +907,13 @@
   function fcSummary() {
     const s = fc.sess, ok = s.log.filter(e => e.ok).length;
     $("#fcCard").hidden = true; $("#kcDone").hidden = false;
-    $("#kcDone").innerHTML = `<div class="kc-big">${ok} / ${s.n}</div><div class="fa">${t("kcDone")}</div><button class="btn big" id="kcAgain">↻ Nochmal</button>`;
+    $("#kcDone").innerHTML = `<div class="kc-big">${ok} / ${s.n}</div><div class="fa">${t("kcDone")}</div><button class="btn big" id="kcAgain">↻ ${t("again")}</button>`;
     $("#kcAgain").onclick = fcSession;
     renderFcStats(); renderKcLog();
   }
   function fcCountdown() {
     clearInterval(fc.cdT); fc.cd = 5;
-    const lab = () => { $("#fcNext").innerHTML = `Weiter › <span class="kc-cd">${fc.cd}</span>`; $("#fcNext").style.setProperty("--cd", (5 - fc.cd) / 5 * 100 + "%"); };
+    const lab = () => { $("#fcNext").innerHTML = `${t("nextBtn")} <span class="kc-cd">${fc.cd}</span>`; $("#fcNext").style.setProperty("--cd", (5 - fc.cd) / 5 * 100 + "%"); };
     lab();
     fc.cdT = setInterval(() => { fc.cd--; if (fc.cd <= 0) { clearInterval(fc.cdT); $("#fcNext").click(); } else lab(); }, 1000);
   }
@@ -927,7 +929,7 @@
     const v = pickWord(); fc.cur = v; fc.last = v.key;
     fc.dir = Math.random() < 0.5 ? "de" : "fa";
     const voice = fc.dir === "fa" ? !!SR : nativeVoice();
-    $("#fcDir").innerHTML = fc.dir === "de" ? `Deutsch → <span class="fa">${t("nativeLang")}</span>${voice ? " 🎤" : ""}` : `<span class="fa">${t("nativeLang")}</span> → Deutsch${voice ? " 🎤" : ""}`;
+    $("#fcDir").innerHTML = fc.dir === "de" ? `${t("german")} → ${t("nativeLang")}${voice ? " 🎤" : ""}` : `${t("nativeLang")} → ${t("german")}${voice ? " 🎤" : ""}`;
     $("#fcPrompt").innerHTML = fc.dir === "de"
       ? `<span>${esc(v.de)}</span><button class="say" data-say="${esc(v.de)}">${SAY_ICON}</button>`
       : `<span class="fa">${esc(v.fa)}</span>`;
@@ -1054,11 +1056,11 @@
     const fb = $("#exFeedback");
     fb.hidden = false;
     fb.className = "ex-feedback " + (correct ? "ok" : "bad");
-    fb.innerHTML = `<div class="fb-title">${correct ? "✓ Richtig! · " + t("wellDone") : "✗ Nicht ganz · " + t("listenAgain")}</div>
+    fb.innerHTML = `<div class="fb-title">${correct ? "✓ " + t("wellDone") : "✗ " + t("listenAgain")}</div>
       ${detail}
       <div class="fb-ans"><button class="say" data-say="${esc(e.answer)}">${SAY_ICON}</button><span>${esc(e.answer)}</span></div>
       ${l && l.fa ? `<div class="fa fb-fa">${esc(e.explain || l.fa)}</div>` : ""}
-      ${timed ? `<button class="chip-btn" id="exClip">▶ Im Dialog hören</button>` : ""}`;
+      ${timed ? `<button class="chip-btn" id="exClip">${t("hearInDialog")}</button>` : ""}`;
     $("#exClip") && ($("#exClip").onclick = () => playClip(e.line));
     $("#exCheck").hidden = true; $("#exNext").classList.add("pulse");
     renderMap(); renderProgress(); renderHub();
@@ -1068,8 +1070,7 @@
   function renderExercise() {
     const e = ex.list[ex.i]; if (!e) return;
     store.set(exKey() + ":i", ex.i);
-    const [de, fa] = window.Practice.TYPE_LABEL[e.type];
-    $("#exType").innerHTML = `${de} <span class="fa">· ${fa}</span>`;
+    $("#exType").textContent = window.Practice.TYPE_LABEL[e.type][1];
     $("#exNum").textContent = `${e.id + 1} / ${ex.list.length}`;
     $("#exFeedback").hidden = true; $("#exCheck").hidden = true; $("#exNext").classList.remove("pulse");
     const body = $("#exBody");
@@ -1094,7 +1095,7 @@
       bindOpts();
     } else if (e.type === "fill") {
       body.innerHTML = `${e.hint ? `<p class="ex-sub fa">${esc(e.hint)}</p>` : ""}
-        <p class="ex-sent">${esc(e.before)}<input id="exInput" autocomplete="off" autocapitalize="off" spellcheck="false" size="${Math.max(4, e.answer.length)}" aria-label="Lücke">${esc(e.after)}</p>
+        <p class="ex-sent">${esc(e.before)}<input id="exInput" autocomplete="off" autocapitalize="off" spellcheck="false" size="${Math.max(4, e.answer.length)}" aria-label="${t("gaps")}">${esc(e.after)}</p>
         <div class="umlauts">${["ä", "ö", "ü", "ß"].map(c => `<button data-c="${c}">${c}</button>`).join("")}<button class="hint" id="exHint">💡 <span class="fa">${t("hint")}</span></button></div>`;
       const inp = $("#exInput"); let hints = 0;
       $$(".umlauts [data-c]", body).forEach(b => b.onclick = () => { inp.value += b.dataset.c; inp.focus(); });
@@ -1122,7 +1123,7 @@
     } else if (e.type === "speak") {
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       body.innerHTML = `<p class="ex-q fa">${esc(e.prompt)}</p><p class="ex-sub fa">${t("sayInGerman")}</p>
-        <div class="speak-row">${SR ? `<button class="mic" id="exMic" aria-label="Mikrofon">🎤</button>` : ""}
+        <div class="speak-row">${SR ? `<button class="mic" id="exMic" aria-label="${t("mic")}">🎤</button>` : ""}
         <button class="chip-btn" id="exReveal">Lösung zeigen · <span class="fa">${t("showAnswer")}</span></button></div>
         <p class="heard" id="exHeard"></p>
         <div class="self" id="exSelf" hidden><span class="fa">${t("saidRight")}</span><button class="btn" data-self="1">✓ Ja</button><button class="btn ghost" data-self="0">✗ Nein</button></div>`;
@@ -1163,7 +1164,6 @@
     const st = fcStats(), seen = seenMap();
     return vocabList.filter(v => { const [r = 0, w = 0] = st[v.key] || []; return (r + w && r / (r + w) < 0.7) || (!(r + w) && seen[v.key] && !state.known.has(v.key)); });
   }
-  const tf = (k, o) => t(k).replace(/\{(\w+)\}/g, (m, x) => o[x]);
   // practice scope: this lesson, every lesson of its level, or everything
   const prScope = () => store.get("prScope", "lesson");
   function scopePool() {
@@ -1180,8 +1180,8 @@
   function renderHub() {
     const L = LESSONS[state.idx], sc = prScope();
     $("#phSub").textContent = `${lsCode(state.idx)} · ${L.title}`;
-    $("#prScope").innerHTML = [["lesson", `${lsCode(state.idx)} · ${L.level}`], ["level", `Alle ${L.level}`], ["all", "Alles"]].map(([k, v]) => `<button data-scope="${k}" class="${sc === k ? "on" : ""}">${v}</button>`).join("");
-    $("#prSkills").innerHTML = SKILLS.map(k => { const p = skillPct(k.id); return `<button class="pr-sk" data-skill="${k.id}"><span class="ic" style="background:${k.color}">${k.ic}</span><span class="tx"><b>${k.de}</b><small class="fa">${t(k.fa)}</small></span><span class="bar"><i style="width:${p}%;background:${k.color}"></i></span></button>`; }).join("");
+    $("#prScope").innerHTML = [["lesson", `${lsCode(state.idx)} · ${L.level}`], ["level", tf("allLevel", { l: L.level })], ["all", t("everything")]].map(([k, v]) => `<button data-scope="${k}" class="${sc === k ? "on" : ""}">${v}</button>`).join("");
+    $("#prSkills").innerHTML = SKILLS.map(k => { const p = skillPct(k.id); return `<button class="pr-sk" data-skill="${k.id}"><span class="ic" style="background:${k.color}">${k.ic}</span><span class="tx"><b>${t(k.fa)}</b></span><span class="bar"><i style="width:${p}%;background:${k.color}"></i></span></button>`; }).join("");
     const eb = store.get("exam" + L.id, null);
     $("#phExamSub").textContent = t("examMix") + " · " + tf("examBest", { b: eb != null ? eb + "%" : "—" });
     renderMap();
@@ -1192,7 +1192,7 @@
   const skOpt = { role: "both", gaps: "off", help: true, topic: -1, cues: false };
   function openSkill(id) {
     const sk = SKILLS.find(k => k.id === id); skOpt.skill = id;
-    showPanel("pSkill", `${sk.ic} ${sk.de} <span class="fa">· ${t(sk.fa)}</span>`);
+    showPanel("pSkill", `${sk.ic} ${t(sk.fa)}`);
     renderSkill();
   }
   function renderSkill() {
@@ -1200,24 +1200,24 @@
     const chips = (key, vals) => vals.map(([v, lab]) => `<button data-o="${key}" data-v="${esc(String(v))}" class="${String(skOpt[key]) === String(v) ? "on" : ""}">${esc(lab)}</button>`).join("");
     const tg = key => `<button class="tg" data-t="${key}" aria-pressed="${!!skOpt[key]}"></button>`;
     const exRows = types => types.map(tp => { const l = ex.list.filter(e => e.type === tp), d = l.filter(e => res[e.id] === true).length; if (!l.length) return ""; const [de, fa] = window.Practice.TYPE_LABEL[tp];
-      return `<button class="sk-ex" data-ex="${tp}"><span class="ic">${TYPE_ICON[tp] || "•"}</span><span class="tx"><b>${de}</b><small class="fa">${fa}</small></span><span class="n">${d}/${l.length}</span><span class="go">›</span></button>`; }).join("");
+      return `<button class="sk-ex" data-ex="${tp}"><span class="ic">${TYPE_ICON[tp] || "•"}</span><span class="tx"><b>${fa}</b></span><span class="n">${d}/${l.length}</span><span class="go">›</span></button>`; }).join("");
     let html = "";
     if (id === "speak") {
       const whos = [...new Set(lines.map(l => l.who).filter(Boolean))].slice(0, 4), sd = speakData();
       if (!whos.some(w => whoCls(w) === skOpt.role)) skOpt.role = "both";
       if (skOpt.topic >= sd.topics.length) skOpt.topic = -1;
-      html = `<div class="sk-card"><h3>💬 Dialog sprechen</h3><p class="fa">${t("skDialogSub")}</p>
-          ${whos.length > 1 ? `<div class="sk-opt"><span>Deine Rolle</span><span class="sk-chips">${chips("role", [...whos.map(w => [whoCls(w), w]), ["both", "Alle"]])}</span></div>` : ""}
-          <div class="sk-opt"><span>Lücken</span><span class="sk-chips">${chips("gaps", [["off", "aus"], ["light", "leicht"], ["hard", "schwer"]])}</span></div>
-          <div class="sk-opt"><span>Hilfe · <span class="fa">${t("showTranslation")}</span></span>${tg("help")}</div>
-          <button class="sk-go" data-go-sk="dialog">🎤 Start</button></div>
-        <div class="sk-card"><h3>🗣️ Frei sprechen</h3><p class="fa">${t("skFreeSub")}</p>
-          <div class="sk-opt"><span>Thema</span><span class="sk-chips">${chips("topic", [[-1, "ohne"], ...sd.topics.map((tp, i) => [i, tp.de])])}</span></div>
-          <div class="sk-opt"><span>Hilfsfragen · <span class="fa">${t("skCues")}</span></span>${tg("cues")}</div>
-          <button class="sk-go alt" data-go-sk="free">🎤 Start</button></div>
+      html = `<div class="sk-card"><h3>💬 ${t("dlgSpeak")}</h3><p class="fa">${t("skDialogSub")}</p>
+          ${whos.length > 1 ? `<div class="sk-opt"><span>${t("yourRole")}</span><span class="sk-chips">${chips("role", [...whos.map(w => [whoCls(w), w]), ["both", t("all")]])}</span></div>` : ""}
+          <div class="sk-opt"><span>${t("gaps")}</span><span class="sk-chips">${chips("gaps", [["off", t("off")], ["light", t("easy")], ["hard", t("hard")]])}</span></div>
+          <div class="sk-opt"><span>${t("showTranslation")}</span>${tg("help")}</div>
+          <button class="sk-go" data-go-sk="dialog">🎤 ${t("start")}</button></div>
+        <div class="sk-card"><h3>🗣️ ${t("freeTalk")}</h3><p class="fa">${t("skFreeSub")}</p>
+          <div class="sk-opt"><span>${t("topic")}</span><span class="sk-chips">${chips("topic", [[-1, t("none")], ...sd.topics.map((tp, i) => [i, tp[I18N.lang] || tp.fa || tp.de])])}</span></div>
+          <div class="sk-opt"><span>${t("skCues")}</span>${tg("cues")}</div>
+          <button class="sk-go alt" data-go-sk="free">🎤 ${t("start")}</button></div>
         ${exRows(sk.types)}`;
     } else {
-      html = `<p class="fa sk-sub">${t("sk_" + id)}</p>${exRows(sk.types)}<button class="sk-go" data-go-sk="mix">Start · <span class="fa">${t("skMix")}</span></button>`;
+      html = `<p class="fa sk-sub">${t("sk_" + id)}</p>${exRows(sk.types)}<button class="sk-go" data-go-sk="mix">${t("start")} · ${t("skMix")}</button>`;
     }
     $("#skPage").innerHTML = html;
   }
@@ -1237,8 +1237,8 @@
     const v = visibleEx(), res = exResults();
     const next = v.find(x => res[x.id] === undefined) || v[0];
     if (next) ex.i = next.id;
-    const [de, fa] = types.length === 1 ? window.Practice.TYPE_LABEL[types[0]] : [SKILLS.find(k => k.id === skOpt.skill)?.de || "Übungen", t("exercises")];
-    showPanel("pEx", `${de} <span class="fa">· ${fa}</span>`); renderExercise();
+    const sk = SKILLS.find(k => k.id === skOpt.skill);
+    showPanel("pEx", types.length === 1 ? window.Practice.TYPE_LABEL[types[0]][1] : sk ? t(sk.fa) : t("exercisesT")); renderExercise();
   }
   // one entry point for every practice mode (used by the lesson page, home and the hub)
   function practiceOpen(k) {
@@ -1276,9 +1276,9 @@
   /* ---------- Dialog speaking: role play · gap dialog · read aloud ---------- */
   const dlg = { run: 0, items: [], i: 0, mode: "", role: "" };
   const DLG = {
-    get role() { return ["Dialog sprechen", t("role")]; },
-    get gap() { return ["Dialog sprechen", t("gap")]; },
-    get read() { return ["Dialog sprechen", t("read")]; }
+    get role() { return [t("dlgSpeak"), t("role")]; },
+    get gap() { return [t("dlgSpeak"), t("gap")]; },
+    get read() { return [t("dlgSpeak"), t("read")]; }
   };
   const wcount = s => window.Practice.words(s).length;
   function pickBlock(n, maxWords) {
@@ -1455,7 +1455,7 @@
     const sd = speakData();
     if (mode === "topic") fs.topic = sd.topics[topicIdx >= 0 ? topicIdx : Math.floor(Math.random() * sd.topics.length)];
     if (mode === "cue") fs.set = sd.cues[Math.floor(Math.random() * sd.cues.length)];
-    const T = { free: ["Frei sprechen", t("fsFreeSub")], topic: ["Frei sprechen", t("fsTopicSub")], cue: ["Frei sprechen", t("fsCueSub")] }[mode];
+    const T = { free: [t("freeTalk"), t("fsFreeSub")], topic: [t("freeTalk"), t("fsTopicSub")], cue: [t("freeTalk"), t("fsCueSub")] }[mode];
     showPanel("pFree", `${T[0]} <span class="fa">· ${esc(T[1])}</span>`);
     $("#fsRes").hidden = true; $("#fsLive").hidden = false; $("#fsBar").hidden = false; $("#fsCnt").hidden = false;
     renderFreeTop(); renderFreeLive("", "");
@@ -1465,7 +1465,7 @@
   }
   // ask for the microphone once, with a clear message if it is blocked
   function freeGate() {
-    $("#fsLive").innerHTML = `<div class="fs-gate"><button class="btn big" id="fsStart">🎤 Start</button></div>`;
+    $("#fsLive").innerHTML = `<div class="fs-gate"><button class="btn big" id="fsStart">🎤 ${t("start")}</button></div>`;
     $("#fsBar").hidden = true;
     $("#fsStart").onclick = async () => {
       unlockAudio();
@@ -1476,8 +1476,8 @@
   }
   function renderFreeTop() {
     const lang = I18N.lang, sd = speakData();
-    if (fs.mode === "free") $("#fsTop").innerHTML = `<div class="ly-seg" id="fsScope"><button data-sc="lesson" class="${fs.scope === "lesson" ? "on" : ""}">${lsName(state.idx)}</button><button data-sc="all" class="${fs.scope === "all" ? "on" : ""}">Alle Wörter</button></div><p class="fa fs-hint">${t("fsHintFree")}</p>`;
-    if (fs.mode === "topic") { const tp = fs.topic || {}; $("#fsTop").innerHTML = `<div class="topic"><div class="k">THEMA · <span class="fa">موضوع</span></div><b>${esc(tp.de || "")}</b><div class="fa">${esc(tp[lang] || tp.fa || "")}</div><button class="tp-new" id="fsNewTopic" aria-label="anderes Thema">↻</button></div>`; }
+    if (fs.mode === "free") $("#fsTop").innerHTML = `<div class="ly-seg" id="fsScope"><button data-sc="lesson" class="${fs.scope === "lesson" ? "on" : ""}">${lsName(state.idx)}</button><button data-sc="all" class="${fs.scope === "all" ? "on" : ""}">${t("allWords")}</button></div><p class="fa fs-hint">${t("fsHintFree")}</p>`;
+    if (fs.mode === "topic") { const tp = fs.topic || {}; $("#fsTop").innerHTML = `<div class="topic"><div class="k">${t("topic")}</div><b>${esc(tp.de || "")}</b><div class="fa">${esc(tp[lang] || tp.fa || "")}</div><button class="tp-new" id="fsNewTopic" aria-label="${t("newTopic")}">↻</button></div>`; }
     if (fs.mode === "cue") $("#fsTop").innerHTML = `<div class="prompts">${fs.set.items.map((q, i) => { const a = fs.answers[i]; const st = a ? (a.ok ? "done" : "part") : i === fs.qi ? "cur" : ""; return `<div class="q ${st}"><span class="n">${a ? (a.ok ? "✓" : "~") : i + 1}</span><span><b>${esc(q.q)}</b> <small class="fa">${esc(q.fa)}</small></span></div>`; }).join("")}</div>`;
     $("#fsNext").hidden = fs.mode !== "cue";
   }
@@ -1489,9 +1489,9 @@
     const cl = classify(fin), words = cl.filter(x => /[a-zäöüß]/i.test(x.w));
     const uniq = new Set(cl.filter(x => x.k).map(x => x.k));
     const lessonU = new Set(cl.filter(x => x.cls === "lw" || x.cls === "tw").map(x => x.k || x.w));
-    const legend = fs.mode === "topic" ? `<span class="c-tw">● Thema</span> <span class="c-lw">● Lektion</span>` : fs.mode === "free" && fs.scope === "all" ? `<span class="c-lw">● Wörterbuch</span>` : `<span class="c-lw">● ${lsName(state.idx)}</span> <span class="c-ow">● andere</span>`;
-    $("#fsCnt").innerHTML = `<div><b>${words.length}</b>Wörter gesagt</div><div><b class="c-lw">${fs.mode === "topic" ? cl.filter(x => x.cls === "tw").length : lessonU.size}</b>${fs.mode === "topic" ? "zum Thema" : fs.scope === "all" && fs.mode === "free" ? "im Wörterbuch" : "aus Lektion " + (state.idx + 1)}</div><div><b>${uniq.size}</b>verschiedene</div>`;
-    if (!$("#fsLive .fs-gate")) $("#fsLive").innerHTML = `<div class="k"><span>LIVE · <span class="fa">هم‌زمان</span></span><span id="fsLegend">${legend}</span></div><div class="lv" dir="ltr">${fin || interim ? liveHtml(fin, interim) : `<span class="ph fa">${fs.mode === "cue" ? t("fsHintCue") : "🎤 …"}</span>`}</div>`;
+    const legend = fs.mode === "topic" ? `<span class="c-tw">● ${t("topic")}</span> <span class="c-lw">● ${t("lesson")}</span>` : fs.mode === "free" && fs.scope === "all" ? `<span class="c-lw">● ${t("dictionary")}</span>` : `<span class="c-lw">● ${lsName(state.idx)}</span> <span class="c-ow">● ${t("other")}</span>`;
+    $("#fsCnt").innerHTML = `<div><b>${words.length}</b>${t("wordsSaid")}</div><div><b class="c-lw">${fs.mode === "topic" ? cl.filter(x => x.cls === "tw").length : lessonU.size}</b>${fs.mode === "topic" ? t("onTopic") : fs.scope === "all" && fs.mode === "free" ? t("inDict") : tf("fromX", { c: lsName(state.idx) })}</div><div><b>${uniq.size}</b>${t("distinct")}</div>`;
+    if (!$("#fsLive .fs-gate")) $("#fsLive").innerHTML = `<div class="k"><span>${t("live")}</span><span id="fsLegend">${legend}</span></div><div class="lv" dir="ltr">${fin || interim ? liveHtml(fin, interim) : `<span class="ph fa">${fs.mode === "cue" ? t("fsHintCue") : "🎤 …"}</span>`}</div>`;
     const lv = $("#fsLive .lv"); if (lv) lv.scrollTop = lv.scrollHeight;
   }
   function freeRecStart() {
@@ -1515,7 +1515,7 @@
       if (ok) logDay("s", 1);
       renderFreeTop();
       renderFreeLive(said, "");
-      const lg = $("#fsLegend"); if (lg) lg.innerHTML = ok ? `<span class="c-lw">✓ passt zur Frage</span>` : `<span class="c-ow">~ ${said ? "Beispiel: " + esc(q.ex) : t("fsNotHeard")}</span>`;
+      const lg = $("#fsLegend"); if (lg) lg.innerHTML = ok ? `<span class="c-lw">${t("fitsQ")}</span>` : `<span class="c-ow">~ ${said ? t("example") + ": " + esc(q.ex) : t("fsNotHeard")}</span>`;
       const run = fs.run;
       if (ok) { setTimeout(() => run === fs.run && nextCue(), 1400); return; }
       // not yet: one more try, then show the example and move on
@@ -1544,7 +1544,7 @@
     if (fs.mode === "cue") {
       const ok = fs.answers.filter(a => a && a.ok).length, n = fs.set.items.length, pct = Math.round(ok / n * 100);
       best.cue = Math.max(best.cue || 0, pct);
-      html = `<div class="big">${ringSvgP(pct)}<div><b>${ok} / ${n}</b><span>Antworten passen</span></div></div>` + fs.set.items.map((q, i) => { const a = fs.answers[i] || {}; return `<div class="qres"><span class="s" style="color:${a.ok ? "#30D158" : "#FF9F0A"}">${a.ok ? "✓" : "~"}</span><div><b>${esc(q.q)}</b><small>${a.said ? "„" + esc(a.said) + "“" : `<span class="fa">${t("fsNotHeard")}</span>`}${a.ok ? "" : ` · <i>${esc(q.ex)}</i>`}</small></div></div>`; }).join("");
+      html = `<div class="big">${ringSvgP(pct)}<div><b>${ok} / ${n}</b><span>${t("answersFit")}</span></div></div>` + fs.set.items.map((q, i) => { const a = fs.answers[i] || {}; return `<div class="qres"><span class="s" style="color:${a.ok ? "#30D158" : "#FF9F0A"}">${a.ok ? "✓" : "~"}</span><div><b>${esc(q.q)}</b><small>${a.said ? "„" + esc(a.said) + "“" : `<span class="fa">${t("fsNotHeard")}</span>`}${a.ok ? "" : ` · <i>${esc(q.ex)}</i>`}</small></div></div>`; }).join("");
     } else {
       const cl = classify(fs.text), words = cl.filter(x => /[a-zäöüß]/i.test(x.w)).length;
       const used = [...new Map(cl.filter(x => x.k).map(x => [x.k, x])).values()];
@@ -1556,26 +1556,26 @@
         const rel = content.length ? Math.round(tw.length / content.length * 100) : 0;
         best.topic = Math.max(best.topic || 0, rel);
         const miss = fs.topic.words.split(" ").filter(w => !used.some(u => u.k.replace(/_.*/, "").toLowerCase() === w.toLowerCase())).slice(0, 8);
-        html = `<div class="big">${ringSvgP(rel)}<div><b>${tw.length} Themenwörter</b><span class="fa">${tw.length >= 3 ? t("fsTopicOk") : t("fsTopicLow")} · ${rel}% · ${words} Wörter</span></div></div>
-          <div class="rh">THEMA · <span class="fa">${t("fsUsed")}</span></div><div class="chipsw">${tw.map(chip).join("") || "—"}</div>
-          <div class="rh">ANDERE WÖRTER</div><div class="chipsw">${used.filter(x => x.cls !== "tw").map(chip).join("") || "—"}</div>
+        html = `<div class="big">${ringSvgP(rel)}<div><b>${tf("topicWords", { n: tw.length })}</b><span class="fa">${tw.length >= 3 ? t("fsTopicOk") : t("fsTopicLow")} · ${rel}% · ${tf("nWords", { n: words })}</span></div></div>
+          <div class="rh">${t("topic")} · ${t("fsUsed")}</div><div class="chipsw">${tw.map(chip).join("") || "—"}</div>
+          <div class="rh">${t("otherWords")}</div><div class="chipsw">${used.filter(x => x.cls !== "tw").map(chip).join("") || "—"}</div>
           <div class="rh">${t("fsTry").toUpperCase()}</div><div class="chipsw">${miss.map(w => `<span class="m">${esc(w)}</span>`).join("")}</div>`;
       } else if (fs.scope === "all") {
         best.free = Math.max(best.free || 0, used.length);
-        html = `<div class="big">${ringSvgP(Math.min(100, used.length * 2))}<div><b>${used.length} Wörter</b><span class="fa">از دیکشنری · ${words} کلمه گفتی · روی هر کلمه بزن تا سطح و درسش را ببینی</span></div></div>
+        html = `<div class="big">${ringSvgP(Math.min(100, used.length * 2))}<div><b>${tf("nWords", { n: used.length })}</b><span class="fa">${tf("fsDictRes", { w: words })}</span></div></div>
           <div class="rh">${t("fsUsed").toUpperCase()}</div><div class="chipsw">${used.map(chip).join("") || "—"}</div>`;
       } else {
         best.free = Math.max(best.free || 0, inL.length);
-        html = `<div class="big">${ringSvgP(Math.round(inL.length / (vocabList.length || 1) * 100 * 5))}<div><b>${inL.length} aus ${lsName(state.idx)}</b><span>${other.length} aus anderen Lektionen / Wörterbuch · ${words} Wörter gesagt</span></div></div>
+        html = `<div class="big">${ringSvgP(Math.round(inL.length / (vocabList.length || 1) * 100 * 5))}<div><b>${tf("fsFromL", { a: inL.length, c: lsName(state.idx) })}</b><span>${tf("fsOther", { b: other.length, w: words })}</span></div></div>
           <div class="rh">${lsName(state.idx).toUpperCase()}</div><div class="chipsw">${inL.map(chip).join("") || "—"}</div>
-          ${other.length ? `<div class="rh">ANDERE</div><div class="chipsw">${other.map(chip).join("")}</div>` : ""}
+          ${other.length ? `<div class="rh">${t("other")}</div><div class="chipsw">${other.map(chip).join("")}</div>` : ""}
           <div class="rh">${t("fsTry").toUpperCase()}</div><div class="chipsw">${notUsed.map(v => `<button class="m" data-entry="${esc(v.key)}">${esc(v.de)}</button>`).join("")}</div>`;
       }
       const sentences = (fs.text.match(/[^.!?]+/g) || []).filter(x => x.trim().split(/\s+/).length >= 3).length || Math.floor(words / 6);
       if (sentences) logDay("s", Math.min(sentences, 20));
     }
     store.set(bestKey("fs"), best);
-    $("#fsRes").innerHTML = html + `<div class="fs-acts"><button class="vs-b sec" id="fsAgain">↻ Nochmal</button></div>`;
+    $("#fsRes").innerHTML = html + `<div class="fs-acts"><button class="vs-b sec" id="fsAgain">↻ ${t("again")}</button></div>`;
     $("#fsRes").hidden = false; $("#fsLive").hidden = true; $("#fsBar").hidden = true; $("#fsCnt").hidden = true;
     if (fs.mode === "cue") $("#fsTop").innerHTML = "";
     $("#fsAgain").onclick = () => startFree(fs.mode, fs.topic ? speakData().topics.indexOf(fs.topic) : -1);
@@ -1604,7 +1604,7 @@
     $("#dlgFoot").innerHTML = `<div class="rp-bar ${mode}">
       <div class="rp-idle"><span class="fa">${mode === "wait" ? t("rpWait") : t("rpHold")}</span></div>
       <div class="rp-live"><span class="rec-dot"></span><span class="rp-time" id="rpTime">0:00</span><span class="rp-wave">${"<i></i>".repeat(24)}</span><span class="rp-lock fa">${t("rpLocked")}</span></div>
-      <button class="rp-mic" id="rpMic" ${mode === "wait" ? "disabled" : ""} aria-label="Mikrofon">${MIC_SVG}</button></div>`;
+      <button class="rp-mic" id="rpMic" ${mode === "wait" ? "disabled" : ""} aria-label="${t("mic")}">${MIC_SVG}</button></div>`;
     const btn = $("#rpMic"); if (mode === "wait") return;
     let pressT = 0;
     const down = e => {
@@ -1641,14 +1641,14 @@
     const sc = it.score, l = lines[it.line];
     const pc = Math.round(sc.pct * 100);
     const miss = sc.hits.filter(h => !h.ok).map(h => cleanWord(h.tok)).filter(Boolean);
-    const verdict = !alts.length ? t("rpNothing") : sc.ok ? (pc >= 90 ? "Sehr gut!" : "Gut!") : t("rpAgain");
+    const verdict = !alts.length ? t("rpNothing") : sc.ok ? (pc >= 90 ? t("veryGood") : t("good")) : t("rpAgain");
     $("#dlgSheet").innerHTML = `<div class="sh-grab"></div>
       <div class="sh-score"><span class="sh-pc ${sc.ok ? "ok" : "bad"}">${alts.length ? pc + "%" : "—"}</span>
-        <div><b class="${sc.ok ? "" : "fa"}">${verdict}</b><div class="sh-legend"><span class="g">erkannt</span><span class="r">nicht gehört</span></div></div></div>
+        <div><b class="${sc.ok ? "" : "fa"}">${verdict}</b><div class="sh-legend"><span class="g">${t("recognized")}</span><span class="r">${t("notHeardL")}</span></div></div></div>
       <div class="sh-line">${it.blanks.length && !it.reveal ? lineHtml(it) : sc.html}</div>
-      ${alts.length && (!it.blanks.length || it.reveal) ? `<div class="sh-heard">🎧 <span>Gehört: „${esc(alts[0])}“</span>${miss.length ? ` <span class="fa">· ${esc(miss.slice(0, 3).join("، "))} ${t("rpNotHeard")}</span>` : ""}</div>` : ""}
+      ${alts.length && (!it.blanks.length || it.reveal) ? `<div class="sh-heard">🎧 <span>${t("heard")} „${esc(alts[0])}“</span>${miss.length ? ` <span class="fa">· ${esc(miss.slice(0, 3).join("، "))} ${t("rpNotHeard")}</span>` : ""}</div>` : ""}
       <div class="fa sh-fa">${esc(l.fa || "")}</div>
-      <div class="sh-acts"><button class="sh-b sec" id="shAgain">↺ Nochmal</button><button class="sh-b sec sq" id="shPlay" aria-label="anhören">🔊</button><button class="sh-b ${sc.ok ? "pri" : "sec"}" id="shNext">Weiter ›</button></div>`;
+      <div class="sh-acts"><button class="sh-b sec" id="shAgain">↺ ${t("again")}</button><button class="sh-b sec sq" id="shPlay" aria-label="${t("listenAria")}">🔊</button><button class="sh-b ${sc.ok ? "pri" : "sec"}" id="shNext">${t("nextBtn")}</button></div>`;
     $("#dlgSheet").hidden = false;
     $("#shAgain").onclick = () => { $("#dlgSheet").hidden = true; it.score = null; it.reveal = false; renderDlg(); };
     $("#shPlay").onclick = () => playClip(it.line);
@@ -1677,7 +1677,7 @@
     const st = store.get(bestKey("dlg"), {}); st[dlg.mode] = Math.max(st[dlg.mode] || 0, avg); store.set(bestKey("dlg"), st);
     dlg.i = dlg.items.length - 1; renderDlg(); dlg.i = dlg.items.length;
     $("#dlgFoot").innerHTML = `<div class="dlg-sum"><b>${avg}%</b> <span class="fa">${t("saidCorrectly")}</span></div>
-      <button class="btn big" id="dlgAgain">↻ Nochmal · <span class="fa">${t("newLines")}</span></button>`;
+      <button class="btn big" id="dlgAgain">↻ ${t("newLines")}</button>`;
     $("#dlgAgain").onclick = () => startDialog(dlg.mode, dlg.opts);
   }
 
@@ -1696,7 +1696,7 @@
   function examRecord(ok) { const it = exam.items[exam.k]; if (it && it.res === undefined) { it.res = ok; if (ok) exam.right++; } }
   function examNext() {
     exam.k++;
-    const title = `Prüfung <span class="fa">· ${t("exam")}</span>`;
+    const title = t("examTitle");
     if (exam.k >= exam.items.length) return examEnd();
     const it = exam.items[exam.k];
     if (it.kind === "ex") { ex.filter = "all"; ex.i = it.id; showPanel("pEx", title); renderExercise(); }
@@ -1707,13 +1707,13 @@
     const n = exam.items.length, pct = Math.round(exam.right / n * 100);
     const best = Math.max(store.get("exam" + LESSONS[state.idx].id, 0), pct); store.set("exam" + LESSONS[state.idx].id, best);
     exam.active = false;
-    showPanel("pEnd", `Prüfung <span class="fa">· ${t("exam")}</span>`);
+    showPanel("pEnd", t("examTitle"));
     $("#pEnd").innerHTML = `<div class="exam-end">
       <div class="exam-score">${exam.right} / ${n}</div>
       <div class="exam-pct ${pct >= 70 ? "ok" : "bad"}">${pct}%</div>
       <p class="fa">${pct >= 90 ? t("examGreat") : pct >= 70 ? t("examGood") : t("examRetry")}</p>
       <p class="fa muted">${t("bestResult")} ${best}%</p>
-      <button class="btn big" id="examAgain">↻ Neue Prüfung · <span class="fa">${t("newExam")}</span></button></div>`;
+      <button class="btn big" id="examAgain">↻ ${t("newExam")}</button></div>`;
     $("#examAgain").onclick = startExam;
   }
 
@@ -1752,7 +1752,7 @@
     else {
       const d = lookup(w);
       side.innerHTML = `<div class="vs-grab"></div><div class="vs-scroll"><div class="vs-top"><span class="vs-big">${esc(w)}</span>
-        <button class="spk big" data-say="${esc(w)}" aria-label="anhören">${SAY_ICON}</button><button class="vs-x" id="vsClose" aria-label="schließen">✕</button></div>
+        <button class="spk big" data-say="${esc(w)}" aria-label="${t("listenAria")}">${SAY_ICON}</button><button class="vs-x" id="vsClose" aria-label="${t("close")}">✕</button></div>
         ${d.p ? `<div class="vs-tags"><span class="pos P fa">${esc(I18N.pos(d.p))}</span></div>` : ""}<div class="vs-mean fa">${esc(d.fa)}</div></div>`;
       side.querySelector("#vsClose").onclick = closeSide;
     }
@@ -1787,6 +1787,8 @@
     $$(".js-lang-code").forEach(e => e.textContent = I18N.lang.toUpperCase());
     if (LESSONS.length) setLesson(state.idx);
     if (document.body.dataset.screen === "profile") renderProfile();
+    if (document.body.dataset.screen === "library") renderLibrary();
+    tick(); renderStories(); nightSleepLabel();
     if (!$("#pView").hidden) closeView();
   }
   window.addEventListener("lapp:lang", applyLang);
@@ -1846,9 +1848,9 @@
     // page header: streak, words, listening time; progress per skill (current lesson)
     const all = daily(), mins = Math.round(Object.values(all).reduce((a, d) => a + (d.l || 0), 0) / 60), since = Object.keys(all).sort()[0];
     $("#pfSub").textContent = `${I18N.name(I18N.lang)}${since ? " · " + since : ""} · ${L.level}`;
-    $("#pfStats").innerHTML = `<div><b>🔥 ${streak()}</b><small>Tage</small></div><div><b>${state.known.size}</b><small>Wörter</small></div><div><b>${mins >= 60 ? Math.round(mins / 60 * 10) / 10 + " h" : mins + " Min"}</b><small>gehört</small></div>`;
+    $("#pfStats").innerHTML = `<div><b>🔥 ${streak()}</b><small>${t("days")}</small></div><div><b>${state.known.size}</b><small>${t("wordsCap")}</small></div><div><b>${mins >= 60 ? tf("hoursN", { n: Math.round(mins / 60 * 10) / 10 }) : tf("minN", { n: mins })}</b><small>${t("heardL")}</small></div>`;
     $("#pfLsName").textContent = `${lsCode(state.idx)} · ${L.title}`;
-    $("#pfSkills").innerHTML = SKILLS.map(k => { const p = skillPct(k.id); return `<div class="pf-row"><span>${k.ic} ${k.de} · <span class="fa">${t(k.fa)}</span></span><span class="pf-bar"><i style="width:${p}%"></i></span><b>${p}%</b></div>`; }).join("");
+    $("#pfSkills").innerHTML = SKILLS.map(k => { const p = skillPct(k.id); return `<div class="pf-row"><span>${k.ic} ${t(k.fa)}</span><span class="pf-bar"><i style="width:${p}%"></i></span><b>${p}%</b></div>`; }).join("");
     paintAvatar();
   }
   $("#profName").addEventListener("input", e => { store.set("name", e.target.value.trim()); paintAvatar(); });
@@ -1888,19 +1890,19 @@
     const kn = keys.filter(k => state.known.has(k)).length, dl = store.get(bestKey("dlg", i), {}), fsb = store.get(bestKey("fs", i), {}), exb = store.get(lsKey("exam", i), null);
     const best = (v, goal = 70) => Math.min(1, (v || 0) / goal);
     if (isStory(L)) return [
-      { ic: "🎧", de: "Geschichte hören", sub: tf("lsStepDialog", { a: heard, b: nLines }), f: Math.min(1, heard / (nLines * 0.8 || 1)), go: () => { go("audio"); player.play().catch(() => {}); } },
-      { ic: "🔤", de: "Neue Wörter", sub: tf("lsStepWords", { a: kn, b: keys.length }), f: Math.min(1, kn / (keys.length * 0.5 || 1)), go: () => go("vocab") },
-      { ic: "❓", de: "Fragen zur Geschichte", sub: tf("lsStepBest", { b: fsb.cue != null ? fsb.cue + "%" : "—" }), f: best(fsb.cue), go: () => { practiceOpen("cue"); } },
-      { ic: "🗣️", de: "Nacherzählen", sub: tf("lsStepBest", { b: fsb.topic != null ? fsb.topic + "%" : "—" }), f: best(fsb.topic), go: () => { practiceOpen("topic"); } },
-      { ic: "🏁", de: "Prüfung", sub: tf("lsStepBest", { b: exb != null ? exb + "%" : "—" }), f: best(exb), go: () => { practiceOpen("exam"); } }
+      { ic: "🎧", de: t("listenStory"), sub: tf("lsStepDialog", { a: heard, b: nLines }), f: Math.min(1, heard / (nLines * 0.8 || 1)), go: () => { go("audio"); player.play().catch(() => {}); } },
+      { ic: "🔤", de: t("newWords"), sub: tf("lsStepWords", { a: kn, b: keys.length }), f: Math.min(1, kn / (keys.length * 0.5 || 1)), go: () => go("vocab") },
+      { ic: "❓", de: t("storyQs"), sub: tf("lsStepBest", { b: fsb.cue != null ? fsb.cue + "%" : "—" }), f: best(fsb.cue), go: () => { practiceOpen("cue"); } },
+      { ic: "🗣️", de: t("retell"), sub: tf("lsStepBest", { b: fsb.topic != null ? fsb.topic + "%" : "—" }), f: best(fsb.topic), go: () => { practiceOpen("topic"); } },
+      { ic: "🏁", de: t("examTitle"), sub: tf("lsStepBest", { b: exb != null ? exb + "%" : "—" }), f: best(exb), go: () => { practiceOpen("exam"); } }
     ];
     return [
-      { ic: "🎧", de: L.type === "story" ? "Geschichte hören" : "Dialog hören", sub: tf("lsStepDialog", { a: heard, b: nLines }), f: Math.min(1, heard / (nLines * 0.8 || 1)), go: () => go("audio") },
-      { ic: "📖", de: "Wichtige Sätze", sub: tf("lsStepPhr", { a: phr, b: nPh }), f: Math.min(1, phr / (nPh * 0.8 || 1)), go: () => $("#phrases").scrollIntoView({ behavior: "smooth", block: "center" }) },
-      { ic: "🔤", de: "Wörter lernen", sub: tf("lsStepWords", { a: kn, b: keys.length }), f: Math.min(1, kn / (keys.length * 0.5 || 1)), go: () => go("vocab") },
-      { ic: "💬", de: "Dialog sprechen", sub: tf("lsStepBest", { b: dl.role != null ? dl.role + "%" : "—" }), f: best(Math.max(dl.role || 0, dl.gap || 0, dl.read || 0)), go: () => { practiceOpen("skill:speak"); } },
-      { ic: "🗣️", de: "Frei sprechen", sub: tf("lsStepBest", { b: fsb.cue != null ? fsb.cue + "%" : fsb.topic != null ? fsb.topic + "%" : "—" }), f: best(Math.max(fsb.cue || 0, fsb.topic || 0)), go: () => { practiceOpen("skill:speak"); } },
-      { ic: "🏁", de: "Prüfung", sub: tf("lsStepBest", { b: exb != null ? exb + "%" : "—" }), f: best(exb), go: () => { practiceOpen("exam"); } }
+      { ic: "🎧", de: t("listenDialog"), sub: tf("lsStepDialog", { a: heard, b: nLines }), f: Math.min(1, heard / (nLines * 0.8 || 1)), go: () => go("audio") },
+      { ic: "📖", de: t("keyPhrases"), sub: tf("lsStepPhr", { a: phr, b: nPh }), f: Math.min(1, phr / (nPh * 0.8 || 1)), go: () => $("#phrases").scrollIntoView({ behavior: "smooth", block: "center" }) },
+      { ic: "🔤", de: t("learnWords"), sub: tf("lsStepWords", { a: kn, b: keys.length }), f: Math.min(1, kn / (keys.length * 0.5 || 1)), go: () => go("vocab") },
+      { ic: "💬", de: t("dlgSpeak"), sub: tf("lsStepBest", { b: dl.role != null ? dl.role + "%" : "—" }), f: best(Math.max(dl.role || 0, dl.gap || 0, dl.read || 0)), go: () => { practiceOpen("skill:speak"); } },
+      { ic: "🗣️", de: t("freeTalk"), sub: tf("lsStepBest", { b: fsb.cue != null ? fsb.cue + "%" : fsb.topic != null ? fsb.topic + "%" : "—" }), f: best(Math.max(fsb.cue || 0, fsb.topic || 0)), go: () => { practiceOpen("skill:speak"); } },
+      { ic: "🏁", de: t("examTitle"), sub: tf("lsStepBest", { b: exb != null ? exb + "%" : "—" }), f: best(exb), go: () => { practiceOpen("exam"); } }
     ];
   }
   const lessonPct = (i = state.idx) => { if (store.get("done", []).includes(LESSONS[i].id)) return 100; const st = lessonSteps(i); return Math.round(st.reduce((a, x) => a + x.f, 0) / st.length * 100); };
@@ -1911,13 +1913,13 @@
     const cur = steps.findIndex(s => s.f < 1), mins = player.duration ? Math.round(player.duration / 60) : "–";
     $("#lsHero").innerHTML = `<div class="row"><span class="chip5">${lsName(state.idx)}</span><span class="chip5">${esc(L.level)}</span></div>
       <div class="tt">${esc(L.title)}</div><div class="fa">${esc(TR.title)} — ${esc(TR.summary)}</div>
-      <div class="meta"><span>🎧 ${mins} Min</span><span>💬 ${lines.length} Sätze</span><span>🔤 ${vocabList.length} Wörter</span></div>
+      <div class="meta"><span>🎧 ${tf("minN", { n: mins })}</span><span>💬 ${tf("sentN", { n: lines.length })}</span><span>🔤 ${tf("nWords", { n: vocabList.length })}</span></div>
       <div class="pb"><i style="width:${pct}%"></i></div><div class="meta"><span class="fa">${tf("lsProgress", { p: pct })}</span></div>
-      <div class="ls-overall"><span>Gesamt · <span class="fa">${t("lsOverall")}</span></span><b>${overallPct()}%</b></div>
-      <div class="ls-lessons">${LESSONS.map((x, j) => isStory(x) !== isStory(L) ? "" : `<button class="chip5 lchip ${j === state.idx ? "on" : ""}" data-lesson="${j - state.idx}"><span>${lsCode(j)}</span><i style="--p:${lessonPct(j)}%"></i><small>${lessonPct(j)}%</small></button>`).join("")}<button class="chip5 lchip" data-go="library">📚 Mediathek</button></div>`;
+      <div class="ls-overall"><span>${t("lsOverall")}</span><b>${overallPct()}%</b></div>
+      <div class="ls-lessons">${LESSONS.map((x, j) => isStory(x) !== isStory(L) ? "" : `<button class="chip5 lchip ${j === state.idx ? "on" : ""}" data-lesson="${j - state.idx}"><span>${lsCode(j)}</span><i style="--p:${lessonPct(j)}%"></i><small>${lessonPct(j)}%</small></button>`).join("")}<button class="chip5 lchip" data-go="library">📚 ${t("library")}</button></div>`;
     $("#lsHero").classList.toggle("story", isStory(L));
     $("#lsPath").innerHTML = steps.map((s, i) => { const st = s.f >= 1 ? "done" : i === cur ? "cur" : "todo";
-      return `<button class="step ${st}" data-step="${i}"><span class="ic">${st === "done" ? "✓" : s.ic}</span><span class="tx"><b>${i + 1}. ${s.de}</b><small class="fa">${esc(s.sub)}</small><span class="sbar"><i style="width:${Math.round(s.f * 100)}%"></i></span></span><span class="go">${st === "done" ? "✓" : st === "cur" ? "Weiter ›" : "Start"}</span></button>`; }).join("");
+      return `<button class="step ${st}" data-step="${i}"><span class="ic">${st === "done" ? "✓" : s.ic}</span><span class="tx"><b>${i + 1}. ${s.de}</b><small class="fa">${esc(s.sub)}</small><span class="sbar"><i style="width:${Math.round(s.f * 100)}%"></i></span></span><span class="go">${st === "done" ? "✓" : st === "cur" ? t("nextBtn") : t("start")}</span></button>`; }).join("");
     $("#lsPathN").textContent = `${steps.filter(s => s.f >= 1).length} / ${steps.length}`;
     const done = new Set(store.get(lsKey("phr"), []));
     $$("#phrases .p").forEach(p => p.classList.toggle("done", done.has(Number(p.dataset.phr))));
@@ -1966,7 +1968,7 @@
 
   /* ---------- Mediathek: lessons and stories as separate, manageable lists ---------- */
   const lib = { tab: store.get("libTab", "lesson"), lvl: "all", sort: store.get("libSort", "order") };
-  const LIB_SORT = { order: "Reihenfolge", level: "Niveau", recent: "Zuletzt" };
+  const LIB_SORT = { order: "sortOrder", level: "sortLevel", recent: "sortRecent" };
   const LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2"];
   const libMins = L => { const tm = L.timings; const e = Array.isArray(tm) && tm.length ? (Array.isArray(tm[tm.length - 1]) ? tm[tm.length - 1][1] : tm[tm.length - 1]) : 0; return e ? Math.max(1, Math.round(e / 60)) : null; };
   const libLines = L => L.transcript.split("\n").filter(x => x.trim()).length;
@@ -1981,23 +1983,23 @@
       lib.sort === "level" ? LEVELS.indexOf(a.L.level) - LEVELS.indexOf(b.L.level) || a.i - b.i
       : lib.sort === "recent" ? (seen[b.L.id] || 0) - (seen[a.L.id] || 0) || a.i - b.i
       : (a.story - b.story) || a.i - b.i);
-    $("#libCount").textContent = `${all.length} Titel`;
-    $("#libSeg").innerHTML = [["lesson", `Lektionen · ${nL}`], ["story", `Geschichten · ${nS}`], ["all", "Alle"]].map(([k, v]) => `<button data-tab="${k}" class="${lib.tab === k ? "on" : ""}">${v}</button>`).join("");
-    $("#libChips").innerHTML = ["all", ...lvls].map(l => `<button data-lvl="${l}" class="${lib.lvl === l ? "on" : ""}">${l === "all" ? "Alle" : l}</button>`).join("") + `<button class="srt" data-sort>↕ ${LIB_SORT[lib.sort]}</button>`;
+    $("#libCount").textContent = tf("titlesN", { n: all.length });
+    $("#libSeg").innerHTML = [["lesson", tf("lessonsN", { n: nL })], ["story", tf("storiesN", { n: nS })], ["all", t("all")]].map(([k, v]) => `<button data-tab="${k}" class="${lib.tab === k ? "on" : ""}">${v}</button>`).join("");
+    $("#libChips").innerHTML = ["all", ...lvls].map(l => `<button data-lvl="${l}" class="${lib.lvl === l ? "on" : ""}">${l === "all" ? t("all") : l}</button>`).join("") + `<button class="srt" data-sort>↕ ${t(LIB_SORT[lib.sort])}</button>`;
     const row = x => { const TR = lessonTr(x.L), m = libMins(x.L), cur = x.i === state.idx;
-      const st = x.p >= 100 ? `<span class="st ok">✓</span>` : x.p > 0 ? `<span class="st">${x.p}%</span>` : `<span class="st new">Neu</span>`;
+      const st = x.p >= 100 ? `<span class="st ok">✓</span>` : x.p > 0 ? `<span class="st">${x.p}%</span>` : `<span class="st new">${t("stNew")}</span>`;
       return `<div class="lib-it ${cur ? "cur" : ""}" data-li="${x.i}" role="button" tabindex="0">
         <div class="cv cv${x.i % 4} ${x.story ? "book" : ""}">${x.story ? "📖" : ""}<b>${lsCode(x.i)}</b></div>
         <div class="tx"><b>${esc(x.L.title)}</b><span class="fa">${esc(TR.title)}</span>
-          <span class="mt"><span class="lv">${esc(x.L.level)}</span>${m ? `<span>${m} Min</span>` : ""}<span>${libLines(x.L)} Sätze</span>${x.L.words ? `<span>${x.L.words.length} Wörter</span>` : ""}</span>
+          <span class="mt"><span class="lv">${esc(x.L.level)}</span>${m ? `<span>${tf("minN", { n: m })}</span>` : ""}<span>${tf("sentN", { n: libLines(x.L) })}</span>${x.L.words ? `<span>${tf("nWords", { n: x.L.words.length })}</span>` : ""}</span>
           <span class="pb"><i style="width:${x.p}%"></i></span></div>
-        ${st}<button class="more" data-more="${x.i}" aria-label="Mehr">⋯</button></div>`; };
+        ${st}<button class="more" data-more="${x.i}" aria-label="${t("more")}">⋯</button></div>`; };
     const groups = lib.sort !== "order" ? [["", items]] : [
-      ["WEITERMACHEN · <span class=\"fa\">ادامه</span>", items.filter(x => x.p > 0 && x.p < 100)],
-      ["NEU · <span class=\"fa\">شروع نشده</span>", items.filter(x => x.p === 0)],
-      ["FERTIG · <span class=\"fa\">تمام‌شده</span>", items.filter(x => x.p >= 100)]];
+      [t("inProgress"), items.filter(x => x.p > 0 && x.p < 100)],
+      [t("notStarted"), items.filter(x => x.p === 0)],
+      [t("finished"), items.filter(x => x.p >= 100)]];
     $("#libList").innerHTML = groups.filter(g => g[1].length).map(([h, xs]) => (h ? `<div class="lib-sec">${h}</div>` : "") + xs.map(row).join("")).join("")
-      || `<div class="lib-empty fa">چیزی اینجا نیست.</div>`;
+      || `<div class="lib-empty">${t("nothingHere")}</div>`;
   }
   $("#libSeg").addEventListener("click", e => { const b = e.target.closest("[data-tab]"); if (!b) return; lib.tab = b.dataset.tab; store.set("libTab", lib.tab); renderLibrary(); });
   $("#libChips").addEventListener("click", e => {
@@ -2011,11 +2013,11 @@
   function libMenu(i, anchor) {
     const L = LESSONS[i], done = store.get("done", []).includes(L.id), r = anchor.getBoundingClientRect(), box = $("#library").getBoundingClientRect();
     $("#libMenu").innerHTML = `<div class="lm-h"><b>${lsCode(i)} · ${esc(L.title)}</b></div>
-      <button data-m="play">▶︎ ${lessonPct(i) > 0 ? "Weiterhören" : "Anhören"} <span class="fa">${lessonPct(i) > 0 ? "ادامه" : "گوش دادن"}</span></button>
-      <button data-m="open">☰ Übersicht <span class="fa">صفحهٔ درس</span></button>
-      <button data-m="done">${done ? "○ Nicht erledigt" : "✓ Als erledigt"} <span class="fa">${done ? "برگرداندن" : "تمام شد"}</span></button>
-      <button data-m="restart">↺ Von vorn <span class="fa">از اول</span></button>
-      <button data-m="reset" class="red">Fortschritt löschen <span class="fa">پاک کردن</span></button>`;
+      <button data-m="play">▶︎ ${lessonPct(i) > 0 ? t("resume") : t("listen")}</button>
+      <button data-m="open">☰ ${t("overview")}</button>
+      <button data-m="done">${done ? "○ " + t("markUndone") : "✓ " + t("markDone")}</button>
+      <button data-m="restart">↺ ${t("restart")}</button>
+      <button data-m="reset" class="red">${t("resetLs")}</button>`;
     $("#libMenu").dataset.i = i;
     const top = Math.min(r.bottom - box.top + 4, box.height - 300);
     $("#libMenu").style.top = Math.max(8, top) + "px";

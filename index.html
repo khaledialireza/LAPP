@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="de">
+<html lang="fa">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -12,11 +12,11 @@
   <meta name="apple-mobile-web-app-title" content="LAPP">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icons/icon-180.png">
-  <title>LAPP | Deutsch lernen</title>
+  <title>LAPP</title>
   <meta name="description" content="LAPP — آموزش زبان آلمانی با دیالوگ صوتی، واژگان و تمرین.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=muju42dq">
+  <link rel="stylesheet" href="style.css?v=mujvvaqq">
 </head>
 <body data-screen="home">
   <div class="frame">
@@ -33,22 +33,22 @@
             <span class="chip5" id="hLevel"></span>
             <button class="chip5 h5-more" data-go="lesson" data-i18n="lessonMore"></button>
           </div>
-          <div class="h5-lbl"><span class="js-lesson-word">Lektion</span> · Weitermachen</div>
+          <div class="h5-lbl"><span class="js-lesson-word"></span> · <span data-i18n="continueL"></span></div>
           <div class="h5-ttl" id="hLessonTitle"></div>
           <div class="h5-sub fa" id="hLessonFa"></div>
           <div class="h5-orbrow">
-            <button class="orb" id="hSpeak" aria-label="Jetzt sprechen"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-3.1A7 7 0 0 0 19 11z"/></svg></button>
-            <div class="h5-orbtxt"><b>Jetzt sprechen</b><span>Rollenspiel · <span class="fa" data-i18n="speakHint"></span></span></div>
-            <button class="h5-listen" data-act="toggle">▶ Hören</button>
+            <button class="orb" id="hSpeak" data-i18n-aria="speakNow"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-3.1A7 7 0 0 0 19 11z"/></svg></button>
+            <div class="h5-orbtxt"><b data-i18n="speakNow"></b><span><span data-i18n="rolePlay"></span> · <span data-i18n="speakHint"></span></span></div>
+            <button class="h5-listen" data-act="toggle" data-i18n="listenBtn"></button>
           </div>
         </div>
         <div class="home-side">
           <div class="home-head">
             <div class="home-hl">
-              <h1 class="home-greet" id="hGreet">Guten Tag</h1>
+              <h1 class="home-greet" id="hGreet"></h1>
               <div class="home-date" id="homeDate"></div>
             </div>
-            <span class="streak" id="hStreak" title="Streak">🔥 0</span>
+            <span class="streak" id="hStreak">🔥 0</span>
           </div>
           <div class="rings5">
             <svg viewBox="0 0 100 100"><g transform="rotate(-90 50 50)" fill="none" stroke-linecap="round" stroke-width="11">
@@ -56,21 +56,21 @@
               <circle cx="50" cy="50" r="29" class="rg-bg rg-l"/><circle cx="50" cy="50" r="29" class="rg rg-l" id="rgListen" pathLength="100" stroke-dasharray="0 100"/>
               <circle cx="50" cy="50" r="16" class="rg-bg rg-w"/><circle cx="50" cy="50" r="16" class="rg rg-w" id="rgWords" pathLength="100" stroke-dasharray="0 100"/></g></svg>
             <div class="rings-lg">
-              <div><b class="c-s" id="lgSpeak">0/8</b> <span>Sätze gesprochen</span></div>
-              <div><b class="c-l" id="lgListen">0/15</b> <span>Min gehört</span></div>
-              <div><b class="c-w" id="lgWords">0</b> <span>Wörter</span></div>
+              <div><b class="c-s" id="lgSpeak">0/8</b> <span data-i18n="sentSpoken"></span></div>
+              <div><b class="c-l" id="lgListen">0/15</b> <span data-i18n="minHeard"></span></div>
+              <div><b class="c-w" id="lgWords">0</b> <span data-i18n="wordsCap"></span></div>
             </div>
           </div>
           <button class="word5" data-go="vocab">
-            <span class="kk">Wort des Tages</span>
-            <span class="sp" id="wotdSay" role="button" aria-label="anhören"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 4V5L7 9zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4z"/></svg></span>
+            <span class="kk" data-i18n="wordOfDay"></span>
+            <span class="sp" id="wotdSay" role="button" data-i18n-aria="listenAria"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 4V5L7 9zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4z"/></svg></span>
             <span class="wd5" id="wotdDe"></span>
             <span class="m fa"><span id="wotdFa"></span> · <span id="wotdEn"></span></span>
             <span class="ex" id="wotdEx"></span>
           </button>
         </div>
-        <div class="hcard hweek"><div class="hk"><span>DIESE WOCHE</span><span id="hWeekSum"></span></div><div class="week" id="hWeek"></div></div>
-        <div class="hcard hrev"><div class="hk"><span>WIEDERHOLEN · <span class="fa">مرور</span></span><button data-go="vocab">Alle ›</button></div><div class="rev" id="hReview"></div></div>
+        <div class="hcard hweek"><div class="hk"><span data-i18n="thisWeek"></span><span id="hWeekSum"></span></div><div class="week" id="hWeek"></div></div>
+        <div class="hcard hrev"><div class="hk"><span data-i18n="review"></span><button data-go="vocab" data-i18n="allArrow"></button></div><div class="rev" id="hReview"></div></div>
         <div class="hprac" id="hPrac"></div>
       </section>
 
@@ -78,16 +78,16 @@
       <section class="screen" id="profile">
         <div class="pf-scroll">
           <div class="pf-top"><div class="avatar-big js-avatar">?</div>
-            <input id="profName" class="pf-name" maxlength="30" autocomplete="name" aria-label="Name">
+            <input id="profName" class="pf-name" maxlength="30" autocomplete="name" data-i18n-aria="nameL">
             <div class="pf-sub fa" id="pfSub"></div></div>
           <div class="pf-stats" id="pfStats"></div>
-          <h3 class="ph-h"><span>FORTSCHRITT · <span class="fa" data-i18n="progress"></span></span></h3>
+          <h3 class="ph-h"><span data-i18n="progress"></span></h3>
           <div class="pf-group" id="pfSkills"></div>
-          <h3 class="ph-h"><span>LEKTION · <span class="fa" id="pfLsName"></span></span></h3>
+          <h3 class="ph-h"><span id="pfLsName"></span></h3>
           <div class="prof-stats pf-group" id="profStats"></div>
-          <h3 class="ph-h"><span>EINSTELLUNGEN · <span class="fa" data-i18n="settings"></span></span></h3>
+          <h3 class="ph-h"><span data-i18n="settings"></span></h3>
           <div class="pf-group">
-            <div class="pf-row"><span>Sprache · <span class="fa" data-i18n="uiLanguage"></span></span><div class="tabs" id="profLang"></div></div>
+            <div class="pf-row"><span data-i18n="uiLanguage"></span><div class="tabs" id="profLang"></div></div>
           </div>
           <p class="fa pf-note" data-i18n="savedOnDevice"></p>
           <button class="btn ghost prof-reset" id="profReset" data-i18n="resetProgress"></button>
@@ -95,7 +95,7 @@
       </section>
 
       <section class="screen" id="library">
-        <div class="lib-head"><div><div class="lib-k">BIBLIOTHEK · <span class="fa">کتابخانه</span></div><h1 class="lib-title">Mediathek</h1></div><span class="lib-n" id="libCount"></span></div>
+        <div class="lib-head"><div><h1 class="lib-title" data-i18n="library"></h1></div><span class="lib-n" id="libCount"></span></div>
         <div class="lib-seg" id="libSeg"></div>
         <div class="lib-chips" id="libChips"></div>
         <div class="lib-list" id="libList"></div>
@@ -107,30 +107,30 @@
         <button class="back-btn" data-go="home"><span class="back-chev">‹</span><span data-i18n="tabHome"></span></button>
         <div class="ls-grid">
           <div class="lhero" id="lsHero"></div>
-          <div class="ls-col ls-path"><h3 class="ph-h"><span>LERNPFAD · <span class="fa" data-i18n="lsPath"></span></span><span id="lsPathN"></span></h3><div class="path" id="lsPath"></div></div>
-          <div class="ls-col ls-phr"><h3 class="ph-h"><span>WICHTIGE SÄTZE · <span class="fa" data-i18n="keyPhrases"></span></span><span id="lsPhrN"></span></h3><div class="phr" id="phrases"></div></div>
-          <div class="ls-col ls-gram"><h3 class="ph-h"><span>GRAMMATIK IM FOKUS</span></h3><div class="gfocus" id="lsGram"></div></div>
+          <div class="ls-col ls-path"><h3 class="ph-h"><span data-i18n="lsPath"></span><span id="lsPathN"></span></h3><div class="path" id="lsPath"></div></div>
+          <div class="ls-col ls-phr"><h3 class="ph-h"><span data-i18n="keyPhrases"></span><span id="lsPhrN"></span></h3><div class="phr" id="phrases"></div></div>
+          <div class="ls-col ls-gram"><h3 class="ph-h"><span data-i18n="grammarFocus"></span></h3><div class="gfocus" id="lsGram"></div></div>
         </div>
       </section>
 
       <!-- AUDIO -->
       <section class="screen" id="audio">
         <div class="ly-head">
-          <div><h1 class="ly-title" id="lyTitle">Dialog</h1><div class="ly-meta"><span id="lySrc">Daily German Talk</span> · <span id="mNum"></span></div></div>
-          <div class="ly-acts"><div class="spk-pick"><button class="ly-chip" id="spkBtn" aria-haspopup="listbox" aria-expanded="false">👤 <span id="spkLbl">Alle</span> ▾</button><div class="spk-menu" id="mSpkTabs" hidden></div></div><button class="ly-chip" data-bgv aria-pressed="true" aria-label="Video im Hintergrund" hidden>🎬</button><button class="ly-chip nt-txt" data-vidonly aria-pressed="false" aria-label="Nur Video" hidden>Aa</button><button class="ly-chip" id="nightBtn" aria-label="Nachtmodus">🌙</button><button class="ly-chip fa" id="faBtn" aria-pressed="true" data-i18n="showTranslation"></button></div>
+          <div><h1 class="ly-title" id="lyTitle"></h1><div class="ly-meta"><span id="lySrc">Daily German Talk</span> · <span id="mNum"></span></div></div>
+          <div class="ly-acts"><div class="spk-pick"><button class="ly-chip" id="spkBtn" aria-haspopup="listbox" aria-expanded="false">👤 <span id="spkLbl"></span> ▾</button><div class="spk-menu" id="mSpkTabs" hidden></div></div><button class="ly-chip" data-bgv aria-pressed="true" data-i18n-aria="bgVideo" hidden>🎬</button><button class="ly-chip nt-txt" data-vidonly aria-pressed="false" data-i18n-aria="videoOnly" hidden>Aa</button><button class="ly-chip" id="nightBtn" data-i18n-aria="nightMode">🌙</button><button class="ly-chip fa" id="faBtn" aria-pressed="true" data-i18n="showTranslation"></button></div>
         </div>
             <div class="lyrics" id="mTranscript"></div>
-        <aside class="word-side" id="wordSide" aria-label="Wort"><div class="ws-body" id="wsBody"></div></aside>
+        <aside class="word-side" id="wordSide" data-i18n-aria="wordL"><div class="ws-body" id="wsBody"></div></aside>
         <div class="q-back" id="qBack" hidden></div>
         <div class="q-sheet" id="qSheet" hidden>
           <div class="q-grab"></div>
-          <div class="q-head"><div><div class="pl-k">ALS NÄCHSTES · <span class="fa" data-i18n="queue"></span></div><h2 class="q-title">Wiedergabeliste</h2></div><button class="q-x" id="qClose" aria-label="schließen">✕</button></div>
+          <div class="q-head"><div><div class="pl-k" data-i18n="queue"></div><h2 class="q-title" data-i18n="playlist"></h2></div><button class="q-x" id="qClose" data-i18n-aria="close">✕</button></div>
           <div class="pl-scroll">
-          <div class="pl-a"><div class="pl-sec">REIHENFOLGE · <span class="fa">ترتیب پخش</span></div>
+          <div class="pl-a"><div class="pl-sec" data-i18n="playOrder"></div>
           <div class="pl-seg" id="plMode"></div>
           <div class="pl-sec" id="plCount"></div>
           <div class="pl-list" id="plList"></div></div>
-          <div class="pl-b"><div class="pl-sec">EINSTELLUNGEN</div>
+          <div class="pl-b"><div class="pl-sec" data-i18n="settings"></div>
           <div class="pl-opts" id="plOpts"></div></div>
         </div>
         <button class="pl-start" id="plStart"></button>
@@ -140,11 +140,11 @@
       <!-- VOCAB -->
       <section class="screen" id="vocab">
         <div class="dc-head">
-          <div><h1 class="dc-title">Wörterbuch</h1><div class="dc-sub" id="vocabSub"></div></div>
-          <button class="ly-chip dc-fc" id="vocabFc">🃏 <span>Karten</span></button><div class="ly-seg" id="vocabScope"><button class="on" data-scope="lesson">Lektion</button><button data-scope="all">Alle</button></div>
+          <div><h1 class="dc-title" data-i18n="dictionary"></h1><div class="dc-sub" id="vocabSub"></div></div>
+          <button class="ly-chip dc-fc" id="vocabFc">🃏 <span data-i18n="cards"></span></button><div class="ly-seg" id="vocabScope"><button class="on" data-scope="lesson" data-i18n="lesson"></button><button data-scope="all" data-i18n="all"></button></div>
         </div>
         <div class="mbar"><div class="mbar-b" id="vMbar"></div><div class="mbar-lg" id="vMleg"></div></div>
-        <input class="v-search" id="vocabSearch" type="search" placeholder="Suchen · جستجو" data-i18n-ph="Suchen · {search}" aria-label="Suchen">
+        <input class="v-search" id="vocabSearch" type="search" data-i18n-ph="{search}" data-i18n-aria="search">
         <div class="pchips" id="vocabPos"></div>
         <div class="dlist" id="vocabGrid"></div>
       </section>
@@ -153,19 +153,19 @@
       <section class="screen" id="practice">
         <div class="p-hub" id="pHub">
           <div class="ph-head">
-            <div><h1 class="dc-title">Üben</h1><div class="dc-sub" id="phSub"></div></div>
+            <div><h1 class="dc-title" data-i18n="tabPractice"></h1><div class="dc-sub" id="phSub"></div></div>
             <div class="ex-stats ph-hide" id="exStats"></div>
           </div>
           <div class="hub-scroll pr-hub">
             <div class="pr-scope" id="prScope"></div>
             <div class="pr-skills" id="prSkills"></div>
-            <button class="pr-exam" data-open="exam"><span class="ic">🏁</span><span class="tx"><b>Abschlussprüfung</b><small class="fa" id="phExamSub"></small></span><span class="go">›</span></button>
+            <button class="pr-exam" data-open="exam"><span class="ic">🏁</span><span class="tx"><b data-i18n="finalExam"></b><small class="fa" id="phExamSub"></small></span><span class="go">›</span></button>
           </div>
         </div>
 
         <div class="p-view" id="pView" hidden>
           <div class="pv-head">
-            <button class="icon-btn pv-back" id="pBack" aria-label="zurück">‹</button>
+            <button class="icon-btn pv-back" id="pBack" data-i18n-aria="back">‹</button>
             <h2 id="pTitle"></h2>
             <span class="pv-prog" id="pProg"></span>
           </div>
@@ -179,9 +179,9 @@
                 <div class="ex-body" id="exBody"></div>
                 <div class="ex-feedback" id="exFeedback" hidden></div>
                 <div class="ex-foot">
-                  <button class="btn ghost" id="exPrev">‹ Zurück</button>
-                  <button class="btn" id="exCheck" hidden>Prüfen · <span class="fa" data-i18n="check"></span></button>
-                  <button class="btn ghost" id="exNext">Weiter ›</button>
+                  <button class="btn ghost" id="exPrev" data-i18n="backBtn"></button>
+                  <button class="btn" id="exCheck" hidden data-i18n="check"></button>
+                  <button class="btn ghost" id="exNext" data-i18n="nextBtn"></button>
                 </div>
               </article>
             </div>
@@ -198,15 +198,15 @@
                 <span class="chip fa fc-pos" id="fcPos"></span>
                 <div class="fc-opts" id="fcOpts"></div>
                 <div class="fc-voice" id="fcVoice" hidden>
-                  <button class="mic" id="fcMic" aria-label="Mikrofon">🎤</button>
+                  <button class="mic" id="fcMic" data-i18n-aria="mic">🎤</button>
                   <p class="heard fa" id="fcHeard"></p>
-                  <button class="chip-btn" id="fcSkip">Weiß nicht · <span class="fa" data-i18n="dontKnow"></span></button>
+                  <button class="chip-btn" id="fcSkip" data-i18n="dontKnow"></button>
                 </div>
                 <div class="fc-info fa" id="fcInfo" hidden></div>
-                <button class="btn kc-next" id="fcNext" hidden>Weiter ›</button>
+                <button class="btn kc-next" id="fcNext" hidden data-i18n="nextBtn"></button>
               </article>
               <div class="kc-done" id="kcDone" hidden></div>
-              <div class="kc-log" id="kcLogWrap" hidden><div class="kc-lh">DIESE RUNDE · <span class="fa" data-i18n="kcRound"></span></div><div id="kcLog"></div></div>
+              <div class="kc-log" id="kcLogWrap" hidden><div class="kc-lh" data-i18n="kcRound"></div><div id="kcLog"></div></div>
             </div>
           </div>
 
@@ -225,9 +225,9 @@
             <div class="recbar" id="fsBar">
               <span class="rtime"><span class="rec-dot"></span><span class="js-rectime">0:00</span></span>
               <span class="rp-wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
-              <button class="auto" id="fsAuto">AUTO</button>
+              <button class="auto" id="fsAuto" data-i18n="auto"></button>
               <button class="fs-next" id="fsNext" hidden>›</button>
-              <button class="rp-mic" id="fsMic" aria-label="Mikrofon"></button>
+              <button class="rp-mic" id="fsMic" data-i18n-aria="mic"></button>
             </div>
           </div>
 
@@ -238,41 +238,41 @@
 
     <!-- Bottom dock -->
     <footer class="dock">
-      <button class="dock-round dock-tabs-btn" id="dockTabsBtn" aria-label="Tabs"></button>
+      <button class="dock-round dock-tabs-btn" id="dockTabsBtn" data-i18n-aria="tabs"></button>
       <nav class="nav">
-        <button class="tab-me" data-go="profile" aria-label="Profil"><span class="avatar-btn js-avatar">?</span><span class="tab-l fa" data-i18n="tabMe"></span></button>
-        <button data-go="vocab" aria-label="Vokabeln"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 20 12 4l7 16M8 14h8"/></svg><span class="tab-l fa" data-i18n="tabVocab"></span></button>
-        <button data-go="home" class="on" aria-label="Start"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11 12 4l9 7v9H3z"/><path d="M9 20v-6h6v6"/></svg><span class="tab-l fa" data-i18n="tabHome"></span></button>
-        <button data-go="audio" aria-label="Audio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg><span class="tab-l fa" data-i18n="tabDialog"></span></button>
-        <button data-go="practice" aria-label="Üben"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg><span class="tab-l fa" data-i18n="tabPractice"></span></button>
+        <button class="tab-me" data-go="profile" data-i18n-aria="tabMe"><span class="avatar-btn js-avatar">?</span><span class="tab-l fa" data-i18n="tabMe"></span></button>
+        <button data-go="vocab" data-i18n-aria="tabVocab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 20 12 4l7 16M8 14h8"/></svg><span class="tab-l fa" data-i18n="tabVocab"></span></button>
+        <button data-go="home" class="on" data-i18n-aria="tabHome"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11 12 4l9 7v9H3z"/><path d="M9 20v-6h6v6"/></svg><span class="tab-l fa" data-i18n="tabHome"></span></button>
+        <button data-go="audio" data-i18n-aria="tabDialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg><span class="tab-l fa" data-i18n="tabDialog"></span></button>
+        <button data-go="practice" data-i18n-aria="tabPractice"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg><span class="tab-l fa" data-i18n="tabPractice"></span></button>
       </nav>
-      <button class="dock-round dock-play" data-act="toggle" aria-label="play"><svg class="dring" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" class="ring-bg"/><circle cx="18" cy="18" r="16" class="ring-fg" pathLength="100"/></svg><svg class="ico-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l12-7z"/></svg></button>
+      <button class="dock-round dock-play" data-act="toggle" data-i18n-aria="play"><svg class="dring" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" class="ring-bg"/><circle cx="18" cy="18" r="16" class="ring-fg" pathLength="100"/></svg><svg class="ico-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l12-7z"/></svg></button>
       <div class="dock-player">
-        <button class="dp-cover" data-go="audio" aria-label="Dialog"><svg class="dring" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" class="ring-bg"/><circle cx="18" cy="18" r="16" class="ring-fg" pathLength="100"/></svg><span class="js-lesson-num">L1</span></button>
+        <button class="dp-cover" data-go="audio" data-i18n-aria="tabDialog"><svg class="dring" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" class="ring-bg"/><circle cx="18" cy="18" r="16" class="ring-fg" pathLength="100"/></svg><span class="js-lesson-num">L1</span></button>
         <button class="dp-text" data-go="audio"><span class="dp-line" id="dpLine"></span><span class="dp-sub"><span id="dpWho"></span> · <span class="tCur">0:00</span> / <span class="tDur">0:00</span></span></button>
-        <button class="dp-chip" data-speed-cycle aria-label="Tempo"><span class="js-speed">1×</span></button>
-        <button class="icon-btn dp-rep" id="lyRepeat" aria-label="Satz wiederholen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.6-5.9"/><path d="M4 4v5h5"/></svg></button>
-        <button class="icon-btn" data-act="toggle" aria-label="play"><svg class="ico-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l12-7z"/></svg></button>
-        <button class="icon-btn dp-q" id="qBtn" aria-label="Wiedergabeliste"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 6h16M4 12h10M4 18h10"/><path d="M17 14v6l4-3z" fill="currentColor"/></svg></button>
-        <button class="icon-btn" data-act="next" aria-label="weiter"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 5v14l8-7zM12 5v14l8-7z"/></svg></button>
+        <button class="dp-chip" data-speed-cycle data-i18n-aria="speed"><span class="js-speed">1×</span></button>
+        <button class="icon-btn dp-rep" id="lyRepeat" data-i18n-aria="repeatLine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.6-5.9"/><path d="M4 4v5h5"/></svg></button>
+        <button class="icon-btn" data-act="toggle" data-i18n-aria="play"><svg class="ico-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l12-7z"/></svg></button>
+        <button class="icon-btn dp-q" id="qBtn" data-i18n-aria="playlist"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 6h16M4 12h10M4 18h10"/><path d="M17 14v6l4-3z" fill="currentColor"/></svg></button>
+        <button class="icon-btn" data-act="next" data-i18n-aria="next"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 5v14l8-7zM12 5v14l8-7z"/></svg></button>
         <div class="progress dp-prog" data-seek><i class="bar"></i></div>
       </div>
-      <button class="dock-swap" id="dockSwap" aria-label="Dock links/rechts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h13l-4-4M17 17H4l4 4"/></svg></button>
+      <button class="dock-swap" id="dockSwap" data-i18n-aria="dockSide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h13l-4-4M17 17H4l4 4"/></svg></button>
     </footer>
   </div>
 
   <!-- Night mode: one line at a time, dark and calm, for reading before sleep -->
   <div class="night" id="night" hidden>
     <div class="bgv" id="bgv" aria-hidden="true"></div>
-    <div class="nt-top"><button class="nt-x" id="ntClose" aria-label="schließen">✕</button><span class="nt-num"><span id="ntTitle"></span> · <span id="ntNum"></span><span class="nt-next" id="ntNext"></span></span><span class="nt-acts"><button class="nt-sleep" data-bgv aria-pressed="true" aria-label="Video im Hintergrund" hidden>🎬</button><button class="nt-sleep nt-txt" data-vidonly aria-pressed="false" aria-label="Nur Video">Aa</button><button class="nt-sleep" id="ntSleep">⏾ <span id="ntSleepL">Aus</span></button></span></div>
+    <div class="nt-top"><button class="nt-x" id="ntClose" data-i18n-aria="close">✕</button><span class="nt-num"><span id="ntTitle"></span> · <span id="ntNum"></span><span class="nt-next" id="ntNext"></span></span><span class="nt-acts"><button class="nt-sleep" data-bgv aria-pressed="true" data-i18n-aria="bgVideo" hidden>🎬</button><button class="nt-sleep nt-txt" data-vidonly aria-pressed="false" data-i18n-aria="videoOnly">Aa</button><button class="nt-sleep" id="ntSleep">⏾ <span id="ntSleepL"></span></button></span></div>
     <div class="nt-stage" id="ntStage"><div class="nt-card" id="ntCard"><div class="nt-who" id="ntWho"></div><div class="nt-de" id="ntDe"></div><div class="nt-tr" id="ntTr"></div></div></div>
-    <div class="nt-time"><span id="ntCur">0:00</span><input type="range" id="ntSeek" min="0" max="0" step="1" value="0" aria-label="Zeit"><span id="ntDur">0:00</span></div>
+    <div class="nt-time"><span id="ntCur">0:00</span><input type="range" id="ntSeek" min="0" max="0" step="1" value="0" data-i18n-aria="time"><span id="ntDur">0:00</span></div>
     <div class="nt-ctl">
-      <button class="nt-b nt-sp" data-speed-cycle aria-label="Tempo"><span class="js-speed">1×</span></button>
-      <button class="nt-b" data-act="prev" aria-label="zurück"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
-      <button class="nt-b nt-play" data-act="toggle" aria-label="play"><svg class="ico-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l12-7z"/></svg></button>
-      <button class="nt-b" data-act="next" aria-label="weiter"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg></button>
-      <button class="nt-b" id="ntRep" aria-label="Satz wiederholen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.6-5.9"/><path d="M4 4v5h5"/></svg></button>
+      <button class="nt-b nt-sp" data-speed-cycle data-i18n-aria="speed"><span class="js-speed">1×</span></button>
+      <button class="nt-b" data-act="prev" data-i18n-aria="back"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
+      <button class="nt-b nt-play" data-act="toggle" data-i18n-aria="play"><svg class="ico-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l12-7z"/></svg></button>
+      <button class="nt-b" data-act="next" data-i18n-aria="next"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg></button>
+      <button class="nt-b" id="ntRep" data-i18n-aria="repeatLine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.6-5.9"/><path d="M4 4v5h5"/></svg></button>
     </div>
   </div>
   <audio id="player" preload="metadata"></audio>
@@ -284,79 +284,79 @@
     <div class="pop" role="dialog" aria-modal="true" aria-labelledby="popWord">
       <div class="pop-head">
         <div><div class="pop-word" id="popWord"></div><div class="pop-lemma" id="popLemma"></div></div>
-        <button class="say" id="popSay" aria-label="vorlesen"></button>
-        <button class="icon-btn pop-x" id="popClose" aria-label="schließen">✕</button>
+        <button class="say" id="popSay" data-i18n-aria="listenAria"></button>
+        <button class="icon-btn pop-x" id="popClose" data-i18n-aria="close">✕</button>
       </div>
       <span class="chip fa" id="popPos"></span>
       <p class="pop-fa fa" id="popFa"></p>
       <div class="pop-g fa" id="popG"></div>
-      <div class="pop-ctx"><h3>Im Satz · <span class="fa" data-i18n="inSentence"></span></h3><p id="popCtx"></p><p class="fa" id="popCtxFa"></p></div>
+      <div class="pop-ctx"><h3 data-i18n="inSentence"></h3><p id="popCtx"></p><p class="fa" id="popCtxFa"></p></div>
     </div>
   </div>
 
-  <script src="data/lessons.js?v=muju42dq"></script>
-  <script src="data/lesson1-fa.js?v=muju42dq"></script>
-  <script src="data/lesson1-times.js?v=muju42dq"></script>
-  <script src="data/lesson1-speak.js?v=muju42dq"></script>
-  <script src="data/lesson1-focus.js?v=muju42dq"></script>
-  <script src="data/lesson1-words.js?v=muju42dq"></script>
-  <script src="data/dict-de.js?v=muju42dq"></script>
-  <script src="data/dict-tr.js?v=muju42dq"></script>
-  <script src="data/lesson1-ru.js?v=muju42dq"></script>
-  <script src="data/lesson1-uk.js?v=muju42dq"></script>
-  <script src="data/lesson2-fa.js?v=muju42dq"></script>
-  <script src="data/lesson2-times.js?v=muju42dq"></script>
-  <script src="data/lesson2-speak.js?v=muju42dq"></script>
-  <script src="data/lesson2-focus.js?v=muju42dq"></script>
-  <script src="data/lesson2-words.js?v=muju42dq"></script>
-  <script src="data/lesson2-ru.js?v=muju42dq"></script>
-  <script src="data/lesson2-uk.js?v=muju42dq"></script>
-  <script src="data/lesson3-fa.js?v=muju42dq"></script>
-  <script src="data/lesson3-times.js?v=muju42dq"></script>
-  <script src="data/lesson3-speak.js?v=muju42dq"></script>
-  <script src="data/lesson3-focus.js?v=muju42dq"></script>
-  <script src="data/lesson3-words.js?v=muju42dq"></script>
-  <script src="data/lesson3-ru.js?v=muju42dq"></script>
-  <script src="data/lesson3-uk.js?v=muju42dq"></script>
-  <script src="data/lesson4-fa.js?v=muju42dq"></script>
-  <script src="data/lesson4-times.js?v=muju42dq"></script>
-  <script src="data/lesson4-speak.js?v=muju42dq"></script>
-  <script src="data/lesson4-focus.js?v=muju42dq"></script>
-  <script src="data/lesson4-words.js?v=muju42dq"></script>
-  <script src="data/lesson4-ru.js?v=muju42dq"></script>
-  <script src="data/lesson4-uk.js?v=muju42dq"></script>
-  <script src="data/lesson5-fa.js?v=muju42dq"></script>
-  <script src="data/lesson5-times.js?v=muju42dq"></script>
-  <script src="data/lesson5-speak.js?v=muju42dq"></script>
-  <script src="data/lesson5-focus.js?v=muju42dq"></script>
-  <script src="data/lesson5-words.js?v=muju42dq"></script>
-  <script src="data/lesson5-ru.js?v=muju42dq"></script>
-  <script src="data/lesson5-uk.js?v=muju42dq"></script>
-  <script src="data/lesson6-fa.js?v=muju42dq"></script>
-  <script src="data/lesson6-times.js?v=muju42dq"></script>
-  <script src="data/lesson6-speak.js?v=muju42dq"></script>
-  <script src="data/lesson6-focus.js?v=muju42dq"></script>
-  <script src="data/lesson6-words.js?v=muju42dq"></script>
-  <script src="data/lesson6-ru.js?v=muju42dq"></script>
-  <script src="data/lesson6-uk.js?v=muju42dq"></script>
-  <script src="data/lesson7-fa.js?v=muju42dq"></script>
-  <script src="data/lesson7-times.js?v=muju42dq"></script>
-  <script src="data/lesson7-speak.js?v=muju42dq"></script>
-  <script src="data/lesson7-focus.js?v=muju42dq"></script>
-  <script src="data/lesson7-words.js?v=muju42dq"></script>
-  <script src="data/lesson7-ru.js?v=muju42dq"></script>
-  <script src="data/lesson7-uk.js?v=muju42dq"></script>
-  <script src="data/lesson8-fa.js?v=muju42dq"></script>
-  <script src="data/lesson8-times.js?v=muju42dq"></script>
-  <script src="data/lesson8-speak.js?v=muju42dq"></script>
-  <script src="data/lesson8-focus.js?v=muju42dq"></script>
-  <script src="data/lesson8-words.js?v=muju42dq"></script>
-  <script src="data/lesson8-ru.js?v=muju42dq"></script>
-  <script src="data/lesson8-uk.js?v=muju42dq"></script>
-  <script src="i18n.js?v=muju42dq"></script>
-  <script src="data/verbs-de.js?v=muju42dq"></script>
-  <script src="grammar.js?v=muju42dq"></script>
-  <script src="exercises.js?v=muju42dq"></script>
-  <script src="app.js?v=muju42dq"></script>
+  <script src="data/lessons.js?v=mujvvaqq"></script>
+  <script src="data/lesson1-fa.js?v=mujvvaqq"></script>
+  <script src="data/lesson1-times.js?v=mujvvaqq"></script>
+  <script src="data/lesson1-speak.js?v=mujvvaqq"></script>
+  <script src="data/lesson1-focus.js?v=mujvvaqq"></script>
+  <script src="data/lesson1-words.js?v=mujvvaqq"></script>
+  <script src="data/dict-de.js?v=mujvvaqq"></script>
+  <script src="data/dict-tr.js?v=mujvvaqq"></script>
+  <script src="data/lesson1-ru.js?v=mujvvaqq"></script>
+  <script src="data/lesson1-uk.js?v=mujvvaqq"></script>
+  <script src="data/lesson2-fa.js?v=mujvvaqq"></script>
+  <script src="data/lesson2-times.js?v=mujvvaqq"></script>
+  <script src="data/lesson2-speak.js?v=mujvvaqq"></script>
+  <script src="data/lesson2-focus.js?v=mujvvaqq"></script>
+  <script src="data/lesson2-words.js?v=mujvvaqq"></script>
+  <script src="data/lesson2-ru.js?v=mujvvaqq"></script>
+  <script src="data/lesson2-uk.js?v=mujvvaqq"></script>
+  <script src="data/lesson3-fa.js?v=mujvvaqq"></script>
+  <script src="data/lesson3-times.js?v=mujvvaqq"></script>
+  <script src="data/lesson3-speak.js?v=mujvvaqq"></script>
+  <script src="data/lesson3-focus.js?v=mujvvaqq"></script>
+  <script src="data/lesson3-words.js?v=mujvvaqq"></script>
+  <script src="data/lesson3-ru.js?v=mujvvaqq"></script>
+  <script src="data/lesson3-uk.js?v=mujvvaqq"></script>
+  <script src="data/lesson4-fa.js?v=mujvvaqq"></script>
+  <script src="data/lesson4-times.js?v=mujvvaqq"></script>
+  <script src="data/lesson4-speak.js?v=mujvvaqq"></script>
+  <script src="data/lesson4-focus.js?v=mujvvaqq"></script>
+  <script src="data/lesson4-words.js?v=mujvvaqq"></script>
+  <script src="data/lesson4-ru.js?v=mujvvaqq"></script>
+  <script src="data/lesson4-uk.js?v=mujvvaqq"></script>
+  <script src="data/lesson5-fa.js?v=mujvvaqq"></script>
+  <script src="data/lesson5-times.js?v=mujvvaqq"></script>
+  <script src="data/lesson5-speak.js?v=mujvvaqq"></script>
+  <script src="data/lesson5-focus.js?v=mujvvaqq"></script>
+  <script src="data/lesson5-words.js?v=mujvvaqq"></script>
+  <script src="data/lesson5-ru.js?v=mujvvaqq"></script>
+  <script src="data/lesson5-uk.js?v=mujvvaqq"></script>
+  <script src="data/lesson6-fa.js?v=mujvvaqq"></script>
+  <script src="data/lesson6-times.js?v=mujvvaqq"></script>
+  <script src="data/lesson6-speak.js?v=mujvvaqq"></script>
+  <script src="data/lesson6-focus.js?v=mujvvaqq"></script>
+  <script src="data/lesson6-words.js?v=mujvvaqq"></script>
+  <script src="data/lesson6-ru.js?v=mujvvaqq"></script>
+  <script src="data/lesson6-uk.js?v=mujvvaqq"></script>
+  <script src="data/lesson7-fa.js?v=mujvvaqq"></script>
+  <script src="data/lesson7-times.js?v=mujvvaqq"></script>
+  <script src="data/lesson7-speak.js?v=mujvvaqq"></script>
+  <script src="data/lesson7-focus.js?v=mujvvaqq"></script>
+  <script src="data/lesson7-words.js?v=mujvvaqq"></script>
+  <script src="data/lesson7-ru.js?v=mujvvaqq"></script>
+  <script src="data/lesson7-uk.js?v=mujvvaqq"></script>
+  <script src="data/lesson8-fa.js?v=mujvvaqq"></script>
+  <script src="data/lesson8-times.js?v=mujvvaqq"></script>
+  <script src="data/lesson8-speak.js?v=mujvvaqq"></script>
+  <script src="data/lesson8-focus.js?v=mujvvaqq"></script>
+  <script src="data/lesson8-words.js?v=mujvvaqq"></script>
+  <script src="data/lesson8-ru.js?v=mujvvaqq"></script>
+  <script src="data/lesson8-uk.js?v=mujvvaqq"></script>
+  <script src="i18n.js?v=mujvvaqq"></script>
+  <script src="data/verbs-de.js?v=mujvvaqq"></script>
+  <script src="grammar.js?v=mujvvaqq"></script>
+  <script src="exercises.js?v=mujvvaqq"></script>
+  <script src="app.js?v=mujvvaqq"></script>
 </body>
 </html>
