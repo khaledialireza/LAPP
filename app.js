@@ -954,8 +954,13 @@
     });
   }
   // unlock audio on a user tap so later clips may play without another tap (Safari)
+  // (muted and rewound, so nothing is heard — it used to play a bit of the lesson under the microphone)
   function unlockAudio() {
-    try { const p = player.play(); p && p.then(() => player.pause()).catch(() => {}); } catch {}
+    if (!player.paused || !player.src) { try { speechSynthesis.speak(new SpeechSynthesisUtterance("")); } catch {} return; }
+    const t0 = player.currentTime, wasMuted = player.muted;
+    player.muted = true;
+    const done = () => { player.pause(); try { player.currentTime = t0; } catch {} player.muted = wasMuted; };
+    try { const p = player.play(); p ? p.then(done).catch(() => { player.muted = wasMuted; }) : done(); } catch { player.muted = wasMuted; }
     try { speechSynthesis.speak(new SpeechSynthesisUtterance("")); } catch {}
   }
   player.addEventListener("timeupdate", () => { if (clipStop != null && player.currentTime >= clipStop) { player.pause(); clipStop = null; clipDone?.(); clipDone = null; } });
@@ -1259,6 +1264,9 @@
   let recOpts = {};
   function recStart(onUpdate, onDone) {
     stopListening();
+    // the microphone never records over the lesson audio
+    if (!player.paused) { clipStop = null; player.pause(); }
+    try { speechSynthesis.cancel(); } catch {}
     rec.id = (rec.id || 0) + 1;
     Object.assign(rec, { on: true, finals: [], interim: "", locked: false, t0: Date.now(), last: 0, err: null, onUpdate, onDone, finished: false, max: 30000, silence: 2000 }, recOpts);
     recOpts = {};
