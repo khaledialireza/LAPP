@@ -1898,8 +1898,8 @@
       { ic: "🎧", de: L.type === "story" ? "Geschichte hören" : "Dialog hören", sub: tf("lsStepDialog", { a: heard, b: nLines }), f: Math.min(1, heard / (nLines * 0.8 || 1)), go: () => go("audio") },
       { ic: "📖", de: "Wichtige Sätze", sub: tf("lsStepPhr", { a: phr, b: nPh }), f: Math.min(1, phr / (nPh * 0.8 || 1)), go: () => $("#phrases").scrollIntoView({ behavior: "smooth", block: "center" }) },
       { ic: "🔤", de: "Wörter lernen", sub: tf("lsStepWords", { a: kn, b: keys.length }), f: Math.min(1, kn / (keys.length * 0.5 || 1)), go: () => go("vocab") },
-      { ic: "🎭", de: "Rollenspiel", sub: tf("lsStepBest", { b: dl.role != null ? dl.role + "%" : "—" }), f: best(dl.role), go: () => { practiceOpen("role"); } },
-      { ic: "🗣️", de: "Frei sprechen", sub: tf("lsStepBest", { b: fsb.cue != null ? fsb.cue + "%" : fsb.topic != null ? fsb.topic + "%" : "—" }), f: best(Math.max(fsb.cue || 0, fsb.topic || 0)), go: () => { practiceOpen("cue"); } },
+      { ic: "💬", de: "Dialog sprechen", sub: tf("lsStepBest", { b: dl.role != null ? dl.role + "%" : "—" }), f: best(Math.max(dl.role || 0, dl.gap || 0, dl.read || 0)), go: () => { practiceOpen("skill:speak"); } },
+      { ic: "🗣️", de: "Frei sprechen", sub: tf("lsStepBest", { b: fsb.cue != null ? fsb.cue + "%" : fsb.topic != null ? fsb.topic + "%" : "—" }), f: best(Math.max(fsb.cue || 0, fsb.topic || 0)), go: () => { practiceOpen("skill:speak"); } },
       { ic: "🏁", de: "Prüfung", sub: tf("lsStepBest", { b: exb != null ? exb + "%" : "—" }), f: best(exb), go: () => { practiceOpen("exam"); } }
     ];
   }
