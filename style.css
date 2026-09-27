@@ -1852,3 +1852,65 @@ body:not([data-screen="audio"]) .dp-q { display: none; }
   .ly-head > div:first-child { flex: 1 1 100%; }
   .ly-acts { flex: 1 1 100%; justify-content: flex-end; }
 }
+
+/* ---------- Practice v3: four skills, calm and simple ---------- */
+.pr-hub { display: flex !important; flex-direction: column; gap: 12px; overflow-y: auto; flex: 1; min-height: 0; max-width: 760px; width: 100%; margin: 0 auto;
+  margin-bottom: calc(-1 * var(--dock-space)); padding-bottom: calc(var(--dock-space) + 12px); scrollbar-width: none; }
+.pr-hub > * { flex-shrink: 0; }
+.pr-scope { display: flex; padding: 2px; border-radius: 11px; background: var(--tile-2); }
+.pr-scope button { flex: 1; height: 32px; border-radius: 9px; font-size: 13px; font-weight: 700; color: var(--muted); white-space: nowrap; }
+.pr-scope button.on { background: var(--tile); color: var(--text); box-shadow: 0 2px 6px rgba(0,0,0,.12); }
+.pr-skills { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.pr-sk { background: var(--tile); border-radius: 22px; padding: 14px; min-height: 128px; display: flex; flex-direction: column; justify-content: space-between; gap: 8px; text-align: start; color: var(--text); transition: transform .15s; }
+.pr-sk:active { transform: scale(.97); }
+.pr-sk .ic { width: 42px; height: 42px; border-radius: 13px; display: grid; place-items: center; font-size: 21px; }
+.pr-sk .tx { display: flex; flex-direction: column; } .pr-sk b { font-size: 17px; } .pr-sk small { font-size: 12px; color: var(--muted); text-align: left; }
+.pr-sk .bar { height: 4px; border-radius: 2px; background: var(--tile-2); overflow: hidden; } .pr-sk .bar i { display: block; height: 100%; border-radius: 2px; }
+.pr-exam { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 22px; color: #fff; text-align: start; background: linear-gradient(135deg, #FF2D55, #7B3FF2); }
+.pr-exam .ic { font-size: 26px; } .pr-exam .tx { flex: 1; display: flex; flex-direction: column; } .pr-exam b { font-size: 17px; }
+.pr-exam small { color: rgba(255,255,255,.85); font-size: 12px; text-align: left; } .pr-exam .go { font-size: 24px; opacity: .8; }
+@media (min-width: 901px) and (min-height: 521px) { .pr-skills { grid-template-columns: repeat(4, 1fr); } .pr-sk { min-height: 150px; } }
+@media (max-height: 520px) and (orientation: landscape) { .pr-skills { grid-template-columns: repeat(4, 1fr); } .pr-sk { min-height: 110px; } .pr-hub { margin-bottom: 0; padding-bottom: 12px; } }
+
+/* skill page */
+#pSkill { overflow-y: auto; min-height: 0; }
+.sk-page { display: flex; flex-direction: column; gap: 10px; max-width: 640px; margin: 0 auto; width: 100%; padding-bottom: calc(var(--dock-space) + 10px); }
+.sk-sub { font-size: 13px; color: var(--muted); text-align: left; margin: 0; }
+.sk-card { background: var(--tile); border-radius: 22px; padding: 14px; display: flex; flex-direction: column; gap: 4px; }
+.sk-card h3 { margin: 0; font-size: 17px; } .sk-card > p { margin: 0 0 4px; font-size: 12px; color: var(--muted); text-align: left; }
+.sk-opt { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 9px 0; border-top: .5px solid rgba(128,128,128,.22); font-size: 14px; flex-wrap: wrap; }
+.sk-chips { display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end; }
+.sk-chips button { height: 28px; padding: 0 10px; border-radius: 14px; font-size: 12px; font-weight: 700; background: var(--tile-2); color: var(--muted); }
+.sk-chips button.on { background: var(--accent); color: #fff; }
+.sk-card .tg[aria-pressed="true"] { background: #34C759; }
+.sk-go { margin-top: 8px; height: 46px; border-radius: 23px; background: var(--accent); color: #fff; font-size: 16px; font-weight: 800; }
+.sk-go.alt { background: #5E5CE6; }
+.sk-ex { display: flex; align-items: center; gap: 12px; background: var(--tile); border-radius: 16px; padding: 12px 14px; color: var(--text); text-align: start; }
+.sk-ex .ic { font-size: 20px; width: 28px; text-align: center; } .sk-ex .tx { flex: 1; display: flex; flex-direction: column; } .sk-ex small { font-size: 12px; color: var(--muted); text-align: left; }
+.sk-ex .n { font-size: 12px; font-weight: 700; color: var(--muted); } .sk-ex .go { color: var(--muted); font-size: 20px; }
+.rb.mine .rb-fa { margin-top: 4px; }
+
+/* Karteikarten */
+#pFc { display: flex; flex-direction: column; gap: 6px; min-height: 0; }
+#pFc[hidden] { display: none !important; }
+.kc-top { display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+.kc-top b { font-size: 16px; }
+.kc-dots { display: flex; gap: 3px; flex-shrink: 0; }
+.kc-dots i { flex: 1; height: 4px; border-radius: 2px; background: var(--tile-2); }
+.kc-dots i.ok { background: #30D158; } .kc-dots i.bad { background: #FF9F0A; } .kc-dots i.cur { background: var(--accent); }
+.kc-scroll { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-bottom: 12px; scrollbar-width: none; }
+.kc-scroll > * { flex-shrink: 0; }
+.kc-next { position: relative; overflow: hidden; --cd: 0%; }
+.kc-next::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: var(--cd); background: rgba(255,255,255,.25); transition: width 1s linear; }
+.kc-cd { display: inline-grid; place-items: center; min-width: 22px; height: 22px; margin-left: 6px; border-radius: 11px; background: rgba(255,255,255,.25); font-size: 13px; }
+.kc-done { background: var(--tile); border-radius: 22px; padding: 22px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.kc-big { font-size: 40px; font-weight: 800; }
+.kc-lh { font-size: 11px; font-weight: 800; letter-spacing: .5px; color: var(--muted); margin: 4px 2px 6px; }
+.kc-li { display: flex; align-items: center; gap: 10px; background: var(--tile); border-radius: 14px; padding: 9px 12px; margin-bottom: 6px; }
+.kc-li .d { font-weight: 800; width: 16px; } .kc-li .d.ok { color: #30D158; } .kc-li .d.bad { color: #FF9F0A; }
+.kc-li b { flex: 1; font-size: 14px; } .kc-li small { font-size: 12px; color: var(--muted); text-align: right; }
+.dc-fc { margin-right: 6px; }
+#pFc > * { width: 100%; max-width: 560px; align-self: center; }
+.kc-done[hidden], .kc-log[hidden] { display: none !important; }
+.sk-card .tg, .sk-card .tg[aria-pressed="false"] { background: var(--tile-2); }
+.sk-card .tg[aria-pressed="true"] { background: #34C759; }

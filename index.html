@@ -16,7 +16,7 @@
   <meta name="description" content="LAPP — آموزش زبان آلمانی با دیالوگ صوتی، واژگان و تمرین.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=mujtjmvs">
+  <link rel="stylesheet" href="style.css?v=mujtv3nd">
 </head>
 <body data-screen="home">
   <div class="frame">
@@ -141,7 +141,7 @@
       <section class="screen" id="vocab">
         <div class="dc-head">
           <div><h1 class="dc-title">Wörterbuch</h1><div class="dc-sub" id="vocabSub"></div></div>
-          <div class="ly-seg" id="vocabScope"><button class="on" data-scope="lesson">Lektion</button><button data-scope="all">Alle</button></div>
+          <button class="ly-chip dc-fc" id="vocabFc">🃏 <span>Karten</span></button><div class="ly-seg" id="vocabScope"><button class="on" data-scope="lesson">Lektion</button><button data-scope="all">Alle</button></div>
         </div>
         <div class="mbar"><div class="mbar-b" id="vMbar"></div><div class="mbar-lg" id="vMleg"></div></div>
         <input class="v-search" id="vocabSearch" type="search" placeholder="Suchen · جستجو" data-i18n-ph="Suchen · {search}" aria-label="Suchen">
@@ -154,16 +154,12 @@
         <div class="p-hub" id="pHub">
           <div class="ph-head">
             <div><h1 class="dc-title">Üben</h1><div class="dc-sub" id="phSub"></div></div>
-            <div class="ph-ring" id="phRing"></div>
             <div class="ex-stats ph-hide" id="exStats"></div>
           </div>
-          <div class="hub-scroll ph-grid">
-            <button class="ph-rec" id="phRec"></button>
-            <div class="ph-col ph-speak"><h3 class="ph-h"><span>SPRECHEN · <span class="fa" data-i18n="speaking"></span></span></h3><div class="sp3" id="phSpeak"></div>
-              <h3 class="ph-h ph-h2"><span>FREI SPRECHEN · <span class="fa" data-i18n="fsFree"></span></span></h3><div class="sp3" id="phFree"></div></div>
-            <button class="ph-fc" data-open="fc"><span class="ic">🃏</span><span class="tx"><b>Karteikarten</b><small class="fa" id="phFcSub"></small></span><span class="due" id="phDue"></span></button>
-            <div class="ph-col ph-ex"><h3 class="ph-h"><span>ÜBUNGEN · <span class="fa" data-i18n="exercises"></span></span><span id="phExCount"></span></h3><div class="ex6" id="hubEx"></div></div>
-            <button class="ph-exam" data-open="exam"><span class="ic">🏁</span><span class="tx"><b>Prüfung</b><small class="fa" id="phExamSub"></small></span><span class="go">Start</span></button>
+          <div class="hub-scroll pr-hub">
+            <div class="pr-scope" id="prScope"></div>
+            <div class="pr-skills" id="prSkills"></div>
+            <button class="pr-exam" data-open="exam"><span class="ic">🏁</span><span class="tx"><b>Abschlussprüfung</b><small class="fa" id="phExamSub"></small></span><span class="go">›</span></button>
           </div>
         </div>
 
@@ -173,6 +169,8 @@
             <h2 id="pTitle"></h2>
             <span class="pv-prog" id="pProg"></span>
           </div>
+
+          <div class="pv-panel" id="pSkill" hidden><div class="sk-page" id="skPage"></div></div>
 
           <div class="pv-panel" id="pEx" hidden>
             <div class="ex-wrap">
@@ -191,20 +189,25 @@
           </div>
 
           <div class="pv-panel" id="pFc" hidden>
-            <div class="fc-stats" id="fcStats"></div>
-            <article class="fc-card" id="fcCard">
-              <div class="fc-dir" id="fcDir"></div>
-              <div class="fc-prompt" id="fcPrompt"></div>
-              <span class="chip fa fc-pos" id="fcPos"></span>
-              <div class="fc-opts" id="fcOpts"></div>
-              <div class="fc-voice" id="fcVoice" hidden>
-                <button class="mic" id="fcMic" aria-label="Mikrofon">🎤</button>
-                <p class="heard fa" id="fcHeard" data-i18n="sayGerman"></p>
-                <button class="chip-btn" id="fcSkip">Weiß nicht · <span class="fa" data-i18n="dontKnow"></span></button>
-              </div>
-              <div class="fc-info fa" id="fcInfo" hidden></div>
-              <button class="btn" id="fcNext" hidden>Weiter ›</button>
-            </article>
+            <div class="kc-top"><b id="kcCount"></b><span class="fc-stats" id="fcStats"></span></div>
+            <div class="kc-dots" id="kcDots"></div>
+            <div class="kc-scroll">
+              <article class="fc-card" id="fcCard">
+                <div class="fc-dir" id="fcDir"></div>
+                <div class="fc-prompt" id="fcPrompt"></div>
+                <span class="chip fa fc-pos" id="fcPos"></span>
+                <div class="fc-opts" id="fcOpts"></div>
+                <div class="fc-voice" id="fcVoice" hidden>
+                  <button class="mic" id="fcMic" aria-label="Mikrofon">🎤</button>
+                  <p class="heard fa" id="fcHeard"></p>
+                  <button class="chip-btn" id="fcSkip">Weiß nicht · <span class="fa" data-i18n="dontKnow"></span></button>
+                </div>
+                <div class="fc-info fa" id="fcInfo" hidden></div>
+                <button class="btn kc-next" id="fcNext" hidden>Weiter ›</button>
+              </article>
+              <div class="kc-done" id="kcDone" hidden></div>
+              <div class="kc-log" id="kcLogWrap" hidden><div class="kc-lh">DIESE RUNDE · <span class="fa" data-i18n="kcRound"></span></div><div id="kcLog"></div></div>
+            </div>
           </div>
 
           <div class="pv-panel" id="pDlg" hidden>
@@ -291,69 +294,69 @@
     </div>
   </div>
 
-  <script src="data/lessons.js?v=mujtjmvs"></script>
-  <script src="data/lesson1-fa.js?v=mujtjmvs"></script>
-  <script src="data/lesson1-times.js?v=mujtjmvs"></script>
-  <script src="data/lesson1-speak.js?v=mujtjmvs"></script>
-  <script src="data/lesson1-focus.js?v=mujtjmvs"></script>
-  <script src="data/lesson1-words.js?v=mujtjmvs"></script>
-  <script src="data/dict-de.js?v=mujtjmvs"></script>
-  <script src="data/dict-tr.js?v=mujtjmvs"></script>
-  <script src="data/lesson1-ru.js?v=mujtjmvs"></script>
-  <script src="data/lesson1-uk.js?v=mujtjmvs"></script>
-  <script src="data/lesson2-fa.js?v=mujtjmvs"></script>
-  <script src="data/lesson2-times.js?v=mujtjmvs"></script>
-  <script src="data/lesson2-speak.js?v=mujtjmvs"></script>
-  <script src="data/lesson2-focus.js?v=mujtjmvs"></script>
-  <script src="data/lesson2-words.js?v=mujtjmvs"></script>
-  <script src="data/lesson2-ru.js?v=mujtjmvs"></script>
-  <script src="data/lesson2-uk.js?v=mujtjmvs"></script>
-  <script src="data/lesson3-fa.js?v=mujtjmvs"></script>
-  <script src="data/lesson3-times.js?v=mujtjmvs"></script>
-  <script src="data/lesson3-speak.js?v=mujtjmvs"></script>
-  <script src="data/lesson3-focus.js?v=mujtjmvs"></script>
-  <script src="data/lesson3-words.js?v=mujtjmvs"></script>
-  <script src="data/lesson3-ru.js?v=mujtjmvs"></script>
-  <script src="data/lesson3-uk.js?v=mujtjmvs"></script>
-  <script src="data/lesson4-fa.js?v=mujtjmvs"></script>
-  <script src="data/lesson4-times.js?v=mujtjmvs"></script>
-  <script src="data/lesson4-speak.js?v=mujtjmvs"></script>
-  <script src="data/lesson4-focus.js?v=mujtjmvs"></script>
-  <script src="data/lesson4-words.js?v=mujtjmvs"></script>
-  <script src="data/lesson4-ru.js?v=mujtjmvs"></script>
-  <script src="data/lesson4-uk.js?v=mujtjmvs"></script>
-  <script src="data/lesson5-fa.js?v=mujtjmvs"></script>
-  <script src="data/lesson5-times.js?v=mujtjmvs"></script>
-  <script src="data/lesson5-speak.js?v=mujtjmvs"></script>
-  <script src="data/lesson5-focus.js?v=mujtjmvs"></script>
-  <script src="data/lesson5-words.js?v=mujtjmvs"></script>
-  <script src="data/lesson5-ru.js?v=mujtjmvs"></script>
-  <script src="data/lesson5-uk.js?v=mujtjmvs"></script>
-  <script src="data/lesson6-fa.js?v=mujtjmvs"></script>
-  <script src="data/lesson6-times.js?v=mujtjmvs"></script>
-  <script src="data/lesson6-speak.js?v=mujtjmvs"></script>
-  <script src="data/lesson6-focus.js?v=mujtjmvs"></script>
-  <script src="data/lesson6-words.js?v=mujtjmvs"></script>
-  <script src="data/lesson6-ru.js?v=mujtjmvs"></script>
-  <script src="data/lesson6-uk.js?v=mujtjmvs"></script>
-  <script src="data/lesson7-fa.js?v=mujtjmvs"></script>
-  <script src="data/lesson7-times.js?v=mujtjmvs"></script>
-  <script src="data/lesson7-speak.js?v=mujtjmvs"></script>
-  <script src="data/lesson7-focus.js?v=mujtjmvs"></script>
-  <script src="data/lesson7-words.js?v=mujtjmvs"></script>
-  <script src="data/lesson7-ru.js?v=mujtjmvs"></script>
-  <script src="data/lesson7-uk.js?v=mujtjmvs"></script>
-  <script src="data/lesson8-fa.js?v=mujtjmvs"></script>
-  <script src="data/lesson8-times.js?v=mujtjmvs"></script>
-  <script src="data/lesson8-speak.js?v=mujtjmvs"></script>
-  <script src="data/lesson8-focus.js?v=mujtjmvs"></script>
-  <script src="data/lesson8-words.js?v=mujtjmvs"></script>
-  <script src="data/lesson8-ru.js?v=mujtjmvs"></script>
-  <script src="data/lesson8-uk.js?v=mujtjmvs"></script>
-  <script src="i18n.js?v=mujtjmvs"></script>
-  <script src="data/verbs-de.js?v=mujtjmvs"></script>
-  <script src="grammar.js?v=mujtjmvs"></script>
-  <script src="exercises.js?v=mujtjmvs"></script>
-  <script src="app.js?v=mujtjmvs"></script>
+  <script src="data/lessons.js?v=mujtv3nd"></script>
+  <script src="data/lesson1-fa.js?v=mujtv3nd"></script>
+  <script src="data/lesson1-times.js?v=mujtv3nd"></script>
+  <script src="data/lesson1-speak.js?v=mujtv3nd"></script>
+  <script src="data/lesson1-focus.js?v=mujtv3nd"></script>
+  <script src="data/lesson1-words.js?v=mujtv3nd"></script>
+  <script src="data/dict-de.js?v=mujtv3nd"></script>
+  <script src="data/dict-tr.js?v=mujtv3nd"></script>
+  <script src="data/lesson1-ru.js?v=mujtv3nd"></script>
+  <script src="data/lesson1-uk.js?v=mujtv3nd"></script>
+  <script src="data/lesson2-fa.js?v=mujtv3nd"></script>
+  <script src="data/lesson2-times.js?v=mujtv3nd"></script>
+  <script src="data/lesson2-speak.js?v=mujtv3nd"></script>
+  <script src="data/lesson2-focus.js?v=mujtv3nd"></script>
+  <script src="data/lesson2-words.js?v=mujtv3nd"></script>
+  <script src="data/lesson2-ru.js?v=mujtv3nd"></script>
+  <script src="data/lesson2-uk.js?v=mujtv3nd"></script>
+  <script src="data/lesson3-fa.js?v=mujtv3nd"></script>
+  <script src="data/lesson3-times.js?v=mujtv3nd"></script>
+  <script src="data/lesson3-speak.js?v=mujtv3nd"></script>
+  <script src="data/lesson3-focus.js?v=mujtv3nd"></script>
+  <script src="data/lesson3-words.js?v=mujtv3nd"></script>
+  <script src="data/lesson3-ru.js?v=mujtv3nd"></script>
+  <script src="data/lesson3-uk.js?v=mujtv3nd"></script>
+  <script src="data/lesson4-fa.js?v=mujtv3nd"></script>
+  <script src="data/lesson4-times.js?v=mujtv3nd"></script>
+  <script src="data/lesson4-speak.js?v=mujtv3nd"></script>
+  <script src="data/lesson4-focus.js?v=mujtv3nd"></script>
+  <script src="data/lesson4-words.js?v=mujtv3nd"></script>
+  <script src="data/lesson4-ru.js?v=mujtv3nd"></script>
+  <script src="data/lesson4-uk.js?v=mujtv3nd"></script>
+  <script src="data/lesson5-fa.js?v=mujtv3nd"></script>
+  <script src="data/lesson5-times.js?v=mujtv3nd"></script>
+  <script src="data/lesson5-speak.js?v=mujtv3nd"></script>
+  <script src="data/lesson5-focus.js?v=mujtv3nd"></script>
+  <script src="data/lesson5-words.js?v=mujtv3nd"></script>
+  <script src="data/lesson5-ru.js?v=mujtv3nd"></script>
+  <script src="data/lesson5-uk.js?v=mujtv3nd"></script>
+  <script src="data/lesson6-fa.js?v=mujtv3nd"></script>
+  <script src="data/lesson6-times.js?v=mujtv3nd"></script>
+  <script src="data/lesson6-speak.js?v=mujtv3nd"></script>
+  <script src="data/lesson6-focus.js?v=mujtv3nd"></script>
+  <script src="data/lesson6-words.js?v=mujtv3nd"></script>
+  <script src="data/lesson6-ru.js?v=mujtv3nd"></script>
+  <script src="data/lesson6-uk.js?v=mujtv3nd"></script>
+  <script src="data/lesson7-fa.js?v=mujtv3nd"></script>
+  <script src="data/lesson7-times.js?v=mujtv3nd"></script>
+  <script src="data/lesson7-speak.js?v=mujtv3nd"></script>
+  <script src="data/lesson7-focus.js?v=mujtv3nd"></script>
+  <script src="data/lesson7-words.js?v=mujtv3nd"></script>
+  <script src="data/lesson7-ru.js?v=mujtv3nd"></script>
+  <script src="data/lesson7-uk.js?v=mujtv3nd"></script>
+  <script src="data/lesson8-fa.js?v=mujtv3nd"></script>
+  <script src="data/lesson8-times.js?v=mujtv3nd"></script>
+  <script src="data/lesson8-speak.js?v=mujtv3nd"></script>
+  <script src="data/lesson8-focus.js?v=mujtv3nd"></script>
+  <script src="data/lesson8-words.js?v=mujtv3nd"></script>
+  <script src="data/lesson8-ru.js?v=mujtv3nd"></script>
+  <script src="data/lesson8-uk.js?v=mujtv3nd"></script>
+  <script src="i18n.js?v=mujtv3nd"></script>
+  <script src="data/verbs-de.js?v=mujtv3nd"></script>
+  <script src="grammar.js?v=mujtv3nd"></script>
+  <script src="exercises.js?v=mujtv3nd"></script>
+  <script src="app.js?v=mujtv3nd"></script>
 </body>
 </html>
