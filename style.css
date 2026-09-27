@@ -1789,3 +1789,8 @@ body.video-only .nt-stage > * { visibility: hidden; }
   #home .prof5 { grid-column: 3; grid-row: 1; align-self: center; padding: 8px 14px; }
   #home .prof5 .avatar-btn { width: 36px; height: 36px; }
 }
+/* more speakers: waiter, fairy-tale characters */
+.ly-line.kellnerin .ly-who, .ly-line.gastgeber .ly-who { color: #30B0C7; }
+.ly-line.mutter .ly-who, .ly-line.frau .ly-who, .ly-line.morgiana .ly-who, .ly-line.goldlöckchen .ly-who, .ly-line.mama-bär .ly-who, .ly-line.baby-bär .ly-who { color: #FF2D55; }
+.ly-line.jack .ly-who, .ly-line.kaiser .ly-who, .ly-line.kasim .ly-who, .ly-line.papa-bär .ly-who, .ly-line.ali-baba .ly-who { color: #FF9F0A; }
+.ly-line.anführer .ly-who, .ly-line.räuber .ly-who, .ly-line.riese .ly-who, .ly-line.weber .ly-who { color: #BF5AF2; }

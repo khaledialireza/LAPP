@@ -98,6 +98,8 @@
   }
 
   /* ---------- Lesson ---------- */
+  // speaker name → one CSS class ("Papa Bär" → "papa-bär")
+  const whoCls = w => (w || "").toLowerCase().replace(/\s+/g, "-");
   function parseTranscript(raw) {
     return raw.split("\n").map(s => s.trim()).filter(Boolean).map(s => {
       const m = s.match(/^\*\*(.+?):\*\*\s*(.*)$/);
@@ -139,12 +141,12 @@
     let acc = 0;
     lines.forEach(l => { l.start = acc / total; acc += l.text.length; l.end = acc / total; });
     $("#mTranscript").innerHTML = lines.map((l, j) => `
-      <div class="ly-line ${l.who.toLowerCase()}" data-i="${j}"><span class="ly-who">${esc(l.who)}</span>
+      <div class="ly-line ${whoCls(l.who)}" data-i="${j}"><span class="ly-who">${esc(l.who)}</span>
       <div class="ly-de">${esc(l.text)}</div><div class="ly-fa fa">${esc(l.fa || "")}</div></div>`).join("");
     // speaker filter: one tab per speaker of this lesson
     const whos = [...new Set(lines.map(l => l.who).filter(Boolean))];
-    if (!whos.some(w => w.toLowerCase() === state.spk)) state.spk = "all";
-    $("#mSpkTabs").innerHTML = ["all", ...whos].map(w => `<button class="${(w === "all" ? "all" : w.toLowerCase()) === state.spk ? "on" : ""}" data-spk="${w === "all" ? "all" : esc(w.toLowerCase())}">${w === "all" ? "Alle" : esc(w)}</button>`).join("");
+    if (!whos.some(w => whoCls(w) === state.spk)) state.spk = "all";
+    $("#mSpkTabs").innerHTML = ["all", ...whos].map(w => `<button class="${(w === "all" ? "all" : whoCls(w)) === state.spk ? "on" : ""}" data-spk="${w === "all" ? "all" : esc(whoCls(w))}">${w === "all" ? "Alle" : esc(w)}</button>`).join("");
     $(".spk-pick").hidden = whos.length < 2;
     $("#spkLbl").textContent = $("#mSpkTabs button.on")?.textContent || "Alle";
     filterSpeakers();
@@ -655,7 +657,7 @@
       <div class="vs-mean fa">${esc(v.fa)}</div>
       ${table}
       ${all.length ? `<div class="vs-sec">GRAMMATIK · <span class="fa">نکتهٔ دستوری</span></div><div class="gram fa">${all.map(n => `<div class="li"><span>${n}</span></div>`).join("")}</div>` : ""}
-      ${ex.length ? `<div class="vs-sec">AUS DER LEKTION · <span class="fa">در درس</span></div>${ex.map(e => `<div class="quote ${e.who.toLowerCase()}"><span class="who">${esc(e.who.toUpperCase())} · Satz ${e.i + 1}</span><span class="qde">${e.html}</span><span class="qfa fa">${esc(e.fa)}</span></div>`).join("")}` : ""}
+      ${ex.length ? `<div class="vs-sec">AUS DER LEKTION · <span class="fa">در درس</span></div>${ex.map(e => `<div class="quote ${whoCls(e.who)}"><span class="who">${esc(e.who.toUpperCase())} · Satz ${e.i + 1}</span><span class="qde">${e.html}</span><span class="qfa fa">${esc(e.fa)}</span></div>`).join("")}` : ""}
       </div>
       <div class="vs-stats"><div><span class="vs-ico">👁</span><div><b>${seen}×</b><span>gesehen</span></div></div>
         <div><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" stroke-width="4" opacity=".15"/>${tries ? "" : "<!--"}<circle cx="18" cy="18" r="15" fill="none" stroke="${pct >= 70 ? "#30D158" : pct >= 40 ? "#FF9F0A" : "#FF375F"}" stroke-width="4" stroke-linecap="round" pathLength="100" stroke-dasharray="${pct} 100" transform="rotate(-90 18 18)"/>${tries ? "" : "-->"}</svg>

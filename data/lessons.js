@@ -734,5 +734,964 @@ window.LESSONS = [
 **Erzähler:** Ein einziger Gedanke kann alles verändern: „Ich trage das nicht mehr.“
 **Erzähler:** Vielleicht ist heute der Tag, an dem ihr anfangt, Löcher in euren Korb zu machen.
 `
+  },
+  {
+    id: 4,
+    title: "Im Restaurant",
+    fa: "در رستوران",
+    level: "A1",
+    audio: "audio/lesson4.mp3",
+    summary: "میز گرفتن، خواندن منو، سفارش پیش‌غذا و غذای اصلی، نوشیدنی، «نوش جان»، سیر و گرسنه و تشنه، خواستن صورت‌حساب، پرداخت نقدی یا با کارت و انعام.",
+    phrases: [
+      ["Haben Sie einen Tisch reserviert?", "میز رزرو کرده‌اید؟", "reservieren = رزرو کردن"],
+      ["Ist ein Tisch für zwei Personen frei?", "یک میز برای دو نفر خالی هست؟", ""],
+      ["Was empfehlen Sie?", "چه پیشنهاد می‌کنید؟", "empfehlen = پیشنهاد کردن"],
+      ["Sind Sie bereit zu bestellen?", "برای سفارش آماده‌اید؟", "bestellen = سفارش دادن"],
+      ["Ich hätte gern die Tomatensuppe.", "سوپ گوجه را می‌خواهم.", "hätte gern = مؤدبانه‌ترین شکل سفارش"],
+      ["Ich nehme das Schnitzel mit Pommes.", "شنیتسل با سیب‌زمینی سرخ‌کرده می‌گیرم.", "nehmen = گرفتن (سفارش)"],
+      ["… als Vorspeise / als Hauptgericht", "… به‌عنوان پیش‌غذا / غذای اصلی", ""],
+      ["Möchten Sie etwas trinken?", "چیزی میل دارید بنوشید؟", ""],
+      ["Guten Appetit! – Danke, gleichfalls.", "نوش جان! – ممنون، همچنین.", ""],
+      ["Kannst du mir das Salz geben, bitte?", "می‌شود نمک را به من بدهی، لطفاً؟", "geben + Dativ (mir)"],
+      ["Das ist lecker! / Das schmeckt sehr gut.", "خوشمزه است! / خیلی خوشمزه است.", ""],
+      ["Ich bin satt. / Ich habe Hunger. / Ich habe Durst.", "سیرم. / گرسنه‌ام. / تشنه‌ام.", "Hunger/Durst با haben"],
+      ["Hat es Ihnen geschmeckt?", "خوشتان آمد؟", "schmecken + Dativ"],
+      ["Die Rechnung, bitte.", "صورت‌حساب، لطفاً.", "در آلمان باید خودت بخواهی"],
+      ["Kann ich mit Karte bezahlen?", "می‌توانم با کارت پرداخت کنم؟", "bar bezahlen = نقدی"],
+      ["Zusammen oder getrennt?", "با هم یا جدا؟", ""],
+      ["Stimmt so. / Das ist für Sie.", "باقی‌اش مال شما. (انعام)", "روش دادن انعام"]
+    ],
+    vocab: [],
+    quiz: [],
+    transcript: `
+**Anna:** Hallo zusammen! Herzlich willkommen bei „Daily German Talk“.
+**Ben:** Hallo, schön, dass ihr da seid.
+**Anna:** Ich bin die Anna.
+**Ben:** Ich bin der Ben. Hier lernt ihr Deutsch mit echten Gesprächen.
+**Anna:** Genau. Wenn ihr das noch nicht gemacht habt, abonniert doch unseren Kanal.
+**Ben:** Gebt uns einen Daumen hoch. Heute sprechen wir über ein tolles Thema.
+**Anna:** Wie geht's dir heute?
+**Ben:** Mir geht es sehr gut, und dir, Anna?
+**Anna:** Mir geht es super! Ich habe heute richtig Hunger.
+**Ben:** Oh, ich auch. Das ist perfekt für unser Thema: im Restaurant.
+**Anna:** Absolut! Was hast du am Wochenende gemacht?
+**Ben:** Am Samstag war ich mit Freunden schwimmen. Und am Sonntag war ich in einem Café.
+**Anna:** Im Café! Was hast du gegessen?
+**Ben:** Ich habe einen Kuchen gegessen. Schokoladenkuchen. Er war sehr lecker.
+**Anna:** Oh, das klingt wunderbar. Ich liebe Schokoladenkuchen.
+**Ben:** Ich auch. Aber heute möchte ich etwas Herzhaftes. Etwas mit Nudeln vielleicht.
+**Anna:** Hmm, gute Idee. Lass uns also ins Restaurant gehen.
+**Anna:** So, hier sind wir, in einem Restaurant.
+**Ben:** Es ist sehr schön hier. Sieh mal, da ist eine Tafel.
+**Anna:** Die Tafel sagt: „Heute empfehlen wir Linsensuppe und Schnitzel.“
+**Ben:** Linsensuppe – das ist Suppe mit Linsen.
+**Anna:** Und Schnitzel ist ein Stück Fleisch, paniert. Sehr typisch deutsch.
+**Gastgeber:** Guten Abend. Haben Sie einen Tisch reserviert?
+**Anna:** Guten Abend. Nein, haben wir nicht.
+**Ben:** Ist ein Tisch für zwei Personen frei?
+**Anna:** Vielen Dank.
+**Ben:** Dankeschön.
+**Anna:** Ein schöner Tisch.
+**Ben:** Ja. Da ist die Speisekarte. Die Karte ist sehr groß.
+**Anna:** Lass uns die Karte lesen. Was möchtest du essen, Ben?
+**Ben:** Hmm, ich weiß nicht. Es gibt so viel. Ich verstehe nicht alles.
+**Ben:** Was ist Rinderbraten?
+**Anna:** Rinderbraten ist „roast beef“. Das ist Fleisch vom Rind.
+**Ben:** Ah, verstehe. Und Gulasch?
+**Anna:** Gulasch ist eine Suppe mit viel Fleisch und Zwiebeln. Sie ist oft ein bisschen scharf.
+**Ben:** Scharf? Nein, danke. Ich mag kein scharfes Essen.
+**Anna:** Ich auch nicht. Sieh mal, hier gibt es auch Pizza und Pasta.
+**Ben:** Das ist gut. Ich mag italienisches Essen.
+**Kellnerin:** Guten Abend, sind Sie bereit zu bestellen?
+**Anna:** Können wir noch zwei Minuten haben, bitte?
+**Kellnerin:** Aber natürlich, kein Problem.
+**Ben:** „Noch zwei Minuten haben“ – das bedeutet „two more minutes“, richtig?
+**Anna:** Sehr gut, Ben. So, was nimmst du?
+**Ben:** Ich möchte die Tomatensuppe als Vorspeise.
+**Anna:** Und als Hauptgericht?
+**Ben:** Ich hätte gern die Spaghetti Bolognese.
+**Anna:** Oh, das ist eine gute Wahl. Ich nehme einen gemischten Salat als Vorspeise und dann das Schnitzel mit Pommes.
+**Ben:** Pommes sind „French fries“. Sehr lecker mit Schnitzel.
+**Kellnerin:** Haben Sie eine Entscheidung getroffen?
+**Anna:** Ja, wir sind bereit.
+**Kellnerin:** Was möchten Sie bestellen?
+**Anna:** Für mich bitte einen gemischten Salat als Vorspeise und dann das Schnitzel mit Pommes.
+**Kellnerin:** Ein gemischter Salat und ein Schnitzel mit Pommes. Und für Sie?
+**Ben:** Ich hätte gerne die Tomatensuppe als Vorspeise und dann die Spaghetti Bolognese.
+**Kellnerin:** Eine Tomatensuppe und Spaghetti Bolognese. Möchten Sie etwas trinken?
+**Anna:** Oh ja, was gibt es? Eine Getränkekarte, bitte.
+**Kellnerin:** Hier, bitte.
+**Ben:** Danke. Wasser, Cola, Fanta, Apfelsaft …
+**Anna:** Ich trinke gern Wasser mit Gas.
+**Ben:** Und ich nehme eine Cola, bitte.
+**Kellnerin:** Also ein Sprudelwasser und eine Cola. Kommt sofort.
+**Anna:** Vielen Dank.
+**Anna:** So, die Bestellung ist fertig.
+**Ben:** Ja. Ich bin so hungrig. Mein Magen macht Geräusche. Hörst du?
+**Anna:** Ja, ich höre. Die Suppe kommt bestimmt schnell.
+**Ben:** Der Salat auch. Da ist die Kellnerin.
+**Kellnerin:** Hier der gemischte Salat für Sie und die Tomatensuppe für Sie. Guten Appetit.
+**Anna:** Vielen Dank. Guten Appetit, Ben.
+**Ben:** Danke, gleichfalls. Guten Appetit, Anna.
+**Ben:** Hmm, die Suppe riecht gut.
+**Anna:** Und der Salat sieht frisch aus. Mit Tomate, Gurke und Karotte.
+**Ben:** Karotte? Ah, „carrot“.
+**Ben:** Ich esse meine Suppe … sie ist heiß!
+**Anna:** Vorsicht! Blas erst, Ben!
+**Ben:** So, jetzt ist es okay. Lecker!
+**Anna:** Ist deine Suppe gut?
+**Ben:** Sehr gut! Und dein Salat?
+**Anna:** Er ist frisch und knackig. Sehr gut.
+**Ben:** So, die Suppe ist fertig. Ich bin aber immer noch hungrig.
+**Anna:** Das Hauptgericht kommt jetzt. Ah, sieh mal.
+**Kellnerin:** Hier das Schnitzel mit Pommes. Vorsicht, der Teller ist heiß.
+**Anna:** Vielen Dank! Oh, das sieht groß aus.
+**Kellnerin:** Und die Spaghetti Bolognese für Sie.
+**Ben:** Wow! Dankeschön. Das sieht fantastisch aus.
+**Kellnerin:** Guten Appetit.
+**Ben:** Danke.
+**Anna:** Gleichfalls. So, deine Spaghetti. Du siehst zufrieden aus, Ben.
+**Ben:** Oh ja, ich liebe Spaghetti. Aber es ist immer schwierig.
+**Anna:** So! Drehen … ja, so dreht man Spaghetti. Oder du schneidest sie mit dem Messer.
+**Ben:** Nein. Ich drehe sie. Es ist lustig. Hmm … sehr lecker!
+**Anna:** Mein Schnitzel ist perfekt.
+**Ben:** Kann ich mal probieren, ein kleines Stück?
+**Anna:** Natürlich, hier. Und ich probiere eine deiner Spaghetti.
+**Ben:** Aber sicher, hier, bitte. Vorsicht, sie sind heiß.
+**Anna:** Deine Spaghetti sind sehr gut. Die Soße ist toll.
+**Ben:** Und dein Schnitzel – wow! Sehr knusprig. Und das Fleisch ist weich.
+**Anna:** Möchtest du noch ein Stück?
+**Ben:** Danke, das war genug. Ich muss meine Spaghetti aufessen.
+**Ben:** Sie essen weiter. Anna, kannst du mir das Salz geben, bitte?
+**Anna:** Das Salz? Hier, bitte. Und für mich den Pfeffer, bitte.
+**Ben:** Kein Problem. Hier ist der Pfeffer.
+**Anna:** Danke. So, meine Pommes sind auch sehr gut. Möchtest du eine?
+**Ben:** Ja, gerne. Danke. Mh … lecker!
+**Anna:** Ben, schau mal! Da ist eine Fliege in deinem Wasser.
+**Ben:** Eine Fliege? Oh nein!
+**Ben:** Das ist kein Problem. Die Fliege mag auch Deutsch.
+**Anna:** Du bist verrückt, Ben. Ich hole neues Wasser.
+**Ben:** Danke, Anna. Du bist sehr nett.
+**Anna:** So, unser Essen ist fast fertig. Das war sehr lecker, findest du nicht?
+**Ben:** Oh ja. Aber ich glaube, ich bin satt. Sehr satt.
+**Anna:** Perfekt für unser kleines Vokabel-Review. „Ich bin satt.“
+**Anna:** Das ist ein sehr wichtiger Satz. Es bedeutet „Ich bin voll. Ich kann nicht mehr essen.“
+**Ben:** Genau. Ich bin satt. Aber vor einer Stunde war ich das Gegenteil. Da war ich hungrig.
+**Anna:** Sehr gut. „Hungrig“ – das bedeutet „hungry“.
+**Anna:** So first I was „hungrig“ and now I am „satt“.
+**Ben:** Ja. Erst hungrig, dann satt. Und jetzt? Ich habe auch ein bisschen Durst.
+**Anna:** Ah, our next word: „Ich habe Durst.“ Thirsty – nicht hungry for food, sondern Durst für etwas zu trinken.
+**Ben:** Richtig. Kannst du mir das Wasser geben, bitte? Mein Durst ist groß.
+**Anna:** Natürlich, hier, bitte. Wir haben also: hungrig und Durst.
+**Anna:** Das Essen war …
+**Ben:** Lecker!
+**Anna:** „Lecker“ ist wahrscheinlich das wichtigste deutsche Wort für das Essen. Es heißt „delicious“ oder „tasty“.
+**Anna:** Sie können sagen: „Das ist lecker.“
+**Ben:** Die Spaghetti waren lecker. Das Schnitzel war lecker, die Pommes waren lecker. Alles war lecker.
+**Anna:** Und die Kellnerin, wie war sie? Was haben wir über sie gesagt?
+**Ben:** Die Kellnerin war sehr nett. Sie war freundlich und hat gelächelt.
+**Ben:** „Nett“ means „nice“.
+**Anna:** Du kannst sagen: „Du bist nett“ zu einem Freund, oder: „Der Herr ist sehr nett.“
+**Anna:** Es ist ein sehr freundliches Wort.
+**Ben:** Also, zusammengefasst: Nach dem Essen bin ich satt. Das Essen war …
+**Anna:** Lecker!
+**Ben:** Die Kellnerin war …
+**Anna:** Nett!
+**Ben:** Und ich habe immer noch Durst.
+**Anna:** Ja, sehr gut! Aber was machen wir jetzt? Das Restaurant will schließen.
+**Ben:** Wir müssen bezahlen. „Bezahlen“ means „to pay“.
+**Anna:** „Die Rechnung, bitte.“ The bill, please. And then we „bezahlen“. Wie willst du denn bezahlen, Ben?
+**Ben:** Ich bezahle bar – mit Geld.
+**Anna:** „Bar bezahlen“ means to pay with cash. Und das Gegenteil: mit Karte.
+**Ben:** Mit meiner Kreditkarte. Perfekt.
+**Anna:** „Kann ich mit Karte bezahlen?“ oder „Ich bezahle bar.“
+**Kellnerin:** Die Kellnerin kommt an den Tisch. „Hat es Ihnen geschmeckt?“
+**Anna:** Oh ja, sehr gut! Es war ausgezeichnet. Wir sind beide sehr satt.
+**Ben:** Alles war sehr lecker, besonders die Spaghetti.
+**Kellnerin:** Das freut mich sehr. Möchten Sie vielleicht noch einen Kaffee oder einen Nachtisch? Unser Apfelstrudel ist frisch.
+**Anna:** „Nachtisch“ – that means dessert.
+**Ben:** Oh, Nachtisch. Der Apfelstrudel klingt lecker. Aber nein, ich bin zu satt. Wirklich, ich kann nicht mehr.
+**Anna:** Ich auch nicht. Vielleicht nächstes Mal. Könnten wir bitte die Rechnung bekommen?
+**Kellnerin:** Aber natürlich, sofort!
+**Anna:** So, du siehst, ich habe es praktisch geübt: „Ich bin zu satt für Nachtisch.“
+**Ben:** Das hast du super gemacht. Und jetzt kommt der wichtigste Teil: die Rechnung.
+**Ben:** „Die Rechnung“ ist „the bill“. In Deutschland muss man oft danach fragen, sie bringen sie nicht automatisch.
+**Anna:** Also man sagt: „Entschuldigung, die Rechnung, bitte.“ Genau.
+**Anna:** So, und da ist sie schon.
+**Kellnerin:** Hier ist die Rechnung.
+**Anna:** Vielen Dank. So, Ben, wie viel Trinkgeld geben wir?
+**Ben:** Trinkgeld, ah. In Deutschland ist es normal, etwa fünf bis zehn Prozent Trinkgeld zu geben.
+**Ben:** Die Kellnerin war sehr nett, also geben wir zehn Prozent.
+**Anna:** Gute Idee. Also: Die Rechnung ist 46 Euro. Zehn Prozent sind 4,60 Euro.
+**Anna:** Runden wir auf 50 Euro auf.
+**Ben:** Das ist einfach. Wir geben 50 Euro, also vier Euro Trinkgeld. Sie hat es verdient.
+**Anna:** Finde ich auch. So, jetzt bezahlen wir.
+**Anna:** Ich habe nicht genug Geld bar. Ich bezahle mit Karte.
+**Ben:** Okay, dann bezahle ich meinen Teil bar. Wir können getrennt bezahlen.
+**Anna:** Oder wir zahlen zusammen und ich gebe dir später Geld.
+**Ben:** Auch eine gute Lösung. So machen wir es.
+**Anna:** Ich übergebe der Kellnerin die Karte. „Wir möchten zusammen bezahlen, bitte, mit Karte.“
+**Kellnerin:** Sehr gern! Bitte sehr. Unterschreiben Sie hier.
+**Anna:** Danke schön, alles war wunderbar.
+**Ben:** Ja, auf Wiedersehen und vielen Dank.
+**Kellnerin:** Auf Wiedersehen, kommen Sie bald wieder.
+**Anna:** So, Ben. Das war ein erfolgreicher Abend. Wir waren hungrig, das Essen war lecker, jetzt sind wir satt und wir haben bezahlt.
+**Ben:** Und ich habe keinen Durst mehr. Das ist jetzt ein Vokabeltraum.
+**Ben:** Ich bin bereit für den Abendspaziergang.
+**Anna:** Perfekt! Lass uns gehen.
+**Anna:** So, das war unser langes, leckeres Gespräch im Restaurant.
+**Ben:** Ich bin immer noch so satt. Das war eine fantastische Übung.
+**Anna:** Wir haben so viel gelernt. Lass uns alles noch einmal zusammenfassen.
+**Anna:** Fangen wir ganz am Anfang an. Wir sind ins Restaurant gekommen.
+**Ben:** Was haben wir als Erstes gesagt? Der Gastgeber hat gefragt: „Haben Sie einen Tisch reserviert?“
+**Ben:** Und wir haben gesagt: „Nein, haben wir nicht.“
+**Anna:** Genau. Dann: Wie fragt man nach einem Tisch? Sehr wichtig.
+**Ben:** „Ist ein Tisch für zwei Personen frei?“
+**Anna:** Perfekt! Zum Publikum: Das könnt ihr immer benutzen. „Ist ein Tisch für zwei, drei, vier Personen frei?“
+**Ben:** Dann sind wir an den Tisch gegangen, und was kam? Die Speisekarte. Die große, große Speisekarte. So viele Wörter.
+**Anna:** Aber keine Panik. Ihr müsst nicht alles verstehen. Ihr könnt einfach fragen: „Was empfehlen Sie?“ – „What do you recommend?“
+**Ben:** Oder: „Was ist das? Was ist das?“ So habe ich es auch gemacht.
+**Anna:** Dann kam die Bestellung. Das ist der wichtigste Satz, den ihr braucht.
+**Ben:** Wir sprechen gemeinsam ins Publikum: „Ich hätte gern …“
+**Anna:** Ja. „Ich hätte gern die Tomatensuppe.“ „Ich hätte gern das Schnitzel.“ Sehr höflich und sehr üblich.
+**Ben:** Und dann, als das Essen kam, was sagt man?
+**Ben:** Richtig! Man sagt „Guten Appetit“ zu allen anderen am Tisch.
+**Ben:** Und die anderen antworten: „Danke, gleichfalls“ oder auch „Guten Appetit“.
+**Anna:** Während dem Essen könnt ihr auch sagen: „Das schmeckt sehr gut“ oder einfach nur „Lecker!“
+**Ben:** Und wenn man etwas braucht, Salz, Pfeffer, Wasser, dann sagt man: „Können Sie mir bitte das Salz geben?“
+**Anna:** Oder: „Entschuldigung, ich hätte gerne noch eine Cola.“
+**Ben:** Und am Ende, wenn man fertig ist und gehen möchte …
+**Anna:** Entschuldigung – ich halte eine imaginäre Rechnung in der Hand – „Die Rechnung, bitte.“ Sehr wichtig!
+**Ben:** In Deutschland muss man oft danach fragen. Der Kellner bringt sie nicht automatisch.
+**Anna:** Und dann bezahlt man: „Kann ich mit Karte bezahlen?“ oder …
+**Ben:** Und dann vergesst das Trinkgeld nicht, etwa fünf bis zehn Prozent.
+**Ben:** Wenn die Rechnung 46 Euro ist und man 50 Euro gibt, ist das ein gutes Trinkgeld.
+**Anna:** Das war eine super Zusammenfassung, Ben. Jetzt wollen wir aber hören, was ihr denkt.
+**Anna:** Unsere Frage des Tages ist heute …
+**Ben:** Ben holt ein großes, buntes Schild hervor, auf dem steht: „Was ist dein Lieblingsessen?“
+**Anna:** Ja! Erzählt uns von eurem Lieblingsessen. Ist es Pizza, Pasta, Schnitzel?
+**Anna:** Oder vielleicht etwas Deutsches wie Bratwurst oder Sauerkraut? Schreibt es unbedingt in die Kommentare.
+**Ben:** Wir lesen alle Kommentare und antworten auch. Wir sind sehr neugierig.
+**Anna:** Vielleicht kochen wir dann in einem zukünftigen Video euer Lieblingsessen. Oder wir gehen in ein Restaurant und bestellen es.
+**Ben:** Oh, das ist eine fantastische Idee. Also schreibt uns: Was ist dein Lieblingsessen?
+**Anna:** Und während ihr darüber nachdenkt, hier ist eine kleine Bonusfrage für euch: Was ist dein Lieblingsgetränk?
+**Ben:** Cola, Wasser, Apfelsaft …
+**Anna:** Oder vielleicht ein deutsches Bier? Ich zwinkere. Aber nur für die Erwachsenen.
+**Ben:** Schreibt auch euer Lieblingsgetränk in die Kommentare. Wir sammeln alle Ideen.
+**Anna:** So, das war's für heute von „Daily German Talk“.
+**Ben:** Wir hoffen, dass euch diese Lektion gefallen hat. Wenn ihr das Video hilfreich fandet, dann gebt uns doch einen Daumen hoch.
+**Ben:** Das hilft unserem Kanal sehr.
+**Anna:** Und wenn ihr noch nicht abonniert habt: Abonniert unseren Kanal. Dann verpasst ihr kein neues Video.
+**Ben:** So könnt ihr euer Hörverstehen und euren Wortschatz üben, mit Anna und Ben.
+**Anna:** Vielen Dank fürs Zuschauen. Bis zum nächsten Mal.
+`
+  },
+  {
+    id: 5,
+    type: "story",
+    video: "pX8A6t12hpw",
+    title: "Goldlöckchen und die drei Bären",
+    fa: "داستان: موطلایی و سه خرس",
+    level: "A1",
+    audio: "audio/story-gold.mp3",
+    summary: "موطلایی وارد خانهٔ سه خرس می‌شود، فرنی‌شان را می‌خورد، صندلی را می‌شکند و در تخت می‌خوابد. جمله‌های خیلی کوتاه در زمان حال، و چند جمله در Perfekt.",
+    phrases: [
+      ["Er ist noch zu heiß.", "هنوز خیلی داغ است.", "zu + صفت = بیش از حد"],
+      ["Lass uns ein bisschen warten.", "بیایید کمی صبر کنیم.", "Lass uns … = بیا …"],
+      ["Das ist eine gute Idee.", "فکر خوبی است.", ""],
+      ["Wer wohnt wohl hier?", "یعنی کی اینجا زندگی می‌کند؟", "wohl = احتمالاً (حدس)"],
+      ["Sie klopft an die Tür.", "در می‌زند.", "an die Tür klopfen"],
+      ["Dieser Stuhl ist gut für mich.", "این صندلی برای من خوب است.", "für + Akkusativ"],
+      ["Der Stuhl geht kaputt.", "صندلی می‌شکند.", "kaputt gehen / kaputt machen"],
+      ["Sie schläft schnell ein.", "زود خوابش می‌برد.", "einschlafen (جداشدنی)"],
+      ["Jemand hat von meinem Brei gegessen.", "یک نفر از فرنی من خورده.", "Perfekt: hat + gegessen"],
+      ["Sie bekommt große Angst.", "خیلی می‌ترسد.", "Angst bekommen = ترسیدن"],
+      ["Das stimmt.", "درست است.", ""]
+    ],
+    vocab: [],
+    quiz: [],
+    transcript: `
+**Erzähler:** Goldlöckchen und die drei Bären.
+**Erzähler:** Es ist ein schöner Morgen.
+**Erzähler:** In einem kleinen Haus im Wald leben drei Bären:
+**Erzähler:** Papa Bär, Mama Bär und ihr kleiner Sohn.
+**Erzähler:** Mama Bär macht Frühstück.
+**Erzähler:** Sie kocht Brei für die ganze Familie.
+**Erzähler:** Der Brei ist aber noch sehr heiß.
+**Papa Bär:** Papa Bär schaut auf den Brei und sagt: „Wir können ihn noch nicht essen.
+**Papa Bär:** Er ist noch zu heiß.
+**Papa Bär:** Lass uns ein bisschen warten.
+**Papa Bär:** Dann können wir den Brei essen.
+**Papa Bär:** In dieser Zeit können wir draußen spazieren gehen.“
+**Mama Bär:** „Das ist eine gute Idee“, sagt Mama Bär.
+**Erzähler:** Die drei Bären verlassen ihr Haus und gehen in den Wald.
+**Erzähler:** Währenddessen läuft ein kleines Mädchen durch den Wald.
+**Erzähler:** Das Mädchen hat lange blonde Haare.
+**Erzähler:** Sie heißt Goldlöckchen.
+**Erzähler:** Nach einer Weile sieht Goldlöckchen ein kleines Haus.
+**Goldlöckchen:** „Wer wohnt wohl hier?“, fragt sie sich.
+**Erzähler:** Sie geht zum Haus und klopft an die Tür.
+**Erzähler:** Aber niemand antwortet.
+**Erzähler:** Goldlöckchen wartet ein bisschen und klopft noch einmal.
+**Erzähler:** Wieder antwortet niemand.
+**Erzähler:** Die Tür ist offen.
+**Erzähler:** Goldlöckchen schaut hinein und geht einfach ins Haus.
+**Erzähler:** Auf dem Tisch stehen drei Schüsseln mit Brei.
+**Erzähler:** Goldlöckchen hat Hunger und probiert den Brei aus der ersten Schüssel.
+**Goldlöckchen:** Zu heiß!
+**Erzähler:** Dann probiert sie den zweiten.
+**Goldlöckchen:** Auch zu heiß!
+**Erzähler:** Sie probiert den Brei aus der dritten Schüssel.
+**Goldlöckchen:** Hmm … der ist gut!
+**Erzähler:** Goldlöckchen isst den ganzen Brei.
+**Erzähler:** Sie sieht drei Stühle.
+**Erzähler:** Der erste ist zu groß.
+**Erzähler:** Der zweite ist auch zu groß.
+**Erzähler:** Aber der dritte ist klein.
+**Goldlöckchen:** „Dieser Stuhl ist gut für mich.“
+**Erzähler:** Goldlöckchen setzt sich darauf.
+**Erzähler:** Sie wackelt ein bisschen hin und her.
+**Erzähler:** Plötzlich geht der kleine Stuhl kaputt.
+**Goldlöckchen:** „Oh nein!“, sagt Goldlöckchen.
+**Erzähler:** Danach geht sie nach oben.
+**Erzähler:** Dort stehen drei Betten.
+**Erzähler:** Sie probiert das erste und dann das zweite Bett.
+**Erzähler:** Die beiden sind zu groß.
+**Erzähler:** Das dritte Bett ist klein und gemütlich.
+**Erzähler:** Das Bett ist sehr bequem.
+**Erzähler:** Goldlöckchen legt sich hin und schläft schnell ein.
+**Erzähler:** Nach ihrem Spaziergang kommen die drei Bären nach Hause.
+**Erzähler:** Papa Bär schaut auf seinen Brei.
+**Papa Bär:** „Jemand hat von meinem Brei gegessen.“
+**Erzähler:** Mama Bär schaut auf ihre Schüssel.
+**Mama Bär:** „Jemand hat auch von meinem Brei gegessen.“
+**Erzähler:** Baby Bär sieht seine leere Schüssel.
+**Baby Bär:** „Jemand hat meinen ganzen Brei gegessen!“
+**Erzähler:** Dann sehen sie die Stühle.
+**Papa Bär:** Papa Bär sagt: „Jemand hat auf meinem Stuhl gesessen.“
+**Mama Bär:** Mama Bär sagt: „Auf meinem Stuhl hat auch jemand gesessen.“
+**Erzähler:** Baby Bär schaut auf seinen kleinen Stuhl.
+**Baby Bär:** „Jemand hat meinen Stuhl kaputt gemacht!“
+**Erzähler:** Die drei Bären gehen nach oben.
+**Erzähler:** Dort sehen sie Goldlöckchen in einem Bett.
+**Erzähler:** Goldlöckchen wacht auf und sieht die drei Bären.
+**Erzähler:** Sie bekommt große Angst.
+**Erzähler:** Sie springt aus dem Bett und läuft, so schnell sie kann, nach unten.
+**Erzähler:** Sie öffnet die Tür und rennt aus dem Haus.
+**Erzähler:** Die drei Bären laufen nicht hinter ihr her.
+**Erzähler:** Sie bleiben vor dem Haus stehen und sehen Goldlöckchen nach.
+**Erzähler:** Goldlöckchen läuft schnell durch den Wald.
+**Erzähler:** Sie hat immer noch Angst.
+**Papa Bär:** Papa Bär schaut ihr nach und sagt: „Jetzt weiß sie, dass sie nicht einfach in ein fremdes Haus gehen darf.
+**Papa Bär:** Sie darf auch nicht die Sachen von anderen Menschen benutzen.“
+**Mama Bär:** Mama Bär nickt. „Das stimmt“, sagt sie.
+**Erzähler:** Goldlöckchen läuft weiter nach Hause.
+**Erzähler:** Seit diesem Tag geht sie nicht mehr in fremde Häuser.
+`
+  },
+  {
+    id: 6,
+    type: "story",
+    video: "1qbDJqen-Ig",
+    title: "Des Kaisers neue Kleider",
+    fa: "داستان: لباس‌های تازهٔ امپراتور",
+    level: "A2",
+    audio: "audio/story-kaiser.mp3",
+    summary: "قصهٔ معروف اندرسن: دو فریبکار برای امپراتور لباسی «نامرئی» می‌بافند و فقط یک بچه حقیقت را می‌گوید. روایت در زمان حال، جمله‌های کوتاه و ساده.",
+    phrases: [
+      ["Er zieht neue Kleidung an.", "لباس نو می‌پوشد.", "anziehen = پوشیدن (جداشدنی)"],
+      ["Er gibt viel Geld dafür aus.", "پول زیادی برایش خرج می‌کند.", "ausgeben = خرج کردن"],
+      ["Sie tun so, als ob sie arbeiten.", "وانمود می‌کنند که کار می‌کنند.", "so tun, als ob … = وانمود کردن"],
+      ["Gefällt Ihnen der Stoff?", "از پارچه خوشتان می‌آید؟", "gefallen + Dativ"],
+      ["Was passiert, wenn …?", "چه می‌شود اگر…؟", ""],
+      ["Das darf niemand wissen.", "هیچ‌کس نباید این را بداند.", "nicht dürfen = نباید"],
+      ["Das Kind hat recht.", "بچه راست می‌گوید.", "recht haben = حق داشتن"],
+      ["Er schämt sich sehr.", "خیلی خجالت می‌کشد.", "sich schämen (انعکاسی)"],
+      ["Man soll immer die Wahrheit sagen.", "آدم باید همیشه حقیقت را بگوید.", "sollen = باید (توصیه)"],
+      ["Ehrlichkeit ist wichtiger als Angst.", "صداقت از ترس مهم‌تر است.", "صفت تفضیلی + als"]
+    ],
+    vocab: [],
+    quiz: [],
+    transcript: `
+**Erzähler:** Des Kaisers neue Kleider.
+**Erzähler:** In einem großen Königreich lebt ein Kaiser.
+**Erzähler:** Er liebt schöne Kleidung.
+**Erzähler:** Er kauft jeden Tag neue Kleider und gibt sehr viel Geld dafür aus.
+**Erzähler:** Jeden Morgen zieht er neue Kleidung an.
+**Erzähler:** Am Nachmittag zieht er wieder andere Kleidung an.
+**Erzähler:** Seine Kleidung ist ihm wichtiger als viele andere Dinge.
+**Erzähler:** Eines Tages kommen zwei Männer in die Stadt.
+**Erzähler:** Sie sagen, dass sie sehr gute Weber sind.
+**Erzähler:** Sie können besondere Kleidung machen.
+**Erzähler:** Der Kaiser freut sich und lädt die beiden Männer in den Palast ein.
+**Erzähler:** Die Männer erklären:
+**Weber:** „Unsere Kleidung ist ganz besonders.
+**Weber:** Dumme Menschen können diese Kleidung nicht sehen.
+**Weber:** Auch Menschen, die nicht gut arbeiten, können diese Kleidung nicht sehen.“
+**Kaiser:** Der Kaiser denkt: „Das ist wunderbar.
+**Kaiser:** So kann ich kluge und dumme Menschen erkennen.“
+**Erzähler:** Deshalb gibt er den Männern viel Gold, Seide und teure Fäden.
+**Erzähler:** Die Männer stellen zwei Webstühle in ein Zimmer.
+**Erzähler:** Aber sie arbeiten nicht wirklich.
+**Erzähler:** Die Webstühle sind leer.
+**Erzähler:** Es gibt keinen Stoff.
+**Erzähler:** Trotzdem bewegen sie ihre Hände und tun so, als ob sie arbeiten.
+**Erzähler:** Nach einigen Tagen möchte der Kaiser den Stoff sehen.
+**Erzähler:** Aber er hat auch Angst.
+**Kaiser:** Er denkt: „Was passiert, wenn ich den Stoff nicht sehen kann?“
+**Erzähler:** Deshalb schickt er einen alten Minister zu den Webern.
+**Erzähler:** Der Minister sieht die Webstühle an.
+**Erzähler:** Aber … er sieht keinen Stoff.
+**Minister:** Er denkt: „Oh nein, ich sehe nichts. Bin ich dumm?“
+**Erzähler:** Er möchte das nicht sagen.
+**Weber:** Die Männer fragen: „Gefällt Ihnen der Stoff?“
+**Minister:** Der Minister antwortet: „Ja, natürlich, er ist sehr schön.
+**Minister:** Die Farben sind wunderbar.“
+**Minister:** Dann geht er zurück zum Kaiser und sagt: „Der Stoff ist wirklich sehr schön.“
+**Erzähler:** Der Kaiser freut sich.
+**Erzähler:** Später schickt er einen zweiten Beamten.
+**Erzähler:** Auch dieser Mann sieht keinen Stoff.
+**Erzähler:** Aber auch er hat Angst.
+**Erzähler:** Deshalb sagt er: „Der Stoff ist wunderschön.“
+**Erzähler:** Jetzt möchte der Kaiser den Stoff selbst sehen.
+**Erzähler:** Er geht zu den Webern und sieht die leeren Webstühle.
+**Kaiser:** Er denkt: „Ich sehe nichts. Das darf niemand wissen.“
+**Weber:** Die Männer zeigen auf den leeren Webstuhl und sagen: „Sehen Sie die schönen Farben!
+**Weber:** Sehen Sie das feine Muster?“
+**Kaiser:** Der Kaiser sieht nichts, aber er sagt: „Ja, wirklich sehr schön.“
+**Erzähler:** Danach gibt er den Männern noch mehr Gold.
+**Weber:** Ein paar Tage später sagen die Männer: „Die neuen Kleider sind fertig.“
+**Erzähler:** Sie tun so, als ob sie dem Kaiser die Kleidung geben.
+**Erzähler:** Dann helfen sie ihm beim Anziehen.
+**Erzähler:** Aber der Kaiser trägt keine Kleidung.
+**Erzähler:** Er steht nur in seiner Unterwäsche da.
+**Weber:** Die Männer sagen: „Die Kleidung ist sehr leicht. Deshalb spüren Sie sie nicht.“
+**Erzähler:** Der Kaiser nickt.
+**Erzähler:** Auch die Diener sagen nichts. Sie haben Angst.
+**Erzähler:** An diesem Tag gibt es eine große Parade.
+**Erzähler:** Der Kaiser geht durch die Straßen.
+**Erzähler:** Viele Menschen stehen dort und sehen ihn.
+**Erzähler:** Aber niemand sagt die Wahrheit. Alle haben Angst.
+**Erzähler:** Sie sagen, wie schön die neuen Kleider sind und der Kaiser sieht wunderbar aus.
+**Kind:** Nur ein kleines Kind ruft laut: „Aber der Kaiser ist nackt!“
+**Erzähler:** Die Menschen sehen den Kaiser an.
+**Erzähler:** Zuerst sind sie still.
+**Erzähler:** Dann beginnen einige Menschen zu lachen.
+**Erzähler:** Bald lachen viele Menschen.
+**Erzähler:** Jetzt sagen sie alle die Wahrheit: „Das Kind hat recht. Der Kaiser ist nackt.“
+**Erzähler:** Immer mehr Menschen lachen und sagen: „Der Kaiser ist nackt!“
+**Erzähler:** Der Kaiser hört alles.
+**Erzähler:** Jetzt weiß er, dass alle die Wahrheit kennen.
+**Erzähler:** Er schämt sich sehr.
+**Erzähler:** Aber er geht weiter.
+**Erzähler:** Die Diener laufen hinter ihm her.
+**Erzähler:** Sie tun immer noch so, als ob sie die lange Kleidung tragen.
+**Erzähler:** Seit diesem Tag erinnern sich die Menschen an diese Geschichte.
+**Erzähler:** Sie verstehen: Man soll immer die Wahrheit sagen.
+**Erzähler:** Ehrlichkeit ist wichtiger als Angst.
+`
+  },
+  {
+    id: 7,
+    type: "story",
+    video: "BORHfagLn_A",
+    title: "Jack und die Bohnenranke",
+    fa: "داستان: جک و ساقهٔ لوبیا",
+    level: "A2",
+    audio: "audio/story-jack.mp3",
+    summary: "جک گاو را با لوبیای جادویی عوض می‌کند؛ ساقهٔ لوبیا تا آسمان بالا می‌رود و به قلعهٔ یک غول می‌رسد. زمان حال، جمله‌های weil/als/bis و فعل‌های جداشدنی زیاد.",
+    phrases: [
+      ["Wir müssen die Kuh verkaufen.", "باید گاو را بفروشیم.", "müssen + مصدر در آخر"],
+      ["Ich gebe dir etwas Besonderes dafür.", "در عوضش چیز خاصی به تو می‌دهم.", "etwas + صفت با حرف بزرگ"],
+      ["Er tauscht die Kuh gegen die Bohnen.", "گاو را با لوبیاها عوض می‌کند.", "tauschen gegen + Akk"],
+      ["Was hast du getan?", "چه کار کردی؟", "Perfekt: tun → getan"],
+      ["In der Nacht passiert etwas Seltsames.", "شب اتفاق عجیبی می‌افتد.", ""],
+      ["Wo führt diese Bohnenranke hin?", "این ساقه به کجا می‌رود؟", "wohin → wo … hin"],
+      ["Seine Neugier ist stärker.", "کنجکاوی‌اش قوی‌تر است.", "stark → stärker"],
+      ["Er versteckt sich hinter einem Schrank.", "پشت یک کمد قایم می‌شود.", "sich verstecken + hinter (Dativ)"],
+      ["Er nimmt so viel Gold, wie er tragen kann.", "هر قدر طلا که بتواند حمل کند برمی‌دارد.", "so viel …, wie …"],
+      ["Sie sind froh, dass alles vorbei ist.", "خوشحال‌اند که همه‌چیز تمام شد.", "froh sein, dass …"],
+      ["Sie lebten glücklich bis ans Ende ihrer Tage.", "تا آخر عمر به خوشی زندگی کردند.", "پایان کلاسیک قصه"]
+    ],
+    vocab: [],
+    quiz: [],
+    transcript: `
+**Erzähler:** Jack und die Bohnenranke.
+**Erzähler:** Jack lebt mit seiner Mutter in einem kleinen Dorf.
+**Erzähler:** Sie sind sehr arm.
+**Erzähler:** Sie haben nur eine Kuh.
+**Erzähler:** Die Kuh gibt ihnen ein bisschen Milch, aber sie verdienen nicht genug Geld.
+**Mutter:** Eines Tages sagt die Mutter zu Jack: „Wir müssen die Kuh auf dem Markt verkaufen.“
+**Erzähler:** Jack ist nicht glücklich, aber er hilft seiner Mutter.
+**Erzähler:** Am nächsten Morgen geht Jack mit der Kuh zum Markt.
+**Erzähler:** Er ist ein bisschen traurig, weil sie die Kuh verkaufen müssen.
+**Erzähler:** Unterwegs trifft er einen alten Mann.
+**Mann:** Der Mann schaut die Kuh an und sagt: „Deine Kuh ist sehr schön.
+**Mann:** Ich gebe dir etwas Besonderes dafür.“
+**Jack:** Jack fragt neugierig: „Was denn?“
+**Erzähler:** Der alte Mann zeigt ihm ein kleines Bündel Bohnen.
+**Mann:** Er sagt: „Das sind magische Bohnen. Sie sind sehr wertvoll.“
+**Erzähler:** Jack glaubt ihm und denkt, dass die Bohnen vielleicht besser sind als Geld.
+**Erzähler:** Deshalb tauscht er die Kuh gegen die Bohnen.
+**Erzähler:** Als Jack nach Hause kommt, ist seine Mutter sehr wütend.
+**Mutter:** Sie schreit: „Was hast du getan? Diese Bohnen sind wertlos!“
+**Erzähler:** Dann wirft sie die Bohnen aus dem Fenster.
+**Erzähler:** Jack ist traurig und geht schlafen.
+**Erzähler:** In der Nacht passiert etwas Seltsames.
+**Erzähler:** Die Bohnen beginnen im Garten zu wachsen.
+**Erzähler:** Sie wachsen sehr schnell und werden zu einer riesigen Bohnenranke.
+**Erzähler:** Sie wächst höher und höher, bis sie in den Himmel reicht.
+**Erzähler:** Am nächsten Morgen schaut Jack aus dem Fenster und sieht die große Bohnenranke.
+**Erzähler:** Er ist sehr überrascht und neugierig.
+**Jack:** Er fragt sich: „Wo führt diese Bohnenranke hin?“
+**Erzähler:** Er denkt eine Weile nach.
+**Erzähler:** Dann entscheidet er, die Bohnenranke zu untersuchen.
+**Erzähler:** Er geht in den Garten und fasst die Pflanze an.
+**Erzähler:** Sie ist sehr dick und stark.
+**Erzähler:** Langsam beginnt er, daran hochzuklettern.
+**Erzähler:** Die Bohnenranke ist sehr hoch.
+**Erzähler:** Jack klettert lange Zeit nach oben.
+**Erzähler:** Unter ihm wird das Haus immer kleiner.
+**Erzähler:** Schließlich sind die Wolken unter ihm.
+**Erzähler:** Nach einer langen Zeit erreicht Jack einen Ort über den Wolken.
+**Erzähler:** Dort sieht er etwas sehr Ungewöhnliches: eine große Burg.
+**Erzähler:** Er ist erstaunt und bleibt kurz stehen.
+**Erzähler:** Die Burg sieht alt und groß aus.
+**Jack:** Er fragt sich: „Wer lebt hier wohl?“
+**Erzähler:** Langsam geht er zur Tür und öffnet sie leise.
+**Erzähler:** Jack hat ein bisschen Angst, aber seine Neugier ist stärker.
+**Erzähler:** Er tritt in die Burg ein.
+**Erzähler:** Es scheint, als wäre niemand da.
+**Erzähler:** Alles ist sehr groß und still.
+**Erzähler:** Die Möbel sind riesig und der Raum wirkt seltsam ruhig.
+**Erzähler:** Jack schaut sich langsam um und hört plötzlich schwere Schritte.
+**Erzähler:** Bum! Bum! Bum!
+**Erzähler:** Der Boden beginnt zu zittern.
+**Erzähler:** Er erschrickt und versteckt sich schnell hinter einem großen Schrank.
+**Erzähler:** Ein riesiger Mann kommt in den Raum.
+**Erzähler:** Es ist ein Riese.
+**Erzähler:** Er setzt sich an den Tisch und isst sehr viel.
+**Erzähler:** Danach holt der Riese einen großen Beutel hervor.
+**Erzähler:** Er legt ihn auf den Tisch und schüttet viele Goldstücke aus.
+**Erzähler:** Der Riese betrachtet sie zufrieden.
+**Erzähler:** Jack bleibt ganz still und beobachtet den Riesen aus seinem Versteck.
+**Erzähler:** Er wartet lange, bis der Riese satt ist und schließlich einschläft.
+**Erzähler:** Der Atem des Riesen wird langsam und tief.
+**Erzähler:** Jetzt bewegt sich Jack ganz vorsichtig.
+**Erzähler:** Er geht leise zum Tisch.
+**Erzähler:** Er nimmt so viel Gold, wie er tragen kann.
+**Erzähler:** Dann geht er langsam zur Tür.
+**Erzähler:** Als er draußen ist, läuft er schnell zur Bohnenranke und beginnt hinunterzuklettern.
+**Erzähler:** Nach einiger Zeit ist Jack wieder zu Hause bei seiner Mutter.
+**Erzähler:** Sie sind jetzt glücklich, weil sie Gold haben.
+**Erzähler:** Sie kaufen Essen und leben besser als früher.
+**Erzähler:** Aber Jack denkt immer noch an die große Burg über den Wolken.
+**Erzähler:** Jack klettert wieder die Bohnenranke hinauf.
+**Erzähler:** In der Burg wartet er, bis der Riese schläft.
+**Erzähler:** Dann geht er leise in den Raum und findet eine goldene Gans.
+**Erzähler:** Diese Gans legt jeden Tag goldene Eier.
+**Erzähler:** Er nimmt sie vorsichtig mit und geht schnell zurück nach Hause.
+**Erzähler:** Jack und seine Mutter werden noch reicher.
+**Erzähler:** Sie leben jetzt sehr bequem und haben keine Sorgen mehr.
+**Erzähler:** Aber Jack ist nicht zufrieden.
+**Jack:** Er denkt: „In der Burg gibt es sicher noch mehr.“
+**Erzähler:** Ein drittes Mal klettert Jack die Bohnenranke hinauf.
+**Erzähler:** Wieder geht er in die Burg.
+**Erzähler:** Dieses Mal findet er eine besondere goldene Harfe.
+**Harfe:** Als er sie berührt, beginnt die Harfe laut zu rufen: „Hilfe! Hilfe!“
+**Erzähler:** Der Riese wacht sofort auf und wird sehr wütend.
+**Erzähler:** Er merkt, dass wieder jemand in seiner Burg war.
+**Erzähler:** Der Riese rennt schnell aus der Burg und sieht Jack auf der Bohnenranke.
+**Erzähler:** Jack klettert, so schnell er kann, nach unten.
+**Erzähler:** Sein Herz schlägt sehr stark, weil er große Angst hat.
+**Erzähler:** Der Riese beginnt ebenfalls, die Bohnenranke hinunterzuklettern.
+**Erzähler:** Die Bohnenranke wackelt stark unter ihrem Gewicht.
+**Erzähler:** Jack kommt immer näher zum Boden.
+**Jack:** Er ruft laut: „Mutter, die Axt, schnell!“
+**Erzähler:** Seine Mutter kommt sofort mit einer Axt aus dem Haus.
+**Erzähler:** Jack erreicht den Boden, rennt los und zeigt auf die Bohnenranke.
+**Erzähler:** Der Riese ist noch oben und kommt immer näher.
+**Erzähler:** Die Mutter schlägt schnell mit der Axt auf die Bohnenranke.
+**Erzähler:** Nach einigen Schlägen bricht die Bohnenranke langsam zusammen.
+**Erzähler:** Der Riese ist noch oben und verliert den Halt.
+**Erzähler:** Er fällt in die Tiefe und verschwindet.
+**Erzähler:** Jack und seine Mutter sind jetzt in Sicherheit.
+**Erzähler:** Sie sind sehr froh, dass alles vorbei ist.
+**Erzähler:** Mit den Schätzen aus der Burg werden sie reich.
+**Erzähler:** Und so lebten Jack und seine Mutter glücklich bis ans Ende ihrer Tage.
+`
+  },
+  {
+    id: 8,
+    type: "story",
+    video: "BILpJFOUDvI",
+    title: "Ali Baba und die vierzig Räuber",
+    fa: "داستان: علی‌بابا و چهل دزد",
+    level: "A2",
+    audio: "audio/story-ali.mp3",
+    summary: "علی‌بابا راز غار «سسام، باز شو» را کشف می‌کند؛ برادر طمعکارش قاسم در غار گیر می‌افتد و خدمتکار باهوش، مرجانه، سه بار دزدها را فریب می‌دهد. زمان حال، جمله‌های کوتاه، کمی Perfekt.",
+    phrases: [
+      ["Sesam, öffne dich!", "سِسام، باز شو!", "امر مؤدبانه‌نشده (du)"],
+      ["Er versteckt sich.", "قایم می‌شود.", "sich verstecken (انعکاسی)"],
+      ["Er will nicht gierig sein.", "نمی‌خواهد طمعکار باشد.", "wollen + مصدر"],
+      ["Woher hast du das Gold?", "طلا را از کجا آورده‌ای؟", "woher = از کجا"],
+      ["Er kann sich nicht an das Wort erinnern.", "کلمه یادش نمی‌آید.", "sich erinnern an + Akk"],
+      ["Er ruft laut um Hilfe.", "بلند کمک می‌خواهد.", "um Hilfe rufen"],
+      ["Hab keine Angst. Ich habe einen Plan.", "نترس. نقشه‌ای دارم.", "Hab keine Angst = نترس"],
+      ["Du darfst nichts sehen.", "نباید چیزی ببینی.", "nicht dürfen = نباید"],
+      ["Er sieht wie ein reicher Händler aus.", "مثل یک تاجر ثروتمند به نظر می‌رسد.", "aussehen wie = شبیه … بودن"],
+      ["Kann ich hier über Nacht bleiben?", "می‌توانم شب اینجا بمانم؟", "über Nacht = شب را"],
+      ["Du hast mein Leben gerettet.", "تو جانم را نجات دادی.", "Perfekt: hat gerettet"],
+      ["Sie leben glücklich bis ans Ende.", "تا آخر به خوشی زندگی می‌کنند.", "پایان کلاسیک قصه"]
+    ],
+    vocab: [],
+    quiz: [],
+    transcript: `
+**Erzähler:** Ali Baba und die vierzig Räuber.
+**Erzähler:** Ali Baba ist ein armer Mann.
+**Erzähler:** Er lebt in einer kleinen Stadt.
+**Erzähler:** Er hat einen Bruder. Sein Bruder heißt Kasim.
+**Erzähler:** Kasim ist reich.
+**Erzähler:** Er hat ein großes Haus und viele Waren.
+**Erzähler:** Er arbeitet als Kaufmann.
+**Erzähler:** Ali Baba ist arm.
+**Erzähler:** Er arbeitet im Wald. Er sammelt Holz.
+**Erzähler:** Er hat nur ein paar Esel.
+**Erzähler:** Jeden Tag geht Ali Baba in den Wald.
+**Erzähler:** Er schneidet Holz und bringt es nach Hause.
+**Erzähler:** Sein Leben ist einfach.
+**Erzähler:** Aber Ali Baba ist ein guter Mann.
+**Erzähler:** Eines Tages ist Ali Baba im Wald.
+**Erzähler:** Er arbeitet wie immer.
+**Erzähler:** Plötzlich hört er ein Geräusch.
+**Erzähler:** Viele Pferde kommen.
+**Erzähler:** Ali Baba hat Angst.
+**Erzähler:** Er klettert schnell auf einen Baum.
+**Erzähler:** Er versteckt sich.
+**Erzähler:** Vierzig Männer kommen.
+**Erzähler:** Sie sind Räuber.
+**Erzähler:** Die Räuber gehen zu einem großen Felsen.
+**Erzähler:** Der Anführer steht vor dem Felsen.
+**Anführer:** Er ruft laut: „Sesam, öffne dich!“
+**Erzähler:** Der Felsen öffnet sich.
+**Erzähler:** Es ist eine geheime Höhle.
+**Erzähler:** Die Räuber gehen hinein.
+**Erzähler:** Ali Baba sieht alles.
+**Erzähler:** Nach einiger Zeit kommen die Räuber zurück.
+**Erzähler:** Sie gehen aus der Höhle.
+**Anführer:** Der Anführer ruft: „Sesam, schließe dich!“
+**Erzähler:** Der Felsen schließt sich.
+**Erzähler:** Dann gehen die Räuber weg.
+**Erzähler:** Ali Baba bleibt im Baum.
+**Erzähler:** Er ist sehr überrascht.
+**Erzähler:** Die Räuber sind weg.
+**Erzähler:** Ali Baba wartet noch ein wenig.
+**Erzähler:** Dann steigt er langsam vom Baum herunter.
+**Erzähler:** Er hat Angst, aber er ist auch neugierig.
+**Erzähler:** Er geht zu dem großen Felsen.
+**Erzähler:** Ali Baba steht vor dem Felsen und denkt nach.
+**Ali Baba:** Dann sagt er leise: „Sesam, öffne dich.“
+**Erzähler:** Der Felsen öffnet sich wirklich.
+**Erzähler:** Ali Baba ist sehr überrascht.
+**Erzähler:** Er geht vorsichtig in die Höhle.
+**Erzähler:** Drinnen sieht er viele Schätze.
+**Erzähler:** Es gibt Gold, Silber und schöne Dinge.
+**Erzähler:** Ali Baba kann es kaum glauben.
+**Erzähler:** Er nimmt nur ein wenig Gold.
+**Erzähler:** Er will nicht gierig sein.
+**Erzähler:** Dann geht er wieder nach draußen.
+**Ali Baba:** Vor dem Felsen sagt er: „Sesam, schließe dich.“
+**Erzähler:** Der Felsen schließt sich.
+**Erzähler:** Ali Baba ist glücklich. Er geht nach Hause.
+**Erzähler:** Ali Baba kommt nach Hause.
+**Erzähler:** Er zeigt seiner Frau das Gold.
+**Erzähler:** Seine Frau ist sehr froh.
+**Frau:** Sie fragt: „Woher hast du das Gold?“
+**Erzähler:** Ali Baba erzählt ihr alles.
+**Erzähler:** Er berichtet von dem Wald, den Räubern und der Höhle.
+**Erzähler:** Aber sie möchte auch wissen, wie viel Gold es ist.
+**Frau:** Sie sagt: „Wir brauchen eine Waage.“
+**Erzähler:** Sie geht zu Kasims Frau und leiht eine Waage.
+**Erzähler:** Kasims Frau ist neugierig.
+**Erzähler:** Sie denkt: „Warum brauchen sie eine Waage?“
+**Erzähler:** Sie macht ein kleines Stück Wachs unter die Waage.
+**Erzähler:** Ali Babas Frau wiegt das Gold.
+**Erzähler:** Dann bringt sie die Waage zurück.
+**Erzähler:** Ein kleines Goldstück bleibt am Wachs kleben.
+**Erzähler:** Kasims Frau sieht das Goldstück.
+**Erzähler:** Sie ist erstaunt und auch ein bisschen neidisch.
+**Erzähler:** Sie zeigt es ihrem Mann, Kasim.
+**Erzähler:** Kasim wird wütend.
+**Kasim:** Er geht zu Ali Baba und sagt: „Woher hast du das Gold?“
+**Erzähler:** Ali Baba hat Angst.
+**Erzähler:** Aber Kasim droht ihm.
+**Erzähler:** Am Ende erzählt Ali Baba das Geheimnis von der Höhle.
+**Erzähler:** Am nächsten Tag geht Kasim in den Wald.
+**Erzähler:** Er nimmt viele Esel mit.
+**Erzähler:** Er will viel Gold holen.
+**Erzähler:** Er findet den großen Felsen.
+**Kasim:** Dann ruft er laut: „Sesam, öffne dich!“
+**Erzähler:** Der Felsen öffnet sich.
+**Erzähler:** Kasim geht schnell hinein.
+**Erzähler:** In der Höhle sieht er sehr viel Gold und viele Schätze.
+**Erzähler:** Er freut sich sehr.
+**Erzähler:** Er nimmt so viel Gold wie möglich.
+**Erzähler:** Seine Säcke sind bald voll.
+**Erzähler:** Dann will er wieder hinausgehen.
+**Erzähler:** Aber er hat ein Problem.
+**Erzähler:** Kasim kann sich nicht mehr an das richtige Wort erinnern.
+**Kasim:** Er sagt: „Simsam, öffne dich!“
+**Erzähler:** Aber nichts passiert.
+**Erzähler:** Dann sagt er andere Wörter.
+**Erzähler:** Doch der Felsen bleibt zu.
+**Erzähler:** Kasim bekommt Angst.
+**Erzähler:** Er läuft hin und her.
+**Erzähler:** Aber er findet keinen Weg nach draußen.
+**Erzähler:** Er bleibt in der Höhle.
+**Erzähler:** Er hat große Angst.
+**Erzähler:** Er ruft laut um Hilfe, aber niemand hört ihn.
+**Erzähler:** Nach einiger Zeit kommen die Räuber zurück.
+**Erzähler:** Sie wollen ihre Schätze sehen.
+**Erzähler:** Der Anführer sagt das Wort und der Felsen öffnet sich.
+**Erzähler:** Die Räuber gehen in die Höhle.
+**Erzähler:** Sie sehen Kasim.
+**Erzähler:** Kasim hat versucht, sich zu verstecken.
+**Erzähler:** Aber es ist zu spät.
+**Erzähler:** Die Räuber sind sehr wütend.
+**Erzähler:** Sie denken, jemand hat ihr Geheimnis verraten.
+**Erzähler:** Kasim bittet um Hilfe.
+**Erzähler:** Aber die Räuber hören nicht zu.
+**Erzähler:** Sie greifen Kasim an und töten ihn.
+**Erzähler:** Dann lassen sie seinen Körper in der Höhle.
+**Erzähler:** Danach verlassen die Räuber die Höhle wieder und nehmen nichts mit.
+**Erzähler:** Der Felsen schließt sich.
+**Erzähler:** Kasim kommt nicht nach Hause.
+**Erzähler:** Es ist Abend.
+**Erzähler:** Seine Frau wartet und wartet.
+**Erzähler:** Sie ist sehr nervös.
+**Erzähler:** Sie sagt: „Wo ist Kasim?“
+**Erzähler:** Auch Ali Babas Frau ist besorgt.
+**Erzähler:** Sie gehen zu Ali Baba.
+**Erzähler:** Ali Baba hört das.
+**Erzähler:** Er denkt nach.
+**Erzähler:** Er nimmt seine Esel und geht in den Wald.
+**Erzähler:** Es ist schon dunkel.
+**Erzähler:** Der Wald ist still.
+**Erzähler:** Ali Baba kommt zu dem großen Felsen.
+**Ali Baba:** Er sagt leise: „Sesam, öffne dich.“
+**Erzähler:** Der Felsen öffnet sich.
+**Erzähler:** Ali Baba geht langsam in die Höhle.
+**Erzähler:** Drinnen ist es dunkel und still.
+**Erzähler:** Dann sieht Ali Baba seinen Bruder.
+**Erzähler:** Kasim liegt auf dem Boden.
+**Erzähler:** Er ist tot.
+**Erzähler:** Ali Baba ist sehr traurig.
+**Erzähler:** Er hat große Angst.
+**Erzähler:** Aber er muss schnell sein.
+**Erzähler:** Die Räuber können jeden Moment kommen.
+**Erzähler:** Ali Baba nimmt den Körper von Kasim.
+**Erzähler:** Er bringt ihn nach draußen.
+**Erzähler:** Er legt den Körper vorsichtig auf einen Esel.
+**Ali Baba:** Dann sagt er: „Sesam, schließe dich.“
+**Erzähler:** Der Felsen schließt sich.
+**Erzähler:** Ali Baba geht schnell nach Hause.
+**Erzähler:** Es ist Nacht. Niemand sieht ihn.
+**Erzähler:** Zu Hause bringt er den Körper in das Haus von Kasim.
+**Erzähler:** Kasims Frau beginnt zu weinen.
+**Ali Baba:** Ali Baba sagt: „Sei leise. Das ist ein großes Geheimnis.“
+**Ali Baba:** Ali Baba denkt: „Wir haben ein großes Problem.“
+**Erzähler:** Ali Baba denkt lange nach.
+**Ali Baba:** Dann sagt er: „Wir brauchen Hilfe.“
+**Erzähler:** Er spricht von Morgiana.
+**Erzähler:** Morgiana ist eine kluge Dienerin in Kasims Haus.
+**Erzähler:** Ali Baba geht zu Morgiana.
+**Erzähler:** Er erzählt ihr alles.
+**Erzähler:** Morgiana hört ruhig zu.
+**Morgiana:** Dann sagt sie: „Hab keine Angst. Ich habe einen Plan.“
+**Erzähler:** Morgiana denkt kurz nach.
+**Erzähler:** Dann geht sie in die Stadt.
+**Erzähler:** Sie sucht einen Schneider.
+**Erzähler:** Sie findet einen alten Mann. Er ist ein Schneider.
+**Morgiana:** Morgiana sagt: „Komm bitte mit. Ich habe Arbeit für dich.“
+**Erzähler:** Der Schneider kommt mit.
+**Morgiana:** Aber Morgiana sagt: „Du darfst nichts sehen.“
+**Erzähler:** Sie verbindet seine Augen.
+**Erzähler:** Der Schneider ist überrascht, aber er sagt nichts.
+**Erzähler:** Morgiana führt ihn zum Haus.
+**Erzähler:** Im Haus zeigt sie ihm den Körper von Kasim.
+**Morgiana:** Sie sagt: „Du musst das nähen.“
+**Erzähler:** Der Schneider hat Angst, aber er macht die Arbeit.
+**Erzähler:** Er näht den Körper vorsichtig zusammen.
+**Erzähler:** Dann bringt Morgiana den Schneider wieder zurück.
+**Erzähler:** Sie verbindet noch immer seine Augen.
+**Erzähler:** Der Schneider weiß nicht, wo er war.
+**Erzähler:** Morgiana gibt ihm Geld. Er geht weg.
+**Erzähler:** Am nächsten Tag sagen alle Leute: „Kasim ist krank.“
+**Erzähler:** Morgiana sorgt für alles.
+**Erzähler:** Nach einiger Zeit sagen sie: „Kasim ist tot.“
+**Erzähler:** Die Leute sind traurig.
+**Erzähler:** Niemand weiß das Geheimnis.
+**Erzähler:** Ali Baba ist erleichtert.
+**Ali Baba:** Er denkt: „Morgiana ist sehr klug.“
+**Erzähler:** Nach einigen Tagen kommen die Räuber zurück zur Höhle.
+**Erzähler:** Sie wollen ihre Schätze sehen.
+**Erzähler:** Aber sie haben ein Problem.
+**Erzähler:** Sie sehen, dass jemand in der Höhle war.
+**Erzähler:** Der Körper ist nicht mehr da.
+**Erzähler:** Der Anführer ist sehr wütend.
+**Anführer:** Er sagt: „Jemand kennt unser Geheimnis.“
+**Erzähler:** Die Räuber haben Angst.
+**Räuber:** Sie sagen: „Wir müssen diese Person finden.“
+**Erzähler:** Der Anführer denkt nach.
+**Anführer:** Dann sagt er: „Ich gehe in die Stadt. Ich finde den Mann.“
+**Erzähler:** Er zieht andere Kleidung an.
+**Erzähler:** Er sieht jetzt wie ein normaler Mann aus.
+**Erzähler:** Dann geht er in die Stadt.
+**Erzähler:** In der Stadt fragt er viele Leute.
+**Anführer:** Er sagt: „Ich suche einen reichen Mann. Er hat vielleicht neues Geld.“
+**Erzähler:** Aber niemand weiß etwas.
+**Erzähler:** Dann hört er von Kasim.
+**Erzähler:** Die Leute sagen: „Kasim war reich. Aber jetzt ist er tot.“
+**Erzähler:** Der Räuber ist neugierig.
+**Anführer:** Er denkt: „Das ist seltsam.“
+**Erzähler:** Er sucht weiter.
+**Erzähler:** Schließlich findet er den Schneider.
+**Schneider:** Der Schneider erzählt: „Ich habe für einen Mann gearbeitet. Ich habe einen Körper genäht.“
+**Erzähler:** Der Räuber hört gut zu.
+**Erzähler:** Der Schneider weiß nicht, wo das Haus ist.
+**Schneider:** Aber er sagt: „Ich kann den Weg vielleicht finden.“
+**Erzähler:** Der Räuber gibt ihm Geld.
+**Erzähler:** Dann verbindet er die Augen des Schneiders, genau wie Morgiana.
+**Erzähler:** Der Schneider geht langsam durch die Straßen.
+**Erzähler:** Er erinnert sich an den Weg.
+**Erzähler:** Schließlich bleibt er stehen.
+**Erzähler:** Er zeigt auf ein Haus.
+**Erzähler:** Es ist das Haus von Ali Baba.
+**Erzähler:** Der Räuber macht ein Zeichen an die Tür.
+**Erzähler:** Er malt ein kleines Zeichen.
+**Erzähler:** Dann geht er weg.
+**Anführer:** Er denkt: „Jetzt finde ich das Haus wieder.“
+**Erzähler:** Aber Morgiana sieht das Zeichen.
+**Erzähler:** Sie geht durch die Straße.
+**Erzähler:** Sie schaut die Türen an.
+**Erzähler:** Dann sieht sie das Zeichen an Ali Babas Haus.
+**Morgiana:** Sie denkt: „Das ist nicht normal.“
+**Erzähler:** Morgiana ist sehr klug.
+**Erzähler:** Sie macht das gleiche Zeichen an viele andere Häuser in der Straße.
+**Erzähler:** Jetzt haben viele Türen das gleiche Zeichen.
+**Erzähler:** Am Abend kommen die Räuber zurück.
+**Erzähler:** Sie suchen das Haus.
+**Erzähler:** Aber sie haben ein Problem.
+**Erzähler:** Viele Häuser haben das gleiche Zeichen.
+**Erzähler:** Sie wissen nicht, welches Haus richtig ist.
+**Erzähler:** Der Anführer wird sehr wütend.
+**Anführer:** Er sagt: „Das ist ein Fehler.“
+**Erzähler:** Die Räuber haben Angst.
+**Erzähler:** Sie gehen schnell weg.
+**Erzähler:** Morgiana lächelt leise.
+**Morgiana:** Sie denkt: „Jetzt sind wir sicher, aber nur für heute.“
+**Erzähler:** Der Anführer der Räuber ist sehr wütend.
+**Anführer:** Er sagt: „Wir machen einen neuen Plan.“
+**Erzähler:** Er denkt lange nach.
+**Erzähler:** Dann hat er eine Idee.
+**Erzähler:** Am nächsten Tag geht er in die Stadt.
+**Erzähler:** Er sieht jetzt wie ein reicher Händler aus.
+**Erzähler:** Er bringt viele große Ölfässer mit.
+**Erzähler:** Auf einem Wagen sind viele Fässer.
+**Erzähler:** Aber in den Fässern ist nicht nur Öl.
+**Erzähler:** In vielen Fässern sind Räuber versteckt.
+**Erzähler:** Nur ein Fass ist wirklich voll mit Öl.
+**Erzähler:** Der Anführer geht zu Ali Babas Haus.
+**Erzähler:** Er klopft an die Tür.
+**Erzähler:** Ali Baba öffnet die Tür.
+**Anführer:** Der Mann sagt: „Guten Abend. Ich bin ein Händler. Ich habe eine lange Reise. Kann ich hier über Nacht bleiben?“
+**Erzähler:** Ali Baba ist freundlich.
+**Ali Baba:** Er sagt: „Ja, natürlich. Komm herein.“
+**Erzähler:** Er hilft dem Mann.
+**Erzähler:** Die Esel und die Fässer bleiben im Hof.
+**Erzähler:** In der Nacht ist es ruhig.
+**Erzähler:** Der Anführer geht leise nach draußen.
+**Erzähler:** Er geht zu den Fässern.
+**Anführer:** Er sagt leise: „Seid bereit.“
+**Erzähler:** Die Räuber in den Fässern warten.
+**Erzähler:** Aber Morgiana schläft nicht.
+**Erzähler:** Sie hört ein Geräusch.
+**Erzähler:** Sie geht leise nach draußen.
+**Erzähler:** Sie sieht die Fässer.
+**Morgiana:** Sie denkt: „Das ist seltsam.“
+**Erzähler:** Morgiana öffnet ein Fass ganz vorsichtig.
+**Räuber:** Plötzlich hört sie eine Stimme: „Ist es Zeit?“
+**Erzähler:** Morgiana bekommt einen Schock.
+**Erzähler:** Aber sie bleibt ruhig.
+**Morgiana:** Sie denkt schnell: „Das sind Räuber!“
+**Erzähler:** Morgiana denkt schnell.
+**Erzähler:** Sie geht leise zurück in die Küche.
+**Erzähler:** Sie nimmt einen großen Topf.
+**Erzähler:** Dann nimmt sie Öl.
+**Erzähler:** Sie macht das Öl sehr heiß.
+**Erzähler:** Die Nacht ist still. Alle schlafen.
+**Erzähler:** Morgiana trägt das heiße Öl vorsichtig nach draußen.
+**Erzähler:** Sie geht zu den Fässern.
+**Erzähler:** Sie öffnet ein Fass nach dem anderen.
+**Erzähler:** In jedem Fass ist ein Räuber.
+**Erzähler:** Morgiana gießt heißes Öl in die Fässer.
+**Erzähler:** Die Räuber können nichts tun.
+**Erzähler:** Sie sind still.
+**Erzähler:** Morgiana arbeitet schnell und leise.
+**Erzähler:** Niemand hört etwas.
+**Erzähler:** Am Ende sind alle Räuber in den Fässern tot.
+**Erzähler:** Nur der Anführer lebt noch.
+**Erzähler:** Er wartet auf ein Zeichen.
+**Anführer:** Er sagt leise: „Jetzt!“
+**Erzähler:** Aber niemand antwortet.
+**Erzähler:** Der Anführer ist überrascht.
+**Erzähler:** Er geht nach draußen.
+**Erzähler:** Er schaut zu den Fässern. Alles ist still.
+**Anführer:** Er versteht: „Mein Plan ist gescheitert.“
+**Erzähler:** Schnell läuft er weg.
+**Erzähler:** Er verschwindet in der Nacht.
+**Erzähler:** Am Morgen sieht Ali Baba die Fässer.
+**Erzähler:** Morgiana erzählt ihm alles.
+**Erzähler:** Ali Baba ist sehr überrascht.
+**Ali Baba:** Er sagt: „Du hast mein Leben gerettet.“
+**Erzähler:** Morgiana lächelt. Sie ist ruhig.
+**Erzähler:** Ali Baba weiß: Morgiana ist sehr klug und sehr mutig.
+**Erzähler:** Der Anführer der Räuber lebt noch.
+**Erzähler:** Er hat große Wut im Herzen.
+**Anführer:** Er sagt: „Ich komme zurück.“
+**Erzähler:** Er will Ali Baba finden und töten.
+**Erzähler:** Nach einiger Zeit kommt er wieder in die Stadt.
+**Erzähler:** Er trägt schöne Kleidung.
+**Erzähler:** Jetzt sieht er wie ein reicher Mann aus.
+**Erzähler:** Niemand erkennt ihn.
+**Erzähler:** Er geht zu Ali Babas Sohn.
+**Erzähler:** Er ist freundlich und nett.
+**Anführer:** Er sagt: „Ich bin ein Kaufmann. Ich möchte dein Freund sein.“
+**Erzähler:** Ali Babas Sohn vertraut ihm.
+**Erzähler:** Eines Tages lädt Ali Babas Sohn den Mann zum Essen ein.
+**Erzähler:** Der Mann kommt in das Haus.
+**Erzähler:** Ali Baba ist auch da.
+**Erzähler:** Morgiana sieht den Mann.
+**Erzähler:** Morgiana schaut genau hin.
+**Morgiana:** Sie denkt: „Ich kenne diesen Mann.“
+**Morgiana:** Dann versteht sie: „Das ist der Anführer der Räuber.“
+**Erzähler:** Morgiana sagt nichts.
+**Erzähler:** Sie hat einen Plan.
+**Erzähler:** Am Abend tanzt sie für die Gäste.
+**Erzähler:** Alle schauen zu.
+**Erzähler:** Die Musik ist schön.
+**Erzähler:** Während des Tanzes kommt Morgiana näher zu dem Mann.
+**Erzähler:** Plötzlich zieht sie ein Messer.
+**Erzähler:** Schnell tötet sie den Räuber.
+**Erzähler:** Alle sind schockiert.
+**Ali Baba:** Ali Baba hat Angst und sagt: „Was machst du?“
+**Morgiana:** Morgiana sagt ruhig: „Das ist der Anführer der Räuber. Er will dich töten.“
+**Erzähler:** Ali Baba versteht alles.
+**Erzähler:** Er ist sehr dankbar.
+**Ali Baba:** Er sagt: „Du hast uns wieder gerettet.“
+**Erzähler:** Ali Baba belohnt Morgiana.
+**Erzähler:** Morgiana heiratet Ali Babas Sohn.
+**Erzähler:** Und sie leben glücklich bis ans Ende.
+`
   }
 ];
