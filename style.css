@@ -1771,8 +1771,8 @@ body.video-only .bgv::after { background: linear-gradient(rgba(0,0,0,.25), trans
 /* the film lives inside the night view, under its text and controls */
 .night > .bgv { z-index: 0; }
 .night > .nt-top, .night > .nt-stage, .night > .nt-ctl { position: relative; z-index: 1; }
-#bgvBtn[aria-pressed="false"] { opacity: .45; }
-#bgvBtn[hidden] { display: none; }
+[data-bgv][aria-pressed="false"] { opacity: .45; }
+[data-bgv][hidden], [data-vidonly][hidden] { display: none !important; }
 body.video-only .nt-stage > * { visibility: hidden; }
 /* night: time bar */
 .nt-time { position: relative; z-index: 1; display: flex; align-items: center; gap: 12px; max-width: 900px; width: 100%; margin: 0 auto; flex-shrink: 0; font-size: 12px; font-weight: 700; color: rgba(255,232,200,.45); font-variant-numeric: tabular-nums; transition: opacity .8s; }
@@ -1794,3 +1794,61 @@ body.video-only .nt-stage > * { visibility: hidden; }
 .ly-line.mutter .ly-who, .ly-line.frau .ly-who, .ly-line.morgiana .ly-who, .ly-line.goldlöckchen .ly-who, .ly-line.mama-bär .ly-who, .ly-line.baby-bär .ly-who { color: #FF2D55; }
 .ly-line.jack .ly-who, .ly-line.kaiser .ly-who, .ly-line.kasim .ly-who, .ly-line.papa-bär .ly-who, .ly-line.ali-baba .ly-who { color: #FF9F0A; }
 .ly-line.anführer .ly-who, .ly-line.räuber .ly-who, .ly-line.riese .ly-who, .ly-line.weber .ly-who { color: #BF5AF2; }
+
+/* ---------- One player: film behind the text, night view on top of the same player ---------- */
+#audio > .ly-head, #audio > .lyrics { position: relative; z-index: 1; }
+#audio .word-side { z-index: 6; }
+body.has-bgv .night { background: radial-gradient(90% 55% at 15% 25%, rgba(255,45,85,.08), transparent 60%), radial-gradient(80% 55% at 90% 85%, rgba(94,92,230,.09), transparent 60%), rgba(0,0,0,.64); }
+body.night-on #audio > :not(.bgv) { visibility: hidden; }
+body.video-only #audio > .lyrics { visibility: hidden; }
+body.video-only .night { background: transparent !important; }
+.ly-acts { flex-wrap: nowrap; }
+@media (max-width: 480px) { .ly-acts .ly-chip { padding: 0 10px; } }
+
+/* queue sheet (Als Nächstes) inside the player */
+.q-back { position: absolute; inset: -40px; z-index: 20; background: rgba(0,0,0,.35); }
+.q-back[hidden], .q-sheet[hidden] { display: none !important; }
+.q-sheet { position: absolute; left: 0; right: 0; bottom: calc(var(--dock-space) - 6px); z-index: 21; max-height: 72%; display: flex; flex-direction: column; gap: 6px;
+  padding: 8px 14px 14px; border-radius: 24px; color: rgba(255,232,200,.9);
+  background: radial-gradient(90% 55% at 15% 25%, rgba(255,45,85,.10), transparent 60%), rgba(22,20,24,.97); box-shadow: 0 -12px 40px rgba(0,0,0,.45); }
+.q-grab { width: 36px; height: 5px; border-radius: 3px; background: rgba(255,255,255,.25); margin: 0 auto 2px; flex-shrink: 0; }
+.q-head { display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+.q-title { margin: 0; font-size: 20px; font-weight: 800; color: rgba(255,232,200,.95); }
+.q-x { width: 34px; height: 34px; border-radius: 17px; background: rgba(255,255,255,.08); color: rgba(255,232,200,.7); font-size: 15px; }
+.q-sheet .pl-scroll { flex: 1; min-height: 0; }
+.q-sheet .pl-start { height: 46px; }
+@media (min-width: 901px) and (min-height: 521px) { .q-sheet { left: auto; right: 12px; width: min(460px, 46%); max-height: calc(100% - var(--dock-space) - 12px); } }
+@media (max-height: 520px) and (orientation: landscape) { .q-sheet { bottom: 6px; top: 6px; max-height: none; left: 20%; right: 8px; } }
+.dock-player .dp-q svg { width: 20px; height: 20px; }
+.dock-player .dp-q.on { color: #5E5CE6; }
+body:not([data-screen="audio"]) .dp-q { display: none; }
+
+/* ---------- Profile: a full page ---------- */
+#profile.active { display: flex !important; flex-direction: column; height: 100%; min-height: 0; overflow: hidden; }
+.pf-scroll { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; max-width: 720px; width: 100%; margin: 0 auto;
+  margin-bottom: calc(-1 * var(--dock-space)); padding-bottom: calc(var(--dock-space) + 12px); scrollbar-width: none; }
+.pf-top { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 0 4px; }
+.pf-top .avatar-big { width: 88px; height: 88px; flex: 0 0 88px; font-size: 38px; }
+.pf-name { font-size: 22px; font-weight: 800; text-align: center; border: 0; background: transparent; color: var(--text); width: 100%; max-width: 320px; padding: 4px; border-radius: 10px; }
+.pf-name:focus { outline: none; background: var(--tile); }
+.pf-sub { font-size: 12px; color: var(--muted); text-align: center; }
+.pf-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.pf-stats > div { background: var(--tile); border-radius: 16px; padding: 10px; text-align: center; display: flex; flex-direction: column; }
+.pf-stats b { font-size: 20px; } .pf-stats small { font-size: 11px; color: var(--muted); }
+.pf-group { background: var(--tile); border-radius: 16px; overflow: hidden; }
+.pf-row { display: flex; align-items: center; gap: 10px; padding: 11px 14px; font-size: 14px; border-bottom: .5px solid var(--hair, rgba(128,128,128,.2)); flex-wrap: wrap; }
+.pf-row:last-child { border-bottom: 0; }
+.pf-row > span:first-child { flex: 1; min-width: 140px; }
+.pf-bar { flex: 0 0 90px; height: 5px; border-radius: 3px; background: var(--tile-2); overflow: hidden; } .pf-bar i { display: block; height: 100%; background: #30D158; }
+.pf-row > b { width: 42px; text-align: right; }
+#profile .prof-stats { padding: 10px 14px; }
+.pf-note { font-size: 12px; color: var(--muted); text-align: center; margin: 4px 0 0; }
+#profile .prof-reset { align-self: center; }
+#profile .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.pf-scroll > * { flex-shrink: 0; }
+.ly-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 480px) {
+  .ly-head { flex-wrap: wrap; row-gap: 6px; }
+  .ly-head > div:first-child { flex: 1 1 100%; }
+  .ly-acts { flex: 1 1 100%; justify-content: flex-end; }
+}

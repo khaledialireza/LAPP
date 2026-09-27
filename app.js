@@ -54,14 +54,7 @@
   }
 
   /* ---------- Navigation ---------- */
-  // dialogs and stories are separate: the dialog screen and home always show a lesson, never a story
-  function backToLesson() {
-    if (!isStory(LESSONS[state.idx])) return;
-    const last = store.get("lastLesson", -1), i = last >= 0 && !isStory(LESSONS[last]) ? last : LESSONS.findIndex(x => !isStory(x));
-    if (i >= 0) { if (!player.paused) player.pause(); setLesson(i); }
-  }
   function go(id) {
-    if ((id === "audio" || id === "home") && !night.open) backToLesson();
     $$(".screen").forEach(s => s.classList.toggle("active", s.id === id));
     // the lesson page opens from the home tile, so home stays lit
     const tab = id === "lesson" || id === "library" ? "home" : id;
@@ -71,10 +64,11 @@
     if (id === "practice" && typeof renderHub === "function" && !$("#pHub").hidden) renderHub();
     if (id === "lesson" && typeof renderLesson === "function") renderLesson();
     if (id === "library" && typeof renderLibrary === "function") renderLibrary();
-    if (id === "stories" && typeof renderStories === "function") renderStories();
+    if (id === "profile" && typeof renderProfile === "function") renderProfile();
+    if (id !== "audio" && typeof queueSheet === "function") queueSheet(false);
     if (id === "audio") { document.body.classList.add("dock-collapsed"); requestAnimationFrame(() => showNow(curLine)); }
     const on = $(".nav button.on");
-    if (on) $("#dockTabsBtn").innerHTML = on.querySelector("svg").outerHTML;
+    const ic = on && on.querySelector("svg, .avatar-btn"); if (ic) $("#dockTabsBtn").innerHTML = ic.outerHTML;
   }
   document.addEventListener("click", e => {
     const g = e.target.closest("[data-go]"); if (g) go(g.dataset.go);
@@ -155,8 +149,10 @@
     $("#lyTitle").textContent = story ? "Geschichte" : "Dialog";
     $("#lySrc").textContent = story ? `${L.title} · ${L.level}` : "Daily German Talk";
 
-    // audio
+    // audio: every lesson and story remembers where you stopped
     player.src = L.audio; player.playbackRate = SPEEDS[state.speed];
+    const resume = (store.get("posMap", {}))[L.id];
+    if (resume > 3) player.addEventListener("loadedmetadata", () => { if (state.idx === i && player.currentTime < 1 && resume < player.duration - 3) { player.currentTime = resume; showNow(Math.max(0, lineAt(resume))); } }, { once: true });
     showNow(0);
 
     buildVocab(); buildPractice(); renderVocab(); renderProgress(); renderWotd();
@@ -231,8 +227,7 @@
     sc.addEventListener("error", () => { sc.remove(); rej(); }, { once: true });
   });
   function bgvSet(L) {
-    $("#bgvBtn").hidden = !L.video;
-    $("#bgvBtn").setAttribute("aria-pressed", bgvOn());
+    $$("[data-bgv]").forEach(b => { b.hidden = !L.video; b.setAttribute("aria-pressed", bgvOn()); });
     const want = L.video && bgvOn() ? L.video : "";
     if (want === bgv.id) return;
     try { bgv.p?.destroy?.(); } catch {}
@@ -274,7 +269,7 @@
     $$("[data-vidonly]").forEach(b => { b.setAttribute("aria-pressed", on); b.hidden = !document.body.classList.contains("has-bgv"); b.textContent = on ? "Aa ✕" : "Aa"; });
   }
   document.addEventListener("click", e => { if (!e.target.closest("[data-vidonly]")) return; const on = !document.body.classList.contains("video-only"); store.set("vidOnly", on); vidOnly(on); });
-  $("#bgvBtn").onclick = () => { store.set("bgVideo", !bgvOn()); bgvSet(LESSONS[state.idx]); };
+  document.addEventListener("click", e => { if (!e.target.closest("[data-bgv]")) return; store.set("bgVideo", !bgvOn()); bgvSet(LESSONS[state.idx]); });
 
   /* ---------- Night mode: calm, one line at a time, big translation, big controls ---------- */
   const night = { open: false, lock: null, idle: 0, sleepEnd: 0, sleepT: 0, shown: -1 };
@@ -307,7 +302,7 @@
   function nightClose() {
     night.open = false; $("#night").hidden = true; document.body.classList.remove("night-on"); clearTimeout(night.idle);
     try { if (document.fullscreenElement) document.exitFullscreen(); } catch {}
-    nightLock(false);
+    nightLock(false); requestAnimationFrame(() => showNow(curLine));
   }
   // sleep timer: minutes, or "end" = stop when the current story ends
   const SLEEP = [0, 15, 30, 45, "end"];
@@ -321,7 +316,8 @@
     const left = night.sleepEnd ? Math.max(0, Math.ceil((night.sleepEnd - Date.now()) / 60000)) : 0;
     $("#ntSleepL").textContent = night.sleepMode === "end" ? "Ende" : night.sleepEnd ? `${left} Min` : "Aus";
   }
-  $("#ntClose").onclick = () => storyClose();
+  $("#ntClose").onclick = () => nightClose();
+  $("#nightBtn").onclick = () => nightOpen();
   // time bar: drag to any point; swipe on the text for the next/previous sentence
   const ntBar = $("#ntSeek"); let ntDrag = false;
   const fmtT = x => `${Math.floor(x / 60)}:${String(Math.floor(x % 60)).padStart(2, "0")}`;
@@ -349,7 +345,7 @@
   player.addEventListener("play", () => { if (night.open) { nightLock(true); nightWake(); } });
   player.addEventListener("pause", () => { if (night.open && !night.gapWait) { $("#night").classList.remove("idle"); nightLock(false); } });
   document.addEventListener("visibilitychange", () => { if (night.open && !document.hidden && !player.paused) nightLock(true); });
-  document.addEventListener("keydown", e => { if (!night.open) return; if (e.key === "Escape") storyClose(); if (e.key === " ") { e.preventDefault(); act("toggle"); } if (e.key === "ArrowRight") act("next"); if (e.key === "ArrowLeft") act("prev"); });
+  document.addEventListener("keydown", e => { if (!night.open) return; if (e.key === "Escape") nightClose(); if (e.key === " ") { e.preventDefault(); act("toggle"); } if (e.key === "ArrowRight") act("next"); if (e.key === "ArrowLeft") act("prev"); });
 
   /* ---------- Story playlist (dock tab): pick, order, settings, then night-mode playback ---------- */
   const PL_MODES = { mine: "Meine Liste", level: "Niveau ↑", newest: "Neueste", random: "Zufall" };
@@ -393,7 +389,9 @@
   // where Start begins: the saved position if that story is still in the list
   function plStartPoint(pl, queue) {
     const q = queue || plOrdered(pl).filter(id => plSel(pl, id)); if (!q.length) return null;
-    const pos = pl.pos && q.includes(pl.pos.id) ? pl.pos : { id: q[0], t: 0 };
+    // start with what is open in the player if it is in the list, else where the list stopped last time
+    const curId = LESSONS[state.idx].id;
+    const pos = q.includes(curId) ? { id: curId, t: player.currentTime || (store.get("posMap", {})[curId] || 0) } : pl.pos && q.includes(pl.pos.id) ? pl.pos : { id: q[0], t: 0 };
     const i = LESSONS.findIndex(x => x.id === pos.id), L = LESSONS[i];
     const line = Array.isArray(L.timings) ? Math.max(0, L.timings.findIndex(x => (Array.isArray(x) ? x[1] : x) > pos.t)) : 0;
     return { id: pos.id, i, t: pos.t || 0, line };
@@ -431,7 +429,7 @@
     const id = night.queue[qi], i = LESSONS.findIndex(x => x.id === id); if (i < 0) return;
     night.qi = qi; night.gapDone = -1;
     if (i !== state.idx) setLesson(i);
-    if (!night.open) nightOpen(); night.shown = -1;
+    night.shown = -1;
     const start = () => { player.currentTime = at || 0; showNow(Math.max(0, lineAt(at || 0))); player.play().catch(() => toast(t("playFailed"))); };
     player.readyState >= 1 ? start() : player.addEventListener("loadedmetadata", start, { once: true });
   }
@@ -447,22 +445,24 @@
     const st = plStartPoint(pl, q);
     startQueue(q, st.id, st.t);
   };
-  // one story on its own (from its page or the library), resuming if it was left halfway
-  function playOneStory(i, fromStart) {
-    const id = LESSONS[i].id, pos = plGet().pos;
-    startQueue([id], id, !fromStart && pos && pos.id === id ? pos.t : 0);
+  $("#plStart").addEventListener("click", () => { queueSheet(false); go("audio"); });
+  // the queue sheet lives in the player
+  function queueSheet(open) {
+    if (open) renderStories();
+    $("#qSheet").hidden = !open; $("#qBack").hidden = !open;
+    $("#qBtn")?.classList.toggle("on", !!open);
   }
-  // closing a story stops it and goes back to the playlist
-  function storyClose() {
-    clearTimeout(night.gapWait); night.gapWait = 0;
-    if (!player.paused) player.pause();
-    night.queue = null; nightClose(); nightSleep(0);
-    backToLesson(); go("stories");
-  }
+  $("#qBtn").addEventListener("click", () => { if (document.body.dataset.screen !== "audio") go("audio"); queueSheet($("#qSheet").hidden); });
+  $("#qClose").onclick = () => queueSheet(false);
+  $("#qBack").onclick = () => queueSheet(false);
   // remember where we are; move on to the next story at the end; optional pause after each sentence
-  let plSaveT = 0;
+  let plSaveT = 0, posSaveT = 0;
   player.addEventListener("timeupdate", () => {
-    if (!night.open || !night.queue || player.ended) return;
+    if (player.paused || clipStop != null || Date.now() - posSaveT < 3000) return;
+    posSaveT = Date.now(); const m = store.get("posMap", {}); m[LESSONS[state.idx].id] = player.ended ? 0 : Math.round(player.currentTime); store.set("posMap", m);
+  });
+  player.addEventListener("timeupdate", () => {
+    if (!night.queue || player.ended) return;
     if (Date.now() - plSaveT > 4000) { plSaveT = Date.now(); const pl = plGet(); pl.pos = { id: LESSONS[state.idx].id, t: player.currentTime }; plSet(pl); }
     const l = lines[curLine];
     if (night.gap && timed && l && !player.paused && !night.gapWait && night.gapDone !== curLine && player.currentTime >= l.t1 - 0.05 && player.currentTime < l.t1 + 0.6) {
@@ -471,7 +471,7 @@
     }
   });
   player.addEventListener("ended", () => {
-    if (!night.open || !night.queue) return;
+    if (!night.queue) return;
     const pl = plGet(); pl.pos = null; plSet(pl);
     if (night.sleepMode === "end") { nightSleep(0); return; }
     if (night.qi + 1 < night.queue.length) setTimeout(() => playStory(night.qi + 1, 0), 1500);
@@ -1677,7 +1677,7 @@
     applyDictLang(); I18N.apply();
     $$(".js-lang-code").forEach(e => e.textContent = I18N.lang.toUpperCase());
     if (LESSONS.length) setLesson(state.idx);
-    if (!$("#profBack").hidden) renderProfile();
+    if (document.body.dataset.screen === "profile") renderProfile();
     if (!$("#pView").hidden) closeView();
   }
   window.addEventListener("lapp:lang", applyLang);
@@ -1698,12 +1698,25 @@
     if (!e.target.closest("#langMenu")) langMenu.hidden = true;
   });
 
+  /* ---------- Four skills (speaking, listening, reading, writing) ---------- */
+  const SKILLS = [
+    { id: "speak", ic: "🗣️", de: "Sprechen", fa: "skSpeak", color: "#FF2D55", types: ["speak"] },
+    { id: "listen", ic: "🎧", de: "Hören", fa: "skListen", color: "#5E5CE6", types: ["listen", "respond"] },
+    { id: "read", ic: "📖", de: "Lesen", fa: "skRead", color: "#30B0C7", types: ["fill", "order"] },
+    { id: "write", ic: "✍️", de: "Schreiben", fa: "skWrite", color: "#FF9F0A", types: ["translate"] }
+  ];
+  function skillPct(id) {
+    const sk = SKILLS.find(k => k.id === id), res = exResults();
+    const list = ex.list.filter(e => sk.types.includes(e.type)), ok = list.filter(e => res[e.id] === true).length;
+    let p = list.length ? ok / list.length * 100 : 0;
+    if (id === "speak") { const dl = store.get(bestKey("dlg"), {}), fb = store.get(bestKey("fs"), {}); p = Math.max(p, ...Object.values(dl), fb.cue || 0, fb.topic || 0); }
+    return Math.min(100, Math.round(p));
+  }
+
   /* ---------- Profile ---------- */
   const initial = n => (n || "").trim().charAt(0).toUpperCase() || "🙂";
   const paintAvatar = () => {
     $$(".js-avatar").forEach(e => e.textContent = initial(store.get("name", "")));
-    $("#p5Name").textContent = store.get("name", "") || t("learner");
-    $("#p5Sub").textContent = `${I18N.name(I18N.lang)} · 🔥 ${streak()} · ${state.known.size} ✓`;
   };
   function renderProfile() {
     const L = LESSONS[state.idx];
@@ -1721,13 +1734,14 @@
       row(t("bestExam"), `${exam}%`, exam) +
       row(t("bestSpeaking"), `${bestDlg}%`, bestDlg);
     $("#profLang").innerHTML = I18N.langs.map(l => `<button data-set-lang="${l}" class="${l === I18N.lang ? "on" : ""}">${I18N.name(l)}</button>`).join("");
+    // page header: streak, words, listening time; progress per skill (current lesson)
+    const all = daily(), mins = Math.round(Object.values(all).reduce((a, d) => a + (d.l || 0), 0) / 60), since = Object.keys(all).sort()[0];
+    $("#pfSub").textContent = `${I18N.name(I18N.lang)}${since ? " · " + since : ""} · ${L.level}`;
+    $("#pfStats").innerHTML = `<div><b>🔥 ${streak()}</b><small>Tage</small></div><div><b>${state.known.size}</b><small>Wörter</small></div><div><b>${mins >= 60 ? Math.round(mins / 60 * 10) / 10 + " h" : mins + " Min"}</b><small>gehört</small></div>`;
+    $("#pfLsName").textContent = `${lsCode(state.idx)} · ${L.title}`;
+    $("#pfSkills").innerHTML = SKILLS.map(k => { const p = skillPct(k.id); return `<div class="pf-row"><span>${k.ic} ${k.de} · <span class="fa">${t(k.fa)}</span></span><span class="pf-bar"><i style="width:${p}%"></i></span><b>${p}%</b></div>`; }).join("");
     paintAvatar();
   }
-  document.addEventListener("click", e => {
-    if (e.target.closest("[data-profile]")) { renderProfile(); $("#profBack").hidden = false; }
-  });
-  $("#profClose").onclick = () => { $("#profBack").hidden = true; };
-  $("#profBack").addEventListener("click", e => { if (e.target.id === "profBack") $("#profBack").hidden = true; });
   $("#profName").addEventListener("input", e => { store.set("name", e.target.value.trim()); paintAvatar(); });
   $("#profReset").onclick = () => {
     if (!confirm(t("resetConfirm"))) return;
@@ -1765,7 +1779,7 @@
     const kn = keys.filter(k => state.known.has(k)).length, dl = store.get(bestKey("dlg", i), {}), fsb = store.get(bestKey("fs", i), {}), exb = store.get(lsKey("exam", i), null);
     const best = (v, goal = 70) => Math.min(1, (v || 0) / goal);
     if (isStory(L)) return [
-      { ic: "🎧", de: "Geschichte hören", sub: tf("lsStepDialog", { a: heard, b: nLines }), f: Math.min(1, heard / (nLines * 0.8 || 1)), go: () => playOneStory(i) },
+      { ic: "🎧", de: "Geschichte hören", sub: tf("lsStepDialog", { a: heard, b: nLines }), f: Math.min(1, heard / (nLines * 0.8 || 1)), go: () => { go("audio"); player.play().catch(() => {}); } },
       { ic: "🔤", de: "Neue Wörter", sub: tf("lsStepWords", { a: kn, b: keys.length }), f: Math.min(1, kn / (keys.length * 0.5 || 1)), go: () => go("vocab") },
       { ic: "❓", de: "Fragen zur Geschichte", sub: tf("lsStepBest", { b: fsb.cue != null ? fsb.cue + "%" : "—" }), f: best(fsb.cue), go: () => { go("practice"); $('#pHub [data-open="cue"]')?.click(); } },
       { ic: "🗣️", de: "Nacherzählen", sub: tf("lsStepBest", { b: fsb.topic != null ? fsb.topic + "%" : "—" }), f: best(fsb.topic), go: () => { go("practice"); $('#pHub [data-open="topic"]')?.click(); } },
@@ -1909,8 +1923,7 @@
   $("#libMenu").addEventListener("click", e => {
     const b = e.target.closest("[data-m]"); if (!b) return;
     const i = Number($("#libMenu").dataset.i), L = LESSONS[i], m = b.dataset.m; libMenuClose();
-    if ((m === "play" || m === "restart") && isStory(L)) playOneStory(i, m === "restart");
-    else if (m === "play" || m === "restart") { if (i !== state.idx) setLesson(i); if (m === "restart") { player.currentTime = 0; showNow(0); } go("audio"); }
+    if (m === "play" || m === "restart") { if (i !== state.idx) setLesson(i); if (m === "restart") { player.currentTime = 0; showNow(0); } go("audio"); player.play().catch(() => {}); }
     if (m === "open") { if (i !== state.idx) setLesson(i); go("lesson"); }
     if (m === "done") { const d = store.get("done", []); store.set("done", d.includes(L.id) ? d.filter(x => x !== L.id) : [...d, L.id]); renderLibrary(); renderProgress?.(); }
     if (m === "reset" && confirm(`${lsName(i)}: Fortschritt löschen?`)) { libReset(L); if (i === state.idx) setLesson(i); renderLibrary(); }

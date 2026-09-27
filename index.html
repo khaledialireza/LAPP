@@ -16,7 +16,7 @@
   <meta name="description" content="LAPP — آموزش زبان آلمانی با دیالوگ صوتی، واژگان و تمرین.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=mujr3oqq">
+  <link rel="stylesheet" href="style.css?v=mujtjmvs">
 </head>
 <body data-screen="home">
   <div class="frame">
@@ -61,7 +61,6 @@
               <div><b class="c-w" id="lgWords">0</b> <span>Wörter</span></div>
             </div>
           </div>
-          <button class="prof5" data-profile><span class="avatar-btn js-avatar">?</span><span class="p5t"><span class="kk">Profil · <span class="fa">من</span></span><b id="p5Name"></b><span class="fa" id="p5Sub"></span></span><span class="p5c">›</span></button>
           <button class="word5" data-go="vocab">
             <span class="kk">Wort des Tages</span>
             <span class="sp" id="wotdSay" role="button" aria-label="anhören"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 4V5L7 9zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4z"/></svg></span>
@@ -76,17 +75,23 @@
       </section>
 
       <!-- LESSON -->
-      <section class="screen" id="stories">
-        <div class="pl-head"><div class="pl-k">GUTE-NACHT-PLAYLIST</div><h1 class="pl-title">Geschichten</h1><div class="pl-sub fa">پلی‌لیست داستان و دیالوگ — قبل از خواب گوش کن و بخوان</div></div>
-        <div class="pl-scroll">
-          <div class="pl-a"><div class="pl-sec">REIHENFOLGE · <span class="fa">ترتیب پخش</span></div>
-          <div class="pl-seg" id="plMode"></div>
-          <div class="pl-sec" id="plCount"></div>
-          <div class="pl-list" id="plList"></div></div>
-          <div class="pl-b"><div class="pl-sec">EINSTELLUNGEN</div>
-          <div class="pl-opts" id="plOpts"></div></div>
+      <section class="screen" id="profile">
+        <div class="pf-scroll">
+          <div class="pf-top"><div class="avatar-big js-avatar">?</div>
+            <input id="profName" class="pf-name" maxlength="30" autocomplete="name" aria-label="Name">
+            <div class="pf-sub fa" id="pfSub"></div></div>
+          <div class="pf-stats" id="pfStats"></div>
+          <h3 class="ph-h"><span>FORTSCHRITT · <span class="fa" data-i18n="progress"></span></span></h3>
+          <div class="pf-group" id="pfSkills"></div>
+          <h3 class="ph-h"><span>LEKTION · <span class="fa" id="pfLsName"></span></span></h3>
+          <div class="prof-stats pf-group" id="profStats"></div>
+          <h3 class="ph-h"><span>EINSTELLUNGEN · <span class="fa" data-i18n="settings"></span></span></h3>
+          <div class="pf-group">
+            <div class="pf-row"><span>Sprache · <span class="fa" data-i18n="uiLanguage"></span></span><div class="tabs" id="profLang"></div></div>
+          </div>
+          <p class="fa pf-note" data-i18n="savedOnDevice"></p>
+          <button class="btn ghost prof-reset" id="profReset" data-i18n="resetProgress"></button>
         </div>
-        <button class="pl-start" id="plStart"></button>
       </section>
 
       <section class="screen" id="library">
@@ -112,10 +117,24 @@
       <section class="screen" id="audio">
         <div class="ly-head">
           <div><h1 class="ly-title" id="lyTitle">Dialog</h1><div class="ly-meta"><span id="lySrc">Daily German Talk</span> · <span id="mNum"></span></div></div>
-          <div class="ly-acts"><div class="spk-pick"><button class="ly-chip" id="spkBtn" aria-haspopup="listbox" aria-expanded="false">👤 <span id="spkLbl">Alle</span> ▾</button><div class="spk-menu" id="mSpkTabs" hidden></div></div><button class="ly-chip fa" id="faBtn" aria-pressed="true" data-i18n="showTranslation"></button></div>
+          <div class="ly-acts"><div class="spk-pick"><button class="ly-chip" id="spkBtn" aria-haspopup="listbox" aria-expanded="false">👤 <span id="spkLbl">Alle</span> ▾</button><div class="spk-menu" id="mSpkTabs" hidden></div></div><button class="ly-chip" data-bgv aria-pressed="true" aria-label="Video im Hintergrund" hidden>🎬</button><button class="ly-chip nt-txt" data-vidonly aria-pressed="false" aria-label="Nur Video" hidden>Aa</button><button class="ly-chip" id="nightBtn" aria-label="Nachtmodus">🌙</button><button class="ly-chip fa" id="faBtn" aria-pressed="true" data-i18n="showTranslation"></button></div>
         </div>
-        <div class="lyrics" id="mTranscript"></div>
+            <div class="lyrics" id="mTranscript"></div>
         <aside class="word-side" id="wordSide" aria-label="Wort"><div class="ws-body" id="wsBody"></div></aside>
+        <div class="q-back" id="qBack" hidden></div>
+        <div class="q-sheet" id="qSheet" hidden>
+          <div class="q-grab"></div>
+          <div class="q-head"><div><div class="pl-k">ALS NÄCHSTES · <span class="fa" data-i18n="queue"></span></div><h2 class="q-title">Wiedergabeliste</h2></div><button class="q-x" id="qClose" aria-label="schließen">✕</button></div>
+          <div class="pl-scroll">
+          <div class="pl-a"><div class="pl-sec">REIHENFOLGE · <span class="fa">ترتیب پخش</span></div>
+          <div class="pl-seg" id="plMode"></div>
+          <div class="pl-sec" id="plCount"></div>
+          <div class="pl-list" id="plList"></div></div>
+          <div class="pl-b"><div class="pl-sec">EINSTELLUNGEN</div>
+          <div class="pl-opts" id="plOpts"></div></div>
+        </div>
+        <button class="pl-start" id="plStart"></button>
+        </div>
       </section>
 
       <!-- VOCAB -->
@@ -218,7 +237,7 @@
     <footer class="dock">
       <button class="dock-round dock-tabs-btn" id="dockTabsBtn" aria-label="Tabs"></button>
       <nav class="nav">
-        <button data-go="stories" aria-label="Geschichten"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg><span class="tab-l fa" data-i18n="tabStory"></span></button>
+        <button class="tab-me" data-go="profile" aria-label="Profil"><span class="avatar-btn js-avatar">?</span><span class="tab-l fa" data-i18n="tabMe"></span></button>
         <button data-go="vocab" aria-label="Vokabeln"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 20 12 4l7 16M8 14h8"/></svg><span class="tab-l fa" data-i18n="tabVocab"></span></button>
         <button data-go="home" class="on" aria-label="Start"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11 12 4l9 7v9H3z"/><path d="M9 20v-6h6v6"/></svg><span class="tab-l fa" data-i18n="tabHome"></span></button>
         <button data-go="audio" aria-label="Audio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg><span class="tab-l fa" data-i18n="tabDialog"></span></button>
@@ -231,6 +250,7 @@
         <button class="dp-chip" data-speed-cycle aria-label="Tempo"><span class="js-speed">1×</span></button>
         <button class="icon-btn dp-rep" id="lyRepeat" aria-label="Satz wiederholen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.6-5.9"/><path d="M4 4v5h5"/></svg></button>
         <button class="icon-btn" data-act="toggle" aria-label="play"><svg class="ico-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l12-7z"/></svg></button>
+        <button class="icon-btn dp-q" id="qBtn" aria-label="Wiedergabeliste"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 6h16M4 12h10M4 18h10"/><path d="M17 14v6l4-3z" fill="currentColor"/></svg></button>
         <button class="icon-btn" data-act="next" aria-label="weiter"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 5v14l8-7zM12 5v14l8-7z"/></svg></button>
         <div class="progress dp-prog" data-seek><i class="bar"></i></div>
       </div>
@@ -241,7 +261,7 @@
   <!-- Night mode: one line at a time, dark and calm, for reading before sleep -->
   <div class="night" id="night" hidden>
     <div class="bgv" id="bgv" aria-hidden="true"></div>
-    <div class="nt-top"><button class="nt-x" id="ntClose" aria-label="schließen">✕</button><span class="nt-num"><span id="ntTitle"></span> · <span id="ntNum"></span><span class="nt-next" id="ntNext"></span></span><span class="nt-acts"><button class="nt-sleep" id="bgvBtn" aria-pressed="true" aria-label="Video im Hintergrund" hidden>🎬</button><button class="nt-sleep nt-txt" data-vidonly aria-pressed="false" aria-label="Nur Video">Aa</button><button class="nt-sleep" id="ntSleep">⏾ <span id="ntSleepL">Aus</span></button></span></div>
+    <div class="nt-top"><button class="nt-x" id="ntClose" aria-label="schließen">✕</button><span class="nt-num"><span id="ntTitle"></span> · <span id="ntNum"></span><span class="nt-next" id="ntNext"></span></span><span class="nt-acts"><button class="nt-sleep" data-bgv aria-pressed="true" aria-label="Video im Hintergrund" hidden>🎬</button><button class="nt-sleep nt-txt" data-vidonly aria-pressed="false" aria-label="Nur Video">Aa</button><button class="nt-sleep" id="ntSleep">⏾ <span id="ntSleepL">Aus</span></button></span></div>
     <div class="nt-stage" id="ntStage"><div class="nt-card" id="ntCard"><div class="nt-who" id="ntWho"></div><div class="nt-de" id="ntDe"></div><div class="nt-tr" id="ntTr"></div></div></div>
     <div class="nt-time"><span id="ntCur">0:00</span><input type="range" id="ntSeek" min="0" max="0" step="1" value="0" aria-label="Zeit"><span id="ntDur">0:00</span></div>
     <div class="nt-ctl">
@@ -255,20 +275,6 @@
   <audio id="player" preload="metadata"></audio>
   <div class="toast" id="toast"></div>
   <div class="lang-menu" id="langMenu" hidden></div>
-  <div class="pop-back" id="profBack" hidden>
-    <div class="pop prof" role="dialog" aria-modal="true" aria-labelledby="profTitle">
-      <div class="pop-head">
-        <div class="avatar-big js-avatar">?</div>
-        <div><div class="pop-word" id="profTitle" data-i18n="profile"></div><div class="pop-lemma fa" data-i18n="savedOnDevice"></div></div>
-        <button class="icon-btn pop-x" id="profClose" aria-label="close">✕</button>
-      </div>
-      <label class="prof-name"><span class="fa" data-i18n="yourName"></span><input id="profName" maxlength="30" autocomplete="name"></label>
-      <h3 class="fa" data-i18n="progress"></h3>
-      <div class="prof-stats" id="profStats"></div>
-      <div class="prof-lang"><span class="fa" data-i18n="uiLanguage"></span><div class="tabs" id="profLang"></div></div>
-      <button class="btn ghost prof-reset" id="profReset" data-i18n="resetProgress"></button>
-    </div>
-  </div>
   <div class="pop-back vs-back" id="vBack" hidden><div class="vsheet" id="vSheet" role="dialog" aria-modal="true"></div></div>
 
   <div class="pop-back" id="popBack" hidden>
@@ -285,69 +291,69 @@
     </div>
   </div>
 
-  <script src="data/lessons.js?v=mujr3oqq"></script>
-  <script src="data/lesson1-fa.js?v=mujr3oqq"></script>
-  <script src="data/lesson1-times.js?v=mujr3oqq"></script>
-  <script src="data/lesson1-speak.js?v=mujr3oqq"></script>
-  <script src="data/lesson1-focus.js?v=mujr3oqq"></script>
-  <script src="data/lesson1-words.js?v=mujr3oqq"></script>
-  <script src="data/dict-de.js?v=mujr3oqq"></script>
-  <script src="data/dict-tr.js?v=mujr3oqq"></script>
-  <script src="data/lesson1-ru.js?v=mujr3oqq"></script>
-  <script src="data/lesson1-uk.js?v=mujr3oqq"></script>
-  <script src="data/lesson2-fa.js?v=mujr3oqq"></script>
-  <script src="data/lesson2-times.js?v=mujr3oqq"></script>
-  <script src="data/lesson2-speak.js?v=mujr3oqq"></script>
-  <script src="data/lesson2-focus.js?v=mujr3oqq"></script>
-  <script src="data/lesson2-words.js?v=mujr3oqq"></script>
-  <script src="data/lesson2-ru.js?v=mujr3oqq"></script>
-  <script src="data/lesson2-uk.js?v=mujr3oqq"></script>
-  <script src="data/lesson3-fa.js?v=mujr3oqq"></script>
-  <script src="data/lesson3-times.js?v=mujr3oqq"></script>
-  <script src="data/lesson3-speak.js?v=mujr3oqq"></script>
-  <script src="data/lesson3-focus.js?v=mujr3oqq"></script>
-  <script src="data/lesson3-words.js?v=mujr3oqq"></script>
-  <script src="data/lesson3-ru.js?v=mujr3oqq"></script>
-  <script src="data/lesson3-uk.js?v=mujr3oqq"></script>
-  <script src="data/lesson4-fa.js?v=mujr3oqq"></script>
-  <script src="data/lesson4-times.js?v=mujr3oqq"></script>
-  <script src="data/lesson4-speak.js?v=mujr3oqq"></script>
-  <script src="data/lesson4-focus.js?v=mujr3oqq"></script>
-  <script src="data/lesson4-words.js?v=mujr3oqq"></script>
-  <script src="data/lesson4-ru.js?v=mujr3oqq"></script>
-  <script src="data/lesson4-uk.js?v=mujr3oqq"></script>
-  <script src="data/lesson5-fa.js?v=mujr3oqq"></script>
-  <script src="data/lesson5-times.js?v=mujr3oqq"></script>
-  <script src="data/lesson5-speak.js?v=mujr3oqq"></script>
-  <script src="data/lesson5-focus.js?v=mujr3oqq"></script>
-  <script src="data/lesson5-words.js?v=mujr3oqq"></script>
-  <script src="data/lesson5-ru.js?v=mujr3oqq"></script>
-  <script src="data/lesson5-uk.js?v=mujr3oqq"></script>
-  <script src="data/lesson6-fa.js?v=mujr3oqq"></script>
-  <script src="data/lesson6-times.js?v=mujr3oqq"></script>
-  <script src="data/lesson6-speak.js?v=mujr3oqq"></script>
-  <script src="data/lesson6-focus.js?v=mujr3oqq"></script>
-  <script src="data/lesson6-words.js?v=mujr3oqq"></script>
-  <script src="data/lesson6-ru.js?v=mujr3oqq"></script>
-  <script src="data/lesson6-uk.js?v=mujr3oqq"></script>
-  <script src="data/lesson7-fa.js?v=mujr3oqq"></script>
-  <script src="data/lesson7-times.js?v=mujr3oqq"></script>
-  <script src="data/lesson7-speak.js?v=mujr3oqq"></script>
-  <script src="data/lesson7-focus.js?v=mujr3oqq"></script>
-  <script src="data/lesson7-words.js?v=mujr3oqq"></script>
-  <script src="data/lesson7-ru.js?v=mujr3oqq"></script>
-  <script src="data/lesson7-uk.js?v=mujr3oqq"></script>
-  <script src="data/lesson8-fa.js?v=mujr3oqq"></script>
-  <script src="data/lesson8-times.js?v=mujr3oqq"></script>
-  <script src="data/lesson8-speak.js?v=mujr3oqq"></script>
-  <script src="data/lesson8-focus.js?v=mujr3oqq"></script>
-  <script src="data/lesson8-words.js?v=mujr3oqq"></script>
-  <script src="data/lesson8-ru.js?v=mujr3oqq"></script>
-  <script src="data/lesson8-uk.js?v=mujr3oqq"></script>
-  <script src="i18n.js?v=mujr3oqq"></script>
-  <script src="data/verbs-de.js?v=mujr3oqq"></script>
-  <script src="grammar.js?v=mujr3oqq"></script>
-  <script src="exercises.js?v=mujr3oqq"></script>
-  <script src="app.js?v=mujr3oqq"></script>
+  <script src="data/lessons.js?v=mujtjmvs"></script>
+  <script src="data/lesson1-fa.js?v=mujtjmvs"></script>
+  <script src="data/lesson1-times.js?v=mujtjmvs"></script>
+  <script src="data/lesson1-speak.js?v=mujtjmvs"></script>
+  <script src="data/lesson1-focus.js?v=mujtjmvs"></script>
+  <script src="data/lesson1-words.js?v=mujtjmvs"></script>
+  <script src="data/dict-de.js?v=mujtjmvs"></script>
+  <script src="data/dict-tr.js?v=mujtjmvs"></script>
+  <script src="data/lesson1-ru.js?v=mujtjmvs"></script>
+  <script src="data/lesson1-uk.js?v=mujtjmvs"></script>
+  <script src="data/lesson2-fa.js?v=mujtjmvs"></script>
+  <script src="data/lesson2-times.js?v=mujtjmvs"></script>
+  <script src="data/lesson2-speak.js?v=mujtjmvs"></script>
+  <script src="data/lesson2-focus.js?v=mujtjmvs"></script>
+  <script src="data/lesson2-words.js?v=mujtjmvs"></script>
+  <script src="data/lesson2-ru.js?v=mujtjmvs"></script>
+  <script src="data/lesson2-uk.js?v=mujtjmvs"></script>
+  <script src="data/lesson3-fa.js?v=mujtjmvs"></script>
+  <script src="data/lesson3-times.js?v=mujtjmvs"></script>
+  <script src="data/lesson3-speak.js?v=mujtjmvs"></script>
+  <script src="data/lesson3-focus.js?v=mujtjmvs"></script>
+  <script src="data/lesson3-words.js?v=mujtjmvs"></script>
+  <script src="data/lesson3-ru.js?v=mujtjmvs"></script>
+  <script src="data/lesson3-uk.js?v=mujtjmvs"></script>
+  <script src="data/lesson4-fa.js?v=mujtjmvs"></script>
+  <script src="data/lesson4-times.js?v=mujtjmvs"></script>
+  <script src="data/lesson4-speak.js?v=mujtjmvs"></script>
+  <script src="data/lesson4-focus.js?v=mujtjmvs"></script>
+  <script src="data/lesson4-words.js?v=mujtjmvs"></script>
+  <script src="data/lesson4-ru.js?v=mujtjmvs"></script>
+  <script src="data/lesson4-uk.js?v=mujtjmvs"></script>
+  <script src="data/lesson5-fa.js?v=mujtjmvs"></script>
+  <script src="data/lesson5-times.js?v=mujtjmvs"></script>
+  <script src="data/lesson5-speak.js?v=mujtjmvs"></script>
+  <script src="data/lesson5-focus.js?v=mujtjmvs"></script>
+  <script src="data/lesson5-words.js?v=mujtjmvs"></script>
+  <script src="data/lesson5-ru.js?v=mujtjmvs"></script>
+  <script src="data/lesson5-uk.js?v=mujtjmvs"></script>
+  <script src="data/lesson6-fa.js?v=mujtjmvs"></script>
+  <script src="data/lesson6-times.js?v=mujtjmvs"></script>
+  <script src="data/lesson6-speak.js?v=mujtjmvs"></script>
+  <script src="data/lesson6-focus.js?v=mujtjmvs"></script>
+  <script src="data/lesson6-words.js?v=mujtjmvs"></script>
+  <script src="data/lesson6-ru.js?v=mujtjmvs"></script>
+  <script src="data/lesson6-uk.js?v=mujtjmvs"></script>
+  <script src="data/lesson7-fa.js?v=mujtjmvs"></script>
+  <script src="data/lesson7-times.js?v=mujtjmvs"></script>
+  <script src="data/lesson7-speak.js?v=mujtjmvs"></script>
+  <script src="data/lesson7-focus.js?v=mujtjmvs"></script>
+  <script src="data/lesson7-words.js?v=mujtjmvs"></script>
+  <script src="data/lesson7-ru.js?v=mujtjmvs"></script>
+  <script src="data/lesson7-uk.js?v=mujtjmvs"></script>
+  <script src="data/lesson8-fa.js?v=mujtjmvs"></script>
+  <script src="data/lesson8-times.js?v=mujtjmvs"></script>
+  <script src="data/lesson8-speak.js?v=mujtjmvs"></script>
+  <script src="data/lesson8-focus.js?v=mujtjmvs"></script>
+  <script src="data/lesson8-words.js?v=mujtjmvs"></script>
+  <script src="data/lesson8-ru.js?v=mujtjmvs"></script>
+  <script src="data/lesson8-uk.js?v=mujtjmvs"></script>
+  <script src="i18n.js?v=mujtjmvs"></script>
+  <script src="data/verbs-de.js?v=mujtjmvs"></script>
+  <script src="grammar.js?v=mujtjmvs"></script>
+  <script src="exercises.js?v=mujtjmvs"></script>
+  <script src="app.js?v=mujtjmvs"></script>
 </body>
 </html>
