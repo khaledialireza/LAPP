@@ -1817,7 +1817,8 @@
 
   /* ---------- iOS home-screen app: fill the whole screen ---------- */
   // only iOS Safari's home-screen app (navigator.standalone) has the short-viewport bug; desktop web apps size correctly
-  if (navigator.standalone === true) {
+  // macOS Safari web apps also report navigator.standalone but have windows: only touch devices (iPhone/iPad) need this
+  if (navigator.standalone === true && navigator.maxTouchPoints > 0) {
     const fit = () => {
       const long = Math.max(screen.width, screen.height), short = Math.min(screen.width, screen.height);
       const h = innerWidth > innerHeight ? short : long;
