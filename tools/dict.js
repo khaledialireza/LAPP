@@ -1,21 +1,25 @@
 #!/usr/bin/env node
 // ابزار دیکشنری LAPP
 //   node tools/dict.js check   → دیکشنری سراسری را برای تکراری‌ها بررسی می‌کند
-//   node tools/dict.js build   → برای هر درس فایل data/lessonN-words.js می‌سازد (کلیدهای دیکشنری سراسری)
-// دیکشنری سراسری (data/dict-de.js) تنها جایی است که معنی کلمه‌ها ذخیره می‌شود؛
+//   node tools/dict.js build   → فهرست کلمه‌های هر درس را در content/lessons/<درس>/lesson.json می‌نویسد
+// دیکشنری سراسری (content/lang/de/dict.json + معنی‌ها در content/lang/<زبان>/dict.json) تنها جایی است که معنی کلمه‌ها ذخیره می‌شود؛
 // هر درس فقط فهرست کلیدها را نگه می‌دارد، پس هیچ کلمه‌ای دو بار ذخیره نمی‌شود.
 const fs = require("fs"), path = require("path");
 const root = path.join(__dirname, "..");
+const C = path.join(root, "content");
+const json = f => JSON.parse(fs.readFileSync(path.join(C, f), "utf8"));
 global.window = {};
-const load = f => fs.existsSync(path.join(root, f)) && require(path.join(root, f));
-load("data/lessons.js");
-for (const f of fs.readdirSync(path.join(root, "data")).filter(f => /^lesson\d+-fa\.js$/.test(f))) load("data/" + f);
-load("data/dict-de.js");
-const { DICT, NAMES = {}, LESSONS = [] } = window;
+const idx0 = json("index.json");
+const de = json("lang/de/dict.json"), fa = json("lang/fa/dict.json");
+const DICT = {};
+for (const [k, v] of Object.entries(de)) { const m = fa[k]; DICT[k] = { p: v.p, f: v.f || [], fa: typeof m === "string" ? m : m ? m.m : "" }; }
+const NAMES = Object.fromEntries(json("lang/de/names.json").map(n => [n, n]));
+const LESSONS = idx0.lessons.map(dir => ({ dir, ...json(`lessons/${dir}/lesson.json`) }));
+window.VERBS = json("lang/de/verbs.json");
+require(path.join(root, "grammar.js"));
 
 const clean = t => t.replace(/^[^A-Za-zÄÖÜäöüßé]+|[^A-Za-zÄÖÜäöüßé'-]+$/g, "");
 const base = k => k.replace(/_.*/, "");
-load("data/verbs-de.js"); load("grammar.js");
 function index() {
   const idx = {};
   for (const [k, v] of Object.entries(DICT)) for (const f of [base(k), ...(v.f || [])]) { idx[f] ??= k; idx[f.toLowerCase()] ??= k; }
@@ -28,9 +32,9 @@ function index() {
 }
 
 function check() {
-  const src = fs.readFileSync(path.join(root, "data/dict-de.js"), "utf8");
+  const src = fs.readFileSync(path.join(C, "lang/de/dict.json"), "utf8");
   const problems = [];
-  // 1) same key written twice in the source (JS silently keeps the last one)
+  // 1) same key written twice in the source (JSON.parse silently keeps the last one)
   const keys = [...src.matchAll(/^\s*"([^"]+)":\s*\{/gm)].map(m => m[1]);
   const seenKey = new Set();
   keys.forEach(k => { if (seenKey.has(k)) problems.push(`کلید تکراری: ${k}`); seenKey.add(k); });
@@ -63,9 +67,9 @@ function lookupKey(idx, w) {
 }
 function build() {
   const idx = index();
-  LESSONS.forEach((L, li) => {
+  LESSONS.forEach(L => {
     const keys = [], missing = new Set();
-    L.transcript.split("\n").map(s => s.trim()).filter(Boolean).forEach(line => {
+    L.transcript.forEach(line => {
       line.replace(/^\*\*.+?:\*\*\s*/, "").split(/\s+/).forEach(tok => {
         const w = clean(tok); if (!w || NAMES[w]) return;
         const k = lookupKey(idx, w);
@@ -73,10 +77,10 @@ function build() {
         if (DICT[k].p !== "انگلیسی" && !keys.includes(k)) keys.push(k);
       });
     });
-    const file = `data/lesson${L.id}-words.js`;
-    fs.writeFileSync(path.join(root, file),
-      `// دیکشنری درس ${L.id}: کلیدهای دیکشنری سراسری (data/dict-de.js)، به ترتیب اولین ظهور در متن.\n` +
-      `// با «node tools/dict.js build» دوباره ساخته می‌شود.\nwindow.LESSONS[${li}].words = ${JSON.stringify(keys)};\n`);
+    // words go into lesson.json as one line, the rest of the file is left as it is
+    const file = `content/lessons/${L.dir}/lesson.json`, full = path.join(root, file);
+    const txt = fs.readFileSync(full, "utf8").replace(/^(  "words": ).*$/m, (m, a) => a + JSON.stringify(keys).replace(/,/g, ", ") + (/,\s*$/.test(m) ? "," : ""));
+    fs.writeFileSync(full, txt);
     console.log(`${file}: ${keys.length} کلمه` + (missing.size ? ` · بدون مدخل (انگلیسی یا جدید): ${[...missing].join(", ")}` : ""));
   });
 }

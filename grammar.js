@@ -1,5 +1,5 @@
 // Grammar for the word sheet: conjugation, declension, comparison and rule notes.
-// Irregular verbs come from data/verbs-de.js; regular forms are built by rule here.
+// Irregular verbs come from content/lang/de/verbs.json; regular forms are built by rule here.
 (() => {
   const H = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   const de = s => `<bdi class="gde">${H(s)}</bdi>`;
@@ -29,17 +29,18 @@
     const rows = PERS.map((p, i) => ({ p, pr: v.pr[i] + tail(i), pt: v.pt[i] + tail(i), pf: `${AUX[v.aux][i]}${v.refl ? " " + REFL[i] : ""}`, pp: v.pp }));
     return { inf, rows, aux: v.aux, pp: v.pp, irr: !!v.irr, sep: v.sep, refl: !!v.refl, modal: !!v.modal, stemChange: v.pr[1].slice(0, 2) !== v.pr[0].slice(0, 2) };
   }
+  // notes come from content/lang/<code>/grammar.json; a language without a template simply shows no note
+  const gt = (k, o = {}) => window.I18N && I18N.has(k) ? I18N.t(k, o) : null;
+  const push = (n, x) => { if (x) n.push(x); };
   function verbNotes(v) {
     const n = [];
-    if (v.irr) n.push(`بی‌قاعده (${de("unregelmäßig")}) است؛ صورت‌های گذشته‌اش را باید حفظ کرد: ${de(v.rows[0].pt)} · ${de(v.pp)}`);
-    else n.push(`باقاعده است: گذشتهٔ ساده با ${de("-te")} و اسم مفعول با ${de("ge- … -t")} ساخته می‌شود: ${de(v.rows[0].pt)} · ${de(v.pp)}`);
-    if (v.stemChange) n.push(`در ${de("du")} و ${de("er/sie/es")} ریشه عوض می‌شود: ${de(v.rows[1].pr)} · ${de(v.rows[2].pr)}`);
-    if (v.sep) n.push(`جداشدنی است: پیشوند ${de(v.sep)} در زمان حال به آخر جمله می‌رود: ${de(`Ich ${v.rows[0].pr}.`)} — در اسم مفعول ${de("ge")} وسط می‌آید: ${de(v.pp)}`);
-    if (v.refl) n.push(`انعکاسی است و ضمیر ${de("mich/dich/sich …")} لازم دارد: ${de(`ich ${v.rows[0].pr.split(" ").slice(0, 2).join(" ")}`)}`);
-    if (v.modal) n.push(`فعل وجهی است؛ فعل اصلی به‌صورت مصدر به آخر جمله می‌رود: ${de(`Ich ${v.rows[0].pr} gut Deutsch sprechen.`)}`);
-    n.push(v.aux === "sein"
-      ? `پرفکت با ${de("sein")} ساخته می‌شود، چون حرکت یا تغییر حالت را نشان می‌دهد: ${de(`ich ${v.rows[0].pf} ${v.pp}`)}`
-      : `پرفکت با ${de("haben")} ساخته می‌شود: ${de(`ich ${v.rows[0].pf} ${v.pp}`)}`);
+    if (v.irr) push(n, gt("g_verbIrr", { u: de("unregelmäßig"), a: de(v.rows[0].pt), b: de(v.pp) }));
+    else push(n, gt("g_verbReg", { te: de("-te"), ge: de("ge- … -t"), a: de(v.rows[0].pt), b: de(v.pp) }));
+    if (v.stemChange) push(n, gt("g_stem", { du: de("du"), er: de("er/sie/es"), a: de(v.rows[1].pr), b: de(v.rows[2].pr) }));
+    if (v.sep) push(n, gt("g_sep", { p: de(v.sep), ex: de(`Ich ${v.rows[0].pr}.`), ge: de("ge"), pp: de(v.pp) }));
+    if (v.refl) push(n, gt("g_refl", { r: de("mich/dich/sich …"), ex: de(`ich ${v.rows[0].pr.split(" ").slice(0, 2).join(" ")}`) }));
+    if (v.modal) push(n, gt("g_modal", { ex: de(`Ich ${v.rows[0].pr} gut Deutsch sprechen.`) }));
+    push(n, gt(v.aux === "sein" ? "g_perfSein" : "g_perfHaben", { aux: de(v.aux), ex: de(`ich ${v.rows[0].pf} ${v.pp}`) }));
     return n;
   }
 
@@ -55,10 +56,11 @@
     const dp = plural && !/[ns]$/.test(plural) ? plural + "n" : plural;
     const pl = plural ? [plural, plural, dp, plural] : null;
     const rows = CASES.map((c, i) => ({ c, def: `${ART[art][i]} ${sg[i]}`, ind: `${INDEF[art][i]} ${sg[i]}`, pl: pl ? `${["die", "die", "den", "der"][i]} ${pl[i]}` : "" }));
-    const n = [{ der: "مذکر", die: "مؤنث", das: "خنثی" }[art] + ` است؛ حرف تعریف معین ${de(art)} و نامعین ${de(INDEF[art][0])}.`];
-    if (art === "der") n.push(`در حالت مفعولی (${de("Akkusativ")}) فقط حرف تعریف مذکر عوض می‌شود: ${de(`den ${sg[1]}`)} · ${de(`einen ${sg[1]}`)}`);
-    if (weak) n.push(`از اسم‌های «ضعیف» (${de("n-Deklination")}) است و در همهٔ حالت‌ها جز فاعلی ${de("-n/-en")} می‌گیرد: ${de(`den ${sg[1]}`)}`);
-    if (plural) n.push(`جمع: ${de("die " + plural)} — در ${de("Dativ")} جمع ${de("-n")} اضافه می‌شود: ${de("mit den " + dp)}`);
+    const n = [];
+    push(n, gt("g_gender", { g: I18N.t({ der: "masc", die: "fem", das: "neut" }[art]), d: de(art), i: de(INDEF[art][0]) }));
+    if (art === "der") push(n, gt("g_akk", { akk: de("Akkusativ"), a: de(`den ${sg[1]}`), b: de(`einen ${sg[1]}`) }));
+    if (weak) push(n, gt("g_weak", { nd: de("n-Deklination"), en: de("-n/-en"), a: de(`den ${sg[1]}`) }));
+    if (plural) push(n, gt("g_plural", { pl: de("die " + plural), dat: de("Dativ"), n: de("-n"), ex: de("mit den " + dp) }));
     return { rows, notes: n, hasPlural: !!plural };
   }
 
@@ -88,26 +90,26 @@
   function smallNotes(word, p) {
     const n = []; let table = null;
     if (p.startsWith("حرف اضافه")) {
-      if (DAT.has(word)) n.push(`همیشه با حالت ${de("Dativ")} می‌آید: ${de(word + " dem Freund")} · ${de(word + " der Schule")}`);
-      else if (AKK.has(word)) n.push(`همیشه با حالت ${de("Akkusativ")} می‌آید: ${de(word + " den Freund")} · ${de(word + " die Schule")}`);
-      else if (WECHSEL.has(word)) n.push(`دوحالته است: برای «کجا؟» (${de("Wo?")}) با ${de("Dativ")} و برای «به کجا؟» (${de("Wohin?")}) با ${de("Akkusativ")}: ${de(word + " der Schule")} ↔ ${de(word + " die Schule")}`);
-      if (FUSE[word]) n.push(`با حرف تعریف ادغام می‌شود: ${de(FUSE[word])}`);
+      if (DAT.has(word)) push(n, gt("g_prepCase", { c: de("Dativ"), a: de(word + " dem Freund"), b: de(word + " der Schule") }));
+      else if (AKK.has(word)) push(n, gt("g_prepCase", { c: de("Akkusativ"), a: de(word + " den Freund"), b: de(word + " die Schule") }));
+      else if (WECHSEL.has(word)) push(n, gt("g_prepTwo", { wo: de("Wo?"), dat: de("Dativ"), wohin: de("Wohin?"), akk: de("Akkusativ"), a: de(word + " der Schule"), b: de(word + " die Schule") }));
+      if (FUSE[word]) push(n, gt("g_fuse", { x: de(FUSE[word]) }));
     }
     const SUBX = { dass: "Ich glaube, dass er kommt.", weil: "Ich lerne, weil ich Deutsch mag.", wenn: "Wenn ich Zeit habe, lese ich.", ob: "Ich weiß nicht, ob er kommt.", als: "Als ich klein war, spielte ich viel." };
     const COORDX = { und: "Ich lerne, und du hörst zu.", oder: "Kommst du, oder bleibst du?", aber: "Ich bin müde, aber ich lerne.", denn: "Ich lerne, denn ich will sprechen." };
-    if (SUB.has(word)) n.push(`حرف ربط وابسته‌ساز است: فعل صرف‌شده به آخر جمله می‌رود${SUBX[word] ? ": " + de(SUBX[word]) : "."}`);
-    if (COORDX[word]) n.push(`دو جمله را به هم وصل می‌کند و ترتیب کلمات را تغییر نمی‌دهد (جایگاه صفر): ${de(COORDX[word])}`);
-    if (word === "sondern") n.push(`فقط بعد از جملهٔ منفی می‌آید: ${de("nicht A, sondern B")}`);
-    if (PERSONAL[word] && /ضمیر/.test(p)) { const f = PERSONAL[word]; table = { head: ["Nominativ", "Akkusativ", "Dativ"], rows: [f] }; n.push(`ضمیر شخصی است و با نقش جمله عوض می‌شود: ${de(f.join(" · "))}`); }
+    if (SUB.has(word)) push(n, SUBX[word] ? gt("g_subEx", { ex: de(SUBX[word]) }) : gt("g_sub"));
+    if (COORDX[word]) push(n, gt("g_coord", { ex: de(COORDX[word]) }));
+    if (word === "sondern") push(n, gt("g_sondern", { ex: de("nicht A, sondern B") }));
+    if (PERSONAL[word] && /ضمیر/.test(p)) { const f = PERSONAL[word]; table = { head: ["Nominativ", "Akkusativ", "Dativ"], rows: [f] }; push(n, gt("g_personal", { ex: de(f.join(" · ")) })); }
     if (POSS.has(word)) {
       const s = word === "sein_poss" ? "sein" : word === "euer" ? "eur" : word;
       table = { head: ["", "maskulin", "feminin", "neutral", "Plural"], rows: [["Nom.", word === "euer" ? "euer" : s, s + "e", word === "euer" ? "euer" : s, s + "e"], ["Akk.", s + "en", s + "e", word === "euer" ? "euer" : s, s + "e"], ["Dat.", s + "em", s + "er", s + "em", s + "en"]] };
-      n.push(`ضمیر ملکی است و مثل ${de("ein/eine")} صرف می‌شود.`);
+      push(n, gt("g_poss", { x: de("ein/eine") }));
     }
     const WX = { wie: "Wie heißt du?", was: "Was machst du?", wo: "Wo wohnst du?", woher: "Woher kommst du?", wohin: "Wohin fährst du?", wer: "Wer ist das?", wann: "Wann kommst du?", warum: "Warum lernst du Deutsch?" };
-    if (p.startsWith("کلمهٔ پرسشی")) n.push(`در پرسش ${de("W-Frage")} کلمهٔ پرسشی در جایگاه اول و فعل در جایگاه دوم می‌آید${WX[word] ? ": " + de(WX[word]) : "."}`);
-    if (p.startsWith("قید") && !p.includes("نفی")) n.push(`قید است و صرف نمی‌شود. اگر اول جمله بیاید، فعل بلافاصله بعد از آن (جایگاه دوم) می‌آید و فاعل بعد از فعل.`);
-    if (word === "nicht") n.push(`${de("nicht")} فعل، صفت یا قید را منفی می‌کند؛ اسم با ${de("kein")} منفی می‌شود: ${de("Ich habe keine Zeit.")}`);
+    if (p.startsWith("کلمهٔ پرسشی")) push(n, WX[word] ? gt("g_wqEx", { wf: de("W-Frage"), ex: de(WX[word]) }) : gt("g_wq", { wf: de("W-Frage") }));
+    if (p.startsWith("قید") && !p.includes("نفی")) push(n, gt("g_adv"));
+    if (word === "nicht") push(n, gt("g_nicht", { n: de("nicht"), k: de("kein"), ex: de("Ich habe keine Zeit.") }));
     return { notes: n, table };
   }
 

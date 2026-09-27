@@ -673,9 +673,9 @@ mark.w-fill { background: rgba(127,214,164,.25); color: var(--ok); }
 .dl-state.model { color: var(--ok); }
 
 /* ---------- Interface language: .fa marks text in the learner's language ---------- */
-html[data-ui="ru"] .fa, html[data-ui="uk"] .fa { direction: ltr; font-family: "Inter", system-ui, sans-serif; }
-html[data-ui="ru"] .lc-fa, html[data-ui="uk"] .lc-fa,
-html[data-ui="ru"] #lSum, html[data-ui="uk"] #lSum { text-align: start; }
+html[data-dir="ltr"] .fa { direction: ltr; font-family: "Inter", system-ui, sans-serif; }
+html[data-dir="ltr"] .lc-fa,
+html[data-dir="ltr"] #lSum { text-align: start; }
 
 /* ---------- Language + profile buttons ---------- */
 .dock .right { gap: 10px; }
@@ -1917,3 +1917,8 @@ body:not([data-screen="audio"]) .dp-q { display: none; }
 
 /* UI only in the learner's language: Persian text falls back to Vazirmatn everywhere */
 html[data-ui="fa"] body { font-family: -apple-system, "Inter", "Vazirmatn", system-ui, sans-serif; }
+
+.load-err { position: fixed; inset: auto 16px 110px; padding: 12px 16px; border-radius: 14px; background: #FF3B30; color: #fff; font-weight: 600; z-index: 99; }
+/* the course loads from content/ first; show the page when the app is ready */
+body:not(.ready) .frame { opacity: 0; }
+body.ready .frame { opacity: 1; transition: opacity .2s; }

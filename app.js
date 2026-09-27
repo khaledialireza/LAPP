@@ -34,9 +34,9 @@
   const lineAt = t => timed ? lines.findIndex(l => t < l.next) : lines.findIndex(l => t / (player.duration || 1) < l.end);
 
   // Persian pieces are bidi-isolated so numbers and Latin codes keep their order inside LTR lines
-  const iso = s => I18N.lang === "fa" ? "\u2068" + s + "\u2069" : s;
+  const iso = s => I18N.info().dir === "rtl" ? "\u2068" + s + "\u2069" : s;
   const tf = (k, o) => iso(t(k).replace(/\{(\w+)\}/g, (m, x) => o[x]));
-  const uiLocale = () => ({ fa: "fa-IR", ru: "ru-RU", uk: "uk-UA" })[I18N.lang] || "fa-IR";
+  const uiLocale = () => I18N.info().locale;
   const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const fmt = t => isFinite(t) ? `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, "0")}` : "0:00";
   const SAY_ICON = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 4V5L7 9zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4z"/></svg>';
@@ -106,9 +106,8 @@
 
   // lesson texts in the interface language (Persian lives in lessons.js / lesson1-fa.js)
   function lessonTr(L) {
-    const lang = window.I18N ? I18N.lang : "fa", tr = L.tr && L.tr[lang];
-    if (lang === "fa" || !tr) return { title: L.fa, summary: L.summary, phrases: L.phrases.map(p => p[1]), notes: L.phrases.map(p => p[2]), lines: L.transcriptFa || [] };
-    return { title: tr.title, summary: tr.summary, phrases: tr.phrases, notes: tr.phraseNotes || [], lines: tr.lines };
+    const tr = L.tr[I18N.lang] || {};
+    return { title: tr.title || "", summary: tr.summary || "", phrases: tr.phrases || [], notes: tr.phraseNotes || [], lines: tr.lines || [] };
   }
   function setLesson(i) {
     if (i < 0 || i >= LESSONS.length) return toast(t("moreLessonsSoon"));
@@ -648,8 +647,7 @@
     tags.push(inL.length ? `<span class="pos P">${inL.join(" · ")}</span>` : `<span class="pos P">${t("notInLessons")}</span>`);
     // notes from the dictionary first (usage, idioms), then the rules
     const own = (v.g || "").split(" · ").filter(x => x && x !== v.de && !/^جمع:/.test(x) && !(pg === "V" && /^(ich|du|er|sie|es|wir|ihr|Sie) \S+$/.test(x))).map(x => `<bdi dir="auto">${esc(x)}</bdi>`);
-    // rule notes from grammar.js are written in Persian only; hide them in other UI languages
-    const all = [...own, ...(I18N.lang === "fa" ? notes : notes.filter(n => !/[\u0600-\u06FF]/.test(n.replace(/<[^>]*>/g, ""))))];
+    const all = [...own, ...notes];
     const ex = examplesFor(v, forms);
     const target = into || $("#vSheet");
     target.innerHTML = `<div class="vs-grab"></div>
@@ -876,8 +874,7 @@
   }
   /* ---------- Karteikarten: a round of cards with a count, a list of this round and a 5 s pause ---------- */
   // browsers recognise Russian, Ukrainian and German speech, but not Persian: Persian answers are chosen from options
-  const SR_LANG = { ru: "ru-RU", uk: "uk-UA" };
-  const nativeVoice = () => !!(SR && SR_LANG[I18N.lang]);
+  const nativeVoice = () => !!(SR && I18N.info().speech);
   function renderFcStats() {
     $("#fcStats").innerHTML = `<span class="ok">✓ ${fc.right}</span><span class="bad">✗ ${fc.wrong}</span>`;
     const s = fc.sess;
@@ -973,7 +970,7 @@
     const v = fc.cur, toNative = fc.dir === "de";
     $("#fcMic").classList.add("rec"); $("#fcHeard").textContent = t("listening");
     try {
-      const alts = await listen(toNative ? SR_LANG[I18N.lang] : "de-DE");
+      const alts = await listen(toNative ? I18N.info().speech : "de-DE");
       let ok;
       if (toNative) {
         const want = meaningWords(v);
@@ -1212,7 +1209,7 @@
           <div class="sk-opt"><span>${t("showTranslation")}</span>${tg("help")}</div>
           <button class="sk-go" data-go-sk="dialog">🎤 ${t("start")}</button></div>
         <div class="sk-card"><h3>🗣️ ${t("freeTalk")}</h3><p class="fa">${t("skFreeSub")}</p>
-          <div class="sk-opt"><span>${t("topic")}</span><span class="sk-chips">${chips("topic", [[-1, t("none")], ...sd.topics.map((tp, i) => [i, tp[I18N.lang] || tp.fa || tp.de])])}</span></div>
+          <div class="sk-opt"><span>${t("topic")}</span><span class="sk-chips">${chips("topic", [[-1, t("none")], ...sd.topics.map((tp, i) => [i, tp.fa || tp.de])])}</span></div>
           <div class="sk-opt"><span>${t("skCues")}</span>${tg("cues")}</div>
           <button class="sk-go alt" data-go-sk="free">🎤 ${t("start")}</button></div>
         ${exRows(sk.types)}`;
@@ -1477,7 +1474,7 @@
   function renderFreeTop() {
     const lang = I18N.lang, sd = speakData();
     if (fs.mode === "free") $("#fsTop").innerHTML = `<div class="ly-seg" id="fsScope"><button data-sc="lesson" class="${fs.scope === "lesson" ? "on" : ""}">${lsName(state.idx)}</button><button data-sc="all" class="${fs.scope === "all" ? "on" : ""}">${t("allWords")}</button></div><p class="fa fs-hint">${t("fsHintFree")}</p>`;
-    if (fs.mode === "topic") { const tp = fs.topic || {}; $("#fsTop").innerHTML = `<div class="topic"><div class="k">${t("topic")}</div><b>${esc(tp.de || "")}</b><div class="fa">${esc(tp[lang] || tp.fa || "")}</div><button class="tp-new" id="fsNewTopic" aria-label="${t("newTopic")}">↻</button></div>`; }
+    if (fs.mode === "topic") { const tp = fs.topic || {}; $("#fsTop").innerHTML = `<div class="topic"><div class="k">${t("topic")}</div><b>${esc(tp.de || "")}</b><div class="fa">${esc(tp.fa || "")}</div><button class="tp-new" id="fsNewTopic" aria-label="${t("newTopic")}">↻</button></div>`; }
     if (fs.mode === "cue") $("#fsTop").innerHTML = `<div class="prompts">${fs.set.items.map((q, i) => { const a = fs.answers[i]; const st = a ? (a.ok ? "done" : "part") : i === fs.qi ? "cur" : ""; return `<div class="q ${st}"><span class="n">${a ? (a.ok ? "✓" : "~") : i + 1}</span><span><b>${esc(q.q)}</b> <small class="fa">${esc(q.fa)}</small></span></div>`; }).join("")}</div>`;
     $("#fsNext").hidden = fs.mode !== "cue";
   }
@@ -1772,18 +1769,8 @@
   $("#popSay").innerHTML = SAY_ICON;
 
   /* ---------- Interface language ---------- */
-  function applyDictLang() {
-    const lang = I18N.lang, col = lang === "ru" ? 0 : 1, TRD = window.DICT_TR || {}, NT = (window.NAMES_TR || {})[lang] || {};
-    for (const [k, d] of Object.entries(DICT)) {
-      if (d.fa0 === undefined) { d.fa0 = d.fa; d.g0 = d.g; }
-      d.fa = lang === "fa" ? d.fa0 : ((TRD[k] || [])[col] || d.fa0);
-      d.g = lang === "fa" ? d.g0 : ""; // grammar notes are written in Persian only
-    }
-    if (!window.NAMES0) window.NAMES0 = { ...NAMES };
-    for (const n of Object.keys(NAMES)) NAMES[n] = lang === "fa" ? window.NAMES0[n] : (NT[n] || window.NAMES0[n]);
-  }
   function applyLang() {
-    applyDictLang(); I18N.apply();
+    I18N.apply();
     $$(".js-lang-code").forEach(e => e.textContent = I18N.lang.toUpperCase());
     if (LESSONS.length) setLesson(state.idx);
     if (document.body.dataset.screen === "profile") renderProfile();
@@ -1860,7 +1847,7 @@
     location.reload();
   };
   paintAvatar();
-  applyDictLang(); I18N.apply();
+  I18N.apply();
   $$(".js-lang-code").forEach(e => e.textContent = I18N.lang.toUpperCase());
 
   /* ---------- Landscape: side dock, left or right hand ---------- */
