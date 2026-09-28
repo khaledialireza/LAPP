@@ -1837,13 +1837,16 @@
     $("#pfSub").textContent = `${I18N.name(I18N.lang)}${since ? " · " + since : ""} · ${L.level}`;
     $("#pfStats").innerHTML = `<div><b>🔥 ${streak()}</b><small>${t("days")}</small></div><div><b>${state.known.size}</b><small>${t("wordsCap")}</small></div><div><b>${mins >= 60 ? tf("hoursN", { n: Math.round(mins / 60 * 10) / 10 }) : tf("minN", { n: mins })}</b><small>${t("heardL")}</small></div>`;
     $("#pfLsName").textContent = `${lsCode(state.idx)} · ${L.title}`;
+    const ses = Auth.session || {};
+    $("#pfAcct").textContent = ses.type === "guest" ? t("guest") : ses.name || ses.email || "";
+    $("#pfAcctSub").textContent = ses.type === "guest" ? tf("guestInfo", { d: ses.since ? new Date(ses.since).toLocaleDateString(uiLocale()) : "" }) : ses.email || "";
     $("#pfSkills").innerHTML = SKILLS.map(k => { const p = skillPct(k.id); return `<div class="pf-row"><span>${k.ic} ${t(k.fa)}</span><span class="pf-bar"><i style="width:${p}%"></i></span><b>${p}%</b></div>`; }).join("");
     paintAvatar();
   }
   $("#profName").addEventListener("input", e => { store.set("name", e.target.value.trim()); paintAvatar(); });
   $("#profReset").onclick = () => {
     if (!confirm(t("resetConfirm"))) return;
-    try { Object.keys(localStorage).filter(k => k.startsWith("lapp:") && !/^lapp:(lang|name)$/.test(k)).forEach(k => localStorage.removeItem(k)); } catch {}
+    try { Object.keys(localStorage).filter(k => k.startsWith("lapp:") && !/^lapp:(lang|name|session)$/.test(k)).forEach(k => localStorage.removeItem(k)); } catch {}
     location.reload();
   };
   paintAvatar();
@@ -2024,7 +2027,7 @@
     if (m === "play" || m === "restart") { if (i !== state.idx) setLesson(i); if (m === "restart") { player.currentTime = 0; showNow(0); } go("audio"); player.play().catch(() => {}); }
     if (m === "open") { if (i !== state.idx) setLesson(i); go("lesson"); }
     if (m === "done") { const d = store.get("done", []); store.set("done", d.includes(L.id) ? d.filter(x => x !== L.id) : [...d, L.id]); renderLibrary(); renderProgress?.(); }
-    if (m === "reset" && confirm(`${lsName(i)}: Fortschritt löschen?`)) { libReset(L); if (i === state.idx) setLesson(i); renderLibrary(); }
+    if (m === "reset" && confirm(tf("resetLsQ", { c: lsName(i) }))) { libReset(L); if (i === state.idx) setLesson(i); renderLibrary(); }
   });
   $("#libList").addEventListener("pointerdown", e => {
     const it = e.target.closest("[data-li]"); if (!it || e.target.closest("[data-more]")) return;
@@ -2038,6 +2041,25 @@
     const it = e.target.closest("[data-li]"); if (!it || libLong) { libLong = false; return; }
     const i = Number(it.dataset.li); if (i !== state.idx) setLesson(i); go("lesson");
   });
+  /* ---------- Welcome / sign-in: guest today, providers (Google …) plug into Auth later ---------- */
+  function renderWelcome() {
+    $(".wc-box").dir = I18N.info().dir;
+    $("#wcLangs").innerHTML = I18N.langs.map(l => `<button data-wl="${l}" class="${l === I18N.lang ? "on" : ""}">${esc(I18N.name(l))}</button>`).join("");
+    $("#wcProviders").innerHTML = Object.entries(Auth.providers).map(([k, p]) => `<button class="wc-go" data-prov="${esc(k)}">${esc(p.label)}</button>`).join("");
+  }
+  function showWelcome(on) {
+    $("#welcome").hidden = !on;
+    if (on) { $("#wcName").value = store.get("name", ""); renderWelcome(); }
+  }
+  $("#wcLangs").addEventListener("click", async e => { const b = e.target.closest("[data-wl]"); if (!b) return; await I18N.setLang(b.dataset.wl); renderWelcome(); });
+  $("#wcProviders").addEventListener("click", e => { const b = e.target.closest("[data-prov]"); if (b) Auth.signIn(b.dataset.prov).catch(err => toast(err.message)); });
+  const saveWcName = () => { const n = $("#wcName").value.trim(); if (n) { store.set("name", n); paintAvatar(); } return n; };
+  $("#wcGuest").addEventListener("click", () => Auth.signInGuest(saveWcName()));
+  $("#wcName").addEventListener("keydown", e => { if (e.key === "Enter") $("#wcGuest").click(); });
+  $("#pfSignOut").addEventListener("click", () => { if (confirm(t("signOutConfirm"))) Auth.signOut(); });
+  Auth.onChange(ses => { showWelcome(!ses); if (ses) go("home"); });
+  showWelcome(!Auth.signedIn);
+
   setSpeed(state.speed);
   if (LESSONS.length) setLesson(state.idx);
   const start = location.hash.slice(1);

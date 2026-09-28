@@ -1922,3 +1922,29 @@ html[data-ui="fa"] body { font-family: -apple-system, "Inter", "Vazirmatn", syst
 /* the course loads from content/ first; show the page when the app is ready */
 body:not(.ready) .frame { opacity: 0; }
 body.ready .frame { opacity: 1; transition: opacity .2s; }
+
+/* Welcome / sign-in (guest for now) */
+.welcome { position: fixed; inset: 0; z-index: 300; display: grid; place-items: center; padding: 24px 16px calc(24px + env(safe-area-inset-bottom));
+  background: radial-gradient(90% 60% at 10% 0%, rgba(255,45,85,.16), transparent 60%), radial-gradient(80% 60% at 100% 100%, rgba(88,86,214,.16), transparent 60%), var(--bg); overflow-y: auto; }
+.welcome[hidden] { display: none; }
+.wc-box { width: 100%; max-width: 380px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; }
+.wc-logo { width: 72px; height: 72px; border-radius: 20px; display: grid; place-items: center; font: 800 36px/1 Inter, system-ui, sans-serif; color: #fff;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 10px 30px rgba(255,45,85,.3); margin-bottom: 6px; }
+.wc-title { font-size: 26px; font-weight: 800; margin: 0; line-height: 1.25; }
+.wc-sub { margin: 0 0 12px; color: var(--muted); font-size: 15px; line-height: 1.5; }
+.wc-k { align-self: stretch; text-align: start; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.wc-langs { align-self: stretch; display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 8px; }
+.wc-langs button { padding: 12px 8px; border-radius: 14px; background: var(--tile, rgba(128,128,128,.12)); font-weight: 600; font-size: 15px; color: var(--text); border: 2px solid transparent; }
+.wc-langs button.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.wc-name { align-self: stretch; margin-top: 6px; padding: 14px 16px; border-radius: 14px; border: 0; font: inherit; font-size: 16px; color: var(--text); background: var(--tile, rgba(128,128,128,.12)); text-align: start; }
+.wc-providers { align-self: stretch; display: flex; flex-direction: column; gap: 8px; }
+.wc-providers:empty { display: none; }
+.wc-go { align-self: stretch; margin-top: 6px; padding: 15px; border-radius: 16px; font-size: 17px; font-weight: 700; color: var(--on-accent); background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+.wc-note { margin: 4px 0 0; font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+.pf-acct { flex-wrap: nowrap; }
+.pf-acct-ic { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: rgba(128,128,128,.15); flex: none; }
+.pf-acct-tx { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.pf-acct-tx small { color: var(--muted); font-size: 12px; }
+.pf-out { padding: 7px 12px; border-radius: 10px; color: var(--bad); font-weight: 600; background: rgba(255,59,48,.1); flex: none; }
+.pf-row.pf-acct > .pf-acct-ic { flex: 0 0 36px; width: 36px; min-width: 0; }
+.pf-row.pf-acct > .pf-acct-tx { flex: 1 1 auto; }

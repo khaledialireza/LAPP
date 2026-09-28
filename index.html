@@ -16,7 +16,7 @@
   <meta name="description" content="LAPP — آموزش زبان آلمانی با دیالوگ صوتی، واژگان و تمرین.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=muk38vjy">
+  <link rel="stylesheet" href="style.css?v=mul5rowm">
 </head>
 <body data-screen="home">
   <div class="frame">
@@ -81,6 +81,10 @@
             <input id="profName" class="pf-name" maxlength="30" autocomplete="name" data-i18n-aria="nameL">
             <div class="pf-sub fa" id="pfSub"></div></div>
           <div class="pf-stats" id="pfStats"></div>
+          <h3 class="ph-h"><span data-i18n="account"></span></h3>
+          <div class="pf-group">
+            <div class="pf-row pf-acct"><span class="pf-acct-ic">👤</span><span class="pf-acct-tx"><b id="pfAcct"></b><small id="pfAcctSub"></small></span><button class="pf-out" id="pfSignOut" data-i18n="signOut"></button></div>
+          </div>
           <h3 class="ph-h"><span data-i18n="progress"></span></h3>
           <div class="pf-group" id="pfSkills"></div>
           <h3 class="ph-h"><span id="pfLsName"></span></h3>
@@ -261,6 +265,21 @@
     </footer>
   </div>
 
+  <!-- Welcome: shown until someone signs in (today: guest only); remembered in this browser -->
+  <div class="welcome" id="welcome" hidden>
+    <div class="wc-box">
+      <div class="wc-logo">L</div>
+      <h1 class="wc-title" data-i18n="wcTitle"></h1>
+      <p class="wc-sub" data-i18n="wcSub"></p>
+      <div class="wc-k" data-i18n="wcLang"></div>
+      <div class="wc-langs" id="wcLangs"></div>
+      <input class="wc-name" id="wcName" maxlength="30" autocomplete="given-name" data-i18n-ph="{wcName}" data-i18n-aria="wcName">
+      <div class="wc-providers" id="wcProviders"></div>
+      <button class="wc-go" id="wcGuest" data-i18n="wcGuest"></button>
+      <p class="wc-note" data-i18n="wcNote"></p>
+    </div>
+  </div>
+
   <!-- Night mode: one line at a time, dark and calm, for reading before sleep -->
   <div class="night" id="night" hidden>
     <div class="bgv" id="bgv" aria-hidden="true"></div>
@@ -294,9 +313,10 @@
     </div>
   </div>
 
-  <script src="i18n.js?v=muk38vjy"></script>
-  <script src="grammar.js?v=muk38vjy"></script>
-  <script src="exercises.js?v=muk38vjy"></script>
-  <script src="content.js?v=muk38vjy"></script>
+  <script src="i18n.js?v=mul5rowm"></script>
+  <script src="grammar.js?v=mul5rowm"></script>
+  <script src="exercises.js?v=mul5rowm"></script>
+  <script src="auth.js?v=mul5rowm"></script>
+  <script src="content.js?v=mul5rowm"></script>
 </body>
 </html>
