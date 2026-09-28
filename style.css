@@ -1948,3 +1948,23 @@ body.ready .frame { opacity: 1; transition: opacity .2s; }
 .pf-out { padding: 7px 12px; border-radius: 10px; color: var(--bad); font-weight: 600; background: rgba(255,59,48,.1); flex: none; }
 .pf-row.pf-acct > .pf-acct-ic { flex: 0 0 36px; width: 36px; min-width: 0; }
 .pf-row.pf-acct > .pf-acct-tx { flex: 1 1 auto; }
+
+/* sign-in providers (shown only when one is registered in auth.js) */
+.prov-btn { width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 13px 16px; border-radius: 999px;
+  background: #fff; color: #1f1f1f; font-weight: 700; font-size: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.18); }
+.prov-btn svg, .prov-btn img { width: 20px; height: 20px; flex: none; }
+.wc-go.wc-link { background: none; color: var(--muted); font-size: 14px; font-weight: 600; text-decoration: underline; padding: 8px; }
+.js-avatar img, .pf-acct-ic img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; }
+.pf-save { border-radius: 22px; padding: 18px; color: #fff; display: flex; flex-direction: column; gap: 8px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2)); flex-shrink: 0; }
+.pf-save[hidden], .save-banner[hidden] { display: none; }
+.pf-save b { font-size: 19px; }
+.pf-save p { margin: 0 0 4px; font-size: 14px; opacity: .92; line-height: 1.5; }
+.save-banner { display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-radius: 18px; background: var(--tile); margin-bottom: 12px; }
+.save-banner .sb-ic { font-size: 24px; }
+.save-banner .sb-tx { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.save-banner small { color: var(--muted); font-size: 13px; }
+.save-banner .sb-provs { margin-top: 6px; }
+.save-banner .sb-x { color: var(--muted); font-size: 15px; padding: 2px 6px; }
+.h5-orbtxt { flex: 1 1 auto; overflow: hidden; }
+.h5-orbtxt b { white-space: normal; line-height: 1.25; }

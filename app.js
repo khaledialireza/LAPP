@@ -711,7 +711,7 @@
     $("#lgListen").textContent = `${mins}/${GOAL.listen}`;
     $("#lgWords").textContent = `${k}/${vocabList.length}`;
     $("#hStreak").textContent = `🔥 ${streak()}`;
-    renderHomeExtras();
+    renderHomeExtras(); renderSaveBanner();
   }
   // wide screens: this week, words to review, practice shortcuts
   function renderHomeExtras() {
@@ -1814,7 +1814,8 @@
   /* ---------- Profile ---------- */
   const initial = n => (n || "").trim().charAt(0).toUpperCase() || "🙂";
   const paintAvatar = () => {
-    $$(".js-avatar").forEach(e => e.textContent = initial(store.get("name", "")));
+    const ph = (Auth.session || {}).photo;
+    $$(".js-avatar").forEach(e => { if (ph) e.innerHTML = `<img src="${esc(ph)}" alt="" referrerpolicy="no-referrer">`; else e.textContent = initial(store.get("name", "")); });
   };
   function renderProfile() {
     const L = LESSONS[state.idx];
@@ -1837,9 +1838,12 @@
     $("#pfSub").textContent = `${I18N.name(I18N.lang)}${since ? " · " + since : ""} · ${L.level}`;
     $("#pfStats").innerHTML = `<div><b>🔥 ${streak()}</b><small>${t("days")}</small></div><div><b>${state.known.size}</b><small>${t("wordsCap")}</small></div><div><b>${mins >= 60 ? tf("hoursN", { n: Math.round(mins / 60 * 10) / 10 }) : tf("minN", { n: mins })}</b><small>${t("heardL")}</small></div>`;
     $("#pfLsName").textContent = `${lsCode(state.idx)} · ${L.title}`;
-    const ses = Auth.session || {};
-    $("#pfAcct").textContent = ses.type === "guest" ? t("guest") : ses.name || ses.email || "";
-    $("#pfAcctSub").textContent = ses.type === "guest" ? tf("guestInfo", { d: ses.since ? new Date(ses.since).toLocaleDateString(uiLocale()) : "" }) : ses.email || "";
+    // account: guest (saved in this browser) or a signed-in user (photo, name, email, sync state)
+    const ses = Auth.session || {}, guest = ses.type === "guest";
+    $("#pfAcct").textContent = guest ? t("guest") : ses.name || ses.email || "";
+    $("#pfAcctSub").textContent = guest ? tf("guestInfo", { d: ses.since ? new Date(ses.since).toLocaleDateString(uiLocale()) : "" }) : `${ses.email || ""} · ☁︎ ${t("synced")}`;
+    $("#pfAcctIc").innerHTML = ses.photo ? `<img src="${esc(ses.photo)}" alt="" referrerpolicy="no-referrer">` : "👤";
+    $("#pfSave").hidden = !guest || !Object.keys(Auth.providers).length;
     $("#pfSkills").innerHTML = SKILLS.map(k => { const p = skillPct(k.id); return `<div class="pf-row"><span>${k.ic} ${t(k.fa)}</span><span class="pf-bar"><i style="width:${p}%"></i></span><b>${p}%</b></div>`; }).join("");
     paintAvatar();
   }
@@ -2042,22 +2046,42 @@
     const i = Number(it.dataset.li); if (i !== state.idx) setLesson(i); go("lesson");
   });
   /* ---------- Welcome / sign-in: guest today, providers (Google …) plug into Auth later ---------- */
+  // one button per registered provider (none yet); the same buttons appear on the welcome
+  // screen, the profile "save your progress" card and the home banner
+  function hasProviders() { return Object.keys(Auth.providers).length > 0; }
+  function paintProviders() {
+    const html = Object.entries(Auth.providers).map(([k, p]) => `<button class="prov-btn" data-prov="${esc(k)}">${p.icon || ""}<span>${esc(tf("signInWith", { p: p.label }))}</span></button>`).join("");
+    $$(".js-provs").forEach(e => e.innerHTML = html);
+  }
   function renderWelcome() {
     $(".wc-box").dir = I18N.info().dir;
     $("#wcLangs").innerHTML = I18N.langs.map(l => `<button data-wl="${l}" class="${l === I18N.lang ? "on" : ""}">${esc(I18N.name(l))}</button>`).join("");
-    $("#wcProviders").innerHTML = Object.entries(Auth.providers).map(([k, p]) => `<button class="wc-go" data-prov="${esc(k)}">${esc(p.label)}</button>`).join("");
+    paintProviders();
+    // with a provider, guest entry becomes the quiet second choice
+    $("#wcGuest").classList.toggle("wc-link", hasProviders());
+    $("#wcGuest").textContent = t(hasProviders() ? "wcNoLogin" : "wcGuest");
   }
+  // home: once, after the first real progress, suggest saving it (only when a provider exists)
+  function renderSaveBanner() {
+    const ses = Auth.session, n = state.known.size;
+    const on = !!ses && ses.type === "guest" && hasProviders() && n >= 20 && !store.get("saveBannerOff", false);
+    $("#hSave").hidden = !on;
+    if (on) { $("#hSaveT").textContent = tf("bannerTitle", { n }); paintProviders(); }
+  }
+  $("#hSaveX").addEventListener("click", () => { store.set("saveBannerOff", true); renderSaveBanner(); });
+  Auth.onProviders = () => { paintProviders(); if (!$("#welcome").hidden) renderWelcome(); renderSaveBanner(); };
+  renderSaveBanner();
   function showWelcome(on) {
     $("#welcome").hidden = !on;
     if (on) { $("#wcName").value = store.get("name", ""); renderWelcome(); }
   }
   $("#wcLangs").addEventListener("click", async e => { const b = e.target.closest("[data-wl]"); if (!b) return; await I18N.setLang(b.dataset.wl); renderWelcome(); });
-  $("#wcProviders").addEventListener("click", e => { const b = e.target.closest("[data-prov]"); if (b) Auth.signIn(b.dataset.prov).catch(err => toast(err.message)); });
+  document.addEventListener("click", e => { const b = e.target.closest("[data-prov]"); if (b) Auth.signIn(b.dataset.prov).catch(err => toast(err.message)); });
   const saveWcName = () => { const n = $("#wcName").value.trim(); if (n) { store.set("name", n); paintAvatar(); } return n; };
   $("#wcGuest").addEventListener("click", () => Auth.signInGuest(saveWcName()));
   $("#wcName").addEventListener("keydown", e => { if (e.key === "Enter") $("#wcGuest").click(); });
   $("#pfSignOut").addEventListener("click", () => { if (confirm(t("signOutConfirm"))) Auth.signOut(); });
-  Auth.onChange(ses => { showWelcome(!ses); if (ses) go("home"); });
+  Auth.onChange(ses => { showWelcome(!ses); paintAvatar(); renderSaveBanner(); if (ses) go(document.body.dataset.screen === "profile" ? "profile" : "home"); });
   showWelcome(!Auth.signedIn);
 
   setSpeed(state.speed);

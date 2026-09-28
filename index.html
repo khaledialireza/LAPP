@@ -16,7 +16,7 @@
   <meta name="description" content="LAPP — آموزش زبان آلمانی با دیالوگ صوتی، واژگان و تمرین.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=mul5rowm">
+  <link rel="stylesheet" href="style.css?v=mul88okj">
 </head>
 <body data-screen="home">
   <div class="frame">
@@ -43,6 +43,11 @@
           </div>
         </div>
         <div class="home-side">
+          <div class="save-banner" id="hSave" hidden>
+            <span class="sb-ic">☁︎</span>
+            <div class="sb-tx"><b id="hSaveT"></b><small data-i18n="bannerSub"></small><div class="sb-provs js-provs"></div></div>
+            <button class="sb-x" id="hSaveX" data-i18n-aria="close">✕</button>
+          </div>
           <div class="home-head">
             <div class="home-hl">
               <h1 class="home-greet" id="hGreet"></h1>
@@ -80,10 +85,15 @@
           <div class="pf-top"><div class="avatar-big js-avatar">?</div>
             <input id="profName" class="pf-name" maxlength="30" autocomplete="name" data-i18n-aria="nameL">
             <div class="pf-sub fa" id="pfSub"></div></div>
+          <div class="pf-save" id="pfSave" hidden>
+            <b data-i18n="saveTitle"></b>
+            <p data-i18n="saveSub"></p>
+            <div class="sb-provs js-provs"></div>
+          </div>
           <div class="pf-stats" id="pfStats"></div>
           <h3 class="ph-h"><span data-i18n="account"></span></h3>
           <div class="pf-group">
-            <div class="pf-row pf-acct"><span class="pf-acct-ic">👤</span><span class="pf-acct-tx"><b id="pfAcct"></b><small id="pfAcctSub"></small></span><button class="pf-out" id="pfSignOut" data-i18n="signOut"></button></div>
+            <div class="pf-row pf-acct"><span class="pf-acct-ic" id="pfAcctIc">👤</span><span class="pf-acct-tx"><b id="pfAcct"></b><small id="pfAcctSub"></small></span><button class="pf-out" id="pfSignOut" data-i18n="signOut"></button></div>
           </div>
           <h3 class="ph-h"><span data-i18n="progress"></span></h3>
           <div class="pf-group" id="pfSkills"></div>
@@ -274,7 +284,7 @@
       <div class="wc-k" data-i18n="wcLang"></div>
       <div class="wc-langs" id="wcLangs"></div>
       <input class="wc-name" id="wcName" maxlength="30" autocomplete="given-name" data-i18n-ph="{wcName}" data-i18n-aria="wcName">
-      <div class="wc-providers" id="wcProviders"></div>
+      <div class="wc-providers js-provs" id="wcProviders"></div>
       <button class="wc-go" id="wcGuest" data-i18n="wcGuest"></button>
       <p class="wc-note" data-i18n="wcNote"></p>
     </div>
@@ -313,10 +323,10 @@
     </div>
   </div>
 
-  <script src="i18n.js?v=mul5rowm"></script>
-  <script src="grammar.js?v=mul5rowm"></script>
-  <script src="exercises.js?v=mul5rowm"></script>
-  <script src="auth.js?v=mul5rowm"></script>
-  <script src="content.js?v=mul5rowm"></script>
+  <script src="i18n.js?v=mul88okj"></script>
+  <script src="grammar.js?v=mul88okj"></script>
+  <script src="exercises.js?v=mul88okj"></script>
+  <script src="auth.js?v=mul88okj"></script>
+  <script src="content.js?v=mul88okj"></script>
 </body>
 </html>

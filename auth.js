@@ -1,6 +1,6 @@
 // Sign-in state, remembered in this browser (localStorage "lapp:session").
 // Today there is only guest entry; a provider (e.g. Google) plugs in later:
-//   Auth.providers.google = { label, signIn: async () => ({ id, name, email, photo, token }) }
+//   Auth.register("google", { label: "Google", icon: "<svg…>", signIn: async () => ({ id, name, email, photo, token }) })
 // and the welcome screen shows a button for every registered provider.
 (() => {
   const KEY = "lapp:session";
@@ -10,6 +10,8 @@
   const emit = () => listeners.forEach(f => f(read()));
   window.Auth = {
     providers: {},
+    // add a sign-in method; its button then shows on the welcome screen, profile and home banner
+    register(key, provider) { this.providers[key] = provider; this.onProviders?.(); },
     get session() { return read(); },
     get signedIn() { return !!read(); },
     get isGuest() { return read()?.type === "guest"; },
