@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LAPP Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07070B;--p1:#0F0F16;--p2:#15151F;--p3:#1C1C29;--ln:rgba(255,255,255,.08);--tx:#F4F4F8;--mu:rgba(235,235,245,.55);--pk:#FF3D7F;--vi:#8B5CF6;--cy:#22D3EE;--gr:#34D399;--am:#FBBF24;--g:linear-gradient(135deg,#FF3D7F,#8B5CF6 55%,#22D3EE)}
+*{box-sizing:border-box;margin:0}body{background:var(--bg);color:var(--tx);font:14px/1.55 Vazirmatn,Inter,system-ui,sans-serif;min-height:100vh;display:grid;grid-template-columns:260px 1fr}
+.de{font-family:Inter,system-ui,sans-serif;direction:ltr;text-align:left;unicode-bidi:isolate}
+aside{background:var(--p1);border-inline-start:1px solid var(--ln);padding:16px;display:flex;flex-direction:column;gap:8px;height:100vh;position:sticky;top:0}
+.lg{display:flex;align-items:center;gap:10px;font-weight:800;font-size:16px;margin-bottom:10px}.lg i{width:34px;height:34px;border-radius:11px;background:var(--g);display:grid;place-items:center;font:800 16px Inter;font-style:normal}
+.dr{padding:10px 12px;border-radius:12px;border:1px solid transparent;cursor:pointer}.dr:hover{background:var(--p2)}.dr.on{background:var(--p3);border-color:var(--ln)}
+.dr b{display:block}.dr small{color:var(--mu);font-size:12px}
+.bar{height:4px;border-radius:3px;background:var(--p3);margin-top:6px;overflow:hidden}.bar i{display:block;height:100%;background:var(--gr)}
+main{padding:20px 28px 120px;max-width:1100px}
+.top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.top h1{font:800 26px Inter;margin-inline-end:auto}
+.chip{padding:5px 11px;border-radius:99px;background:var(--p3);border:1px solid var(--ln);font-size:12.5px;color:var(--mu);cursor:pointer}.chip.on{color:var(--tx);border-color:rgba(139,92,246,.7);background:rgba(139,92,246,.16)}
+button.b{height:36px;padding:0 14px;border-radius:10px;border:1px solid var(--ln);background:var(--p2);color:var(--tx);font:700 13px Vazirmatn,Inter;cursor:pointer}button.b.pr{background:var(--g);border:0}
+.cast{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.cast span{background:var(--p2);border:1px solid var(--ln);border-radius:10px;padding:6px 10px;font-size:12.5px}
+.sc{margin:22px 0 8px;font-weight:800;color:var(--mu);font-size:13px;display:flex;gap:8px}
+.ln{display:grid;grid-template-columns:34px 120px 1fr 64px;gap:12px;align-items:start;padding:10px 12px;border-radius:12px;border:1px solid var(--ln);background:var(--p2);margin-bottom:6px}
+.ln.ok{border-color:rgba(52,211,153,.35)}
+.pl{width:30px;height:30px;border-radius:50%;background:rgba(34,211,238,.14);color:var(--cy);border:0;cursor:pointer}
+.who{font:700 11.5px Inter;letter-spacing:.4px;text-transform:uppercase;padding-top:6px}
+[contenteditable]{outline:none;border-radius:6px;padding:2px 4px}[contenteditable]:focus{background:rgba(139,92,246,.16)}
+.t-de{font:500 16px Inter}.t-tr{color:var(--mu);margin-top:3px}
+.ck{width:30px;height:30px;border-radius:9px;border:1px solid var(--ln);background:var(--p3);color:var(--mu);cursor:pointer;font-size:14px}.ln.ok .ck{background:rgba(52,211,153,.2);color:var(--gr);border-color:rgba(52,211,153,.5)}
+.dock{position:fixed;bottom:16px;left:16px;right:276px;display:flex;align-items:center;gap:10px;background:rgba(21,21,31,.9);backdrop-filter:blur(14px);border:1px solid var(--ln);border-radius:16px;padding:10px 14px}
+.dock audio{flex:1;height:34px}
+pre{white-space:pre-wrap;font:12px/1.5 Inter,monospace;color:var(--mu);background:var(--p1);border:1px solid var(--ln);border-radius:12px;padding:12px;margin-top:12px;direction:ltr;text-align:left;max-height:220px;overflow:auto}
+.empty{color:var(--mu);margin-top:40px}
+</style></head><body>
+<aside><div class="lg"><i>L</i>Studio</div><div id="list"></div></aside>
+<main id="main"><p class="empty">یک پیش‌نویس را از فهرست انتخاب کن.</p></main>
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const COL = ["#38BDF8", "#FF3D7F", "#8B5CF6", "#34D399", "#FBBF24"];
+let D = null, lang = "fa", dirty = false;
+async function list() {
+  const ds = await (await fetch("/api/drafts")).json();
+  $("#list").innerHTML = ds.map(d => `<div class="dr ${D && D.slug === d.slug ? "on" : ""}" data-s="${d.slug}"><b class="de">${esc(d.title)}</b><small>${d.type} · ${d.level} · ${d.status} · ${d.ok}/${d.lines}</small><div class="bar"><i style="width:${d.lines ? d.ok / d.lines * 100 : 0}%"></i></div></div>`).join("");
+}
+async function open(slug) { D = await (await fetch("/api/draft/" + slug)).json(); render(); list(); }
+function render() {
+  const who = Object.keys(D.cast), col = w => COL[who.indexOf(w) % COL.length];
+  let n = 0;
+  $("#main").innerHTML = `<div class="top"><h1 class="de">${esc(D.title)}</h1>${["fa", "ru", "uk"].map(l => `<span class="chip ${l === lang ? "on" : ""}" data-l="${l}">${l.toUpperCase()}</span>`).join("")}
+    <button class="b" data-do="check">بررسی</button><button class="b" data-do="voice">🎙 ساخت صدا</button><button class="b pr" data-do="publish">🚀 انتشار</button></div>
+    <div class="cast">${who.map(w => `<span><b class="de" style="color:${col(w)}">${esc(w)}</b> · <span class="de">${esc(D.cast[w].voice)}</span> · ${D.cast[w].speed ?? 0.95}×</span>`).join("")}</div>
+    ${D.scenes.map((sc, si) => `<div class="sc"><span class="de">${esc(sc.title.de)}</span> · <span>${esc(sc.title[lang] || "")}</span></div>` + sc.lines.map((ln, li) => `
+      <div class="ln ${ln.ok ? "ok" : ""}" data-si="${si}" data-li="${li}"><button class="pl" data-play title="▶">▶</button>
+      <div class="who de" style="color:${col(ln.who)}">${++n} · ${esc(ln.who)}</div>
+      <div><div class="t-de de" contenteditable data-f="de">${esc(ln.de)}</div><div class="t-tr" contenteditable data-f="${lang}" dir="${lang === "fa" ? "rtl" : "ltr"}">${esc(ln[lang])}</div></div>
+      <button class="ck" data-ok>✓</button></div>`).join("")).join("")}
+    <pre id="out" hidden></pre>`;
+}
+async function save() { await fetch("/api/draft/" + D.slug, { method: "POST", body: JSON.stringify(D) }); dirty = false; list(); }
+document.addEventListener("click", async e => {
+  const dr = e.target.closest("[data-s]"); if (dr) { if (dirty) await save(); return open(dr.dataset.s); }
+  const l = e.target.closest("[data-l]"); if (l) { lang = l.dataset.l; return render(); }
+  const row = e.target.closest(".ln");
+  if (e.target.closest("[data-ok]")) { const ln = D.scenes[row.dataset.si].lines[row.dataset.li]; ln.ok = !ln.ok; row.classList.toggle("ok", ln.ok); return save(); }
+  if (e.target.closest("[data-play]")) { if (dirty) await save(); $("#player").src = `/clip/${D.slug}/${row.dataset.si}-${row.dataset.li}.wav?t=${Date.now()}`; return $("#player").play(); }
+  const act = e.target.closest("[data-do]");
+  if (act) {
+    if (dirty) await save();
+    const out = $("#out"); out.hidden = false; out.textContent = "…";
+    const r = await (await fetch(`/api/${act.dataset.do}/${D.slug}`, { method: "POST" })).json();
+    out.textContent = r.out;
+    if (act.dataset.do === "voice" && r.ok) $("#player").src = `/audio/${D.slug}.mp3?t=${Date.now()}`;
+    list();
+  }
+});
+document.addEventListener("input", e => {
+  const f = e.target.dataset.f, row = e.target.closest(".ln"); if (!f || !row) return;
+  const ln = D.scenes[row.dataset.si].lines[row.dataset.li]; ln[f] = e.target.textContent.trim(); ln.ok = false; row.classList.remove("ok"); dirty = true;
+});
+document.addEventListener("focusout", () => { if (dirty) save(); });
+list();
+</script>
+<div class="dock"><span>🎧</span><audio id="player" controls></audio></div>
+</body></html>

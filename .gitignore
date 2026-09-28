@@ -1,0 +1,7 @@
+# studio: downloaded voices, synthesis cache and per-draft work files
+_studio/.voices/
+_studio/.cache/
+_studio/drafts/*/clips/
+_studio/drafts/*/preview.wav
+_studio/drafts/*/audio.mp3
+__pycache__/

@@ -1,0 +1,325 @@
+{
+ "slug": "im-hotel",
+ "type": "talk",
+ "title": "Im Hotel",
+ "level": "A1",
+ "status": "published",
+ "brief": "Check-in, Frühstück, WLAN, ein kleines Problem im Zimmer",
+ "cast": {
+  "Rezeption": {
+   "voice": "piper:thorsten-medium",
+   "speed": 0.95
+  },
+  "Lena": {
+   "voice": "piper:eva_k-x_low",
+   "speed": 0.95
+  }
+ },
+ "pause": 0.6,
+ "scenePause": 1.4,
+ "tr": {
+  "fa": {
+   "title": "در هتل",
+   "summary": "ورود به هتل، گرفتن کلید، پرسیدن دربارهٔ صبحانه و وای‌فای، و حل یک مشکل کوچک در اتاق."
+  },
+  "ru": {
+   "title": "В отеле",
+   "summary": "Заселение в отель, ключ от номера, вопросы о завтраке и Wi-Fi и маленькая проблема в номере."
+  },
+  "uk": {
+   "title": "У готелі",
+   "summary": "Заселення в готель, ключ від номера, питання про сніданок і Wi-Fi та маленька проблема в номері."
+  }
+ },
+ "scenes": [
+  {
+   "title": {
+    "de": "An der Rezeption",
+    "fa": "در پذیرش",
+    "ru": "На ресепшене",
+    "uk": "На рецепції"
+   },
+   "lines": [
+    {
+     "who": "Rezeption",
+     "de": "Guten Abend! Willkommen im Hotel Linde.",
+     "fa": "عصر بخیر! به هتل لینده خوش آمدید.",
+     "ru": "Добрый вечер! Добро пожаловать в отель «Линде».",
+     "uk": "Добрий вечір! Ласкаво просимо до готелю «Лінде».",
+     "ok": false
+    },
+    {
+     "who": "Lena",
+     "de": "Guten Abend. Ich habe ein Zimmer reserviert.",
+     "fa": "عصر بخیر. یک اتاق رزرو کرده‌ام.",
+     "ru": "Добрый вечер. Я забронировала номер.",
+     "uk": "Добрий вечір. Я забронювала номер.",
+     "ok": false
+    },
+    {
+     "who": "Rezeption",
+     "de": "Sehr gut. Wie ist Ihr Name, bitte?",
+     "fa": "خیلی خوب. اسمتان چیست، لطفاً؟",
+     "ru": "Очень хорошо. Как вас зовут?",
+     "uk": "Дуже добре. Як вас звати?",
+     "ok": false
+    },
+    {
+     "who": "Lena",
+     "de": "Mein Name ist Lena Berger.",
+     "fa": "اسم من لنا برگر است.",
+     "ru": "Меня зовут Лена Бергер.",
+     "uk": "Мене звати Лена Бергер.",
+     "ok": false
+    },
+    {
+     "who": "Rezeption",
+     "de": "Ah ja, ein Einzelzimmer für drei Nächte.",
+     "fa": "آه بله، یک اتاق یک‌نفره برای سه شب.",
+     "ru": "А, да, одноместный номер на три ночи.",
+     "uk": "А, так, одномісний номер на три ночі.",
+     "ok": false
+    },
+    {
+     "who": "Lena",
+     "de": "Genau. Brauchen Sie meinen Ausweis?",
+     "fa": "دقیقاً. کارت شناسایی‌ام را لازم دارید؟",
+     "ru": "Точно. Вам нужен мой паспорт?",
+     "uk": "Саме так. Вам потрібен мій паспорт?",
+     "ok": false
+    },
+    {
+     "who": "Rezeption",
+     "de": "Ja, bitte. Danke schön.",
+     "fa": "بله، لطفاً. خیلی ممنون.",
+     "ru": "Да, пожалуйста. Большое спасибо.",
+     "uk": "Так, будь ласка. Щиро дякую.",
+     "ok": false
+    },
+    {
+     "who": "Rezeption",
+     "de": "Hier ist Ihr Schlüssel. Zimmer zweihundertzwölf.",
+     "fa": "این کلید شماست. اتاق دویست و دوازده.",
+     "ru": "Вот ваш ключ. Номер двести двенадцать.",
+     "uk": "Ось ваш ключ. Номер двісті дванадцять.",
+     "ok": false
+    },
+    {
+     "who": "Lena",
+     "de": "Wo ist der Aufzug?",
+     "fa": "آسانسور کجاست؟",
+     "ru": "Где лифт?",
+     "uk": "Де ліфт?",
+     "ok": false
+    },
+    {
+     "who": "Rezeption",
+     "de": "Dort links, neben der Treppe.",
+     "fa": "آن‌جا سمت چپ، کنار پله‌ها.",
+     "ru": "Там слева, рядом с лестницей.",
+     "uk": "Там ліворуч, біля сходів.",
+     "ok": false
+    }
+   ]
+  },
+  {
+   "title": {
+    "de": "Frühstück und WLAN",
+    "fa": "صبحانه و وای‌فای",
+    "ru": "Завтрак и Wi-Fi",
+    "uk": "Сніданок і Wi-Fi"
+   },
+   "lines": [
+    {
+     "who": "Lena",
+     "de": "Wann gibt es Frühstück?",
+     "fa": "صبحانه کِی است؟",
+     "ru": "Когда завтрак?",
+     "uk": "Коли сніданок?",
+     "ok": false
+    },
+    {
+     "who": "Rezeption",
+     "de": "Von sieben bis zehn Uhr, im Restaurant.",
+     "fa": "از ساعت هفت تا ده، در رستوران.",
+     "ru": "С семи до десяти, в ресторане.",
+     "uk": "З сьомої до десятої, у ресторані.",
+     "ok": false
+    },
+    {
+     "who": "Lena",
+     "de": "Gibt es auch Kaffee und Tee?",
+     "fa": "قهوه و چای هم هست؟",
+     "ru": "Кофе и чай тоже есть?",
+     "uk": "Кава і чай теж є?",
+     "ok": false
+    },
+    {
+     "who": "Rezeption",
+     "de": "Natürlich. Kaffee, Tee und frisches Brot.",
+     "fa": "البته. قهوه، چای و نان تازه.",
+     "ru": "Конечно. Кофе, чай и свежий хлеб.",
+     "uk": "Звісно. Кава, чай і свіжий хліб.",
+     "ok": false
+    },
+    {
+     "who": "Lena",
+     "de": "Und wie ist das Passwort für das WLAN?",
+     "fa": "و رمز وای‌فای چیست؟",
+     "ru": "А какой пароль от Wi-Fi?",
+     "uk": "А який пароль від Wi-Fi?",
+     "ok": false
+    },
+    {
+     "who": "Rezeption",
+     "de": "Das Passwort steht auf der Karte.",
+     "fa": "رمز روی کارت نوشته شده.",
+     "ru": "Пароль написан на карточке.",
+     "uk": "Пароль написаний на картці.",
+     "ok": false
+    },
+    {
+     "who": "Lena",
+     "de": "Super, vielen Dank!",
+     "fa": "عالی، خیلی ممنون!",
+     "ru": "Супер, большое спасибо!",
+     "uk": "Супер, дуже дякую!",
+     "ok": false
+    },
+    {
+     "who": "Rezeption",
+     "de": "Gern geschehen. Einen schönen Abend!",
+     "fa": "خواهش می‌کنم. عصر خوبی داشته باشید!",
+     "ru": "Пожалуйста. Хорошего вечера!",
+     "uk": "Будь ласка. Гарного вечора!",
+     "ok": false
+    }
+   ]
+  },
+  {
+   "title": {
+    "de": "Ein kleines Problem",
+    "fa": "یک مشکل کوچک",
+    "ru": "Маленькая проблема",
+    "uk": "Маленька проблема"
+   },
+   "lines": [
+    {
+     "who": "Lena",
+     "de": "Entschuldigung, ich habe ein Problem.",
+     "fa": "ببخشید، یک مشکل دارم.",
+     "ru": "Извините, у меня проблема.",
+     "uk": "Вибачте, у мене проблема.",
+     "ok": false
+    },
+    {
+     "who": "Rezeption",
+     "de": "Oh, was ist los?",
+     "fa": "اوه، چه شده؟",
+     "ru": "Ой, что случилось?",
+     "uk": "Ой, що сталося?",
+     "ok": false
+    },
+    {
+     "who": "Lena",
+     "de": "Die Dusche in meinem Zimmer ist kalt.",
+     "fa": "دوش اتاقم سرد است.",
+     "ru": "В душе в моём номере холодная вода.",
+     "uk": "У душі в моєму номері холодна вода.",
+     "ok": false
+    },
+    {
+     "who": "Rezeption",
+     "de": "Das tut mir leid. Ich rufe sofort den Techniker.",
+     "fa": "متأسفم. همین الان تکنیسین را صدا می‌کنم.",
+     "ru": "Мне очень жаль. Я сейчас же вызову техника.",
+     "uk": "Мені дуже шкода. Я зараз же викличу техніка.",
+     "ok": false
+    },
+    {
+     "who": "Lena",
+     "de": "Wie lange dauert das?",
+     "fa": "چقدر طول می‌کشد؟",
+     "ru": "Сколько это займёт?",
+     "uk": "Скільки це триватиме?",
+     "ok": false
+    },
+    {
+     "who": "Rezeption",
+     "de": "Ungefähr zwanzig Minuten.",
+     "fa": "حدود بیست دقیقه.",
+     "ru": "Примерно двадцать минут.",
+     "uk": "Приблизно двадцять хвилин.",
+     "ok": false
+    },
+    {
+     "who": "Rezeption",
+     "de": "Möchten Sie so lange einen Tee an der Bar?",
+     "fa": "تا آن موقع یک چای در بار میل دارید؟",
+     "ru": "Хотите пока выпить чаю в баре?",
+     "uk": "Хочете поки що випити чаю в барі?",
+     "ok": false
+    },
+    {
+     "who": "Lena",
+     "de": "Ja, gern. Das ist sehr nett.",
+     "fa": "بله، با کمال میل. خیلی لطف دارید.",
+     "ru": "Да, с удовольствием. Это очень мило.",
+     "uk": "Так, із задоволенням. Це дуже мило.",
+     "ok": false
+    }
+   ]
+  }
+ ],
+ "phrases": [
+  {
+   "de": "Ich habe ein Zimmer reserviert.",
+   "fa": "یک اتاق رزرو کرده‌ام.",
+   "ru": "Я забронировал(а) номер.",
+   "uk": "Я забронював(ла) номер."
+  },
+  {
+   "de": "Wie ist Ihr Name?",
+   "fa": "اسمتان چیست؟",
+   "ru": "Как вас зовут?",
+   "uk": "Як вас звати?"
+  },
+  {
+   "de": "Hier ist Ihr Schlüssel.",
+   "fa": "این کلید شماست.",
+   "ru": "Вот ваш ключ.",
+   "uk": "Ось ваш ключ."
+  },
+  {
+   "de": "Wo ist der Aufzug?",
+   "fa": "آسانسور کجاست؟",
+   "ru": "Где лифт?",
+   "uk": "Де ліфт?"
+  },
+  {
+   "de": "Wann gibt es Frühstück?",
+   "fa": "صبحانه کِی است؟",
+   "ru": "Когда завтрак?",
+   "uk": "Коли сніданок?"
+  },
+  {
+   "de": "Wie ist das Passwort für das WLAN?",
+   "fa": "رمز وای‌فای چیست؟",
+   "ru": "Какой пароль от Wi-Fi?",
+   "uk": "Який пароль від Wi-Fi?"
+  },
+  {
+   "de": "Entschuldigung, ich habe ein Problem.",
+   "fa": "ببخشید، یک مشکل دارم.",
+   "ru": "Извините, у меня проблема.",
+   "uk": "Вибачте, у мене проблема."
+  },
+  {
+   "de": "Das tut mir leid.",
+   "fa": "متأسفم.",
+   "ru": "Мне очень жаль.",
+   "uk": "Мені дуже шкода."
+  }
+ ],
+ "published": "09-im-hotel"
+}

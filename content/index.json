@@ -1,5 +1,5 @@
 {
   "source": "de",
   "languages": [{"code":"fa","name":"فارسی","dir":"rtl","locale":"fa-IR","speech":null},{"code":"ru","name":"Русский","dir":"ltr","locale":"ru-RU","speech":"ru-RU"},{"code":"uk","name":"Українська","dir":"ltr","locale":"uk-UA","speech":"uk-UA"}],
-  "lessons": ["01-sich-vorstellen", "02-ueber-hobbys-sprechen", "03-wie-man-gluecklich-ist", "04-im-restaurant", "05-goldloeckchen-und-die-drei-baeren", "06-des-kaisers-neue-kleider", "07-jack-und-die-bohnenranke", "08-ali-baba-und-die-vierzig-raeuber"]
+  "lessons": ["01-sich-vorstellen", "02-ueber-hobbys-sprechen", "03-wie-man-gluecklich-ist", "04-im-restaurant", "05-goldloeckchen-und-die-drei-baeren", "06-des-kaisers-neue-kleider", "07-jack-und-die-bohnenranke", "08-ali-baba-und-die-vierzig-raeuber", "09-im-hotel"]
 }

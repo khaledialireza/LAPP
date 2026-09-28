@@ -27,9 +27,12 @@
   // seconds where a line starts: real timings if present, else proportional estimate
   const lineStart = l => timed ? l.t0 : l.start * (player.duration || 0);
   // lessons and stories share one list; each category is numbered on its own (L1, L2 … / G1, G2 …)
+  // three kinds: lesson (L), story (G, Geschichte) and short conversation (D, Dialog)
   const isStory = L => L && L.type === "story";
-  const lsCode = i => { const L = LESSONS[i], same = LESSONS.filter(x => isStory(x) === isStory(L)); return (isStory(L) ? "G" : "L") + (same.indexOf(L) + 1); };
-  const lsKind = i => isStory(LESSONS[i]) ? t("story") : t("lesson");
+  const cat = L => L && (L.type === "story" || L.type === "talk") ? L.type : "lesson";
+  const CAT_CODE = { lesson: "L", story: "G", talk: "D" };
+  const lsCode = i => { const L = LESSONS[i], same = LESSONS.filter(x => cat(x) === cat(L)); return CAT_CODE[cat(L)] + (same.indexOf(L) + 1); };
+  const lsKind = i => t(cat(LESSONS[i]));
   const lsName = i => iso(lsKind(i) + " " + lsCode(i).slice(1));
   const lineAt = t => timed ? lines.findIndex(l => t < l.next) : lines.findIndex(l => t / (player.duration || 1) < l.end);
 
@@ -107,12 +110,12 @@
   // lesson texts in the interface language (Persian lives in lessons.js / lesson1-fa.js)
   function lessonTr(L) {
     const tr = L.tr[I18N.lang] || {};
-    return { title: tr.title || "", summary: tr.summary || "", phrases: tr.phrases || [], notes: tr.phraseNotes || [], lines: tr.lines || [] };
+    return { title: tr.title || "", summary: tr.summary || "", phrases: tr.phrases || [], notes: tr.phraseNotes || [], lines: tr.lines || [], scenes: tr.scenes || [] };
   }
   function setLesson(i) {
     if (i < 0 || i >= LESSONS.length) return toast(t("moreLessonsSoon"));
     state.idx = i; store.set("lesson", i);
-    if (!isStory(LESSONS[i])) store.set("lastLesson", i);
+    if (cat(LESSONS[i]) === "lesson") store.set("lastLesson", i);
     const L = LESSONS[i];
     $$(".js-lesson-num").forEach(e => e.textContent = lsCode(i));
     $$(".js-lesson-word").forEach(e => e.textContent = lsKind(i));
@@ -136,7 +139,9 @@
     const total = lines.reduce((n, l) => n + l.text.length, 0);
     let acc = 0;
     lines.forEach(l => { l.start = acc / total; acc += l.text.length; l.end = acc / total; });
-    $("#mTranscript").innerHTML = lines.map((l, j) => `
+    // conversations are made of short scenes; a header starts each one and jumps to it
+    const scenes = new Map((L.scenes || []).map((s, k) => [s.start, { de: s.title, tr: (TR.scenes || [])[k] || "" }]));
+    $("#mTranscript").innerHTML = lines.map((l, j) => (scenes.has(j) ? `<button class="ly-scene" data-scene="${j}"><b>${esc(scenes.get(j).de)}</b><span class="fa">${esc(scenes.get(j).tr)}</span></button>` : "") + `
       <div class="ly-line ${whoCls(l.who)}" data-i="${j}"><span class="ly-who">${esc(l.who)}</span>
       <div class="ly-de">${esc(l.text)}</div><div class="ly-fa fa">${esc(l.fa || "")}</div></div>`).join("");
     // speaker filter: one tab per speaker of this lesson
@@ -148,8 +153,8 @@
     filterSpeakers();
     bgvSet(L);
     const story = L.type === "story";
-    $("#lyTitle").textContent = story ? t("story") : t("dialog");
-    $("#lySrc").textContent = story ? `${L.title} · ${L.level}` : "Daily German Talk";
+    $("#lyTitle").textContent = story ? t("story") : cat(L) === "talk" ? t("talk") : t("dialog");
+    $("#lySrc").textContent = cat(L) !== "lesson" ? `${L.title} · ${L.level}` : "Daily German Talk";
 
     // audio: every lesson and story remembers where you stopped
     player.src = L.audio; player.playbackRate = SPEEDS[state.speed];
@@ -197,7 +202,8 @@
   }
   ["touchstart", "wheel"].forEach(ev => $("#mTranscript").addEventListener(ev, () => { followPause = Date.now() + 4000; }, { passive: true }));
   $("#mTranscript").addEventListener("click", e => {
-    const row = e.target.closest(".ly-line"); if (!row) return;
+    const sc = e.target.closest("[data-scene]");
+    const row = sc ? $(`#mTranscript .ly-line[data-i="${sc.dataset.scene}"]`) : e.target.closest(".ly-line"); if (!row) return;
     const w = e.target.closest(".w");
     if (w && row.classList.contains("cur")) { if (!player.paused) player.pause(); openWord(w.dataset.w); return; }
     const i = Number(row.dataset.i), l = lines[i];
@@ -373,7 +379,7 @@
     $("#plList").innerHTML = ids.map(id => { const i = LESSONS.findIndex(x => x.id === id), L = LESSONS[i], sel = plSel(pl, id), p = lessonPct(i), m = libMins(L);
       return `<div class="pl-it ${sel ? "" : "off"}" data-id="${id}">
         <span class="n">${sel && pl.mode !== "random" ? ++n : ""}</span><span class="cv cv${i % 4}">${isStory(L) ? "📖" : "💬"}</span>
-        <span class="t"><b>${esc(L.title)}</b><span>${isStory(L) ? "" : t("dialog") + " · "}${lsCode(i)} · ${esc(L.level)}${m ? " · " + tf("minN", { n: m }) : ""} · ${p >= 100 ? t("stDone") : p ? p + "%" : t("stNew")}</span></span>
+        <span class="t"><b>${esc(L.title)}</b><span>${cat(L) === "lesson" ? t("dialog") + " · " : ""}${lsCode(i)} · ${esc(L.level)}${m ? " · " + tf("minN", { n: m }) : ""} · ${p >= 100 ? t("stDone") : p ? p + "%" : t("stNew")}</span></span>
         <button class="ck" data-ck aria-pressed="${sel}">${sel ? "✓" : ""}</button>${pl.mode === "mine" ? `<span class="hd" data-drag>≡</span>` : ""}</div>`; }).join("")
       || `<div class="pl-empty">${t("plEmpty")}</div>`;
     const chips = (key, vals, lab = v => v) => vals.map(v => `<button data-opt="${key}" data-v="${v}" class="${String(pl[key]) === String(v) ? "on" : ""}">${lab(v)}</button>`).join("");
@@ -1910,7 +1916,7 @@
       <div class="meta"><span>🎧 ${tf("minN", { n: mins })}</span><span>💬 ${tf("sentN", { n: lines.length })}</span><span>🔤 ${tf("nWords", { n: vocabList.length })}</span></div>
       <div class="pb"><i style="width:${pct}%"></i></div><div class="meta"><span class="fa">${tf("lsProgress", { p: pct })}</span></div>
       <div class="ls-overall"><span>${t("lsOverall")}</span><b>${overallPct()}%</b></div>
-      <div class="ls-lessons">${LESSONS.map((x, j) => isStory(x) !== isStory(L) ? "" : `<button class="chip5 lchip ${j === state.idx ? "on" : ""}" data-lesson="${j - state.idx}"><span>${lsCode(j)}</span><i style="--p:${lessonPct(j)}%"></i><small>${lessonPct(j)}%</small></button>`).join("")}<button class="chip5 lchip" data-go="library">📚 ${t("library")}</button></div>`;
+      <div class="ls-lessons">${LESSONS.map((x, j) => cat(x) !== cat(L) ? "" : `<button class="chip5 lchip ${j === state.idx ? "on" : ""}" data-lesson="${j - state.idx}"><span>${lsCode(j)}</span><i style="--p:${lessonPct(j)}%"></i><small>${lessonPct(j)}%</small></button>`).join("")}<button class="chip5 lchip" data-go="library">📚 ${t("library")}</button></div>`;
     $("#lsHero").classList.toggle("story", isStory(L));
     $("#lsPath").innerHTML = steps.map((s, i) => { const st = s.f >= 1 ? "done" : i === cur ? "cur" : "todo";
       return `<button class="step ${st}" data-step="${i}"><span class="ic">${st === "done" ? "✓" : s.ic}</span><span class="tx"><b>${i + 1}. ${s.de}</b><small class="fa">${esc(s.sub)}</small><span class="sbar"><i style="width:${Math.round(s.f * 100)}%"></i></span></span><span class="go">${st === "done" ? "✓" : st === "cur" ? t("nextBtn") : t("start")}</span></button>`; }).join("");
@@ -1967,23 +1973,24 @@
   const libMins = L => { const tm = L.timings; const e = Array.isArray(tm) && tm.length ? (Array.isArray(tm[tm.length - 1]) ? tm[tm.length - 1][1] : tm[tm.length - 1]) : 0; return e ? Math.max(1, Math.round(e / 60)) : null; };
   const libLines = L => L.transcript.split("\n").filter(x => x.trim()).length;
   function renderLibrary() {
-    const all = LESSONS.map((L, i) => ({ L, i, story: isStory(L), p: lessonPct(i), done: store.get("done", []).includes(L.id) }));
-    const nL = all.filter(x => !x.story).length, nS = all.length - nL;
-    const inTab = all.filter(x => lib.tab === "all" || (lib.tab === "story") === x.story);
+    const ORDER = { lesson: 0, talk: 1, story: 2 };
+    const all = LESSONS.map((L, i) => ({ L, i, cat: cat(L), story: isStory(L), p: lessonPct(i), done: store.get("done", []).includes(L.id) }));
+    const count = c => all.filter(x => x.cat === c).length;
+    const inTab = all.filter(x => lib.tab === "all" || lib.tab === x.cat);
     const lvls = LEVELS.filter(l => inTab.some(x => x.L.level === l));
     if (lib.lvl !== "all" && !lvls.includes(lib.lvl)) lib.lvl = "all";
     const seen = store.get("libSeen", {});
     const items = inTab.filter(x => lib.lvl === "all" || x.L.level === lib.lvl).sort((a, b) =>
       lib.sort === "level" ? LEVELS.indexOf(a.L.level) - LEVELS.indexOf(b.L.level) || a.i - b.i
       : lib.sort === "recent" ? (seen[b.L.id] || 0) - (seen[a.L.id] || 0) || a.i - b.i
-      : (a.story - b.story) || a.i - b.i);
+      : (ORDER[a.cat] - ORDER[b.cat]) || a.i - b.i);
     $("#libCount").textContent = tf("titlesN", { n: all.length });
-    $("#libSeg").innerHTML = [["lesson", tf("lessonsN", { n: nL })], ["story", tf("storiesN", { n: nS })], ["all", t("all")]].map(([k, v]) => `<button data-tab="${k}" class="${lib.tab === k ? "on" : ""}">${v}</button>`).join("");
+    $("#libSeg").innerHTML = [["lesson", tf("lessonsN", { n: count("lesson") })], ["talk", tf("talksN", { n: count("talk") })], ["story", tf("storiesN", { n: count("story") })], ["all", t("all")]].filter(([k]) => k === "all" || k === "lesson" || count(k)).map(([k, v]) => `<button data-tab="${k}" class="${lib.tab === k ? "on" : ""}">${v}</button>`).join("");
     $("#libChips").innerHTML = ["all", ...lvls].map(l => `<button data-lvl="${l}" class="${lib.lvl === l ? "on" : ""}">${l === "all" ? t("all") : l}</button>`).join("") + `<button class="srt" data-sort>↕ ${t(LIB_SORT[lib.sort])}</button>`;
     const row = x => { const TR = lessonTr(x.L), m = libMins(x.L), cur = x.i === state.idx;
       const st = x.p >= 100 ? `<span class="st ok">✓</span>` : x.p > 0 ? `<span class="st">${x.p}%</span>` : `<span class="st new">${t("stNew")}</span>`;
       return `<div class="lib-it ${cur ? "cur" : ""}" data-li="${x.i}" role="button" tabindex="0">
-        <div class="cv cv${x.i % 4} ${x.story ? "book" : ""}">${x.story ? "📖" : ""}<b>${lsCode(x.i)}</b></div>
+        <div class="cv cv${x.i % 4} ${x.story ? "book" : ""}">${x.story ? "📖" : x.cat === "talk" ? "💬" : ""}<b>${lsCode(x.i)}</b></div>
         <div class="tx"><b>${esc(x.L.title)}</b><span class="fa">${esc(TR.title)}</span>
           <span class="mt"><span class="lv">${esc(x.L.level)}</span>${m ? `<span>${tf("minN", { n: m })}</span>` : ""}<span>${tf("sentN", { n: libLines(x.L) })}</span>${x.L.words ? `<span>${tf("nWords", { n: x.L.words.length })}</span>` : ""}</span>
           <span class="pb"><i style="width:${x.p}%"></i></span></div>

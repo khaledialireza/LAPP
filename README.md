@@ -39,6 +39,22 @@ node tools/dict.js build   # فهرست کلمه‌های هر درس را از 
 node tools/bump.js        # قبل از هر push: نسخهٔ فایل‌ها را عوض می‌کند تا مرورگر نسخهٔ قدیمی را نشان ندهد
 ```
 
+## استودیو (`_studio/`)
+
+تولید محتوای خودمان: متن، ترجمه، صدا و انتشار. پوشه با `_` شروع می‌شود، پس GitHub Pages آن را منتشر نمی‌کند.
+
+```
+python3 _studio/studio.py new im-hotel --type talk --level A1 --title "Im Hotel" --brief "…"
+python3 _studio/studio.py prompt im-hotel        # متنی که به هوش مصنوعی (Claude/ChatGPT) می‌دهی
+python3 _studio/studio.py import im-hotel out.json
+python3 _studio/studio.py serve                  # صفحهٔ بازبینی: http://localhost:8787
+python3 _studio/studio.py voice im-hotel         # صدا + زمان‌بندی دقیق هر خط
+python3 _studio/studio.py publish im-hotel       # فقط وقتی همهٔ خط‌ها تأیید شده‌اند
+```
+
+صداها: `piper:<نام>` آفلاین و رایگان (بار اول دانلود می‌شود)؛ `azure:<voice>` با `AZURE_SPEECH_KEY` و `AZURE_SPEECH_REGION`.
+نیازها: `pip install sherpa-onnx av numpy`.
+
 ## قاعدهٔ طراحی
 
 موبایل و دسکتاپ یک طراحی و یک HTML دارند. هر قابلیتی که اضافه می‌شود در هر دو هست؛
