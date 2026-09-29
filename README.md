@@ -55,6 +55,12 @@ python3 _studio/studio.py publish im-hotel       # فقط وقتی همهٔ خط
 صداها: `piper:<نام>` آفلاین و رایگان (بار اول دانلود می‌شود)؛ `azure:<voice>` با `AZURE_SPEECH_KEY` و `AZURE_SPEECH_REGION`.
 نیازها: `pip install sherpa-onnx av numpy`.
 
+### پنل وب: `lapp.khaledi.eu/studio`
+
+یک Cloudflare Worker (`_studio/worker/`) پشت Cloudflare Access؛ فقط صاحب با ایمیلش وارد می‌شود و Worker امضای Access را خودش هم بررسی می‌کند.
+پیش‌نویس‌ها در همین مخزن ذخیره می‌شوند و نوشتن، صدا و انتشار با گردش‌کار `studio` در GitHub Actions اجرا می‌شود.
+Worker با گردش‌کار `studio-worker` منتشر می‌شود (نیاز: `CLOUDFLARE_API_TOKEN`، `CLOUDFLARE_ACCOUNT_ID`).
+
 ## قاعدهٔ طراحی
 
 موبایل و دسکتاپ یک طراحی و یک HTML دارند. هر قابلیتی که اضافه می‌شود در هر دو هست؛

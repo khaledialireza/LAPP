@@ -1,0 +1,53 @@
+# LAPP Studio: the heavy steps the web panel (lapp.khaledi.eu/studio) asks for.
+# write   → Claude writes the script from the draft's brief
+# voice   → every line is spoken, joined, timed (Piper offline, or Azure when its key is set)
+# publish → the approved draft becomes content/lessons/<NN-slug>/ and the site updates
+name: studio
+run-name: "studio ${{ inputs.action }} ${{ inputs.slug }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      action: { description: "write, voice or publish", type: choice, options: [write, voice, publish], required: true }
+      slug: { description: "draft folder in _studio/drafts", type: string, required: true }
+      force: { description: "skip the checks", type: boolean, default: false }
+
+permissions:
+  contents: write
+
+# one studio job at a time, so two runs never push over each other
+concurrency: { group: studio, cancel-in-progress: false }
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - uses: actions/cache@v4
+        with: { path: _studio/.voices, key: piper-voices-v1 }
+      - run: pip install sherpa-onnx av numpy anthropic
+      - name: studio ${{ inputs.action }}
+        env:
+          ACTION: ${{ inputs.action }}
+          SLUG: ${{ inputs.slug }}
+          FORCE: ${{ inputs.force && '--force' || '' }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          AZURE_SPEECH_KEY: ${{ secrets.AZURE_SPEECH_KEY }}
+          AZURE_SPEECH_REGION: ${{ secrets.AZURE_SPEECH_REGION }}
+        run: |
+          [[ "$SLUG" =~ ^[a-z0-9][a-z0-9-]{1,40}$ ]] || { echo "bad slug"; exit 1; }
+          if [ "$ACTION" = "write" ]; then python3 _studio/studio.py write "$SLUG"
+          else python3 _studio/studio.py "$ACTION" "$SLUG" $FORCE; fi
+      - name: save
+        env: { ACTION: "${{ inputs.action }}", SLUG: "${{ inputs.slug }}" }
+        run: |
+          git config user.name "LAPP Studio"
+          git config user.email "studio@users.noreply.github.com"
+          git add -A _studio/drafts content
+          git diff --cached --quiet && exit 0
+          git commit -m "studio: $ACTION $SLUG"
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push

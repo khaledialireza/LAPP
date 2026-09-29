@@ -1,7 +1,7 @@
-# studio: downloaded voices, synthesis cache and per-draft work files
+# studio: downloaded voices, synthesis cache and per-line work files
+# (a draft's audio.mp3 is kept, so the web panel can play it before publishing)
 _studio/.voices/
 _studio/.cache/
 _studio/drafts/*/clips/
 _studio/drafts/*/preview.wav
-_studio/drafts/*/audio.mp3
 __pycache__/

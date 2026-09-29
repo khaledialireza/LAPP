@@ -7,6 +7,7 @@ studio lives in the repository but not on the site.
 A piece of content is a draft in _studio/drafts/<slug>/draft.json. It moves:
 
     new      → an empty draft with a brief
+    write    → Claude writes the script from the brief (ANTHROPIC_API_KEY), or:
     prompt   → the text to give an AI writer (Claude, ChatGPT …); its JSON answer
     import   → goes back into the draft
     check    → validates it: every line translated, speakers cast, sentence length
@@ -40,7 +41,11 @@ PIPER_URL = "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/
 DEFAULT_CAST = ["piper:thorsten-medium", "piper:eva_k-x_low", "piper:karlsson-low", "piper:kerstin-low"]
 
 
+SLUG = re.compile(r"^[a-z0-9][a-z0-9-]{1,40}$")
+
+
 def load(slug):
+    if not SLUG.match(slug): sys.exit(f"bad slug {slug!r}")
     f = DRAFTS / slug / "draft.json"
     if not f.exists(): sys.exit(f"no draft {slug}")
     return json.loads(f.read_text("utf-8"))
@@ -59,6 +64,7 @@ def lines_of(d):
 
 # ---------------------------------------------------------------- new / prompt / import
 def cmd_new(a):
+    if not SLUG.match(a.slug): sys.exit("slug: lowercase letters, digits and -")
     if (DRAFTS / a.slug / "draft.json").exists(): sys.exit("draft exists")
     save(a.slug, {
         "slug": a.slug, "type": a.type, "title": a.title, "level": a.level, "status": "draft",
@@ -80,10 +86,9 @@ SCHEMA = """{
 }"""
 
 
-def cmd_prompt(a):
-    d = load(a.slug)
+def prompt_text(d):
     kind = {"talk": "a short everyday conversation", "lesson": "a lesson dialogue", "story": "a story told by a narrator with some dialogue"}[d["type"]]
-    print(f"""Write {kind} in German for learners at level {d['level']}. It must be completely original — do not copy any existing text.
+    return f"""Write {kind} in German for learners at level {d['level']}. It must be completely original — do not copy any existing text.
 Topic / brief: {d.get('brief') or d['title']}
 Rules:
 - natural spoken German, one sentence per line, at most {MAX_WORDS[d['level']]} words per line
@@ -91,24 +96,55 @@ Rules:
 - translate every line naturally (not word for word) into Persian (fa), Russian (ru) and Ukrainian (uk)
 - 6–10 key phrases a learner should keep
 Answer with JSON only, in exactly this shape:
-{SCHEMA}""")
+{SCHEMA}"""
 
 
-def cmd_import(a):
-    d = load(a.slug)
-    src = json.loads(Path(a.file).read_text("utf-8"))
+def cmd_prompt(a):
+    print(prompt_text(load(a.slug)))
+
+
+def merge(d, src):
+    """take a written script (the JSON shape in SCHEMA) into the draft and give every new speaker a voice"""
     for k in ("title", "tr", "scenes", "phrases"):
         if k in src: d[k] = src[k]
-    cast = src.get("cast", {})
     male = [v for v in DEFAULT_CAST if "thorsten" in v or "karlsson" in v]
     female = [v for v in DEFAULT_CAST if "eva_k" in v or "kerstin" in v]
-    for who, g in cast.items():
+    for who, g in src.get("cast", {}).items():
         if who not in d["cast"]:
             pool = female if str(g).startswith("f") else male
             used = [c["voice"] for c in d["cast"].values()]
             d["cast"][who] = {"voice": next((v for v in pool if v not in used), pool[0]), "speed": 0.95}
-    for _, _, ln in lines_of(d): ln.setdefault("ok", False)
+    for _, _, ln in lines_of(d): ln["ok"] = False
+    return d
+
+
+def cmd_import(a):
+    d = merge(load(a.slug), json.loads(Path(a.file).read_text("utf-8")))
     save(a.slug, d); print("imported", sum(1 for _ in lines_of(d)), "lines")
+
+
+def cmd_write(a):
+    """Claude writes the script from the brief (needs ANTHROPIC_API_KEY)"""
+    if not os.environ.get("ANTHROPIC_API_KEY"): sys.exit("ANTHROPIC_API_KEY is not set")
+    import anthropic
+    d = load(a.slug)
+    client = anthropic.Anthropic()
+    # a refused request is re-run server-side on Anthropic's recommended fallback model
+    with client.beta.messages.stream(
+            model="claude-opus-5-5", max_tokens=64000,
+            thinking={"type": "adaptive"}, output_config={"effort": "medium"},
+            betas=["server-side-fallback-2026-07-01"], fallbacks="default",
+            messages=[{"role": "user", "content": prompt_text(d)}]) as stream:
+        msg = stream.get_final_message()
+    if msg.stop_reason == "refusal": sys.exit(f"the model declined: {getattr(msg.stop_details, 'explanation', '')}")
+    if msg.stop_reason == "max_tokens": sys.exit("the answer was cut off (max_tokens)")
+    text = "".join(b.text for b in msg.content if b.type == "text")
+    m = re.search(r"\{.*\}", text, re.S)
+    if not m: sys.exit("no JSON in the answer")
+    d = merge(d, json.loads(m.group(0)))
+    d["status"] = "review"; save(a.slug, d)
+    print(f"✓ written by {msg.model}: {len(d['scenes'])} scenes, {sum(1 for _ in lines_of(d))} lines")
+    cmd_check(argparse.Namespace(slug=a.slug))
 
 
 # ---------------------------------------------------------------- check
@@ -258,6 +294,7 @@ def cmd_voice(a):
     audio = audio * min(1.0, 0.89 / peak)
     write_mp3(DRAFTS / a.slug / "audio.mp3", audio)
     (DRAFTS / a.slug / "timings.json").write_text(json.dumps(timings))
+    d = load(a.slug); d["timings"] = timings; d["status"] = "review" if d.get("status") != "published" else d["status"]; save(a.slug, d)
     print(f"\n✓ audio.mp3 · {round(len(audio) / RATE / 60, 1)} min · {n} lines, exact timings")
 
 
@@ -374,11 +411,12 @@ def main():
     sub.add_parser("prompt").add_argument("slug")
     p = sub.add_parser("import"); p.add_argument("slug"); p.add_argument("file")
     sub.add_parser("check").add_argument("slug")
+    sub.add_parser("write").add_argument("slug")
     for c in ("voice", "publish"):
         p = sub.add_parser(c); p.add_argument("slug"); p.add_argument("--force", action="store_true")
     sub.add_parser("serve").add_argument("--port", type=int, default=8787)
     a = ap.parse_args()
-    r = {"new": cmd_new, "prompt": cmd_prompt, "import": cmd_import, "check": cmd_check, "voice": cmd_voice, "publish": cmd_publish, "serve": cmd_serve}[a.cmd](a)
+    r = {"new": cmd_new, "prompt": cmd_prompt, "write": cmd_write, "import": cmd_import, "check": cmd_check, "voice": cmd_voice, "publish": cmd_publish, "serve": cmd_serve}[a.cmd](a)
     if a.cmd == "check" and r: sys.exit(1)
 
 

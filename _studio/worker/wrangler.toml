@@ -1,0 +1,20 @@
+# LAPP Studio Worker — deployed by .github/workflows/studio-worker.yml
+name = "lapp-studio"
+main = "src/index.js"
+compatibility_date = "2026-09-01"
+workers_dev = false
+routes = [{ pattern = "lapp.khaledi.eu/studio*", zone_name = "khaledi.eu" }]
+
+[[rules]]
+type = "Text"
+globs = ["**/*.html"]
+
+[vars]
+REPO = "khaledialireza/LAPP"
+BRANCH = "main"
+
+# Secrets (set once, never in this file):
+#   ACCESS_TEAM    the Zero Trust team name (<team>.cloudflareaccess.com)
+#   ACCESS_AUD     the Access application's AUD tag
+#   ALLOWED_EMAIL  the only person who may enter
+#   GITHUB_TOKEN   fine-grained token for this repository: Contents read/write, Actions read/write
