@@ -507,5 +507,15 @@
   "wbF3": "🔥 Every day",
   "wbLine1": "Good evening! Welcome.",
   "wbLine2": "I have booked a room.",
-  "acErrWrong": "Wrong password."
+  "acErrWrong": "Wrong password.",
+  "crTitle": "What do you want to learn?",
+  "crCourse": "Course",
+  "crOwn": "Each course keeps its own progress.",
+  "crNotStarted": "Not started",
+  "crWords": "{n} words",
+  "crLessons": "{n} lessons",
+  "crSoon": "soon",
+  "course_de": "German",
+  "course_nl": "Dutch",
+  "course_pl": "Polish"
 }

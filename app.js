@@ -11,8 +11,10 @@
   const SPEEDS = [0.75, 0.9, 1, 1.1, 1.25];
 
   const store = {
-    get(k, d) { try { const v = localStorage.getItem("lapp:" + k); return v ? JSON.parse(v) : d; } catch { return d; } },
-    set(k, v) { try { localStorage.setItem("lapp:" + k, JSON.stringify(v)); } catch {} }
+    // progress belongs to the course (COURSE.prefix); a few settings are the same for every course
+    key: k => (/^(name|dockSide|saveBannerOff|showFa|bgVideo|vidOnly)$/.test(k) ? "lapp:" : COURSE.prefix) + k,
+    get(k, d) { try { const v = localStorage.getItem(store.key(k)); return v ? JSON.parse(v) : d; } catch { return d; } },
+    set(k, v) { try { localStorage.setItem(store.key(k), JSON.stringify(v)); } catch {} }
   };
 
   const state = {
@@ -54,8 +56,8 @@
     if (!("speechSynthesis" in window)) return toast(t("noTts"));
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text.replace(/[*"]/g, ""));
-    u.lang = "de-DE"; u.rate = SPEEDS[state.speed] * 0.95;
-    const v = speechSynthesis.getVoices().find(v => v.lang.startsWith("de"));
+    u.lang = COURSE.speech; u.rate = SPEEDS[state.speed] * 0.95;
+    const v = speechSynthesis.getVoices().find(v => v.lang.startsWith(COURSE.code));
     if (v) u.voice = v;
     speechSynthesis.speak(u);
   }
@@ -599,7 +601,7 @@
       POSG.filter(([k]) => byPos[k]).map(([k, name]) => `<button data-pos="${k}" class="${state.vpos === k ? "on" : ""}">${t(name)} <b>${byPos[k]}</b></button>`).join("");
     const list = vocabList.filter(v => (state.vf === "all" || v.st === state.vf) && (state.vpos === "all" || v.pg === state.vpos)
       && (!q || v.de.toLowerCase().includes(q) || v.fa.includes(q)))
-      .sort((a, b) => baseWord(a).localeCompare(baseWord(b), "de", { sensitivity: "base" }));
+      .sort((a, b) => baseWord(a).localeCompare(baseWord(b), COURSE.code, { sensitivity: "base" }));
     const groups = [];
     list.forEach(v => { const L = letterOf(v); if (!groups.length || groups[groups.length - 1][0] !== L) groups.push([L, []]); groups[groups.length - 1][1].push(v); });
     $("#vocabGrid").innerHTML = groups.map(([L, vs]) => `<div class="dsec">${esc(L)}</div><div class="dgrp">${vs.map(v => {
@@ -761,7 +763,7 @@
   let activeRec = null;
   const stopListening = () => { try { activeRec?.abort(); } catch {} activeRec = null; };
   // one short listening session: mic on → one phrase → mic off (resolves only after the mic is released)
-  function listen(lang = "de-DE") {
+  function listen(lang = COURSE.speech) {
     return new Promise((resolve, reject) => {
       if (!SR) return reject(new Error("no-sr"));
       stopListening();
@@ -934,7 +936,7 @@
     const v = pickWord(); fc.cur = v; fc.last = v.key;
     fc.dir = Math.random() < 0.5 ? "de" : "fa";
     const voice = fc.dir === "fa" ? !!SR : nativeVoice();
-    $("#fcDir").innerHTML = fc.dir === "de" ? `${t("german")} → ${t("nativeLang")}${voice ? " 🎤" : ""}` : `${t("nativeLang")} → ${t("german")}${voice ? " 🎤" : ""}`;
+    $("#fcDir").innerHTML = fc.dir === "de" ? `${COURSE.name} → ${t("nativeLang")}${voice ? " 🎤" : ""}` : `${t("nativeLang")} → ${COURSE.name}${voice ? " 🎤" : ""}`;
     $("#fcPrompt").innerHTML = fc.dir === "de"
       ? `<span>${esc(v.de)}</span><button class="say" data-say="${esc(v.de)}">${SAY_ICON}</button>`
       : `<span class="fa">${esc(v.fa)}</span>`;
@@ -978,7 +980,7 @@
     const v = fc.cur, toNative = fc.dir === "de";
     $("#fcMic").classList.add("rec"); $("#fcHeard").textContent = t("listening");
     try {
-      const alts = await listen(toNative ? I18N.info().speech : "de-DE");
+      const alts = await listen(toNative ? I18N.info().speech : COURSE.speech);
       let ok;
       if (toNative) {
         const want = meaningWords(v);
@@ -1136,7 +1138,7 @@
       $("#exReveal").onclick = reveal;
       $$("#exSelf [data-self]").forEach(b => b.onclick = () => { $("#exSelf").hidden = true; finishEx(b.dataset.self === "1"); });
       if (SR) $("#exMic").onclick = () => {
-        const r = new SR(); r.lang = "de-DE"; r.interimResults = false; r.maxAlternatives = 3;
+        const r = new SR(); r.lang = COURSE.speech; r.interimResults = false; r.maxAlternatives = 3;
         $("#exMic").classList.add("rec"); $("#exHeard").innerHTML = `<span class="fa">${t("listening")}</span>`;
         r.onresult = ev => {
           const target = window.Practice.words(window.Practice.norm(e.answer));
@@ -1350,7 +1352,7 @@
   const rec = { on: false, r: null, finals: [], interim: "", locked: false, t0: 0, last: 0, err: null, tick: 0, onUpdate: null, onDone: null };
   function srSession() {
     const id = rec.id, mine = () => id === rec.id;
-    const r = new SR(); r.lang = "de-DE"; r.continuous = true; r.interimResults = true; r.maxAlternatives = 3;
+    const r = new SR(); r.lang = COURSE.speech; r.continuous = true; r.interimResults = true; r.maxAlternatives = 3;
     r.onresult = ev => {
       if (!mine()) return;
       let interim = "";
@@ -1857,7 +1859,7 @@
   $("#profName").addEventListener("input", e => { store.set("name", e.target.value.trim()); paintAvatar(); });
   $("#profReset").onclick = () => {
     if (!confirm(t("resetConfirm"))) return;
-    try { Object.keys(localStorage).filter(k => k.startsWith("lapp:") && !/^lapp:(lang|name|session)$/.test(k)).forEach(k => localStorage.removeItem(k)); } catch {}
+    try { Object.keys(localStorage).filter(k => k.startsWith(COURSE.prefix) && !/^lapp:(lang|name|session|course|sync|cfg)$/.test(k) && (COURSE.prefix !== "lapp:" || !COURSES.some(c => k.startsWith(`lapp:${c.code}:`)))).forEach(k => localStorage.removeItem(k)); } catch {}
     location.reload();
   };
   paintAvatar();
@@ -2029,8 +2031,8 @@
   $("#libBack").onclick = libMenuClose;
   function libReset(L) {
     const id = L.id;
-    ["heard", "phr", "exam", "dlg", "fs", "ex"].forEach(k => { try { localStorage.removeItem("lapp:" + k + id); } catch {} });
-    try { localStorage.removeItem("lapp:ex" + id + ":i"); } catch {}
+    ["heard", "phr", "exam", "dlg", "fs", "ex"].forEach(k => { try { localStorage.removeItem(COURSE.prefix + k + id); } catch {} });
+    try { localStorage.removeItem(COURSE.prefix + "ex" + id + ":i"); } catch {}
     store.set("done", store.get("done", []).filter(x => x !== id));
   }
   $("#libMenu").addEventListener("click", e => {
@@ -2065,9 +2067,10 @@
   renderSaveBanner();
   const showWelcome = on => on ? Account.open("email", { closable: false }) : Account.close();
   const repaint = () => { paintAvatar(); renderSaveBanner(); if (document.body.dataset.screen === "profile") renderProfile(); if (document.body.dataset.screen === "library") renderLibrary(); };
-  Auth.onChange(ses => { if (!ses) showWelcome(true); repaint(); });
+  Auth.onChange(ses => { if (!ses) showWelcome(true); repaint(); Course.ask(); });
   Account.onChange(repaint);
   if (!Account.fromLink()) showWelcome(!Auth.signedIn);
+  Course.paint(); Course.ask();
 
   setSpeed(state.speed);
   if (LESSONS.length) setLesson(Account.canOpen(LESSONS[state.idx]) ? state.idx : Math.max(0, LESSONS.findIndex(L => Account.canOpen(L))));

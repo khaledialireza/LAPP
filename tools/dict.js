@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // ابزار دیکشنری LAPP
-//   node tools/dict.js check   → دیکشنری سراسری را برای تکراری‌ها بررسی می‌کند
-//   node tools/dict.js build   → فهرست کلمه‌های هر درس را در content/lessons/<درس>/lesson.json می‌نویسد
-// دیکشنری سراسری (content/lang/de/dict.json + معنی‌ها در content/lang/<زبان>/dict.json) تنها جایی است که معنی کلمه‌ها ذخیره می‌شود؛
+//   node tools/dict.js check [de|nl|pl]   → دیکشنری سراسری آن زبان را برای تکراری‌ها بررسی می‌کند
+//   node tools/dict.js build [de|nl|pl]   → فهرست کلمه‌های هر درس آن زبان را در content/lessons/<درس>/lesson.json می‌نویسد
+// دیکشنری سراسری (content/lang/<زبان درس>/dict.json + معنی‌ها در content/lang/<زبان رابط>/dict.<زبان درس>.json) تنها جایی است که معنی کلمه‌ها ذخیره می‌شود؛
 // هر درس فقط فهرست کلیدها را نگه می‌دارد، پس هیچ کلمه‌ای دو بار ذخیره نمی‌شود.
 const fs = require("fs"), path = require("path");
 const root = path.join(__dirname, "..");
@@ -10,15 +10,18 @@ const C = path.join(root, "content");
 const json = f => JSON.parse(fs.readFileSync(path.join(C, f), "utf8"));
 global.window = {};
 const idx0 = json("index.json");
-const de = json("lang/de/dict.json"), fa = json("lang/fa/dict.json");
+const COURSE = process.argv[3] || "de";
+const course = idx0.courses.find(c => c.code === COURSE);
+if (!course) { console.error("no course " + COURSE); process.exit(1); }
+const de = json(`lang/${COURSE}/dict.json`), fa = (() => { try { return json(`lang/fa/dict.${COURSE}.json`); } catch { return {}; } })();
 const DICT = {};
 for (const [k, v] of Object.entries(de)) { const m = fa[k]; DICT[k] = { p: v.p, f: v.f || [], fa: typeof m === "string" ? m : m ? m.m : "" }; }
-const NAMES = Object.fromEntries(json("lang/de/names.json").map(n => [n, n]));
-const LESSONS = idx0.lessons.map(dir => ({ dir, ...json(`lessons/${dir}/lesson.json`) }));
-window.VERBS = json("lang/de/verbs.json");
+const NAMES = Object.fromEntries(json(`lang/${COURSE}/names.json`).map(n => [n, n]));
+const LESSONS = course.lessons.map(dir => ({ dir, ...json(`lessons/${dir}/lesson.json`) }));
+window.VERBS = json(`lang/${COURSE}/verbs.json`);
 require(path.join(root, "grammar.js"));
 
-const clean = t => t.replace(/^[^A-Za-zÄÖÜäöüßé]+|[^A-Za-zÄÖÜäöüßé'-]+$/g, "");
+const clean = t => t.replace(/^[^\p{L}]+|[^\p{L}'-]+$/gu, "");
 const base = k => k.replace(/_.*/, "");
 function index() {
   const idx = {};
@@ -32,7 +35,7 @@ function index() {
 }
 
 function check() {
-  const src = fs.readFileSync(path.join(C, "lang/de/dict.json"), "utf8");
+  const src = fs.readFileSync(path.join(C, `lang/${COURSE}/dict.json`), "utf8");
   const problems = [];
   // 1) same key written twice in the source (JSON.parse silently keeps the last one)
   const keys = [...src.matchAll(/^\s*"([^"]+)":\s*\{/gm)].map(m => m[1]);

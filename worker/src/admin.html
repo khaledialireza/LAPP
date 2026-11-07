@@ -119,7 +119,8 @@ let LESSONS = null, A = null;
 async function lessons() {
   if (LESSONS) return LESSONS;
   const idx = await (await fetch("/content/index.json")).json();
-  LESSONS = await Promise.all(idx.lessons.map(async dir => { const L = await (await fetch(`/content/lessons/${dir}/lesson.json`)).json(); return { dir, title: L.title, level: L.level }; }));
+  const all = idx.courses.flatMap(c => c.lessons.map(dir => ({ dir, course: c.code })));
+  LESSONS = await Promise.all(all.map(async x => { const L = await (await fetch(`/content/lessons/${x.dir}/lesson.json`)).json(); return { ...x, title: L.title, level: L.level }; }));
   return LESSONS;
 }
 V.access = async () => {
@@ -129,7 +130,7 @@ V.access = async () => {
   const tg = (on, attrs) => `<button class="tg ${on ? "on" : ""}" ${attrs} ${admin ? "" : "disabled"} aria-pressed="${on}"></button>`;
   return `<div class="top"><h1>Content & access</h1>${admin ? "" : `<span class="mu">Only an admin can change these.</span>`}</div>
   <div class="two"><div class="card"><h3>📚 Free or Plus — per lesson</h3><p class="mu" style="margin:-4px 0 8px">On = free for everyone. Off = Plus only (the lesson shows a lock and its audio is refused).</p>
-   <div class="list">${ls.map(L => `<div class="r"><span><b>${esc(L.title)}</b> <span class="mu">${esc(L.level)} · ${esc(L.dir)}</span></span>${tg(!A.locked.includes(L.dir), `data-lock="${esc(L.dir)}"`)}</div>`).join("")}</div></div>
+   <div class="list">${ls.map(L => `<div class="r"><span><b>${esc(L.title)}</b> <span class="mu">${esc(L.course.toUpperCase())} · ${esc(L.level)} · ${esc(L.dir)}</span></span>${tg(!A.locked.includes(L.dir), `data-lock="${esc(L.dir)}"`)}</div>`).join("")}</div></div>
    <div class="card"><h3>⚙️ Rules</h3><div class="list">
     <div class="r"><span><b>Full access, free, from Iran</b><br><span class="mu">By connection country (Cloudflare); someone on a VPN counts as their VPN's country.</span></span>${tg(A.iranFree, `data-k="iranFree"`)}</div>
     <div class="r"><span><b>Free trial</b><br><span class="mu">Days before the first payment, once per person.</span></span><input type="number" min="0" max="30" value="${A.trialDays}" id="trialDays" style="width:70px" ${admin ? "" : "disabled"}></div>

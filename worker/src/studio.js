@@ -45,7 +45,7 @@ async function writeDraft(env, slug, draft, sha, message) {
 }
 const summary = (d, sha) => {
   const rows = (d.scenes || []).flatMap(s => s.lines);
-  return { slug: d.slug, title: d.title, type: d.type, level: d.level, status: d.status || "draft", lines: rows.length, ok: rows.filter(r => r.ok).length, sha };
+  return { slug: d.slug, course: d.course || "de", title: d.title, type: d.type, level: d.level, status: d.status || "draft", lines: rows.length, ok: rows.filter(r => r.ok).length, sha };
 };
 
 export async function studioApi(req, env, path, email) {
@@ -64,10 +64,11 @@ export async function studioApi(req, env, path, email) {
   if (req.method === "POST" && path === "/drafts") {
     const b = await req.json();
     if (!SLUG.test(b.slug || "")) throw fail("slug: lowercase letters, digits and -", 400);
+    if (!["de", "nl", "pl"].includes(b.course || "de")) throw fail("course: de, nl or pl", 400);
     if (!["talk", "lesson", "story"].includes(b.type) || !["A1", "A2", "B1", "B2", "C1", "C2"].includes(b.level) || !b.title) throw fail("type, level and title are required", 400);
     const draft = {
-      slug: b.slug, type: b.type, title: String(b.title).slice(0, 80), level: b.level, status: "draft", brief: String(b.brief || "").slice(0, 2000),
-      cast: {}, pause: 0.6, scenePause: 1.4, tr: { fa: { title: "", summary: "" }, ru: { title: "", summary: "" }, uk: { title: "", summary: "" } },
+      slug: b.slug, course: b.course || "de", type: b.type, title: String(b.title).slice(0, 80), level: b.level, status: "draft", brief: String(b.brief || "").slice(0, 2000),
+      cast: {}, pause: 0.6, scenePause: 1.4, tr: { en: { title: "", summary: "" }, fa: { title: "", summary: "" }, ru: { title: "", summary: "" }, uk: { title: "", summary: "" } },
       scenes: [], phrases: []
     };
     const sha = await writeDraft(env, b.slug, draft, null, `studio: new ${b.slug}`);

@@ -2114,3 +2114,18 @@ body.ac-open { overflow: hidden; }
   .wb-langs, .wb-feats { display: none; }
 }
 div.ac-dt { display: flex; flex-direction: column; gap: 10px; }
+
+/* course: German · Dutch · Polish */
+.hh-r { display: flex; align-items: center; gap: 8px; flex: none; }
+.course-pill { padding: 6px 12px; border-radius: 99px; border: 1.5px solid var(--sep); background: var(--tile); color: var(--text); font-weight: 700; font-size: 13.5px; }
+.cr-page { position: fixed; inset: 0; z-index: 310; background: var(--tile); display: grid; place-items: center; padding: 24px; overflow-y: auto; }
+.cr-page[hidden] { display: none; }
+.cr-box { width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 12px; }
+.cr-box h2 { text-align: center; font-size: 22px; margin: 0 0 10px; }
+.cr-it { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 18px; border-radius: 16px; border: 1.5px solid var(--sep); background: var(--tile); color: var(--text); text-align: start; width: 100%; }
+.cr-it b { font-size: 17px; display: block; }
+.cr-it small { color: var(--muted); font-size: 13px; }
+.cr-it.on { border-color: var(--text); box-shadow: 0 0 0 1px var(--text); }
+.cr-it:disabled { opacity: .55; }
+.cr-code { width: 40px; height: 40px; border-radius: 12px; background: var(--tile-2); display: grid; place-items: center; font-weight: 800; font-size: 14px; flex: none; }
+.cr-go { background: var(--text) !important; color: var(--tile) !important; margin-top: 8px; }

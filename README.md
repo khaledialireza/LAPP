@@ -9,25 +9,28 @@
 
 ## محتوا (content/)
 
-هر زبان یک پوشه و هر درس یک پوشه؛ برای درس یا زبان جدید فقط فایل اضافه می‌شود، نه کد.
+سه زبان درس داریم: آلمانی (de)، هلندی (nl)، لهستانی (pl). زبان درسی که درس ندارد در اپ «به‌زودی» نشان داده می‌شود.
+کاربر یک بار زبان درس را انتخاب می‌کند (بعداً از برچسب DE در خانه عوض می‌شود) و پیشرفت هر زبان جداست.
 
 ```
-content/index.json                      زبان‌ها (نام، جهت، locale، کد گفتار) و ترتیب درس‌ها
-content/lang/de/dict.json               دیکشنری آلمانی: نوع کلمه و شکل‌های دیگر
-content/lang/de/verbs.json              صرف فعل‌های بی‌قاعده
-content/lang/de/names.json              اسم‌های خاص
-content/lang/<زبان>/ui.json             متن‌های رابط کاربری (+ "_pos" نوع کلمه)
-content/lang/<زبان>/grammar.json        قالب نکته‌های گرامری
-content/lang/<زبان>/dict.json           معنی کلمه‌ها (فارسی: {"m": معنی, "g": نکته})
-content/lang/<زبان>/names.json          اسم‌ها به این زبان
-content/lessons/<درس>/lesson.json       متن آلمانی، زمان‌بندی، کلمه‌ها، جمله‌های مهم، تمرین گفتار
-content/lessons/<درس>/audio.mp3         فایل صوتی
-content/lessons/<درس>/<زبان>.json       ترجمهٔ درس به یک زبان
+content/index.json                          زبان‌های رابط، و زبان‌های درس (courses) با فهرست درس‌هایشان
+content/lang/<de|nl|pl>/dict.json           دیکشنری زبان درس: نوع کلمه و شکل‌های دیگر
+content/lang/<de|nl|pl>/verbs.json          صرف فعل‌های بی‌قاعده
+content/lang/<de|nl|pl>/names.json          اسم‌های خاص
+content/lang/<رابط>/ui.json                 متن‌های رابط کاربری (+ "_pos" نوع کلمه)
+content/lang/<رابط>/grammar.json            قالب نکته‌های گرامری
+content/lang/<رابط>/dict.<de|nl|pl>.json    معنی کلمه‌های هر زبان درس (فارسی: {"m": معنی, "g": نکته})
+content/lang/<رابط>/names.json              اسم‌ها به این زبان
+content/lessons/<درس>/lesson.json           متن، زمان‌بندی، کلمه‌ها، جمله‌های مهم، تمرین گفتار
+content/lessons/<درس>/audio.mp3             فایل صوتی
+content/lessons/<درس>/<رابط>.json           ترجمهٔ درس به یک زبان رابط
 ```
 
-**زبان جدید (مثلاً هلندی nl):** پوشهٔ `content/lang/nl/` با همان فایل‌ها، فایل `nl.json` در هر درس، و یک خط در `index.json`.
+زبان‌های رابط: en (پیش‌فرض)، fa، ru، uk.
 
-**درس جدید:** پوشهٔ `content/lessons/09-…/` با `lesson.json`، `audio.mp3` و ترجمه‌ها، و نام پوشه در `index.json`.
+**زبان رابط جدید:** پوشهٔ `content/lang/<کد>/` با همان فایل‌ها، فایل `<کد>.json` در هر درس، و یک خط در `languages` در `index.json`.
+
+**درس جدید:** از استودیو (`--course de|nl|pl`)؛ انتشار، پوشه را به فهرست همان زبان در `index.json` اضافه می‌کند.
 
 ## دیکشنری
 
@@ -37,8 +40,8 @@ content/lessons/<درس>/<زبان>.json       ترجمهٔ درس به یک ز�
 بعد از اضافه کردن درس یا کلمهٔ جدید:
 
 ```
-node tools/dict.js check   # تکراری‌ها و مدخل‌های ناقص را پیدا می‌کند
-node tools/dict.js build   # فهرست کلمه‌های هر درس را از روی متن می‌سازد
+node tools/dict.js check de   # تکراری‌ها و مدخل‌های ناقص را پیدا می‌کند
+node tools/dict.js build de   # فهرست کلمه‌های هر درس را از روی متن می‌سازد
 node tools/bump.js        # قبل از هر push: نسخهٔ فایل‌ها را عوض می‌کند تا مرورگر نسخهٔ قدیمی را نشان ندهد
 ```
 
@@ -47,7 +50,7 @@ node tools/bump.js        # قبل از هر push: نسخهٔ فایل‌ها ر
 تولید محتوای خودمان: متن، ترجمه، صدا و انتشار. پوشه با `_` شروع می‌شود، پس GitHub Pages آن را منتشر نمی‌کند.
 
 ```
-python3 _studio/studio.py new im-hotel --type talk --level A1 --title "Im Hotel" --brief "…"
+python3 _studio/studio.py new im-hotel --course de --type talk --level A1 --title "Im Hotel" --brief "…"
 python3 _studio/studio.py prompt im-hotel        # متنی که به هوش مصنوعی (Claude/ChatGPT) می‌دهی
 python3 _studio/studio.py import im-hotel out.json
 python3 _studio/studio.py serve                  # صفحهٔ بازبینی: http://localhost:8787

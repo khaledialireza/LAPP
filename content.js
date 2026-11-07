@@ -1,12 +1,14 @@
-// Loads the course from content/ and then starts the app.
-//   content/index.json                 languages and the order of lessons
-//   content/lang/de/                   German side: dict.json (word type, forms), verbs.json, names.json
-//   content/lang/<code>/               one folder per interface language (see i18n.js)
-//   content/lessons/<folder>/          one folder per lesson or story:
-//       lesson.json   German text, timings, words, phrases, speaking tasks
+// Loads the chosen course from content/ and then starts the app.
+//   content/index.json                 interface languages, and the courses (de, nl, pl) with their lessons
+//   content/lang/<course>/             the learned language: dict.json (word type, forms), verbs.json, names.json
+//   content/lang/<code>/               one folder per interface language (see i18n.js);
+//                                      dict.<course>.json = meanings of that course's words
+//   content/lessons/<folder>/          one folder per lesson or story (folders are unique across courses):
+//       lesson.json   the text, timings, words, phrases, speaking tasks
 //       audio.mp3     the recording
 //       <code>.json   translation into one interface language
-// A new language = a new lang/<code>/ folder + <code>.json in each lesson + one line in index.json.
+// A new interface language = a new lang/<code>/ folder + <code>.json in each lesson + one line in index.json.
+// A course is listed once it has a lesson; each course keeps its own progress (see COURSE.prefix).
 (() => {
   const V = ((document.currentScript || {}).src || "").match(/[?&]v=([^&]+)/)?.[1] || "";
   const get = p => fetch("content/" + p + (V ? "?v=" + V : "")).then(r => r.ok ? r.json() : Promise.reject(new Error(p + " " + r.status)));
@@ -16,9 +18,14 @@
   async function boot() {
     const idx = await get("index.json");
     I18N.init(idx.languages);
+    window.COURSES = idx.courses.map(c => ({ ...c, ready: c.lessons.length > 0 }));
+    let want = null; try { want = JSON.parse(localStorage.getItem("lapp:course")); } catch {}
+    const C = COURSES.find(c => c.code === want && c.ready) || COURSES.find(c => c.ready);
+    // the first course keeps the original "lapp:" keys; the others get their own
+    window.COURSE = { ...C, chosen: !!want, prefix: C.code === COURSES[0].code ? "lapp:" : `lapp:${C.code}:` };
     const [de, verbs, deNames, lessons] = await Promise.all([
-      get("lang/de/dict.json"), get("lang/de/verbs.json"), get("lang/de/names.json"),
-      Promise.all(idx.lessons.map(async dir => ({ dir, ...await get(`lessons/${dir}/lesson.json`) })))]);
+      get(`lang/${C.code}/dict.json`), get(`lang/${C.code}/verbs.json`).catch(() => ({})), get(`lang/${C.code}/names.json`).catch(() => []),
+      Promise.all(C.lessons.map(async dir => ({ dir, ...await get(`lessons/${dir}/lesson.json`) })))]);
     window.VERBS = verbs;
     window.DICT = {};
     for (const [k, v] of Object.entries(de)) DICT[k] = { p: v.p, f: v.f || [], fa: "", g: "" };
@@ -40,7 +47,7 @@
   async function loadLang(l) {
     if (!loaded.has(l)) {
       const [, dict, nm, trs] = await Promise.all([
-        I18N.load(l, get), get(`lang/${l}/dict.json`).catch(() => ({})), get(`lang/${l}/names.json`).catch(() => ({})),
+        I18N.load(l, get), get(`lang/${l}/dict.${COURSE.code}.json`).catch(() => ({})), get(`lang/${l}/names.json`).catch(() => ({})),
         Promise.all(LESSONS.map(L => get(`lessons/${L.dir}/${l}.json`).catch(() => ({}))))]);
       dicts[l] = dict; names[l] = nm;
       LESSONS.forEach((L, i) => { L.tr[l] = trs[i]; });

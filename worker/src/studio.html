@@ -60,9 +60,10 @@ dialog textarea{min-height:90px}.row2{display:grid;grid-template-columns:1fr 1fr
 <div class="toast" id="toast"></div>
 <dialog id="dlg"><form method="dialog" id="newForm">
   <h3>محتوای تازه</h3>
+  <label>زبان درس</label><select name="course"><option value="de">آلمانی · Deutsch</option><option value="nl">هلندی · Nederlands</option><option value="pl">لهستانی · Polski</option></select>
   <div class="row2"><div><label>نوع</label><select name="type"><option value="talk">مکالمه</option><option value="lesson">درس</option><option value="story">داستان</option></select></div>
   <div><label>سطح</label><select name="level"><option>A1</option><option>A2</option><option>B1</option><option>B2</option></select></div></div>
-  <label>عنوان آلمانی</label><input name="title" required placeholder="Am Bahnhof" class="de">
+  <label>عنوان (به زبان درس)</label><input name="title" required placeholder="Am Bahnhof" class="de">
   <label>نام کوتاه (برای پوشه)</label><input name="slug" required pattern="[a-z0-9][a-z0-9\-]{1,40}" placeholder="am-bahnhof" class="de">
   <label>موضوع و خواسته‌ها</label><textarea name="brief" placeholder="بلیت خریدن، سکوی قطار، تأخیر… واژه‌ها و گرامری که باید داشته باشد"></textarea>
   <div class="acts"><button class="b" value="cancel" formnovalidate>انصراف</button><button class="b pr" value="ok">ساختن</button></div>
@@ -86,7 +87,7 @@ function toast(t) { const e = $("#toast"); e.textContent = t; e.classList.add("o
 async function list() {
   const ds = await call("/drafts").catch(e => (toast(e.message), []));
   $("#list").innerHTML = ds.map(d => `<div class="dr ${D && D.slug === d.slug ? "on" : ""}" data-s="${d.slug}"><b class="de">${esc(d.title)}</b>
-    <small>${TYPE[d.type] || d.type} · ${d.level} · ${d.ok}/${d.lines}</small><span class="st ${d.status}">${STATUS[d.status] || d.status}</span>
+    <small>${(d.course || "de").toUpperCase()} · ${TYPE[d.type] || d.type} · ${d.level} · ${d.ok}/${d.lines}</small><span class="st ${d.status}">${STATUS[d.status] || d.status}</span>
     <div class="bar"><i style="width:${d.lines ? d.ok / d.lines * 100 : 0}%"></i></div></div>`).join("") || `<p class="brief">هنوز پیش‌نویسی نیست.</p>`;
 }
 async function runs() {
@@ -112,12 +113,12 @@ function render() {
   const rows = D.scenes.flatMap(s => s.lines), done = rows.filter(r => r.ok).length;
   let n = 0;
   $("#main").innerHTML = `<div class="top"><h1 class="de">${esc(D.title)}</h1>
-      ${["fa", "ru", "uk"].map(l => `<span class="chip ${l === lang ? "on" : ""}" data-l="${l}">${l.toUpperCase()}</span>`).join("")}
+      ${["en", "fa", "ru", "uk"].map(l => `<span class="chip ${l === lang ? "on" : ""}" data-l="${l}">${l.toUpperCase()}</span>`).join("")}
       <button class="b" data-run="write">✦ نوشتن با هوش مصنوعی</button>
       <button class="b" data-run="voice" ${rows.length ? "" : "disabled"}>🎙 ساخت صدا</button>
       <button class="b pr" data-run="publish" ${rows.length && done === rows.length && audioFor ? "" : "disabled"} title="وقتی همهٔ خط‌ها تأیید شده و صدا ساخته شده">🚀 انتشار</button></div>
     <p class="brief">${esc(D.brief || "")}</p>
-    <div class="meta"><span>${TYPE[D.type]} · ${D.level}</span><span>${done} / ${rows.length} تأیید</span>
+    <div class="meta"><span>${(D.course || "de").toUpperCase()} · ${TYPE[D.type]} · ${D.level}</span><span>${done} / ${rows.length} تأیید</span>
       ${who.map(w => `<span><b class="de" style="color:${col(w)}">${esc(w)}</b> · <span class="de">${esc(D.cast[w].voice)}</span></span>`).join("")}
       ${rows.length ? `<button class="chip" data-all>✓ تأیید همه</button>` : ""}</div>
     ${rows.length ? "" : `<div class="empty"><b>هنوز متنی نیست</b>«✦ نوشتن با هوش مصنوعی» را بزن؛ چند دقیقه بعد متن و ترجمه‌ها این‌جا هستند.</div>`}

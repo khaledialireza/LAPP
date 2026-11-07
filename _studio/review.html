@@ -45,7 +45,7 @@ async function open(slug) { D = await (await fetch("/api/draft/" + slug)).json()
 function render() {
   const who = Object.keys(D.cast), col = w => COL[who.indexOf(w) % COL.length];
   let n = 0;
-  $("#main").innerHTML = `<div class="top"><h1 class="de">${esc(D.title)}</h1>${["fa", "ru", "uk"].map(l => `<span class="chip ${l === lang ? "on" : ""}" data-l="${l}">${l.toUpperCase()}</span>`).join("")}
+  $("#main").innerHTML = `<div class="top"><h1 class="de">${esc(D.title)}</h1>${["en", "fa", "ru", "uk"].map(l => `<span class="chip ${l === lang ? "on" : ""}" data-l="${l}">${l.toUpperCase()}</span>`).join("")}
     <button class="b" data-do="check">بررسی</button><button class="b" data-do="voice">🎙 ساخت صدا</button><button class="b pr" data-do="publish">🚀 انتشار</button></div>
     <div class="cast">${who.map(w => `<span><b class="de" style="color:${col(w)}">${esc(w)}</b> · <span class="de">${esc(D.cast[w].voice)}</span> · ${D.cast[w].speed ?? 0.95}×</span>`).join("")}</div>
     ${D.scenes.map((sc, si) => `<div class="sc"><span class="de">${esc(sc.title.de)}</span> · <span>${esc(sc.title[lang] || "")}</span></div>` + sc.lines.map((ln, li) => `

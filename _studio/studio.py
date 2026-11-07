@@ -21,7 +21,11 @@ Voices: "piper:<name>" runs offline (downloaded once into _studio/.voices);
 "azure:<voice>" uses Azure Speech when AZURE_SPEECH_KEY and AZURE_SPEECH_REGION
 are set.
 
-    python3 _studio/studio.py new im-hotel --type talk --level A1 --title "Im Hotel"
+    python3 _studio/studio.py new im-hotel --course de --type talk --level A1 --title "Im Hotel"
+
+Courses: de (German), nl (Dutch), pl (Polish). In a draft, the field "de" of a line,
+title or phrase holds the text in the course's language (the name stayed from the
+first course); fa, ru, uk and en are the translations.
 """
 import argparse, glob, hashlib, json, os, re, shutil, subprocess, sys, tarfile, urllib.request, wave
 from pathlib import Path
@@ -32,13 +36,19 @@ DRAFTS = STUDIO / "drafts"
 VOICES = STUDIO / ".voices"
 CACHE = STUDIO / ".cache"
 CONTENT = ROOT / "content"
-LANGS = ["fa", "ru", "uk"]
+LANGS = ["en", "fa", "ru", "uk"]
+# the languages we teach: name for the writer, Piper locale, voices ranked best first
+COURSES = {
+    "de": {"name": "German", "male": ["piper:thorsten-medium", "piper:karlsson-low"], "female": ["piper:eva_k-x_low", "piper:kerstin-low"]},
+    "nl": {"name": "Dutch", "male": ["piper:nl_NL-ronnie-medium", "piper:nl_NL-pim-medium"], "female": ["piper:nl_BE-nathalie-medium"]},
+    "pl": {"name": "Polish", "male": ["piper:pl_PL-darkman-medium"], "female": ["piper:pl_PL-gosia-medium"]},
+}
 RATE = 24000
 # longest sentence we accept per level (words); longer lines are flagged by check
 MAX_WORDS = {"A1": 10, "A2": 14, "B1": 20, "B2": 26, "C1": 32, "C2": 40}
-PIPER_URL = "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/vits-piper-de_DE-{}.tar.bz2"
-# ranked by how well Whisper understands them back (thorsten, eva_k ≈ 95%, karlsson 88%, kerstin 81%)
-DEFAULT_CAST = ["piper:thorsten-medium", "piper:eva_k-x_low", "piper:karlsson-low", "piper:kerstin-low"]
+PIPER_URL = "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/vits-piper-{}.tar.bz2"
+# German voices are ranked by how well Whisper understands them back (thorsten, eva_k ≈ 95%, karlsson 88%, kerstin 81%)
+course = lambda d: d.get("course", "de")
 
 
 SLUG = re.compile(r"^[a-z0-9][a-z0-9-]{1,40}$")
@@ -67,7 +77,7 @@ def cmd_new(a):
     if not SLUG.match(a.slug): sys.exit("slug: lowercase letters, digits and -")
     if (DRAFTS / a.slug / "draft.json").exists(): sys.exit("draft exists")
     save(a.slug, {
-        "slug": a.slug, "type": a.type, "title": a.title, "level": a.level, "status": "draft",
+        "slug": a.slug, "course": a.course, "type": a.type, "title": a.title, "level": a.level, "status": "draft",
         "brief": a.brief or "", "cast": {}, "pause": 0.6, "scenePause": 1.4,
         "tr": {l: {"title": "", "summary": ""} for l in LANGS},
         "scenes": [], "phrases": []})
@@ -75,25 +85,27 @@ def cmd_new(a):
 
 
 SCHEMA = """{
-  "title": "German title",
-  "tr": { "fa": {"title": "", "summary": ""}, "ru": {…}, "uk": {…} },
+  "title": "title in the course language",
+  "tr": { "en": {"title": "", "summary": ""}, "fa": {…}, "ru": {…}, "uk": {…} },
   "cast": { "<Speaker>": "male" | "female" },
   "scenes": [
-    { "title": {"de": "", "fa": "", "ru": "", "uk": ""},
-      "lines": [ {"who": "<Speaker>", "de": "", "fa": "", "ru": "", "uk": ""} ] }
+    { "title": {"de": "", "en": "", "fa": "", "ru": "", "uk": ""},
+      "lines": [ {"who": "<Speaker>", "de": "", "en": "", "fa": "", "ru": "", "uk": ""} ] }
   ],
-  "phrases": [ {"de": "", "fa": "", "ru": "", "uk": ""} ]
-}"""
+  "phrases": [ {"de": "", "en": "", "fa": "", "ru": "", "uk": ""} ]
+}
+("de" always holds the text in the course language, even for Dutch or Polish.)"""
 
 
 def prompt_text(d):
     kind = {"talk": "a short everyday conversation", "lesson": "a lesson dialogue", "story": "a story told by a narrator with some dialogue"}[d["type"]]
-    return f"""Write {kind} in German for learners at level {d['level']}. It must be completely original — do not copy any existing text.
+    lang = COURSES[course(d)]["name"]
+    return f"""Write {kind} in {lang} for learners at level {d['level']}. It must be completely original — do not copy any existing text.
 Topic / brief: {d.get('brief') or d['title']}
 Rules:
-- natural spoken German, one sentence per line, at most {MAX_WORDS[d['level']]} words per line
+- natural spoken {lang}, one sentence per line, at most {MAX_WORDS[d['level']]} words per line
 - 2–4 scenes, 8–14 lines each; speakers keep one consistent name
-- translate every line naturally (not word for word) into Persian (fa), Russian (ru) and Ukrainian (uk)
+- translate every line naturally (not word for word) into English (en), Persian (fa), Russian (ru) and Ukrainian (uk)
 - 6–10 key phrases a learner should keep
 Answer with JSON only, in exactly this shape:
 {SCHEMA}"""
@@ -107,8 +119,7 @@ def merge(d, src):
     """take a written script (the JSON shape in SCHEMA) into the draft and give every new speaker a voice"""
     for k in ("title", "tr", "scenes", "phrases"):
         if k in src: d[k] = src[k]
-    male = [v for v in DEFAULT_CAST if "thorsten" in v or "karlsson" in v]
-    female = [v for v in DEFAULT_CAST if "eva_k" in v or "kerstin" in v]
+    male, female = COURSES[course(d)]["male"], COURSES[course(d)]["female"]
     for who, g in src.get("cast", {}).items():
         if who not in d["cast"]:
             pool = female if str(g).startswith("f") else male
@@ -148,18 +159,18 @@ def cmd_write(a):
 
 
 # ---------------------------------------------------------------- check
-def dict_forms():
-    de = json.loads((CONTENT / "lang/de/dict.json").read_text("utf-8"))
+def dict_forms(c="de"):
+    de = json.loads((CONTENT / f"lang/{c}/dict.json").read_text("utf-8"))
     forms = set()
     for k, v in de.items():
         b = k.split("_")[0]; forms |= {b, b.lower()}
         for f in v.get("f", []): forms |= {f, f.lower()}
-    names = set(json.loads((CONTENT / "lang/de/names.json").read_text("utf-8")))
+    names = set(json.loads((CONTENT / f"lang/{c}/names.json").read_text("utf-8")))
     return forms, names
 
 
 def cmd_check(a):
-    d = load(a.slug); forms, names = dict_forms(); problems, unknown = [], {}
+    d = load(a.slug); forms, names = dict_forms(course(d)); problems, unknown = [], {}
     if not d["scenes"]: problems.append("no scenes yet")
     for l in LANGS:
         if not d["tr"].get(l, {}).get("title"): problems.append(f"title missing in {l}")
@@ -168,7 +179,7 @@ def cmd_check(a):
         if ln.get("who") and ln["who"] not in d["cast"]: problems.append(f"{at}: speaker {ln['who']} has no voice")
         for l in LANGS:
             if not ln.get(l): problems.append(f"{at}: no {l}")
-        words = re.findall(r"[A-Za-zÄÖÜäöüß]+", ln["de"])
+        words = re.findall(r"[^\W\d_]+", ln["de"])
         if len(words) > MAX_WORDS[d["level"]]: problems.append(f"{at}: {len(words)} words (> {MAX_WORDS[d['level']]} for {d['level']})")
         for w in words:
             if w in names or w in forms or w.lower() in forms: continue
@@ -187,11 +198,13 @@ def cmd_check(a):
 
 # ---------------------------------------------------------------- voices
 def piper(name):
-    d = VOICES / f"vits-piper-de_DE-{name}"
+    # "thorsten-medium" (German, the first voices) or "<locale>-<name>", e.g. "nl_NL-ronnie-medium"
+    full = name if re.match(r"^[a-z]{2}_[A-Z]{2}-", name) else f"de_DE-{name}"
+    d = VOICES / f"vits-piper-{full}"
     if not d.exists():
         VOICES.mkdir(parents=True, exist_ok=True)
-        tmp = VOICES / f"{name}.tar.bz2"
-        print("downloading voice", name); urllib.request.urlretrieve(PIPER_URL.format(name), tmp)
+        tmp = VOICES / f"{full}.tar.bz2"
+        print("downloading voice", full); urllib.request.urlretrieve(PIPER_URL.format(full), tmp)
         with tarfile.open(tmp) as t: t.extractall(VOICES)
         tmp.unlink()
     import sherpa_onnx
@@ -321,8 +334,10 @@ def cmd_publish(a):
     waiting = sum(1 for *_, ln in lines_of(d) if not ln.get("ok"))
     if waiting and not a.force: sys.exit(f"{waiting} lines are not approved yet (review them, or --force)")
     idx = json.loads((CONTENT / "index.json").read_text("utf-8"))
-    ids = [json.loads((CONTENT / "lessons" / x / "lesson.json").read_text("utf-8"))["id"] for x in idx["lessons"]]
-    existing = next((x for x in idx["lessons"] if x.split("-", 1)[1] == a.slug), None)
+    every = [x for c in idx["courses"] for x in c["lessons"]]          # ids stay unique across courses
+    mine = next(c for c in idx["courses"] if c["code"] == course(d))["lessons"]
+    ids = [json.loads((CONTENT / "lessons" / x / "lesson.json").read_text("utf-8"))["id"] for x in every] or [0]
+    existing = next((x for x in mine if x.split("-", 1)[1] == a.slug), None)
     if existing: lid = json.loads((CONTENT / "lessons" / existing / "lesson.json").read_text("utf-8"))["id"]; folder = existing
     else: lid = max(ids) + 1; folder = f"{lid:02d}-{a.slug}"
     out = CONTENT / "lessons" / folder; out.mkdir(parents=True, exist_ok=True)
@@ -330,7 +345,7 @@ def cmd_publish(a):
     starts, n = [], 0
     for sc in d["scenes"]: starts.append(n); n += len(sc["lines"])
     lesson = {
-        "id": lid, "type": d["type"], "title": d["title"], "level": d["level"], "audio": "audio.mp3",
+        "id": lid, "course": course(d), "type": d["type"], "title": d["title"], "level": d["level"], "audio": "audio.mp3",
         "made": "studio",
         "phrases": [p["de"] for p in d.get("phrases", [])],
         "transcript": [f"**{ln['who']}:** {ln['de']}" if ln.get("who") else ln["de"] for ln in rows],
@@ -346,12 +361,13 @@ def cmd_publish(a):
             "phrases": [p.get(l, "") for p in d.get("phrases", [])], "phraseNotes": ["" for _ in d.get("phrases", [])],
             "lines": [ln[l] for ln in rows], "scenes": [sc["title"][l] for sc in d["scenes"]],
             "topics": [], "cues": [], "focus": []}) + "\n", "utf-8")
-    if folder not in idx["lessons"]:
-        idx["lessons"].append(folder)
+    if folder not in mine:
+        # the course's line in index.json gets the folder at the end of its "lessons" list
         txt = (CONTENT / "index.json").read_text("utf-8")
-        txt = re.sub(r'("lessons": \[[^\]]*?)(\s*\])', lambda m: m.group(1) + f', "{folder}"' + m.group(2), txt, flags=re.S)
+        line = re.compile(r'(\{"code":"%s".*?"lessons": \[)([^\]]*)(\])' % course(d))
+        txt = line.sub(lambda m: m.group(1) + (m.group(2) + ", " if m.group(2).strip() else "") + f'"{folder}"' + m.group(3), txt, count=1)
         json.loads(txt); (CONTENT / "index.json").write_text(txt, "utf-8")
-    subprocess.run(["node", str(ROOT / "tools/dict.js"), "build"], check=True, stdout=subprocess.DEVNULL)
+    subprocess.run(["node", str(ROOT / "tools/dict.js"), "build", course(d)], check=True, stdout=subprocess.DEVNULL)
     d["status"] = "published"; d["published"] = folder; save(a.slug, d)
     print(f"✓ content/lessons/{folder}/ (id {lid})")
 
@@ -406,7 +422,8 @@ def cmd_serve(a):
 
 def main():
     ap = argparse.ArgumentParser(description="LAPP Studio"); sub = ap.add_subparsers(dest="cmd", required=True)
-    p = sub.add_parser("new"); p.add_argument("slug"); p.add_argument("--type", choices=["talk", "lesson", "story"], default="talk")
+    p = sub.add_parser("new"); p.add_argument("slug"); p.add_argument("--course", choices=list(COURSES), default="de")
+    p.add_argument("--type", choices=["talk", "lesson", "story"], default="talk")
     p.add_argument("--level", default="A1", choices=list(MAX_WORDS)); p.add_argument("--title", required=True); p.add_argument("--brief")
     sub.add_parser("prompt").add_argument("slug")
     p = sub.add_parser("import"); p.add_argument("slug"); p.add_argument("file")
