@@ -1,1 +1,185 @@
-<!doctype html><title>Admin</title>
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LAPP Admin</title>
+<meta name="robots" content="noindex">
+<style>
+:root{--bg:#F2F2F7;--tile:#fff;--text:#111;--mu:rgba(60,60,67,.6);--sep:rgba(60,60,67,.14);--ac:#FF2D55;--ac2:#5856D6;--ok:#34C759;--bad:#FF3B30;--g:linear-gradient(135deg,#FF2D55,#5856D6);--side:#0F0F16}
+@media (prefers-color-scheme:dark){:root{--bg:#000;--tile:#1C1C1E;--text:#fff;--mu:rgba(235,235,245,.6);--sep:rgba(84,84,88,.6)}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+button,input,select{font:inherit;color:inherit}button{cursor:pointer;border:0;background:none}
+.app{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+.sbar{background:var(--side);color:#eee;padding:16px 12px;display:flex;flex-direction:column;gap:4px;position:sticky;top:0;height:100vh}
+.lg{display:flex;gap:9px;align-items:center;font-weight:800;margin:0 0 14px 4px}.lg i{width:32px;height:32px;border-radius:10px;background:var(--g);display:grid;place-items:center;font-style:normal;font-weight:800}
+.sbar a{padding:9px 11px;border-radius:10px;color:#bbb;text-decoration:none;display:flex;gap:9px;font-size:13.5px}.sbar a.on,.sbar a:hover{background:#1f1f2e;color:#fff}
+.sp{flex:1}.me{font-size:12px;color:#888;border-top:1px solid #222;padding:10px 4px 0;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.main{padding:22px 26px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.top h1{font-size:22px;font-weight:800;margin:0 auto 0 0}
+.kp{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}.kp div{background:var(--tile);border-radius:14px;padding:13px}.kp b{font-size:24px;font-weight:800;display:block}.kp span{font-size:12px;color:var(--mu)}
+.card{background:var(--tile);border-radius:14px;padding:14px}.card h3{margin:0 0 10px;font-size:14px}
+.two{display:grid;grid-template-columns:1.4fr 1fr;gap:14px}
+table{width:100%;border-collapse:collapse;font-size:13px}th{text-align:left;color:var(--mu);font-weight:600;font-size:12px;padding:9px 12px;border-bottom:1px solid var(--sep)}td{padding:9px 12px;border-bottom:1px solid var(--sep);vertical-align:middle}tr:last-child td{border:0}
+.tbl{background:var(--tile);border-radius:14px;overflow:auto}tr.sel td{background:rgba(88,86,214,.08)}tbody tr[data-u]{cursor:pointer}
+.chip{padding:5px 11px;border-radius:99px;background:var(--tile);border:1px solid var(--sep);font-size:12.5px}.chip.on{background:var(--text);color:var(--bg);border-color:var(--text)}
+.search{background:var(--tile);border:1px solid var(--sep);border-radius:10px;padding:8px 12px;width:260px}
+.role{font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:7px}.r-admin{background:#111;color:#fff}.r-manager{background:#EDE9FE;color:#6D28D9}.r-designer{background:#E0F2FE;color:#0369A1}.r-user{background:rgba(120,120,128,.14);color:var(--mu)}
+.badge{display:inline-block;font-size:11px;font-weight:800;padding:2px 9px;border-radius:99px}.free{background:rgba(120,120,128,.14);color:var(--mu)}.plus{background:var(--g);color:#fff}.ir{background:#E6F8EC;color:#1E8E3E}.trial{background:#FFF4E5;color:#B45309}.off{background:#FDE8E8;color:#B91C1C}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{padding:8px 13px;border-radius:10px;background:var(--g);color:#fff;font-weight:700;text-decoration:none}.btn.w{background:var(--tile);color:var(--text);border:1px solid var(--sep)}.btn.d{background:none;border:1px solid var(--bad);color:var(--bad)}
+.mu{color:var(--mu)}.list .r{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--sep)}.list .r:last-child{border:0}
+.tg{position:relative;width:42px;height:24px;border-radius:99px;background:#ccc;flex:none;transition:.2s}.tg::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s}.tg.on{background:var(--ok)}.tg.on::after{left:21px}.tg:disabled{opacity:.5;cursor:default}
+.bars{display:flex;align-items:flex-end;gap:3px;height:90px}.bars i{flex:1;background:var(--ac2);border-radius:3px 3px 0 0;min-height:2px;opacity:.85}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:10px 16px;border-radius:12px;font-weight:600;opacity:0;transition:.25s;pointer-events:none}.toast.on{opacity:1}
+.empty{padding:26px;text-align:center;color:var(--mu)}
+select,input[type=number]{padding:6px 8px;border-radius:8px;border:1px solid var(--sep);background:var(--bg)}
+@media (max-width:860px){.app{grid-template-columns:1fr}.sbar{position:static;height:auto;flex-direction:row;flex-wrap:wrap}.sp{display:none}.me{border:0;padding:0}.two{grid-template-columns:1fr}.search{width:100%}.main{padding:16px}}
+</style></head><body>
+<div class="app">
+ <nav class="sbar"><div class="lg"><i>L</i>LAPP Admin</div>
+  <a href="#dash" data-v="dash">📊 Dashboard</a><a href="#users" data-v="users">👥 Users</a><a href="#customers" data-v="customers">💳 Customers</a><a href="#access" data-v="access">📚 Content & access</a>
+  <a href="/studio">🎬 Studio</a><a href="/">← Back to the app</a>
+  <div class="sp"></div><div class="me" id="me"></div></nav>
+ <main class="main" id="view"></main>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+const flag = c => c && /^[A-Z]{2}$/.test(c) ? String.fromCodePoint(...[...c].map(x => 127397 + x.charCodeAt(0))) + " " + c : "—";
+const day = ms => ms ? new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "—";
+const ago = ms => { if (!ms) return "—"; const m = (Date.now() - ms) / 60000; return m < 60 ? Math.max(1, Math.round(m)) + " min ago" : m < 1440 ? Math.round(m / 60) + " h ago" : m < 2880 ? "yesterday" : Math.round(m / 1440) + " days ago"; };
+const ROLE = { user: "Learner", designer: "Designer", manager: "Manager", admin: "Admin" };
+let ME = null, toastT;
+function toast(t) { const e = $("#toast"); e.textContent = t; e.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(() => e.classList.remove("on"), 2600); }
+async function api(method, path, body) {
+  const r = await fetch("/api" + path, { method, credentials: "same-origin", headers: { ...(body ? { "Content-Type": "application/json" } : {}), ...(method !== "GET" ? { "X-LAPP": "1" } : {}) }, body: body ? JSON.stringify(body) : undefined });
+  const j = await r.json().catch(() => ({}));
+  if (r.status === 401) { location.href = "/?login=1&next=/admin"; throw new Error("signed out"); }
+  if (!r.ok) throw new Error(j.error || r.statusText);
+  return j;
+}
+const planBadge = u => u.sub_status === "active" ? `<span class="badge plus">Plus · ${u.sub_interval === "year" ? "yearly" : "monthly"}</span>`
+  : u.sub_status === "trialing" ? `<span class="badge trial">Trial</span>`
+  : u.plus_until > Date.now() ? `<span class="badge plus">Plus (gift)</span>`
+  : u.role !== "user" ? "—" : u.country === "IR" ? `<span class="badge ir">Iran · free</span>` : `<span class="badge free">Free</span>`;
+
+/* ---------- views ---------- */
+const V = {};
+V.dash = async () => {
+  const s = await api("GET", "/admin/stats");
+  const max = Math.max(1, ...s.days.map(d => d.n));
+  const byDay = new Map(s.days.map(d => [d.d, d.n])), today = Math.floor(Date.now() / 864e5);
+  const bars = Array.from({ length: 30 }, (_, i) => byDay.get(today - 29 + i) || 0);
+  return `<div class="top"><h1>Dashboard</h1></div>
+  <div class="kp"><div><b>${s.users}</b><span>Users · ${s.verified} verified</span></div><div><b>${s.activeWeek}</b><span>Active this week</span></div><div><b>${s.newWeek}</b><span>New this week</span></div>
+   <div><b>${s.plus}</b><span>Plus subscribers</span></div><div><b>${s.trial}</b><span>In trial</span></div><div><b>${s.grants}</b><span>Plus gifts</span></div><div><b>${s.staff}</b><span>Team</span></div></div>
+  <div class="two"><div class="card"><h3>Sign-ups · last 30 days</h3><div class="bars">${bars.map(n => `<i style="height:${n / max * 100}%" title="${n}"></i>`).join("")}</div></div>
+   <div class="card"><h3>Countries</h3><div class="list">${s.countries.map(c => `<div class="r"><span>${flag(c.country)}</span><b>${c.n}</b></div>`).join("") || `<div class="empty">No users yet</div>`}</div></div></div>
+  <div class="card"><h3>Newest users</h3><div class="list">${s.recent.map(u => `<div class="r"><span><b>@${esc(u.username)}</b> <span class="mu">${esc(u.email)}</span></span><span class="mu">${flag(u.country)} · ${ago(u.created_at)}</span></div>`).join("") || `<div class="empty">No users yet</div>`}</div></div>`;
+};
+
+let U = { q: "", filter: "all", page: 0, sel: null, rows: [] };
+V.users = async () => {
+  const r = await api("GET", `/admin/users?q=${encodeURIComponent(U.q)}&filter=${U.filter}&page=${U.page}`);
+  U.rows = r.users;
+  const F = [["all", "All"], ["free", "Free"], ["plus", "Plus"], ["iran", "Iran"], ["staff", "Team"], ["unverified", "Unverified"], ["disabled", "Disabled"]];
+  const sel = U.rows.find(u => u.id === U.sel);
+  return `<div class="top"><h1>Users</h1><input class="search" id="q" placeholder="🔍 Search name, e-mail, username…" value="${esc(U.q)}">${F.map(([k, l]) => `<button class="chip ${U.filter === k ? "on" : ""}" data-f="${k}">${l}</button>`).join("")}</div>
+  <div class="tbl"><table><thead><tr><th>User</th><th>E-mail</th><th>Role</th><th>Plan</th><th>Country</th><th>Last seen</th><th>Joined</th></tr></thead><tbody>
+  ${U.rows.map(u => `<tr data-u="${u.id}" class="${u.id === U.sel ? "sel" : ""}"><td><b>@${esc(u.username)}</b>${u.name ? ` <span class="mu">${esc(u.name)}</span>` : ""}</td><td>${esc(u.email)} ${u.verified ? "" : `<span class="badge trial">unverified</span>`}</td>
+   <td><span class="role r-${u.role}">${ROLE[u.role]}</span>${u.disabled ? ` <span class="badge off">disabled</span>` : ""}</td><td>${planBadge(u)}</td><td>${flag(u.country)}</td><td>${ago(u.last_seen)}</td><td>${day(u.created_at)}</td></tr>`).join("") || `<tr><td colspan="7" class="empty">Nobody here</td></tr>`}
+  </tbody></table></div>
+  <div class="row">${U.page ? `<button class="btn w" data-pg="-1">‹ Newer</button>` : ""}${r.more ? `<button class="btn w" data-pg="1">Older ›</button>` : ""}</div>
+  ${sel ? userCard(sel) : `<p class="mu">Click a user to manage them.</p>`}`;
+};
+function userCard(u) {
+  const admin = ME.role === "admin", canTouch = admin || u.role === "user", self = u.id === ME.id, gift = u.plus_until > Date.now();
+  return `<div class="card"><h3>👤 @${esc(u.username)} <span class="mu" style="font-weight:400">· ${esc(u.email)} · joined ${day(u.created_at)}${gift ? " · Plus gift until " + day(u.plus_until) : ""}</span></h3>
+  <div class="row">
+   ${admin && !self ? `<label class="row">Role <select id="role">${Object.entries(ROLE).map(([k, l]) => `<option value="${k}" ${u.role === k ? "selected" : ""}>${l}</option>`).join("")}</select></label>` : ""}
+   ${canTouch ? `<button class="btn w" data-act="gift">🎁 ${gift ? "Change Plus gift" : "Give Plus"}</button>
+   ${gift ? `<button class="btn w" data-act="ungift">Remove gift</button>` : ""}
+   ${u.verified ? "" : `<button class="btn w" data-act="verify">✓ Mark e-mail verified</button>`}
+   <button class="btn w" data-act="reset">📧 Send password-reset link</button>
+   ${self ? "" : `<button class="btn ${u.disabled ? "w" : "d"}" data-act="disable">${u.disabled ? "Enable account" : "Disable account"}</button>`}` : `<span class="mu">Only an admin can change team accounts.</span>`}
+  </div></div>`;
+}
+
+V.customers = async () => {
+  const r = await api("GET", "/admin/customers");
+  const st = s => ({ active: "plus", trialing: "trial", past_due: "off", canceled: "free", unpaid: "off" })[s] || "free";
+  return `<div class="top"><h1>Customers</h1>${r.stripe ? `<a class="btn w" href="https://dashboard.stripe.com/" target="_blank" rel="noopener">Open Stripe ↗</a>` : `<span class="badge trial">Stripe is not connected yet</span>`}</div>
+  <div class="tbl"><table><thead><tr><th>User</th><th>Status</th><th>Plan</th><th>Renews / ends</th><th>Country</th><th>Updated</th></tr></thead><tbody>
+  ${r.subscriptions.map(s => `<tr><td><b>@${esc(s.username)}</b> <span class="mu">${esc(s.email)}</span></td><td><span class="badge ${st(s.status)}">${esc(s.status)}</span></td><td>${s.interval === "year" ? "Yearly" : s.interval === "month" ? "Monthly" : "—"}</td>
+   <td>${day(s.period_end)}${s.cancel_at_end ? ` <span class="badge off">cancels</span>` : ""}</td><td>${flag(s.country)}</td><td>${ago(s.updated_at)}</td></tr>`).join("") || `<tr><td colspan="6" class="empty">No subscriptions yet</td></tr>`}
+  </tbody></table></div>
+  <div class="card"><h3>🎁 Plus gifts</h3><div class="list">${r.grants.map(g => `<div class="r"><span><b>@${esc(g.username)}</b> <span class="mu">${esc(g.email)}</span></span><span class="mu">until ${day(g.plus_until)}</span></div>`).join("") || `<div class="empty">None</div>`}</div></div>`;
+};
+
+let LESSONS = null, A = null;
+async function lessons() {
+  if (LESSONS) return LESSONS;
+  const idx = await (await fetch("/content/index.json")).json();
+  LESSONS = await Promise.all(idx.lessons.map(async dir => { const L = await (await fetch(`/content/lessons/${dir}/lesson.json`)).json(); return { dir, title: L.title, level: L.level }; }));
+  return LESSONS;
+}
+V.access = async () => {
+  const [{ access }, ls] = await Promise.all([api("GET", "/admin/settings"), lessons()]);
+  A = access;
+  const admin = ME.role === "admin";
+  const tg = (on, attrs) => `<button class="tg ${on ? "on" : ""}" ${attrs} ${admin ? "" : "disabled"} aria-pressed="${on}"></button>`;
+  return `<div class="top"><h1>Content & access</h1>${admin ? "" : `<span class="mu">Only an admin can change these.</span>`}</div>
+  <div class="two"><div class="card"><h3>📚 Free or Plus — per lesson</h3><p class="mu" style="margin:-4px 0 8px">On = free for everyone. Off = Plus only (the lesson shows a lock and its audio is refused).</p>
+   <div class="list">${ls.map(L => `<div class="r"><span><b>${esc(L.title)}</b> <span class="mu">${esc(L.level)} · ${esc(L.dir)}</span></span>${tg(!A.locked.includes(L.dir), `data-lock="${esc(L.dir)}"`)}</div>`).join("")}</div></div>
+   <div class="card"><h3>⚙️ Rules</h3><div class="list">
+    <div class="r"><span><b>Full access, free, from Iran</b><br><span class="mu">By connection country (Cloudflare); someone on a VPN counts as their VPN's country.</span></span>${tg(A.iranFree, `data-k="iranFree"`)}</div>
+    <div class="r"><span><b>Free trial</b><br><span class="mu">Days before the first payment, once per person.</span></span><input type="number" min="0" max="30" value="${A.trialDays}" id="trialDays" style="width:70px" ${admin ? "" : "disabled"}></div>
+   </div></div></div>`;
+};
+
+/* ---------- router & events ---------- */
+async function show() {
+  const v = location.hash.slice(1) || "dash";
+  document.querySelectorAll(".sbar a[data-v]").forEach(a => a.classList.toggle("on", a.dataset.v === v));
+  try { $("#view").innerHTML = await (V[v] || V.dash)(); } catch (e) { $("#view").innerHTML = `<div class="card">⚠️ ${esc(e.message)}</div>`; }
+}
+addEventListener("hashchange", show);
+let qT;
+document.addEventListener("input", e => {
+  if (e.target.id !== "q") return;
+  clearTimeout(qT);
+  qT = setTimeout(async () => { U.q = e.target.value; U.page = 0; await show(); const q = $("#q"); q.focus(); q.setSelectionRange(q.value.length, q.value.length); }, 300);
+});
+async function saveAccess(patch) {
+  try { const r = await api("PUT", "/admin/settings", { access: { ...A, ...patch } }); A = r.access; toast("Saved"); show(); } catch (x) { toast(x.message); }
+}
+document.addEventListener("change", async e => {
+  if (e.target.id === "role") { try { await api("PATCH", `/admin/users/${U.sel}`, { role: e.target.value }); toast("Role saved"); show(); } catch (x) { toast(x.message); } }
+  if (e.target.id === "trialDays") saveAccess({ trialDays: Number(e.target.value) });
+});
+document.addEventListener("click", async e => {
+  const f = e.target.closest("[data-f]"); if (f) { U.filter = f.dataset.f; U.page = 0; U.sel = null; return show(); }
+  const pg = e.target.closest("[data-pg]"); if (pg) { U.page += Number(pg.dataset.pg); return show(); }
+  const tr = e.target.closest("tr[data-u]"); if (tr) { U.sel = Number(tr.dataset.u); return show(); }
+  const lk = e.target.closest("[data-lock]"); if (lk && !lk.disabled) { const d = lk.dataset.lock; return saveAccess({ locked: A.locked.includes(d) ? A.locked.filter(x => x !== d) : [...A.locked, d] }); }
+  const k = e.target.closest(".tg[data-k]"); if (k && !k.disabled) return saveAccess({ [k.dataset.k]: !A[k.dataset.k] });
+  const a = e.target.closest("[data-act]"); if (!a) return;
+  const u = U.rows.find(x => x.id === U.sel); if (!u) return;
+  try {
+    if (a.dataset.act === "gift") { const d = prompt("Plus for how many days?", "30"); if (!d) return; await api("PATCH", `/admin/users/${u.id}`, { plusDays: Number(d) }); toast("Plus given"); }
+    if (a.dataset.act === "ungift") { await api("PATCH", `/admin/users/${u.id}`, { plusDays: 0 }); toast("Gift removed"); }
+    if (a.dataset.act === "verify") { await api("PATCH", `/admin/users/${u.id}`, { verified: true }); toast("Marked verified"); }
+    if (a.dataset.act === "reset") { const r = await api("POST", `/admin/users/${u.id}/reset`); toast(r.sent ? "Reset link sent" : "No mail service yet — the link is in the Worker log"); }
+    if (a.dataset.act === "disable") { if (!u.disabled && !confirm(`Disable @${u.username}? They are signed out everywhere.`)) return; await api("PATCH", `/admin/users/${u.id}`, { disabled: !u.disabled }); toast(u.disabled ? "Enabled" : "Disabled"); }
+    show();
+  } catch (x) { toast(x.message); }
+});
+(async () => {
+  const m = await api("GET", "/me");
+  if (!m.user) { location.href = "/?login=1&next=/admin"; return; }
+  ME = m.user;
+  $("#me").innerHTML = `<span>@${esc(ME.username)} · <span class="role r-${ME.role}">${ROLE[ME.role]}</span></span><button class="btn w" id="out" style="padding:5px 10px">Sign out</button>`;
+  $("#out").onclick = async () => { await api("POST", "/auth/logout"); location.href = "/"; };
+  show();
+})();
+</script>
+</body></html>
