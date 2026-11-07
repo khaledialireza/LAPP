@@ -76,7 +76,7 @@ const STATUS = { draft: "پیش‌نویس", review: "بازبینی", published
 let D = null, SHA = null, lang = "fa", dirty = false, saving = null, audioFor = null;
 
 async function call(path, opt = {}) {
-  const r = await fetch("/studio/api" + path, { ...opt, headers: { "Content-Type": "application/json", "X-Studio": "1", ...(opt.headers || {}) } });
+  const r = await fetch("/api/studio" + path, { ...opt, headers: { "Content-Type": "application/json", "X-LAPP": "1", ...(opt.headers || {}) } });
   const b = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error(b.error || r.status);
   return b;
@@ -103,7 +103,7 @@ async function open(slug) {
 }
 async function loadAudio() {
   // fetched whole, so seeking to a line works even without Range support
-  const r = await fetch("/studio/api/audio/" + D.slug);
+  const r = await fetch("/api/studio/audio/" + D.slug);
   if (!r.ok) { $("#player").removeAttribute("src"); audioFor = null; return render(); }
   $("#player").src = URL.createObjectURL(await r.blob()); audioFor = D.slug; render();
 }

@@ -5,3 +5,6 @@ _studio/.cache/
 _studio/drafts/*/clips/
 _studio/drafts/*/preview.wav
 __pycache__/
+.wrangler/
+.dev.vars
+node_modules/

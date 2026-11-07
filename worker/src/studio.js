@@ -1,60 +1,13 @@
-// LAPP Studio — lapp.khaledi.eu/studio
+// LAPP Studio API — /api/studio/* (designers, managers and admins; index.js checks the role).
 //
-// Only the owner gets in. Cloudflare Access sits in front of /studio and signs every request
-// it lets through; this Worker checks that signature itself (Access policy, audience, expiry,
-// and the owner's email) and refuses everything else, so a mistake in the Access setup fails
-// closed instead of open.
-//
-// The Worker keeps no data of its own. Drafts live in the repository (_studio/drafts/<slug>/)
+// The studio keeps no data of its own. Drafts live in the repository (_studio/drafts/<slug>/)
 // and every heavy step — writing with Claude, making the voices, publishing — runs as the
 // "studio" GitHub Actions workflow with the same studio.py a laptop would run.
-import PANEL from "./panel.html";
-
 const SLUG = /^[a-z0-9][a-z0-9-]{1,40}$/;
 const ACTIONS = ["write", "voice", "publish"];
 
-export default {
-  async fetch(req, env) {
-    const url = new URL(req.url);
-    if (!url.pathname.startsWith("/studio")) return new Response("Not found", { status: 404 });
-    const email = await owner(req, env);
-    if (!email) return new Response("Forbidden", { status: 403 });
-    if (url.pathname === "/studio" || url.pathname === "/studio/") {
-      return new Response(PANEL, { headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store", ...SECURE } });
-    }
-    // state-changing calls must carry a header a cross-site form or image cannot send
-    if (req.method !== "GET" && req.headers.get("X-Studio") !== "1") return json({ error: "missing X-Studio header" }, 400);
-    try {
-      return await api(req, env, url.pathname.slice("/studio/api".length), email);
-    } catch (e) {
-      return json({ error: e.message }, e.status || 500);
-    }
-  }
-};
-
-const SECURE = { "X-Frame-Options": "DENY", "Referrer-Policy": "no-referrer", "X-Content-Type-Options": "nosniff" };
-const json = (v, status = 200) => new Response(JSON.stringify(v), { status, headers: { "Content-Type": "application/json", "Cache-Control": "no-store", ...SECURE } });
+const json = (v, status = 200) => new Response(JSON.stringify(v), { status, headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
 const fail = (message, status) => Object.assign(new Error(message), { status });
-
-/* ---------- who is asking: a valid Cloudflare Access token for the owner, or nobody ---------- */
-const b64url = s => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((s.length + 3) % 4)), c => c.charCodeAt(0));
-async function owner(req, env) {
-  const jwt = req.headers.get("Cf-Access-Jwt-Assertion");
-  if (!jwt || !env.ACCESS_TEAM || !env.ACCESS_AUD || !env.ALLOWED_EMAIL) return null;
-  const [h, p, sig] = jwt.split(".");
-  if (!sig) return null;
-  const header = JSON.parse(new TextDecoder().decode(b64url(h)));
-  const claims = JSON.parse(new TextDecoder().decode(b64url(p)));
-  const issuer = `https://${env.ACCESS_TEAM}.cloudflareaccess.com`;
-  const certs = await (await fetch(`${issuer}/cdn-cgi/access/certs`, { cf: { cacheTtl: 3600 } })).json();
-  const jwk = (certs.keys || []).find(k => k.kid === header.kid);
-  if (!jwk || header.alg !== "RS256") return null;
-  const key = await crypto.subtle.importKey("jwk", jwk, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["verify"]);
-  const ok = await crypto.subtle.verify("RSASSA-PKCS1-v1_5", key, b64url(sig), new TextEncoder().encode(`${h}.${p}`));
-  const now = Date.now() / 1000, aud = [].concat(claims.aud || []);
-  if (!ok || claims.iss !== issuer || !aud.includes(env.ACCESS_AUD) || !(claims.exp > now) || (claims.nbf && claims.nbf > now + 60)) return null;
-  return (claims.email || "").toLowerCase() === env.ALLOWED_EMAIL.toLowerCase() ? claims.email : null;
-}
 
 /* ---------- GitHub: the repository is the database ---------- */
 function gh(env, path, init = {}) {
@@ -95,7 +48,8 @@ const summary = (d, sha) => {
   return { slug: d.slug, title: d.title, type: d.type, level: d.level, status: d.status || "draft", lines: rows.length, ok: rows.filter(r => r.ok).length, sha };
 };
 
-async function api(req, env, path, email) {
+export async function studioApi(req, env, path, email) {
+  if (!env.GITHUB_TOKEN) throw fail("GITHUB_TOKEN is not set", 503);
   let m;
   if (req.method === "GET" && path === "/me") return json({ email, repo: env.REPO });
 

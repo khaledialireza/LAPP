@@ -1,0 +1,12 @@
+.git
+.github
+.gitignore
+.wrangler
+.dev.vars
+node_modules
+worker
+_studio
+tools
+wrangler.toml
+README.md
+CNAME
