@@ -2090,3 +2090,24 @@ body.ac-open { overflow: hidden; }
   background: rgba(30,30,30,.92); color: #fff; padding: 11px 16px; border-radius: 14px; font-size: 14px; font-weight: 600; transition: .25s; max-width: calc(100% - 32px); text-align: center; }
 .ac-toast.on { opacity: 1; transform: translate(-50%, 0); }
 .ac-open .ac-toast { bottom: auto; top: calc(20px + env(safe-area-inset-top)); }
+
+/* phone sign-in: only the e-mail, one button, a guest link; languages as links at the bottom */
+.wc-ll { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 14px; font-size: 13.5px; }
+.wc-ll button { color: var(--muted); padding: 4px 0; }
+.wc-ll button.on { color: var(--text); font-weight: 600; }
+@media (max-width: 899px) {
+  .welcome { background: var(--tile); }
+  .wc-side { padding: 0 26px; align-items: stretch; }
+  .wc-box[data-step="email"] { min-height: 100dvh; gap: 14px; padding: calc(24px + env(safe-area-inset-top)) 0 calc(26px + env(safe-area-inset-bottom)); }
+  .wc-box[data-step="email"] .wc-mob { margin-top: auto; }
+  .wc-box[data-step="email"] .wc-logo { width: 56px; height: 56px; border-radius: 16px; font-size: 28px; margin-bottom: 18px; box-shadow: none; }
+  .wc-box[data-step="email"] .ac-dt { display: none; }
+  .wc-box[data-step="email"] .ac-form { gap: 14px; }
+  .wc-box[data-step="email"] .ac-in { padding: 15px 16px; }
+  .wc-box[data-step="email"] .wc-go { background: var(--text); color: var(--tile); margin: 0; font-size: 16px; }
+  .wc-box[data-step="email"] .wc-go.ac-ghost { background: none; border: 0; color: var(--muted); font-weight: 500; font-size: 14px; padding: 4px; }
+  .wc-box[data-step="email"] .wc-ll { margin-top: auto; }
+  .wc-box:not([data-step="email"]) .wc-ll { display: none; }
+}
+@media (min-width: 900px) { .wc-ll { display: none; } }
+div.ac-dt { display: flex; flex-direction: column; gap: 10px; }

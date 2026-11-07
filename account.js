@@ -160,17 +160,19 @@
     const api = !!cfg, s = W.step;
     let h = W.closable ? `<button type="button" class="ac-x" data-ac="close" aria-label="${esc(t("close"))}">✕</button>` : "";
     if (s === "email") {
-      h += `<div class="wc-mob"><div class="wc-logo">L</div><h1 class="wc-title">${esc(t("wcTitle"))}</h1><p class="wc-sub">${esc(t("wcSub"))}</p></div>
-        <div class="wc-langs" id="wcLangs">${I18N.langs.map(l => `<button type="button" data-wl="${l}" class="${l === I18N.lang ? "on" : ""}">${esc(I18N.name(l))}</button>`).join("")}</div>`;
-      if (api) h += `${steps(1)}<h3 class="ac-h">${esc(t(W.closable ? "acSaveT" : "acStartT"))}</h3><p class="ac-mu">${esc(t("acStartSub"))}</p>
-        <form class="ac-form" data-form="email" novalidate><label class="ac-l" for="acEmail">${esc(t("acEmail"))}</label>
-        <input class="ac-in" id="acEmail" type="email" dir="ltr" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" required value="${esc(W.email)}" placeholder="name@mail.com">${err}
+      // phone: logo, e-mail, one button, a quiet guest link, languages as links at the bottom
+      // (the title, hints and divider show only beside the brand panel on wide screens)
+      h += `<div class="wc-mob"><div class="wc-logo">L</div></div>`;
+      if (api) h += `<div class="ac-dt">${steps(1)}<h3 class="ac-h">${esc(t(W.closable ? "acSaveT" : "acStartT"))}</h3><p class="ac-mu">${esc(t("acStartSub"))}</p></div>
+        <form class="ac-form" data-form="email" novalidate><label class="ac-l ac-dt" for="acEmail">${esc(t("acEmail"))}</label>
+        <input class="ac-in" id="acEmail" type="email" dir="ltr" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" required value="${esc(W.email)}" placeholder="${esc(t("acEmail"))}" aria-label="${esc(t("acEmail"))}">${err}
         <button class="wc-go" type="submit">${esc(t("acContinue"))}</button></form>`;
       if (!W.closable) {
-        if (api) h += `<div class="ac-or">${esc(t("acOr"))}</div><button type="button" class="wc-go ac-ghost" id="wcGuest">${esc(t("wcNoLogin"))}</button>`;
+        if (api) h += `<div class="ac-or ac-dt">${esc(t("acOr"))}</div><button type="button" class="wc-go ac-ghost" id="wcGuest">${esc(t("wcNoLogin"))}</button>`;
         else h += `<input class="wc-name" id="wcName" maxlength="30" autocomplete="given-name" placeholder="${esc(t("wcName"))}" aria-label="${esc(t("wcName"))}" value="${esc(jget("lapp:name", ""))}"><button type="button" class="wc-go" id="wcGuest">${esc(t("wcGuest"))}</button>`;
-        h += `<p class="wc-note">${esc(t("wcNote"))}</p>`;
+        h += `<p class="wc-note ac-dt">${esc(t("wcNote"))}</p>`;
       }
+      h += `<nav class="wc-ll">${I18N.langs.map(l => `<button type="button" data-wl="${l}" class="${l === I18N.lang ? "on" : ""}">${esc(I18N.name(l))}</button>`).join("")}</nav>`;
     } else if (s === "password") {
       h += `${steps(2)}${back()}<div class="ac-av">${esc(initial(W.name || W.email))}</div><h3 class="ac-h">${esc(t("acHi", { n: W.name || W.email.split("@")[0] }))}</h3>${mailChip()}
         <form class="ac-form" data-form="login" novalidate><input type="email" autocomplete="username" value="${esc(W.email)}" hidden>
