@@ -149,7 +149,8 @@
     b.innerHTML = `<h1>${esc(map[0])}</h1><p>${esc(map[1])}</p>`;
     $("#wbBubs").innerHTML = s === "signup" && words
       ? `<div class="wb-bub"><small>${esc(t("acMoveBrand"))}</small><b dir="ltr">${words} Wörter · ${days} ${days === 1 ? "Tag" : "Tage"} 🔥</b></div>`
-      : `<div class="wb-bub"><small>LENA</small><b dir="ltr">Ich habe ein Zimmer reserviert.</b><span>${esc(t("wbLine2"))}</span></div>`;
+      : [["Deutsch", "Ich habe ein Zimmer reserviert."], ["Nederlands", "Ik heb een kamer gereserveerd."], ["Polski", "Mam zarezerwowany pokój."]]
+        .map(([k, x], i) => `<div class="wb-bub${i % 2 ? " r" : ""}"><small>${k}</small><b dir="ltr">${x}</b>${i === 2 ? `<span>${esc(t("wbLine2"))}</span>` : ""}</div>`).join("");
     $("#wbFeats").innerHTML = [t("wbF1"), t("wbF2"), t("wbF3")].map(x => `<span>${esc(x)}</span>`).join("");
     $("#wbLangs").innerHTML = I18N.langs.map(l => `<button type="button" data-wl="${l}" class="${l === I18N.lang ? "on" : ""}">${esc(I18N.name(l))}</button>`).join("");
   }
