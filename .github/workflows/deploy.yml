@@ -1,0 +1,65 @@
+# Deploys the whole site (static app + Worker API) to Cloudflare on every push to main.
+# Skips quietly until CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID are set as repository secrets.
+# Optional secrets, copied into the Worker when present: ADMIN_EMAILS, RESEND_API_KEY,
+# STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STUDIO_GITHUB_TOKEN (→ GITHUB_TOKEN).
+# Optional variables (Settings → Variables): STRIPE_PRICE_MONTHLY, STRIPE_PRICE_YEARLY.
+name: deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency: { group: deploy, cancel-in-progress: false }
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      HAS_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      WRANGLER: npx --yes wrangler@4.158.0
+    steps:
+      - if: env.HAS_TOKEN != 'true'
+        run: echo "CLOUDFLARE_API_TOKEN is not set yet — skipping the deploy."
+      - uses: actions/checkout@v4
+        if: env.HAS_TOKEN == 'true'
+      - uses: actions/setup-node@v4
+        if: env.HAS_TOKEN == 'true'
+        with: { node-version: 22 }
+      - name: database (created on the first run)
+        if: env.HAS_TOKEN == 'true'
+        run: |
+          id=$($WRANGLER d1 list --json | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const x=JSON.parse(s).find(d=>d.name==="lapp");console.log(x?x.uuid:"")})')
+          if [ -z "$id" ]; then
+            $WRANGLER d1 create lapp
+            id=$($WRANGLER d1 list --json | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>console.log(JSON.parse(s).find(d=>d.name==="lapp").uuid))')
+          fi
+          sed -i "s/00000000-0000-0000-0000-000000000000/$id/" wrangler.toml
+          $WRANGLER d1 migrations apply lapp --remote
+      - name: prices
+        if: env.HAS_TOKEN == 'true'
+        env: { M: "${{ vars.STRIPE_PRICE_MONTHLY }}", Y: "${{ vars.STRIPE_PRICE_YEARLY }}" }
+        run: |
+          [ -n "$M" ] && sed -i "s/^STRIPE_PRICE_MONTHLY = \"\"/STRIPE_PRICE_MONTHLY = \"$M\"/" wrangler.toml || true
+          [ -n "$Y" ] && sed -i "s/^STRIPE_PRICE_YEARLY = \"\"/STRIPE_PRICE_YEARLY = \"$Y\"/" wrangler.toml || true
+      - name: deploy
+        if: env.HAS_TOKEN == 'true'
+        run: $WRANGLER deploy
+      - name: secrets
+        if: env.HAS_TOKEN == 'true'
+        env:
+          ADMIN_EMAILS: ${{ secrets.ADMIN_EMAILS }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          GITHUB_TOKEN_STUDIO: ${{ secrets.STUDIO_GITHUB_TOKEN }}
+        run: |
+          node -e '
+            const m = { ADMIN_EMAILS: "ADMIN_EMAILS", RESEND_API_KEY: "RESEND_API_KEY", STRIPE_SECRET_KEY: "STRIPE_SECRET_KEY", STRIPE_WEBHOOK_SECRET: "STRIPE_WEBHOOK_SECRET", GITHUB_TOKEN: "GITHUB_TOKEN_STUDIO" };
+            const o = {}; for (const [k, e] of Object.entries(m)) if (process.env[e]) o[k] = process.env[e];
+            require("fs").writeFileSync("/tmp/secrets.json", JSON.stringify(o));
+            console.log("secrets:", Object.keys(o).join(", ") || "none");'
+          [ "$(cat /tmp/secrets.json)" = "{}" ] || $WRANGLER secret bulk /tmp/secrets.json
+          rm -f /tmp/secrets.json

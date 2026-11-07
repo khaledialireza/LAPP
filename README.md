@@ -2,7 +2,10 @@
 
 سایت آموزش زبان — https://lapp.khaledi.eu
 
-میزبانی با GitHub Pages (شاخهٔ `main`، ریشهٔ ریپو).
+کل سایت یک Cloudflare Worker است (`wrangler.toml`، کد در `worker/`): فایل‌های اپ به‌صورت Static Assets
+و `/api/*`، `/admin` و `/studio` با کد Worker. با هر push به `main` گردش‌کار `deploy` منتشر می‌کند.
+تا وقتی API در دسترس نیست (مثلاً روی GitHub Pages) اپ فقط ورود مهمان دارد و همهٔ درس‌ها باز است.
+زبان پیش‌فرض رابط: انگلیسی.
 
 ## محتوا (content/)
 
@@ -57,9 +60,37 @@ python3 _studio/studio.py publish im-hotel       # فقط وقتی همهٔ خط
 
 ### پنل وب: `lapp.khaledi.eu/studio`
 
-یک Cloudflare Worker (`_studio/worker/`) پشت Cloudflare Access؛ فقط صاحب با ایمیلش وارد می‌شود و Worker امضای Access را خودش هم بررسی می‌کند.
-پیش‌نویس‌ها در همین مخزن ذخیره می‌شوند و نوشتن، صدا و انتشار با گردش‌کار `studio` در GitHub Actions اجرا می‌شود.
-Worker با گردش‌کار `studio-worker` منتشر می‌شود (نیاز: `CLOUDFLARE_API_TOKEN`، `CLOUDFLARE_ACCOUNT_ID`).
+برای طراح، مدیر و ادمین (با همان ورود اپ). پیش‌نویس‌ها در همین مخزن ذخیره می‌شوند و نوشتن، صدا و انتشار
+با گردش‌کار `studio` در GitHub Actions اجرا می‌شود (نیاز: `STUDIO_GITHUB_TOKEN`).
+
+## حساب‌ها، اشتراک و مدیریت (`worker/`)
+
+- ورود و ثبت‌نام یک فرم است: ایمیل → اگر حساب هست رمز، اگر نه نام کاربری + رمز → کد تأیید ایمیل.
+- مهمان: همه‌چیز فقط در مرورگر خودش؛ با ثبت‌نام یک‌بار به حساب منتقل می‌شود و از آن به بعد همگام است.
+- پلن‌ها: رایگان · Plus (اشتراک Stripe، هدیهٔ ادمین، تیم، یا اتصال از ایران). درس‌های Plus را ادمین در `/admin` تعیین می‌کند.
+- نقش‌ها: learner · designer (استودیو) · manager (+ کاربران و مشتریان) · admin (همه‌چیز). ایمیل‌های `ADMIN_EMAILS` بعد از تأیید ایمیل ادمین می‌شوند.
+- جدول‌ها: `worker/migrations/`. رمزها PBKDF2-SHA256، نشست با کوکی HttpOnly.
+
+اجرای محلی:
+
+```
+printf 'DEV=1\nADMIN_EMAILS=you@example.com\nAPP_URL=http://localhost:8787\n' > .dev.vars
+npx wrangler d1 migrations apply lapp --local
+npx wrangler dev          # http://localhost:8787 — کدهای تأیید در کنسول مرورگر/ترمینال
+```
+
+راه‌اندازی یک‌باره (GitHub → Settings → Secrets and variables → Actions):
+
+| نام | چیست |
+|---|---|
+| `CLOUDFLARE_API_TOKEN`، `CLOUDFLARE_ACCOUNT_ID` | انتشار Worker و ساخت پایگاه D1 |
+| `ADMIN_EMAILS` | ایمیل(های) ادمین، با کاما |
+| `RESEND_API_KEY` | ارسال ایمیل (کد تأیید، بازنشانی رمز) — فرستنده در `EMAIL_FROM` |
+| `STRIPE_SECRET_KEY`، `STRIPE_WEBHOOK_SECRET` | پرداخت؛ webhook: `https://lapp.khaledi.eu/api/stripe/webhook` |
+| متغیر `STRIPE_PRICE_MONTHLY`، `STRIPE_PRICE_YEARLY` | شناسهٔ قیمت‌ها در Stripe (`price_…`) |
+| `STUDIO_GITHUB_TOKEN` | توکن fine-grained همین مخزن برای استودیو |
+
+دامنه: `lapp.khaledi.eu` در `wrangler.toml` دامنهٔ سفارشی Worker است؛ رکورد فعلی GitHub Pages باید برداشته شود.
 
 ## قاعدهٔ طراحی
 
