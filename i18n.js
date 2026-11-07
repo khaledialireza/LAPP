@@ -7,7 +7,7 @@
 // In HTML: data-i18n / data-i18n-ph / data-i18n-aria; in code: t("key") or t("key", { n: 3 }).
 (() => {
   const store = { get(k) { try { return localStorage.getItem("lapp:" + k); } catch { return null; } }, set(k, v) { try { localStorage.setItem("lapp:" + k, v); } catch {} } };
-  const FALLBACK = "fa";
+  const FALLBACK = "en";
   let langs = [], lang = store.get("lang") || FALLBACK, str = {}, fb = {}, posMap = {};
 
   function t(key, vars) {
@@ -16,7 +16,7 @@
     return s;
   }
   const has = key => key in str;
-  const pos = p => !p || lang === FALLBACK ? p : posMap[p] || p;
+  const pos = p => p && (posMap[p] || p);
   const info = (l = lang) => langs.find(x => x.code === l) || { code: l, name: l, dir: "ltr", locale: l, speech: null };
 
   // strings of one language (and the fallback once)

@@ -1,0 +1,138 @@
+{
+  "title": "Story: Goldilocks and the three bears",
+  "summary": "Goldilocks walks into the three bears' house, eats their porridge, breaks a chair and falls asleep in a bed. Very short sentences in the present tense, with a little Perfekt.",
+  "phrases": ["It's still too hot.", "Let's wait a little.", "That's a good idea. |", "Who might live here?", "She knocks on the door. |", "This chair is right for me.", "The chair breaks.", "She falls asleep quickly.", "Someone has eaten some of my porridge.", "She gets very scared.", "That's right. |"],
+  "phraseNotes": ["zu + adjective = too", "Lass uns … = let's …", "", "wohl = probably, I wonder", "", "für + Akkusativ", "kaputt gehen = to break", "einschlafen = to fall asleep", "Perfekt: hat + gegessen", "Angst bekommen = to get scared", ""],
+  "lines": [
+    "Goldilocks and the three bears.",
+    "It's a beautiful morning.",
+    "In a small house in the forest live three bears:",
+    "Papa Bear, Mama Bear and their little son.",
+    "Mama Bear is making breakfast.",
+    "She is cooking porridge for the whole family.",
+    "But the porridge is still very hot.",
+    "Papa Bear looks at the porridge and says: \"We can't eat it yet.",
+    "It's still too hot.",
+    "Let's wait a little.",
+    "Then we can eat the porridge.",
+    "In the meantime we can go for a walk outside.\"",
+    "\"That's a good idea,\" says Mama Bear.",
+    "The three bears leave their house and go into the forest.",
+    "Meanwhile a little girl is walking through the forest.",
+    "The girl has long blond hair.",
+    "Her name is Goldilocks.",
+    "After a while Goldilocks sees a little house.",
+    "\"I wonder who lives here?\" she asks herself.",
+    "She goes to the house and knocks on the door.",
+    "But nobody answers.",
+    "Goldilocks waits a little and knocks again.",
+    "Again nobody answers.",
+    "The door is open.",
+    "Goldilocks looks inside and simply walks into the house.",
+    "On the table there are three bowls of porridge.",
+    "Goldilocks is hungry and tries the porridge from the first bowl.",
+    "Too hot!",
+    "Then she tries the second.",
+    "Too hot as well!",
+    "She tries the porridge from the third bowl.",
+    "Hmm … this one is good!",
+    "Goldilocks eats all the porridge.",
+    "She sees three chairs.",
+    "The first is too big.",
+    "The second is too big as well.",
+    "But the third is small.",
+    "\"This chair is right for me.\"",
+    "Goldilocks sits down on it.",
+    "She wobbles back and forth a little.",
+    "Suddenly the little chair breaks.",
+    "\"Oh no!\" says Goldilocks.",
+    "After that she goes upstairs.",
+    "There are three beds there.",
+    "She tries the first and then the second bed.",
+    "Both are too big.",
+    "The third bed is small and cosy.",
+    "The bed is very comfortable.",
+    "Goldilocks lies down and quickly falls asleep.",
+    "After their walk the three bears come home.",
+    "Papa Bear looks at his porridge.",
+    "\"Someone has eaten some of my porridge.\"",
+    "Mama Bear looks at her bowl.",
+    "\"Someone has eaten some of my porridge too.\"",
+    "Baby Bear sees his empty bowl.",
+    "\"Someone has eaten all my porridge!\"",
+    "Then they see the chairs.",
+    "Papa Bear says: \"Someone has been sitting on my chair.\"",
+    "Mama Bear says: \"Someone has been sitting on my chair too.\"",
+    "Baby Bear looks at his little chair.",
+    "\"Someone has broken my chair!\"",
+    "The three bears go upstairs.",
+    "There they see Goldilocks in a bed.",
+    "Goldilocks wakes up and sees the three bears.",
+    "She gets very scared.",
+    "She jumps out of bed and runs downstairs as fast as she can.",
+    "She opens the door and runs out of the house.",
+    "The three bears don't run after her.",
+    "They stay in front of the house and watch Goldilocks go.",
+    "Goldilocks runs quickly through the forest.",
+    "She is still scared.",
+    "Papa Bear watches her go and says: \"Now she knows she mustn't just walk into a stranger's house.",
+    "And she mustn't use other people's things.\"",
+    "Mama Bear nods. \"That's right,\" she says.",
+    "Goldilocks runs on home.",
+    "Since that day she never goes into strangers' houses."
+  ],
+  "topics": ["Retell the story: who, where, what happens?", "My breakfast: what do you eat in the morning?", "My room: what is in your room?"],
+  "focus": [
+    {
+      "title": "Too …",
+      "points": [
+        "<b>zu</b> before an adjective means \"too\": <b>zu heiß</b> · <b>zu groß</b>",
+        "<b>sehr</b> just means \"very\" and isn't negative: sehr bequem (very comfortable)",
+        "Der Brei ist <b>zu heiß</b> → you can't eat it · Der Brei ist <b>sehr heiß</b> → it's just hot",
+        "The opposite: <b>genau richtig</b> = just right"
+      ]
+    },
+    {
+      "title": "First, second, third",
+      "points": [
+        "<b>der erste</b> · <b>der zweite</b> · <b>der dritte</b> — declined like adjectives",
+        "<b>das erste Bett</b> · <b>die dritte Schüssel</b>",
+        "After a preposition: aus <b>der ersten</b> Schüssel · aus <b>der dritten</b> Schüssel",
+        "From 4 on: vier → <b>der vierte</b> · zwanzig → <b>der zwanzigste</b>"
+      ]
+    },
+    {
+      "title": "Spoken past (Perfekt)",
+      "points": [
+        "<b>haben + Partizip II</b>: Jemand <b>hat</b> von meinem Brei <b>gegessen</b>.",
+        "sitzen → <b>hat gesessen</b> · machen → <b>hat kaputt gemacht</b>",
+        "The participle is always at the end: Jemand hat meinen Stuhl kaputt <b>gemacht</b>.",
+        "Verbs of movement use <b>sein</b>: Sie <b>ist</b> nach Hause <b>gelaufen</b>."
+      ]
+    },
+    {
+      "title": "Reflexive verbs",
+      "points": [
+        "<b>sich setzen</b>: Goldlöckchen <b>setzt sich</b> darauf. (sits down)",
+        "<b>sich hinlegen</b>: Sie <b>legt sich hin</b>. (lies down)",
+        "<b>sich fragen</b>: „Wer wohnt hier?“, <b>fragt sie sich</b>.",
+        "The pronoun changes with the subject: ich setze <b>mich</b> · du setzt <b>dich</b> · sie setzt <b>sich</b>"
+      ]
+    },
+    {
+      "title": "Allowed / not allowed",
+      "points": [
+        "<b>dürfen</b> = to be allowed · <b>nicht dürfen</b> = must not, not allowed",
+        "Sie <b>darf nicht</b> einfach in ein fremdes Haus gehen.",
+        "Conjugation: ich darf · du darfst · er/sie <b>darf</b> · wir dürfen",
+        "The second verb goes to the end: Sie darf die Sachen nicht <b>benutzen</b>."
+      ]
+    }
+  ],
+  "cues": [
+    {
+      "title": "Questions about the story",
+      "items": ["Where do the three bears live?", "Why do the bears go for a walk?", "What is the girl's name?", "Which porridge is good?", "What happens to the little chair?", "What does Goldilocks learn?"]
+    }
+  ]
+}
