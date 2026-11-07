@@ -16,7 +16,7 @@
   <meta name="description" content="LAPP — آموزش زبان آلمانی با دیالوگ صوتی، واژگان و تمرین.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=mw6c73hw">
+  <link rel="stylesheet" href="style.css?v=mw6cndmz">
 </head>
 <body data-screen="home">
   <div class="frame">
@@ -45,7 +45,7 @@
         <div class="home-side">
           <div class="save-banner" id="hSave" hidden>
             <span class="sb-ic">☁︎</span>
-            <div class="sb-tx"><b id="hSaveT"></b><small data-i18n="bannerSub"></small><div class="sb-provs js-provs"></div></div>
+            <div class="sb-tx"><b id="hSaveT"></b><small data-i18n="bannerSub"></small><button class="sb-go" data-acct="signup" data-i18n="acCreateOrIn"></button></div>
             <button class="sb-x" id="hSaveX" data-i18n-aria="close">✕</button>
           </div>
           <div class="home-head">
@@ -85,15 +85,10 @@
           <div class="pf-top"><div class="avatar-big js-avatar">?</div>
             <input id="profName" class="pf-name" maxlength="30" autocomplete="name" data-i18n-aria="nameL">
             <div class="pf-sub fa" id="pfSub"></div></div>
-          <div class="pf-save" id="pfSave" hidden>
-            <b data-i18n="saveTitle"></b>
-            <p data-i18n="saveSub"></p>
-            <div class="sb-provs js-provs"></div>
-          </div>
+          <div class="pf-save" id="pfSave" hidden></div>
           <div class="pf-stats" id="pfStats"></div>
           <h3 class="ph-h"><span data-i18n="account"></span></h3>
-          <div class="pf-group">
-            <div class="pf-row pf-acct"><span class="pf-acct-ic" id="pfAcctIc">👤</span><span class="pf-acct-tx"><b id="pfAcct"></b><small id="pfAcctSub"></small></span><button class="pf-out" id="pfSignOut" data-i18n="signOut"></button></div>
+          <div class="pf-group" id="pfAccount">
           </div>
           <h3 class="ph-h"><span data-i18n="progress"></span></h3>
           <div class="pf-group" id="pfSkills"></div>
@@ -275,19 +270,17 @@
     </footer>
   </div>
 
-  <!-- Welcome: shown until someone signs in (today: guest only); remembered in this browser -->
+  <!-- Welcome / sign-in: e-mail first (known → password, new → sign-up), or start as a guest.
+       Desktop: brand panel + card side by side; phone: the card alone. Filled by account.js -->
   <div class="welcome" id="welcome" hidden>
-    <div class="wc-box">
-      <div class="wc-logo">L</div>
-      <h1 class="wc-title" data-i18n="wcTitle"></h1>
-      <p class="wc-sub" data-i18n="wcSub"></p>
-      <div class="wc-k" data-i18n="wcLang"></div>
-      <div class="wc-langs" id="wcLangs"></div>
-      <input class="wc-name" id="wcName" maxlength="30" autocomplete="given-name" data-i18n-ph="{wcName}" data-i18n-aria="wcName">
-      <div class="wc-providers js-provs" id="wcProviders"></div>
-      <button class="wc-go" id="wcGuest" data-i18n="wcGuest"></button>
-      <p class="wc-note" data-i18n="wcNote"></p>
-    </div>
+    <aside class="wc-brand" aria-hidden="true">
+      <div class="wb-logo"><i>L</i>LAPP</div>
+      <div class="wb-text" id="wbText"></div>
+      <div class="wb-langs" id="wbLangs"></div>
+      <div class="wb-bubs" id="wbBubs"></div>
+      <div class="wb-feats" id="wbFeats"></div>
+    </aside>
+    <div class="wc-side"><div class="wc-box" id="wcBox"></div></div>
   </div>
 
   <!-- Night mode: one line at a time, dark and calm, for reading before sleep -->
@@ -323,10 +316,11 @@
     </div>
   </div>
 
-  <script src="i18n.js?v=mw6c73hw"></script>
-  <script src="grammar.js?v=mw6c73hw"></script>
-  <script src="exercises.js?v=mw6c73hw"></script>
-  <script src="auth.js?v=mw6c73hw"></script>
-  <script src="content.js?v=mw6c73hw"></script>
+  <script src="i18n.js?v=mw6cndmz"></script>
+  <script src="grammar.js?v=mw6cndmz"></script>
+  <script src="exercises.js?v=mw6cndmz"></script>
+  <script src="auth.js?v=mw6cndmz"></script>
+  <script src="account.js?v=mw6cndmz"></script>
+  <script src="content.js?v=mw6cndmz"></script>
 </body>
 </html>

@@ -66,7 +66,7 @@
   }
 
   window.Content = { boot, loadLang };
-  boot().then(() => {
+  Promise.all([boot(), window.Account ? Account.ready : null]).then(() => {
     const s = document.createElement("script");
     s.src = "app.js" + (V ? "?v=" + V : "");
     s.onload = () => document.body.classList.add("ready");

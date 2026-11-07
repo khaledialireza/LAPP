@@ -114,6 +114,8 @@
   }
   function setLesson(i) {
     if (i < 0 || i >= LESSONS.length) return toast(t("moreLessonsSoon"));
+    // a Plus lesson for someone on the free plan: offer Plus instead
+    if (!Account.canOpen(LESSONS[i])) { Account.paywall(LESSONS[i]); return false; }
     state.idx = i; store.set("lesson", i);
     if (cat(LESSONS[i]) === "lesson") store.set("lastLesson", i);
     const L = LESSONS[i];
@@ -1845,11 +1847,10 @@
     $("#pfStats").innerHTML = `<div><b>🔥 ${streak()}</b><small>${t("days")}</small></div><div><b>${state.known.size}</b><small>${t("wordsCap")}</small></div><div><b>${mins >= 60 ? tf("hoursN", { n: Math.round(mins / 60 * 10) / 10 }) : tf("minN", { n: mins })}</b><small>${t("heardL")}</small></div>`;
     $("#pfLsName").textContent = `${lsCode(state.idx)} · ${L.title}`;
     // account: guest (saved in this browser) or a signed-in user (photo, name, email, sync state)
-    const ses = Auth.session || {}, guest = ses.type === "guest";
-    $("#pfAcct").textContent = guest ? t("guest") : ses.name || ses.email || "";
-    $("#pfAcctSub").textContent = guest ? tf("guestInfo", { d: ses.since ? new Date(ses.since).toLocaleDateString(uiLocale()) : "" }) : `${ses.email || ""} · ☁︎ ${t("synced")}`;
-    $("#pfAcctIc").innerHTML = ses.photo ? `<img src="${esc(ses.photo)}" alt="" referrerpolicy="no-referrer">` : "👤";
-    $("#pfSave").hidden = !guest || !Object.keys(Auth.providers).length;
+    const ac = Account.profileCard();
+    $("#pfSave").innerHTML = ac.save; $("#pfSave").hidden = !ac.save;
+    $("#pfAccount").innerHTML = ac.rows;
+    $(".pf-note").hidden = Account.isAccount;
     $("#pfSkills").innerHTML = SKILLS.map(k => { const p = skillPct(k.id); return `<div class="pf-row"><span>${k.ic} ${t(k.fa)}</span><span class="pf-bar"><i style="width:${p}%"></i></span><b>${p}%</b></div>`; }).join("");
     paintAvatar();
   }
@@ -1994,7 +1995,7 @@
         <div class="tx"><b>${esc(x.L.title)}</b><span class="fa">${esc(TR.title)}</span>
           <span class="mt"><span class="lv">${esc(x.L.level)}</span>${m ? `<span>${tf("minN", { n: m })}</span>` : ""}<span>${tf("sentN", { n: libLines(x.L) })}</span>${x.L.words ? `<span>${tf("nWords", { n: x.L.words.length })}</span>` : ""}</span>
           <span class="pb"><i style="width:${x.p}%"></i></span></div>
-        ${st}<button class="more" data-more="${x.i}" aria-label="${t("more")}">⋯</button></div>`; };
+        ${Account.isLocked(x.L) && !Account.isPlus ? `<span class="st lock" title="Plus">🔒</span>` : st}<button class="more" data-more="${x.i}" aria-label="${t("more")}">⋯</button></div>`; };
     const groups = lib.sort !== "order" ? [["", items]] : [
       [t("inProgress"), items.filter(x => x.p > 0 && x.p < 100)],
       [t("notStarted"), items.filter(x => x.p === 0)],
@@ -2050,49 +2051,26 @@
   $("#libList").addEventListener("click", e => {
     const mo = e.target.closest("[data-more]"); if (mo) { e.stopPropagation(); libMenu(Number(mo.dataset.more), mo.closest("[data-li]")); return; }
     const it = e.target.closest("[data-li]"); if (!it || libLong) { libLong = false; return; }
-    const i = Number(it.dataset.li); if (i !== state.idx) setLesson(i); go("lesson");
+    const i = Number(it.dataset.li); if (i !== state.idx && setLesson(i) === false) return; go("lesson");
   });
-  /* ---------- Welcome / sign-in: guest today, providers (Google …) plug into Auth later ---------- */
-  // one button per registered provider (none yet); the same buttons appear on the welcome
-  // screen, the profile "save your progress" card and the home banner
-  function hasProviders() { return Object.keys(Auth.providers).length > 0; }
-  function paintProviders() {
-    const html = Object.entries(Auth.providers).map(([k, p]) => `<button class="prov-btn" data-prov="${esc(k)}">${p.icon || ""}<span>${esc(tf("signInWith", { p: p.label }))}</span></button>`).join("");
-    $$(".js-provs").forEach(e => e.innerHTML = html);
-  }
-  function renderWelcome() {
-    $(".wc-box").dir = I18N.info().dir;
-    $("#wcLangs").innerHTML = I18N.langs.map(l => `<button data-wl="${l}" class="${l === I18N.lang ? "on" : ""}">${esc(I18N.name(l))}</button>`).join("");
-    paintProviders();
-    // with a provider, guest entry becomes the quiet second choice
-    $("#wcGuest").classList.toggle("wc-link", hasProviders());
-    $("#wcGuest").textContent = t(hasProviders() ? "wcNoLogin" : "wcGuest");
-  }
-  // home: once, after the first real progress, suggest saving it (only when a provider exists)
+  /* ---------- Welcome / sign-in: account.js draws the card, the app follows the session ---------- */
+  // home: once, after the first real progress, suggest an account to keep it
   function renderSaveBanner() {
     const ses = Auth.session, n = state.known.size;
-    const on = !!ses && ses.type === "guest" && hasProviders() && n >= 20 && !store.get("saveBannerOff", false);
+    const on = !!ses && ses.type === "guest" && Account.api && n >= 20 && !store.get("saveBannerOff", false);
     $("#hSave").hidden = !on;
-    if (on) { $("#hSaveT").textContent = tf("bannerTitle", { n }); paintProviders(); }
+    if (on) $("#hSaveT").textContent = tf("bannerTitle", { n });
   }
   $("#hSaveX").addEventListener("click", () => { store.set("saveBannerOff", true); renderSaveBanner(); });
-  Auth.onProviders = () => { paintProviders(); if (!$("#welcome").hidden) renderWelcome(); renderSaveBanner(); };
   renderSaveBanner();
-  function showWelcome(on) {
-    $("#welcome").hidden = !on;
-    if (on) { $("#wcName").value = store.get("name", ""); renderWelcome(); }
-  }
-  $("#wcLangs").addEventListener("click", async e => { const b = e.target.closest("[data-wl]"); if (!b) return; await I18N.setLang(b.dataset.wl); renderWelcome(); });
-  document.addEventListener("click", e => { const b = e.target.closest("[data-prov]"); if (b) Auth.signIn(b.dataset.prov).catch(err => toast(err.message)); });
-  const saveWcName = () => { const n = $("#wcName").value.trim(); if (n) { store.set("name", n); paintAvatar(); } return n; };
-  $("#wcGuest").addEventListener("click", () => Auth.signInGuest(saveWcName()));
-  $("#wcName").addEventListener("keydown", e => { if (e.key === "Enter") $("#wcGuest").click(); });
-  $("#pfSignOut").addEventListener("click", () => { if (confirm(t("signOutConfirm"))) Auth.signOut(); });
-  Auth.onChange(ses => { showWelcome(!ses); paintAvatar(); renderSaveBanner(); if (ses) go(document.body.dataset.screen === "profile" ? "profile" : "home"); });
-  showWelcome(!Auth.signedIn);
+  const showWelcome = on => on ? Account.open("email", { closable: false }) : Account.close();
+  const repaint = () => { paintAvatar(); renderSaveBanner(); if (document.body.dataset.screen === "profile") renderProfile(); if (document.body.dataset.screen === "library") renderLibrary(); };
+  Auth.onChange(ses => { if (!ses) showWelcome(true); repaint(); });
+  Account.onChange(repaint);
+  if (!Account.fromLink()) showWelcome(!Auth.signedIn);
 
   setSpeed(state.speed);
-  if (LESSONS.length) setLesson(state.idx);
+  if (LESSONS.length) setLesson(Account.canOpen(LESSONS[state.idx]) ? state.idx : Math.max(0, LESSONS.findIndex(L => Account.canOpen(L))));
   const start = location.hash.slice(1);
   go(start && document.getElementById(start)?.classList.contains("screen") ? start : "home");
 })();

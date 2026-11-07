@@ -1,5 +1,5 @@
 // Sign-in state, remembered in this browser (localStorage "lapp:session").
-// Today there is only guest entry; a provider (e.g. Google) plugs in later:
+// Guest entry, or an e-mail account (account.js). A provider (e.g. Google) can plug in later:
 //   Auth.register("google", { label: "Google", icon: "<svg…>", signIn: async () => ({ id, name, email, photo, token }) })
 // and the welcome screen shows a button for every registered provider.
 (() => {
@@ -15,6 +15,8 @@
     get session() { return read(); },
     get signedIn() { return !!read(); },
     get isGuest() { return read()?.type === "guest"; },
+    // an account session from account.js (the real proof is the HttpOnly cookie)
+    setSession(s) { const before = JSON.stringify(read()); write(s); if (JSON.stringify(s) !== before) emit(); },
     signInGuest(name = "") {
       write({ type: "guest", name: name.trim(), since: new Date().toISOString().slice(0, 10) });
       emit();

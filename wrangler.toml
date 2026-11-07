@@ -28,6 +28,10 @@ REPO = "khaledialireza/LAPP"
 BRANCH = "main"
 STRIPE_PRICE_MONTHLY = ""
 STRIPE_PRICE_YEARLY = ""
+# what the plans sheet shows (the real price is the Stripe price above)
+PRICE_MONTH_LABEL = "€8.99"
+PRICE_YEAR_LABEL = "€59.99"
+PRICE_SAVE_LABEL = "45%"
 
 # Secrets (wrangler secret put …, or the deploy workflow from GitHub secrets — never in this file):
 #   ADMIN_EMAILS           comma-separated; these accounts become admin once their e-mail is verified

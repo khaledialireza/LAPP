@@ -25,7 +25,7 @@ const STAFF = ["designer", "manager", "admin"];
 const USERNAME = /^[a-z0-9_.]{3,20}$/;
 const RESERVED = new Set(["admin", "administrator", "studio", "lapp", "root", "support", "help", "api", "system", "staff", "moderator", "official"]);
 const EMAIL = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,}$/;
-const DEFAULT_ACCESS = { locked: [], exercisesPerDay: 0, nightFree: true, iranFree: true, trialDays: 7 };
+const DEFAULT_ACCESS = { locked: [], iranFree: true, trialDays: 7 };   // locked: lesson folders that need Plus
 
 const SECURE = { "X-Content-Type-Options": "nosniff", "Referrer-Policy": "same-origin" };
 const json = (v, status = 200, headers = {}) => new Response(JSON.stringify(v), { status, headers: { "Content-Type": "application/json", "Cache-Control": "no-store", ...SECURE, ...headers } });
@@ -172,7 +172,8 @@ async function api(req, env, url, ctx) {
   /* ---- public ---- */
   if (p === "/config" && M === "GET") {
     const access = await getSetting(env, "access", DEFAULT_ACCESS);
-    return json({ api: true, country: country(req), iran: access.iranFree && country(req) === "IR", access, billing: !!(env.STRIPE_SECRET_KEY && env.STRIPE_PRICE_MONTHLY) });
+    return json({ api: true, country: country(req), iran: access.iranFree && country(req) === "IR", access, billing: !!(env.STRIPE_SECRET_KEY && env.STRIPE_PRICE_MONTHLY),
+      prices: { month: env.PRICE_MONTH_LABEL || "", year: env.PRICE_YEAR_LABEL || "", save: env.PRICE_SAVE_LABEL || "" } });
   }
   if (p === "/username" && M === "GET") {
     const u = cleanUser(url.searchParams.get("u"));
@@ -221,7 +222,7 @@ async function api(req, env, url, ctx) {
     const u = await env.DB.prepare("SELECT * FROM users WHERE email = ? OR username = ?").bind(id, id.replace(/^@/, "")).first();
     // same work and the same answer for an unknown account and a wrong password
     const ok = u ? await checkPassword(u, pw) : (await pbkdf2(pw, "AAAAAAAAAAAAAAAAAAAAAA==", ITER), false);
-    if (!ok) throw fail("wrong e-mail or password", 401, { code: "password" });
+    if (!ok) throw fail("wrong e-mail or password", 401, { code: "wrong" });
     if (u.disabled) throw fail("this account is disabled", 403, { code: "disabled" });
     await promote(env, u);
     await env.DB.prepare("UPDATE users SET last_seen = ?, country = ? WHERE id = ?").bind(now(), country(req) || u.country, u.id).run();
@@ -581,8 +582,7 @@ async function adminApi(req, env, p, url) {
     const a = (await body(req)).access || {};
     const clean = {
       locked: Array.isArray(a.locked) ? a.locked.filter(x => /^[a-z0-9-]{1,80}$/.test(x)).slice(0, 500) : [],
-      exercisesPerDay: Math.max(0, Math.min(1000, Number(a.exercisesPerDay) || 0)),
-      nightFree: !!a.nightFree, iranFree: !!a.iranFree,
+      iranFree: !!a.iranFree,
       trialDays: Math.max(0, Math.min(30, Number(a.trialDays) || 0))
     };
     await env.DB.prepare("INSERT INTO settings (key, value) VALUES ('access', ?1) ON CONFLICT(key) DO UPDATE SET value = ?1").bind(JSON.stringify(clean)).run();
