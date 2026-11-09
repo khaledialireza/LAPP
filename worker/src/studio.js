@@ -4,6 +4,12 @@
 // and every heavy step — writing with Claude, making the voices, publishing — runs as the
 // "studio" GitHub Actions workflow with the same studio.py a laptop would run.
 const SLUG = /^[a-z0-9][a-z0-9-]{1,40}$/;
+// "Über die Brücke" → "ueber-die-bruecke", "Łódź" → "lodz"
+const slugify = v => {
+  let s = v.toLowerCase().replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss").replace(/ł/g, "l")
+    .normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40).replace(/-+$/, "");
+  return s.length >= 2 ? s : s ? s + "-1" : "";
+};
 const ACTIONS = ["write", "voice", "publish"];
 
 const json = (v, status = 200) => new Response(JSON.stringify(v), { status, headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
@@ -63,7 +69,12 @@ export async function studioApi(req, env, path, email) {
 
   if (req.method === "POST" && path === "/drafts") {
     const b = await req.json();
-    if (!SLUG.test(b.slug || "")) throw fail("slug: lowercase letters, digits and -", 400);
+    // the folder name is made from the title; a number is added when the name is taken
+    const base = slugify(String(b.title || "")) || "lesson";
+    const taken = async x => (await gh(env, `/contents/_studio/drafts/${x}?ref=${env.BRANCH}`)).ok || (await gh(env, `/contents/content/lessons/${x}?ref=${env.BRANCH}`)).ok;
+    let slug = base;
+    for (let n = 2; await taken(slug); n++) { if (n > 50) throw fail("too many lessons with this title", 409); slug = `${base.slice(0, 37)}-${n}`; }
+    b.slug = slug;
     if (!["de", "nl", "pl"].includes(b.course || "de")) throw fail("course: de, nl or pl", 400);
     if (!["talk", "lesson", "story"].includes(b.type) || !["A1", "A2", "B1", "B2", "C1", "C2"].includes(b.level) || !b.title) throw fail("type, level and title are required", 400);
     const draft = {

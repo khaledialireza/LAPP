@@ -68,7 +68,6 @@ dialog textarea{min-height:90px}.row2{display:grid;grid-template-columns:1fr 1fr
   <div class="row2"><div><label>Type</label><l-select name="type" value="talk"><option value="talk" data-icon="💬">Conversation</option><option value="lesson" data-icon="🎧">Lesson</option><option value="story" data-icon="📖">Story</option></l-select></div>
   <div><label>Level</label><l-select name="level" value="A1"><option value="A1">A1</option><option value="A2">A2</option><option value="B1">B1</option><option value="B2">B2</option></l-select></div></div>
   <label>Title (in the course language)</label><input name="title" required placeholder="Am Bahnhof" class="de">
-  <label>Short name (for the folder) · <span style="opacity:.7">made from the title</span></label><input name="slug" required pattern="[a-z0-9][a-z0-9\-]{1,40}" placeholder="am-bahnhof" class="de" autocomplete="off" spellcheck="false">
   <label>Topic and wishes</label><textarea name="brief" placeholder="Buying a ticket, the platform, a delay… words and grammar it should have"></textarea>
   <div class="acts"><button class="b" value="cancel" formnovalidate>Cancel</button><button class="b pr" value="ok">Create</button></div>
 </form></dialog>
@@ -173,21 +172,11 @@ document.addEventListener("input", e => {
   touch();
 });
 $("#newBtn").onclick = () => $("#dlg").showModal();
-// the folder name: lower case, a–z 0–9 and dashes; made from the title until it is typed by hand
-const slugify = v => v.toLowerCase().replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss")
-  .normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/ł/g, "l").replace(/[^a-z0-9]+/g, "-").replace(/^-+/, "").slice(0, 41);
-{
-  const t = $("#newForm [name=title]"), sl = $("#newForm [name=slug]");
-  let own = false;
-  t.addEventListener("input", () => { if (!own) sl.value = slugify(t.value).replace(/-+$/, ""); });
-  sl.addEventListener("input", () => { own = sl.value !== ""; const v = slugify(sl.value); if (v !== sl.value) sl.value = v; });
-  sl.addEventListener("change", () => { sl.value = sl.value.replace(/-+$/, ""); });
-  $("#newBtn").addEventListener("click", () => { own = false; });
-}
+
 $("#dlg").addEventListener("close", async () => {
   if ($("#dlg").returnValue !== "ok") return;
   const f = Object.fromEntries(new FormData($("#newForm")));
-  try { await call("/drafts", { method: "POST", body: JSON.stringify(f) }); $("#newForm").reset(); await list(); open(f.slug); }
+  try { const r = await call("/drafts", { method: "POST", body: JSON.stringify(f) }); $("#newForm").reset(); await list(); open(r.draft.slug); }
   catch (err) { toast(err.message); }
 });
 addEventListener("beforeunload", e => { if (dirty) { save(); e.preventDefault(); } });
