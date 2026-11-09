@@ -257,7 +257,7 @@ const LTOPIC = { daily: "Daily life", travel: "Travel & hotel", food: "Food & sh
 V.lessons = async () => {
   const { lessons } = await studio("/lessons");
   const st = { draft: ["no-p", "draft"], review: ["wa-p", "in work"], published: ["ok-p", "published"] };
-  return `<div class="top"><h1>Lessons</h1><a class="b" href="/studio?org=${SLUG}">🎬 Open the studio</a><button class="b pr" data-go="newlesson">＋ New lesson</button></div>
+  return `<div class="top"><h1>Lessons</h1><button class="b pr" data-go="newlesson">＋ New lesson</button></div>
   <p class="mu">Your school's own audio lessons. Make one, then the studio opens: write it (with AI or by hand), make the audio, publish. Published lessons can be added to a class as material — only your students see them.</p>
   ${lessons.length ? `<div class="g3">${lessons.map(l => `<a class="card" href="/studio?org=${SLUG}#script/${l.id}" style="text-decoration:none;display:flex;flex-direction:column;gap:6px">
     <span class="mu">${FLAG[l.course] || ""} ${COURSE[l.course] || ""} · ${esc(l.level)} · ${LTYPE[l.type][0]} ${esc(LTOPIC[l.topic] || "")}</span><b style="font-size:17px">${esc(l.title)}</b>

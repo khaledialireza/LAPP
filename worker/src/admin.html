@@ -155,7 +155,7 @@ V.dash = async () => {
   const s = await stats();
   const max = Math.max(1, ...s.days.map(d => d.n)), byDay = new Map(s.days.map(d => [d.d, d.n])), today = Math.floor(Date.now() / 864e5);
   const bars = Array.from({ length: 30 }, (_, i) => byDay.get(today - 29 + i) || 0);
-  return `<div class="top"><h1>Dashboard</h1><a class="b pr" href="/studio">🎬 Open the studio</a></div>
+  return `<div class="top"><h1>Dashboard</h1></div>
   <div class="kp"><div><b>${s.users}</b><span>Users · ${s.verified} verified</span></div><div><b>${s.activeWeek}</b><span>Active this week</span></div><div><b>${s.newWeek}</b><span>New this week</span></div>
    <div><b>${s.plus}</b><span>Plus subscribers</span></div><div><b>${s.trial}</b><span>In trial</span></div><div><b>${s.iran}</b><span>Iran · free</span></div><div><b>${s.staff}</b><span>Team</span></div></div>
   <div class="two"><div class="card"><h3>Sign-ups · last 30 days</h3><div class="bars">${bars.map(n => `<i style="height:${n / max * 100}%" title="${n}"></i>`).join("")}</div></div>
@@ -247,7 +247,7 @@ V.lessons = async () => {
   const { lessons } = await api("GET", "/studio/lessons");
   $("#nL").textContent = lessons.length || "";
   const cols = "grid-template-columns:1.6fr 70px 150px 110px 150px 120px 110px";
-  return `<div class="top"><h1>Lessons</h1><a class="b" href="/studio">🎬 Open the studio</a><button class="b pr" id="addLesson">＋ New lesson</button></div>
+  return `<div class="top"><h1>Lessons</h1><button class="b pr" id="addLesson">＋ New lesson</button></div>
   <p class="mu">Lessons made in the studio. Published ones are in the LAPP library for every learner (or for Plus members only).</p>
   ${lessons.length ? `<div class="row hd" style="${cols}"><span>Lesson</span><span>Level</span><span>Type</span><span>Status</span><span>Lines</span><span>Audio</span><span>Changed</span></div>
   ${lessons.map(l => `<a class="row" href="/studio#script/${l.id}" style="${cols};text-decoration:none;color:inherit">
