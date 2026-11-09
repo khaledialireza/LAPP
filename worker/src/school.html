@@ -42,7 +42,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 .hero .b{background:#fff;color:#111;border:0}
 .bar{height:6px;border-radius:3px;background:var(--p3);overflow:hidden}.bar i{display:block;height:100%;background:var(--gr)}
 .toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--p3);border:1px solid var(--ln2);border-radius:12px;padding:10px 16px;z-index:50;opacity:0;transition:.2s;pointer-events:none;max-width:90vw}.toast.on{opacity:1}
-dialog{background:var(--p2);color:var(--tx);border:1px solid var(--ln2);border-radius:18px;padding:22px;width:min(520px,94vw);max-height:90vh}dialog::backdrop{background:rgba(0,0,0,.6)}
+dialog{margin:auto;background:var(--p2);color:var(--tx);border:1px solid var(--ln2);border-radius:18px;padding:22px;width:min(520px,94vw);max-height:90vh}dialog::backdrop{background:rgba(0,0,0,.6)}
 dialog form{display:flex;flex-direction:column;gap:12px}dialog h3{font-size:18px}.f2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .checks{display:flex;flex-direction:column;gap:4px;max-height:240px;overflow:auto;border:1px solid var(--ln);border-radius:10px;padding:8px}.checks label{display:flex;gap:8px;align-items:center;font-size:13px}
 .q{border:1px solid var(--ln);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px}.q label.opt{display:flex;gap:8px;align-items:center;padding:7px 10px;border:1px solid var(--ln2);border-radius:9px;cursor:pointer}.q .right{border-color:var(--gr);background:rgba(52,211,153,.1)}.q .wrong{border-color:var(--rd);background:rgba(248,113,113,.08)}
@@ -156,7 +156,7 @@ V.overview = async () => {
   const now = Date.now(), [cl, ev, hw, fees] = await Promise.all([classes(true), events(now - DAYMS, now + 7 * DAYMS), api("GET", "/assignments"), can("admin", "finance") ? api("GET", "/fees") : null]);
   const c = S.counts, today = ev.filter(e => new Date(e.starts_at).toDateString() === new Date().toDateString());
   const due = hw.assignments.filter(a => a.due_at && a.due_at > now - DAYMS && a.due_at < now + 7 * DAYMS);
-  return `<div class="top"><h1>Overview</h1><button class="b" data-go="import">⬆ Import people (CSV)</button><button class="b pr" data-go="invite">＋ Invite people</button></div>
+  return `<div class="top"><h1>Overview</h1><button class="b" data-go="import">⬆ Import people (CSV)</button><button class="b pr" data-go="invite">＋ Add a person</button></div>
   <div class="kp"><div><b>${c.students}</b><span>Students</span></div><div><b>${cl.filter(k => !k.archived).length}</b><span>Classes</span></div><div><b>${c.teachers}</b><span>Teachers</span></div><div><b>${c.staff}</b><span>Admins & finance</span></div>${fees ? `<div><b>${money(fees.summary.open)}</b><span>Open fees · ${money(fees.summary.overdue)} overdue</span></div>` : ""}</div>
   <div class="g2"><div class="card"><h3>Classes <a class="b sm" href="#classes">All classes</a></h3>${cl.filter(k => !k.archived).slice(0, 8).map(k => `<div class="r"><span><a href="#class/${k.id}"><b>${esc(k.name)}</b></a> <span class="mu">${COURSE[k.course]} ${esc(k.level)} · ${esc(k.place)}</span></span>
     <span class="mu">${k.teacher_name || k.teacher_username ? "👤 " + esc(k.teacher_name || k.teacher_username) : `<span class="pl bad-p">No teacher</span>`} · ${k.students} students</span>${k.live_event ? `<a class="pl bad-p" href="#live/${k.live_event}">LIVE</a>` : `<span class="pl ok-p">${k.next_at ? fmtDay(k.next_at) : "no lessons planned"}</span>`}</div>`).join("") || `<div class="empty">No classes yet. <button class="b sm" data-go="newclass">Create the first class</button></div>`}</div>
@@ -187,7 +187,7 @@ V.class = async id => {
     ${ev.map(e => `<div class="r"><span><b>${fmtDay(e.starts_at)}</b> <span class="mu">${fmtTime(e.starts_at)}–${fmtTime(e.ends_at)}${e.title ? " · " + esc(e.title) : ""}</span></span><span style="display:flex;gap:6px;align-items:center">
       <span class="pl ${e.status === "live" ? "bad-p" : e.status === "done" ? "ok-p" : e.status === "cancelled" ? "no-p" : "cy-p"}">${e.status}</span>
       ${canTeach && e.status !== "cancelled" ? `<button class="b sm" data-go="attend" data-e="${e.id}">✅ Attendance</button>${e.status === "planned" ? `<button class="b sm pr" data-go="startlive" data-e="${e.id}">▶ Start</button><button class="b sm" data-go="cancelev" data-e="${e.id}">Cancel</button>` : liveBtn(e)}` : liveBtn(e)}</span></div>`).join("") || `<div class="empty">No lessons planned</div>`}</div>`;
-  if (CT === "students") body = `<div class="card"><h3>Students ${can("admin") ? `<button class="b sm" data-go="classstudents" data-k="${k.id}">Choose students</button>` : ""}</h3>${st.map(s => `<div class="r"><span><b>${esc(nameOf(s))}</b> <span class="mu">${esc(s.email)}</span></span></div>`).join("") || `<div class="empty">No students in this class yet</div>`}</div>`;
+  if (CT === "students") body = `<div class="card"><h3>Students ${can("admin") ? `<button class="b sm" data-go="classstudents" data-k="${k.id}">Choose students</button>` : ""}</h3>${st.map(s => `<div class="r"><span><b>${esc(nameOf(s))}</b> <span class="mu">@${esc(s.username)}</span></span></div>`).join("") || `<div class="empty">No students in this class yet</div>`}</div>`;
   return `<a class="crumb" href="#classes">← Classes</a><div class="top"><h1>${esc(k.name)}</h1>
     ${can("admin") ? `<button class="b" data-go="editclass" data-k="${k.id}">✎ Edit class</button>` : ""}
     ${live ? `<a class="b pr" href="#live/${live.id}">${canTeach ? "Open live class" : "Join class"}</a>` : canTeach ? (next ? `<button class="b pr" data-go="startlive" data-e="${next.id}">▶ Start live class</button>` : `<button class="b pr" data-go="startnow" data-k="${k.id}">▶ Start a live class now</button>`) : ""}</div>
@@ -333,10 +333,10 @@ V.people = async () => {
   const all = await members(true), list = all.filter(m => m.role === PF);
   const tabs = can("finance") ? [["student", "Students"]] : [["student", "Students"], ["teacher", "Teachers"], ["finance", "Finance"], ["admin", "Admins"]];
   if (can("finance")) PF = "student";
-  return `<div class="top"><h1>${can("finance") ? "Students" : "People"}</h1>${can("admin") ? `<button class="b" data-go="import">⬆ Import CSV</button><button class="b pr" data-go="invite">＋ Invite people</button>` : ""}</div>
+  return `<div class="top"><h1>${can("finance") ? "Students" : "People"}</h1>${can("admin") ? `<button class="b" data-go="import">⬆ Import CSV</button><button class="b pr" data-go="invite">＋ Add a person</button>` : ""}</div>
   <div class="tabs">${tabs.map(([k, l]) => `<button class="chip ${PF === k ? "on" : ""}" data-pf="${k}">${l} (${all.filter(m => m.role === k).length})</button>`).join("")}</div>
   <div class="card tbl"><table><tr><th>Name</th><th>E-mail</th><th>${PF === "teacher" ? "Teaches" : "Classes"}</th><th>Last seen</th><th></th></tr>
-  ${list.map(m => `<tr style="${m.active ? "" : "opacity:.5"}"><td><b>${esc(nameOf(m))}</b> <span class="mu">@${esc(m.username)}</span>${m.active ? "" : ` <span class="pl no-p">inactive</span>`}${m.verified ? "" : ` <span class="pl wa-p">invited</span>`}</td><td>${esc(m.email)}</td>
+  ${list.map(m => `<tr style="${m.active ? "" : "opacity:.5"}"><td><b>${esc(nameOf(m))}</b> <span class="mu">@${esc(m.username)}</span>${m.active ? "" : ` <span class="pl no-p">inactive</span>`}${m.verified || !m.email ? "" : ` <span class="pl wa-p">invited</span>`}</td><td>${m.email ? esc(m.email) : `<span class="mu">School login</span>`}</td>
     <td class="mu">${esc((PF === "teacher" ? m.teaches : m.classes) || "—")}</td><td class="mu">${ago(m.last_seen)}</td>
     <td>${can("admin") && m.id !== S.me.id ? `<button class="b sm" data-go="person" data-u="${m.id}">Edit</button>` : ""}</td></tr>`).join("") || `<tr><td colspan="5" class="empty">Nobody yet</td></tr>`}</table></div>`;
 };
@@ -357,42 +357,77 @@ document.addEventListener("submit", async e => {
 
 /* ================= actions ================= */
 const ACT = {};
+// a password a person can read out and type: no 0/O or 1/l/I
+function newPassword() {
+  const A = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789", r = crypto.getRandomValues(new Uint32Array(10));
+  return Array.from(r, n => A[n % A.length]).join("");
+}
+const suggestUser = name => (name || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, ".").replace(/^\.+|\.+$/g, "").slice(0, 16);
+// after creating logins: one card to read out, copy or hand over
+function credentials(list) {
+  const text = list.map(x => `${x.name ? x.name + " · " : ""}username: ${x.username} · password: ${x.password}`).join("\n");
+  form(list.length === 1 ? "Login created" : `${list.length} logins created`, [{ type: "html", html: `<p class="mu">Give these to the ${list.length === 1 ? "person" : "people"}. They sign in at <b>${location.origin}/s/${SLUG}</b> with the username and password. The password is shown only now.</p>
+    <div class="tbl"><table><tr><th>Name</th><th>Username</th><th>Password</th></tr>${list.map(x => `<tr><td>${esc(x.name || "")}</td><td><b>${esc(x.username)}</b></td><td><code style="font-size:14px">${esc(x.password)}</code></td></tr>`).join("")}</table></div>
+    <button type="button" class="b" id="copyCreds" style="align-self:flex-start">Copy all</button>` }], async () => {}, "Done");
+  $("#copyCreds").onclick = () => navigator.clipboard.writeText(text).then(() => toast("Copied"), () => toast("Select the table and copy it"));
+}
 ACT.invite = async () => {
   const cl = await classes();
-  form("Invite people", [
-    { name: "email", label: "E-mail", type: "email", required: true },
-    { type: "html", html: `<div class="f2">` }, { name: "name", label: "Name" },
-    { name: "role", label: "Role", type: "select", options: Object.entries(ROLE).map(([k, l]) => [k, l]), value: "student" }, { type: "html", html: `</div>` },
-    { name: "classIds", label: "Classes (students join them, teachers teach them)", type: "checks", options: cl.map(k => [k.id, k.name]) }
+  const pw = newPassword();
+  form("Add a person", [
+    { type: "html", html: `<p class="mu">The school gives each person a username and a password. No e-mail is needed.</p><div class="f2">` },
+    { name: "name", label: "Name", required: true, ph: "Sara Müller" },
+    { name: "role", label: "Role", type: "select", options: Object.entries(ROLE), value: "student" },
+    { name: "username", label: "Username", required: true, ph: "sara.mueller", attrs: `pattern="[a-zA-Z0-9_.]{3,20}" autocomplete="off"` },
+    { name: "password", label: "Password", value: pw, required: true, attrs: `minlength="8" autocomplete="off"` },
+    { type: "html", html: `</div>` },
+    { name: "classIds", label: "Classes (students join them, teachers teach them)", type: "checks", options: cl.map(k => [k.id, k.name]) },
+    { name: "email", label: "E-mail (optional — only if they want password resets by e-mail)", type: "email" }
   ], async v => {
-    const r = await api("POST", "/members", { email: v.email, name: v.name, role: v.role, classIds: v.classIds });
+    const r = await api("POST", "/members", { name: v.name, role: v.role, username: v.username, password: v.password, email: v.email || undefined, classIds: v.classIds, notify: false });
     if (r.failed.length) throw new Error(r.failed[0].error);
-    toast(r.added[0].invited ? "Invitation sent" : "Added — they already had a LAPP account"); MEMBERS = null; S.counts = (await api("GET", "")).counts; show();
-  }, "Invite");
+    MEMBERS = null; S.counts = (await api("GET", "")).counts; show();
+    setTimeout(() => r.added[0].created ? credentials([{ name: v.name, username: r.added[0].username, password: v.password }]) : toast("Added — this person already had a LAPP account and keeps their own password"), 50);
+  }, "Create login");
+  // a username from the name while it hasn't been typed by hand
+  const n = $("#f_name"), u = $("#f_username"); let typed = false;
+  u.oninput = () => typed = true; n.oninput = () => { if (!typed) u.value = suggestUser(n.value); };
 };
 ACT.import = () => form("Import people (CSV)", [
-  { type: "html", html: `<p class="mu">One person per line: <b>email, name, role, class</b>. Role is student, teacher, finance or admin (student if empty). Class is the exact class name (optional). You can paste from a spreadsheet.</p>` },
-  { name: "csv", label: "People", type: "textarea", ph: "sara@mail.de, Sara Müller, student, A1 Morning\nlena@school.de, Lena Klein, teacher, A1 Morning" }
+  { type: "html", html: `<p class="mu">One person per line: <b>name, username, password, role, class</b>. Leave the password empty to make one. Role is student, teacher, finance or admin (student if empty); class is the exact class name (optional). You can paste from a spreadsheet.</p>` },
+  { name: "csv", label: "People", type: "textarea", ph: "Sara Müller, sara.mueller, , student, A1 Morning\nLena Klein, lena.k, , teacher, A1 Morning" }
 ], async v => {
   const cl = await classes();
-  const people = v.csv.split(/\r?\n/).map(l => l.split(/[,;\t]/).map(x => x.trim())).filter(r => r[0] && r[0].includes("@")).map(([email, name, role, cls]) => ({ email, name, role: (role || "student").toLowerCase(), classIds: cls ? cl.filter(k => k.name.toLowerCase() === cls.toLowerCase()).map(k => k.id) : [] }));
-  if (!people.length) throw new Error("No lines with an e-mail found");
+  const people = v.csv.split(/\r?\n/).map(l => l.split(/[,;\t]/).map(x => x.trim())).filter(r => r[0] || r[1]).map(([name, username, password, role, cls]) => ({
+    name, username: username || suggestUser(name), password: password || newPassword(), role: (role || "student").toLowerCase(), notify: false,
+    classIds: cls ? cl.filter(k => k.name.toLowerCase() === cls.toLowerCase()).map(k => k.id) : [] }));
+  if (!people.length) throw new Error("No people found");
   const r = await api("POST", "/members", { people });
-  toast(`${r.added.length} added${r.failed.length ? `, ${r.failed.length} failed: ${r.failed.map(f => f.email).join(", ")}` : ""}`);
   MEMBERS = null; S.counts = (await api("GET", "")).counts; show();
+  const made = r.added.filter(a => a.created).map(a => { const p = people.find(x => x.username.toLowerCase() === a.username); return { name: p ? p.name : "", username: a.username, password: p ? p.password : "" }; });
+  setTimeout(() => {
+    if (made.length) credentials(made);
+    if (r.failed.length) toast(`${r.failed.length} not added: ${r.failed.map(f => f.error).join("; ")}`);
+  }, 50);
 }, "Import");
 ACT.person = async btn => {
   const m = (await members()).find(x => x.id === Number(btn.dataset.u));
-  form(`${nameOf(m)} · ${m.email}`, [
+  form(`${nameOf(m)}`, [
     { name: "name", label: "Name", value: m.name },
     { name: "role", label: "Role", type: "select", options: Object.entries(ROLE), value: m.role },
     { name: "active", label: "Status", type: "select", options: [["1", "Active"], ["0", "Inactive (can't open the school)"]], value: m.active ? "1" : "0" },
+    ...(m.managed ? [
+      { type: "html", html: `<div class="f2">` }, { name: "username", label: "Username", value: m.username, attrs: `pattern="[a-zA-Z0-9_.]{3,20}"` },
+      { name: "password", label: "New password (empty = keep)", attrs: `minlength="8" autocomplete="off"`, ph: "leave empty" }, { type: "html", html: `</div>` },
+      { type: "html", html: `<button type="button" class="b sm" id="genPw" style="align-self:flex-start">Make a new password</button>` }
+    ] : [{ type: "html", html: `<p class="mu">${esc(m.email)} · this person signed up themselves and manages their own password.</p>` }]),
     { type: "html", html: `<button type="button" class="b d" data-go="removeperson" data-u="${m.id}" style="align-self:flex-start">Remove from the school</button>` }
-  ], async v => { await api("PATCH", `/members/${m.id}`, { name: v.name, role: v.role, active: v.active === "1" }); toast("Saved"); MEMBERS = null; show(); });
-};
-ACT.removeperson = async btn => {
-  if (btn.dataset.sure !== "1") { btn.dataset.sure = "1"; btn.textContent = "Click again to remove"; return; }
-  await api("DELETE", `/members/${btn.dataset.u}`); $("#dlg").close(); toast("Removed from the school"); MEMBERS = null; show();
+  ], async v => {
+    await api("PATCH", `/members/${m.id}`, { name: v.name, role: v.role, active: v.active === "1", ...(m.managed ? { username: v.username, ...(v.password ? { password: v.password } : {}) } : {}) });
+    MEMBERS = null; show();
+    setTimeout(() => v.password ? credentials([{ name: v.name, username: v.username, password: v.password }]) : toast("Saved"), 50);
+  });
+  const g = $("#genPw"); if (g) g.onclick = () => { $("#f_password").value = newPassword(); };
 };
 async function classForm(k) {
   const t = await teachers();
@@ -420,7 +455,7 @@ ACT.delclass = async btn => {
 };
 ACT.classstudents = async btn => {
   const [st, { students: cur }] = await Promise.all([students(), api("GET", `/classes/${btn.dataset.k}`)]);
-  form("Students in this class", [{ name: "ids", label: "Students", type: "checks", options: st.map(s => [s.id, `${nameOf(s)} · ${s.email}`]), value: cur.map(s => s.id) }],
+  form("Students in this class", [{ name: "ids", label: "Students", type: "checks", options: st.map(s => [s.id, `${nameOf(s)} · ${s.email || "@" + s.username}`]), value: cur.map(s => s.id) }],
     async v => { await api("PUT", `/classes/${btn.dataset.k}/students`, { ids: v.ids.map(Number) }); CLASSES = null; toast("Saved"); show(); });
 };
 ACT.newevents = async btn => {
@@ -497,7 +532,7 @@ ACT.newfee = async () => {
   const [st, cl] = await Promise.all([students(), classes()]);
   const t = new Date().toISOString().slice(0, 10);
   form("New fee", [
-    { name: "studentId", label: "Student", type: "select", options: st.map(s => [s.id, `${nameOf(s)} · ${s.email}`]) },
+    { name: "studentId", label: "Student", type: "select", options: st.map(s => [s.id, `${nameOf(s)} · ${s.email || "@" + s.username}`]) },
     { name: "classId", label: "Class (optional)", type: "select", options: [["", "—"], ...cl.map(k => [k.id, k.name])] },
     { name: "title", label: "What for", value: "Course fee" },
     { type: "html", html: `<div class="f2">` }, { name: "total", label: `Amount (${S.org.currency})`, type: "number", attrs: `min="1" step="0.01" required` },

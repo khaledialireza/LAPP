@@ -49,7 +49,7 @@ main{padding:22px 26px 60px;display:flex;flex-direction:column;gap:14px;min-widt
 .bars{display:flex;align-items:flex-end;gap:3px;height:110px}.bars i{flex:1;background:linear-gradient(to top,var(--vi),var(--pk));border-radius:3px 3px 0 0;min-height:2px;opacity:.9}
 .empty{padding:30px;text-align:center;color:var(--mu)}
 .toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--p3);border:1px solid var(--ln2);border-radius:12px;padding:10px 16px;z-index:9;opacity:0;transition:.2s;pointer-events:none}.toast.on{opacity:1}
-dialog{background:var(--p2);color:var(--tx);border:1px solid var(--ln2);border-radius:18px;padding:22px;width:min(480px,92vw)}dialog::backdrop{background:rgba(0,0,0,.6)}
+dialog{margin:auto;background:var(--p2);color:var(--tx);border:1px solid var(--ln2);border-radius:18px;padding:22px;width:min(480px,92vw)}dialog::backdrop{background:rgba(0,0,0,.6)}
 dialog form{display:flex;flex-direction:column;gap:12px}dialog h3{font-size:18px}
 .grp{font-size:12px;font-weight:800;color:var(--mu);margin:8px 0 2px;letter-spacing:.4px;text-transform:uppercase}
 @media (max-width:1100px){body,body.drawer{grid-template-columns:200px 1fr}.dr{position:fixed;right:0;top:0;width:min(380px,100%);box-shadow:-20px 0 60px rgba(0,0,0,.5)}.two{grid-template-columns:1fr}}
@@ -149,7 +149,7 @@ V.users = async () => {
   <div class="flt"><input class="srch" id="q" placeholder="🔍 Search name, e-mail, username…" value="${esc(U.q)}">${F.map(([k, l]) => `<button class="chip ${U.filter === k ? "on" : ""}" data-f="${k}">${l}</button>`).join("")}</div>
   <div class="row hd"><span></span><span>User</span><span>Role</span><span>Plan</span><span>Country</span><span>Last seen</span></div>
   ${U.rows.map(u => `<div class="row ${u.id === U.sel ? "sel" : ""} ${u.disabled ? "off" : ""}" data-u="${u.id}">${avatar(u)}
-    <div class="u"><b>@${esc(u.username)}${u.name ? ` · ${esc(u.name)}` : ""}</b><small>${esc(u.email)}${u.verified ? "" : ` · <span style="color:var(--am)">unverified</span>`}</small></div>
+    <div class="u"><b>@${esc(u.username)}${u.name ? ` · ${esc(u.name)}` : ""}</b><small>${u.email.startsWith("@") ? "school login" : esc(u.email)}${u.verified ? "" : ` · <span style="color:var(--am)">unverified</span>`}</small></div>
     <div><span class="role r-${u.role}">${ROLE[u.role]}</span></div><div>${plan(u)}</div><div>${flag(u.country)}</div><div class="mu">${ago(u.last_seen)}</div></div>`).join("") || `<div class="empty">Nobody here</div>`}
   <div class="acts">${U.page ? `<button class="b" data-pg="-1">‹ Newer</button>` : ""}${r.more ? `<button class="b" data-pg="1">Older ›</button>` : ""}</div>`;
 };

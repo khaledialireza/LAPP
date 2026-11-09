@@ -517,5 +517,8 @@
   "crSoon": "soon",
   "course_de": "German",
   "course_nl": "Dutch",
-  "course_pl": "Polish"
+  "course_pl": "Polish",
+  "acEmailOrUser": "E-mail or username",
+  "acErrNoUser": "No account with this username. To create an account, enter your e-mail.",
+  "acAskSchool": "Forgot your password? Ask your school to set a new one."
 }

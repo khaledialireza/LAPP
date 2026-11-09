@@ -126,7 +126,7 @@
   const strength = pw => { let s = 0; if (pw.length >= 8) s++; if (pw.length >= 12) s++; if (/[a-z]/.test(pw) && /[A-Z]/.test(pw)) s++; if (/\d/.test(pw)) s++; if (/[^A-Za-z0-9]/.test(pw)) s++; return pw.length < 8 ? Math.min(1, s) : Math.min(4, s); };
   const initial = n => (n || "?").trim().charAt(0).toUpperCase();
   const errText = e => ({
-    email: t("acErrEmail"), password: t("acErrPassword"), wrong: t("acErrWrong"), username: t("acErrUsername"), taken: t("acErrTaken"), exists: t("acErrExists"),
+    email: t("acErrEmail"), password: t("acErrPassword"), wrong: t("acErrWrong"), nouser: t("acErrNoUser"), username: t("acErrUsername"), taken: t("acErrTaken"), exists: t("acErrExists"),
     rate: t("acErrRate"), code: t("acErrCode"), expired: t("acErrExpired"), disabled: t("acErrDisabled"), current: t("acErrCurrent"), billing: t("acErrBilling")
   })[e.code] || (e.status ? e.message : t("acErrNet"));
   const localWords = () => { try { return (JSON.parse(ls.get("lapp:known")) || []).length; } catch { return 0; } };
@@ -169,8 +169,8 @@
       // (the title, hints and divider show only beside the brand panel on wide screens)
       h += `<div class="wc-mob"><div class="wc-logo">L</div></div>`;
       if (api) h += `<div class="ac-dt">${steps(1)}<h3 class="ac-h">${esc(t(W.closable ? "acSaveT" : "acStartT"))}</h3><p class="ac-mu">${esc(t("acStartSub"))}</p></div>
-        <form class="ac-form" data-form="email" novalidate><label class="ac-l ac-dt" for="acEmail">${esc(t("acEmail"))}</label>
-        <input class="ac-in" id="acEmail" type="email" dir="ltr" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" required value="${esc(W.email)}" placeholder="${esc(t("acEmail"))}" aria-label="${esc(t("acEmail"))}">${err}
+        <form class="ac-form" data-form="email" novalidate><label class="ac-l ac-dt" for="acEmail">${esc(t("acEmailOrUser"))}</label>
+        <input class="ac-in" id="acEmail" type="text" dir="ltr" inputmode="email" autocomplete="username" autocapitalize="off" spellcheck="false" required value="${esc(W.email)}" placeholder="${esc(t("acEmailOrUser"))}" aria-label="${esc(t("acEmailOrUser"))}">${err}
         <button class="wc-go" type="submit">${esc(t("acContinue"))}</button></form>`;
       if (!W.closable) {
         if (api) h += `<div class="ac-or ac-dt">${esc(t("acOr"))}</div><button type="button" class="wc-go ac-ghost" id="wcGuest">${esc(t("wcNoLogin"))}</button>`;
@@ -183,7 +183,7 @@
         <form class="ac-form" data-form="login" novalidate><input type="email" autocomplete="username" value="${esc(W.email)}" hidden>
         <label class="ac-l" for="acPw">${esc(t("acPassword"))}</label>${pwField("acPw", "current-password")}${err}
         <button class="wc-go" type="submit">${esc(t("acSignIn"))}</button></form>
-        <button type="button" class="ac-link" data-ac="forgot">${esc(t("acForgot"))}</button><p class="wc-note">${esc(t("acStaffNote"))}</p>`;
+        ${W.noEmail ? `<p class="wc-note">${esc(t("acAskSchool"))}</p>` : `<button type="button" class="ac-link" data-ac="forgot">${esc(t("acForgot"))}</button><p class="wc-note">${esc(t("acStaffNote"))}</p>`}`;
     } else if (s === "signup") {
       const words = localWords();
       h += `${steps(2)}${back()}<h3 class="ac-h">${esc(t("acNewH"))}</h3>${mailChip()}
@@ -235,6 +235,7 @@
     else { try { await pull(); } catch {} }
     const next = new URLSearchParams(location.search).get("next");
     if (okNext(next)) { location.href = next; return; }
+    if (m.user.managed && m.orgs && m.orgs.length) { location.href = `/s/${m.orgs[0].slug}`; return; }
     if (!m.user.verified) { go("verify"); return; }
     finish(fresh);
   }
@@ -255,10 +256,17 @@
     busy(form, true);
     try {
       if (kind === "email") {
-        const email = $("#acEmail").value.trim().toLowerCase();
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) throw { code: "email" };
-        const r = await call("POST", "/auth/check", { email });
-        W.email = email; W.name = r.name || "";
+        const id = $("#acEmail").value.trim().toLowerCase().replace(/^@/, "");
+        // a username (accounts a school made) signs in; only an e-mail can start a new account
+        if (!id.includes("@")) {
+          if (!/^[a-z0-9_.]{3,20}$/.test(id)) throw { code: "nouser" };
+          const r = await call("POST", "/auth/check", { username: id });
+          W.email = id; W.name = r.name || ""; W.noEmail = !r.email;
+          go("password"); return;
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(id)) throw { code: "email" };
+        const r = await call("POST", "/auth/check", { email: id });
+        W.email = id; W.name = r.name || ""; W.noEmail = false;
         go(r.exists ? "password" : "signup"); return;
       }
       if (kind === "login") {

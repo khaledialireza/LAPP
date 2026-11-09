@@ -28,6 +28,8 @@ const STAFF = ["designer", "manager", "admin"];
 const USERNAME = /^[a-z0-9_.]{3,20}$/;
 const RESERVED = new Set(["admin", "administrator", "studio", "lapp", "root", "support", "help", "api", "system", "staff", "moderator", "official"]);
 const EMAIL = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,}$/;
+// school accounts have no address ("@username"): nothing is ever sent to them
+const hasEmail = e => !!e && !String(e).startsWith("@");
 const DEFAULT_ACCESS = { locked: [], iranFree: true, trialDays: 7 };   // locked: lesson folders that need Plus
 
 const SECURE = { "X-Content-Type-Options": "nosniff", "Referrer-Policy": "same-origin" };
@@ -134,7 +136,7 @@ async function planOf(env, req, u) {
   if (iran) return { tier: "plus", why: "iran" };
   return { tier: "free", why: "", status: s ? s.status : "" };
 }
-const publicUser = u => ({ id: u.id, email: u.email, username: u.username, name: u.name, role: u.role, verified: !!u.verified, since: new Date(u.created_at).toISOString().slice(0, 10) });
+const publicUser = u => ({ id: u.id, email: hasEmail(u.email) ? u.email : "", managed: !!u.managed_by, username: u.username, name: u.name, role: u.role, verified: !!u.verified, since: new Date(u.created_at).toISOString().slice(0, 10) });
 async function me(env, req, u) {
   const orgs = (await env.DB.prepare("SELECT o.slug, o.name, m.role FROM org_members m JOIN orgs o ON o.id = m.org_id WHERE m.user_id = ? AND m.active = 1 AND o.disabled = 0 ORDER BY o.name").bind(u.id).all()).results;
   return { user: publicUser(u), plan: await planOf(env, req, u), country: country(req), orgs };
@@ -142,7 +144,7 @@ async function me(env, req, u) {
 // what school.js needs from here
 const H = {
   json, fail, body, need: (req, env, roles) => need(req, env, roles), sendMail, newCode, hashPassword, rand, b64url,
-  appUrl, cleanEmail, cleanUser, EMAIL, USERNAME, RESERVED, now, DAY
+  appUrl, cleanEmail, cleanUser, EMAIL, USERNAME, RESERVED, now, DAY, hasEmail
 };
 
 /* ================= e-mail ================= */
@@ -152,6 +154,7 @@ const T = {
   reset: (link) => ({ subject: "Reset your LAPP password", text: `Someone (hopefully you) asked to reset the password of your LAPP account.\n\nOpen this link to choose a new password (valid for 1 hour):\n${link}\n\nIf this wasn't you, ignore this e-mail — your password stays the same.` })
 };
 async function sendMail(env, to, { subject, text }) {
+  if (!hasEmail(to)) return false;
   if (!env.RESEND_API_KEY) { console.log(`[mail to ${to}] ${subject}\n${text}`); return false; }
   const html = `<div style="font-family:system-ui,sans-serif;font-size:16px;line-height:1.5;max-width:480px">${text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/(https?:\/\/\S+)/g, '<a href="$1">$1</a>').replace(/\n/g, "<br>")}</div>`;
   const r = await fetch("https://api.resend.com/emails", {
@@ -200,13 +203,20 @@ async function api(req, env, url, ctx) {
   }
 
   /* ---- accounts ---- */
+  // the sign-in card asks for an e-mail or a username: known → password, new e-mail → sign-up
   if (p === "/auth/check" && M === "POST") {
-    const { email } = await body(req);
-    const e = cleanEmail(email);
-    if (!EMAIL.test(e)) throw fail("enter a valid e-mail", 400, { code: "email" });
+    const b = await body(req);
+    const e = cleanEmail(b.email || b.username);
     await limit(env, `check:${ip(req)}`, 30, 60e3);
+    if (!e.includes("@") || e.startsWith("@")) {
+      const un = cleanUser(e);
+      const u = USERNAME.test(un) ? await env.DB.prepare("SELECT name, username, email FROM users WHERE username = ?").bind(un).first() : null;
+      if (!u) throw fail("no account with this username", 404, { code: "nouser" });
+      return json({ exists: true, name: u.name || u.username, username: u.username, email: hasEmail(u.email) });
+    }
+    if (!EMAIL.test(e)) throw fail("enter a valid e-mail", 400, { code: "email" });
     const u = await env.DB.prepare("SELECT name, username FROM users WHERE email = ?").bind(e).first();
-    return json({ exists: !!u, name: u ? (u.name || u.username) : "" });
+    return json({ exists: !!u, name: u ? (u.name || u.username) : "", email: true });
   }
 
   if (p === "/auth/signup" && M === "POST") {
@@ -257,7 +267,7 @@ async function api(req, env, url, ctx) {
     await limit(env, `forgot:${e}`, 3, 3600e3);
     const u = await env.DB.prepare("SELECT * FROM users WHERE email = ?").bind(e).first();
     let dev = {};
-    if (u && !u.disabled) {
+    if (u && !u.disabled && hasEmail(u.email)) {
       const token = await newCode(env, u, "reset");
       await sendMail(env, u.email, T.reset(`${appUrl(env, req)}/?reset=${token}`));
       if (env.DEV === "1") dev = { devToken: token };

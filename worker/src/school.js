@@ -54,22 +54,42 @@ async function myClassIds(env, c) {
 }
 const inList = ids => ids.length ? `(${ids.map(Number).join(",")})` : "(-1)";
 
-/* ---------------- adding people: existing account, or a new one with an invitation ---------------- */
+/* ---------------- adding people ----------------
+   1. a school account: username + password from the school, no e-mail (the usual way at a school)
+   2. by e-mail: an existing LAPP account joins; a new one gets an invitation (or the school's password) */
 async function addPerson(env, H, req, org, by, p) {
-  const email = H.cleanEmail(p.email), role = ROLES.includes(p.role) ? p.role : "student";
-  if (!H.EMAIL.test(email)) throw H.fail(`not a valid e-mail: ${p.email || "(empty)"}`);
-  let u = await env.DB.prepare("SELECT * FROM users WHERE email = ?").bind(email).first();
-  let invited = false;
-  if (!u) {
-    // a username from the e-mail, made unique
-    let base = (H.cleanUser(p.username) || email.split("@")[0]).toLowerCase().replace(/[^a-z0-9_.]/g, "").slice(0, 16);
-    if (base.length < 3) base = (base + "user").slice(0, 16);
-    let un = base, n = 1;
-    while (H.RESERVED.has(un) || await env.DB.prepare("SELECT 1 FROM users WHERE username = ?").bind(un).first()) un = `${base}${++n}`;
-    const h = await H.hashPassword(H.b64url(H.rand(24)));
-    u = await env.DB.prepare("INSERT INTO users (email, username, name, pw_hash, salt, iter, created_at) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING *")
-      .bind(email, un, str(p.name, 40), h.pw_hash, h.salt, h.iter, H.now()).first();
-    invited = true;
+  const role = ROLES.includes(p.role) ? p.role : "student";
+  const email = p.email ? H.cleanEmail(p.email) : "";
+  const password = String(p.password || "");
+  if (password && (password.length < 8 || password.length > 200)) throw H.fail("password: at least 8 characters");
+  let u = null, created = false;
+
+  if (!email) {
+    const un = H.cleanUser(p.username);
+    if (!H.USERNAME.test(un) || H.RESERVED.has(un)) throw H.fail(`username "${p.username || ""}": 3–20 letters, digits, _ or .`);
+    if (!password) throw H.fail(`a password is needed for ${un}`);
+    if (await env.DB.prepare("SELECT 1 FROM users WHERE username = ?").bind(un).first()) throw H.fail(`the username ${un} is taken`, 409);
+    const h = await H.hashPassword(password);
+    u = await env.DB.prepare("INSERT INTO users (email, username, name, pw_hash, salt, iter, verified, managed_by, created_at) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?) RETURNING *")
+      .bind("@" + un, un, str(p.name, 40), h.pw_hash, h.salt, h.iter, org.id, H.now()).first();
+    created = true;
+  } else {
+    if (!H.EMAIL.test(email)) throw H.fail(`not a valid e-mail: ${p.email}`);
+    u = await env.DB.prepare("SELECT * FROM users WHERE email = ?").bind(email).first();
+    if (!u) {
+      let un = H.cleanUser(p.username);
+      if (!(H.USERNAME.test(un) && !H.RESERVED.has(un) && !(await env.DB.prepare("SELECT 1 FROM users WHERE username = ?").bind(un).first()))) {
+        // a free username from the e-mail
+        let base = email.split("@")[0].toLowerCase().replace(/[^a-z0-9_.]/g, "").slice(0, 16);
+        if (base.length < 3) base = (base + "user").slice(0, 16);
+        un = base; let n = 1;
+        while (H.RESERVED.has(un) || await env.DB.prepare("SELECT 1 FROM users WHERE username = ?").bind(un).first()) un = `${base}${++n}`;
+      }
+      const h = await H.hashPassword(password || H.b64url(H.rand(24)));
+      u = await env.DB.prepare("INSERT INTO users (email, username, name, pw_hash, salt, iter, verified, managed_by, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *")
+        .bind(email, un, str(p.name, 40), h.pw_hash, h.salt, h.iter, password ? 1 : 0, org.id, H.now()).first();
+      created = true;
+    }
   }
   await env.DB.prepare("INSERT INTO org_members (org_id, user_id, role, active, created_at) VALUES (?1, ?2, ?3, 1, ?4) ON CONFLICT(org_id, user_id) DO UPDATE SET role = ?3, active = 1")
     .bind(org.id, u.id, role, H.now()).run();
@@ -78,17 +98,18 @@ async function addPerson(env, H, req, org, by, p) {
     if (k && role === "student") await env.DB.prepare("INSERT OR IGNORE INTO class_students (class_id, user_id) VALUES (?, ?)").bind(k.id, u.id).run();
     if (k && role === "teacher") await env.DB.prepare("UPDATE classes SET teacher_id = ? WHERE id = ?").bind(u.id, k.id).run();
   }
+  // e-mail only where there is an address and the school wants it
   const base = H.appUrl(env, req);
   let sent = false;
-  if (p.notify !== false) {
-    if (invited) {
+  if (email && p.notify !== false) {
+    if (created && !password) {
       const token = await H.newCode(env, u, "reset", 7 * H.DAY);
       sent = await H.sendMail(env, email, { subject: `${org.name} invited you to LAPP`, text: `${by.name || by.username} added you to ${org.name} on LAPP as ${role}.\n\nChoose your password and sign in (link valid for 7 days):\n${base}/?reset=${token}&next=/s/${org.slug}\n\nAfterwards your school is always at ${base}/s/${org.slug}` });
     } else {
-      sent = await H.sendMail(env, email, { subject: `You were added to ${org.name}`, text: `${by.name || by.username} added you to ${org.name} on LAPP as ${role}.\n\nSign in with your LAPP account: ${base}/s/${org.slug}` });
+      sent = await H.sendMail(env, email, { subject: `You were added to ${org.name}`, text: `${by.name || by.username} added you to ${org.name} on LAPP as ${role}.\n\nSign in: ${base}/s/${org.slug}` });
     }
   }
-  return { id: u.id, email, username: u.username, invited, sent };
+  return { id: u.id, email: H.hasEmail(u.email) ? u.email : "", username: u.username, created, sent };
 }
 
 /* ---------------- money helpers ---------------- */
@@ -192,7 +213,8 @@ export async function orgApi(req, env, H, slug, p, url) {
   if (p === "/members" && M === "GET") {
     allow(c, "admin", "teacher", "finance");
     const role = url.searchParams.get("role");
-    const rows = (await DB.prepare(`SELECT u.id, u.username, u.name, u.email, u.verified, u.last_seen, m.role, m.active, m.created_at,
+    const rows = (await DB.prepare(`SELECT u.id, u.username, u.name, CASE WHEN u.email LIKE '@%' THEN '' ELSE u.email END AS email, u.verified, u.last_seen, m.role, m.active, m.created_at,
+        (u.managed_by = m.org_id) AS managed,
         (SELECT GROUP_CONCAT(k.name, ', ') FROM class_students s JOIN classes k ON k.id = s.class_id WHERE s.user_id = u.id AND k.org_id = m.org_id) AS classes,
         (SELECT GROUP_CONCAT(k.name, ', ') FROM classes k WHERE k.teacher_id = u.id AND k.org_id = m.org_id) AS teaches
       FROM org_members m JOIN users u ON u.id = m.user_id WHERE m.org_id = ? ${role && ROLES.includes(role) ? "AND m.role = ?" : ""} ORDER BY m.role, u.name, u.username`)
@@ -227,6 +249,23 @@ export async function orgApi(req, env, H, slug, p, url) {
     await DB.prepare("UPDATE org_members SET role = COALESCE(?, role), active = COALESCE(?, active) WHERE org_id = ? AND user_id = ?")
       .bind(b.role ?? null, b.active === undefined ? null : (b.active ? 1 : 0), c.org.id, uid).run();
     if (b.name !== undefined) await DB.prepare("UPDATE users SET name = ? WHERE id = ?").bind(str(b.name, 40), uid).run();
+    if (b.password !== undefined || b.username !== undefined) {
+      // only accounts this school made; people who signed up themselves keep their own password
+      const t = await DB.prepare("SELECT * FROM users WHERE id = ?").bind(uid).first();
+      if (!t || t.managed_by !== c.org.id) throw H.fail("this person manages their own login", 403);
+      if (b.username !== undefined && H.cleanUser(b.username) !== t.username) {
+        const un = H.cleanUser(b.username);
+        if (!H.USERNAME.test(un) || H.RESERVED.has(un)) throw H.fail("username: 3–20 letters, digits, _ or .");
+        if (await DB.prepare("SELECT 1 FROM users WHERE username = ?").bind(un).first()) throw H.fail("this username is taken", 409);
+        await DB.prepare("UPDATE users SET username = ?, email = CASE WHEN email LIKE '@%' THEN ? ELSE email END WHERE id = ?").bind(un, "@" + un, uid).run();
+      }
+      if (b.password) {
+        const pw = String(b.password);
+        if (pw.length < 8 || pw.length > 200) throw H.fail("password: at least 8 characters");
+        const h = await H.hashPassword(pw);
+        await DB.batch([DB.prepare("UPDATE users SET pw_hash = ?, salt = ?, iter = ? WHERE id = ?").bind(h.pw_hash, h.salt, h.iter, uid), DB.prepare("DELETE FROM sessions WHERE user_id = ?").bind(uid)]);
+      }
+    }
     return H.json({ ok: true });
   }
 
@@ -252,7 +291,7 @@ export async function orgApi(req, env, H, slug, p, url) {
     const k = await classOf(env, c, m[1], H);
     if (M === "GET") {
       await mustSee(env, c, k, H);
-      const students = canTeach(c, k) || c.role === "finance" ? (await DB.prepare("SELECT u.id, u.username, u.name, u.email FROM class_students s JOIN users u ON u.id = s.user_id WHERE s.class_id = ? ORDER BY u.name, u.username").bind(k.id).all()).results : [];
+      const students = canTeach(c, k) || c.role === "finance" ? (await DB.prepare("SELECT u.id, u.username, u.name, CASE WHEN u.email LIKE '@%' THEN '' ELSE u.email END AS email FROM class_students s JOIN users u ON u.id = s.user_id WHERE s.class_id = ? ORDER BY u.name, u.username").bind(k.id).all()).results : [];
       const teacher = k.teacher_id ? await DB.prepare("SELECT id, username, name FROM users WHERE id = ?").bind(k.teacher_id).first() : null;
       return H.json({ class: k, teacher, students, canTeach: canTeach(c, k) });
     }
@@ -468,7 +507,7 @@ export async function orgApi(req, env, H, slug, p, url) {
   if (p === "/fees" && M === "GET") {
     const mine = c.role === "student" || url.searchParams.get("mine") === "1";
     if (!mine) allow(c, "admin", "finance");
-    const rows = (await DB.prepare(`SELECT f.*, u.name student_name, u.username student_username, u.email student_email, k.name class_name
+    const rows = (await DB.prepare(`SELECT f.*, u.name student_name, u.username student_username, CASE WHEN u.email LIKE '@%' THEN '@' || u.username ELSE u.email END AS student_email, k.name class_name
       FROM fees f JOIN users u ON u.id = f.student_id LEFT JOIN classes k ON k.id = f.class_id WHERE f.org_id = ? ${mine ? "AND f.student_id = ?" : ""} ORDER BY u.name, u.username, f.created_at`)
       .bind(c.org.id, ...(mine ? [c.u.id] : [])).all()).results;
     const ins = rows.length ? (await DB.prepare(`SELECT * FROM installments WHERE fee_id IN ${inList(rows.map(r => r.id))} ORDER BY due_on`).all()).results : [];
