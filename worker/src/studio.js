@@ -10,7 +10,7 @@ const slugify = v => {
     .normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40).replace(/-+$/, "");
   return s.length >= 2 ? s : s ? s + "-1" : "";
 };
-const ACTIONS = ["write", "voice", "publish"];
+const ACTIONS = ["write", "translate", "voice", "publish"];
 
 const json = (v, status = 200) => new Response(JSON.stringify(v), { status, headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
 const fail = (message, status) => Object.assign(new Error(message), { status });

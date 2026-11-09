@@ -116,6 +116,7 @@
  "Fees": "Оплати",
  "File": "Файл",
  "Fill the gaps — Im Hotel": "Заповніть пропуски — Im Hotel",
+ "Fill {a} missing translations": "Заповнити відсутні переклади: {a}",
  "Finance": "Фінанси",
  "First lesson": "Перший урок",
  "First payment due": "Термін першого платежу",
@@ -261,6 +262,7 @@
  "Only an admin can change team accounts.": "Лише адміністратор може змінювати облікові записи команди.",
  "Only an admin can change these.": "Лише адміністратор може це змінювати.",
  "Only an admin manages schools.": "Лише адміністратор керує школами.",
+ "Only the missing ones; nothing else changes": "Лише відсутні; решта не змінюється",
  "Open": "Відкрити",
  "Open Stripe ↗": "Відкрити Stripe ↗",
  "Open fees": "Неоплачені",
@@ -400,6 +402,7 @@
  "Topic (optional)": "Тема (необов’язково)",
  "Topic and wishes": "Тема й побажання",
  "Total": "Разом",
+ "Translating started…": "Переклад почався…",
  "Trial": "Пробний",
  "Type": "Тип",
  "Undo": "Скасувати",
@@ -447,6 +450,7 @@
  "installments": "платежів",
  "invited": "запрошений",
  "leave empty": "залиште порожнім",
+ "made from the title": "створюється з назви",
  "monthly": "щомісяця",
  "name, username, password, role, class": "name, username, password, role, class",
  "not verified": "не підтверджено",
@@ -492,6 +496,5 @@
  "{a} students": "{a} учнів",
  "{a} · this person signed up themselves and manages their own password.": "{a} · ця людина зареєструвалася сама й сама керує паролем.",
  "{a} · {b}": "{a} · {b}",
- "{a}/{b} handed in": "{a}/{b} здано",
- "made from the title": "створюється з назви"
+ "{a}/{b} handed in": "{a}/{b} здано"
 }

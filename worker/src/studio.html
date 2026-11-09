@@ -75,6 +75,11 @@ dialog textarea{min-height:90px}.row2{display:grid;grid-template-columns:1fr 1fr
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const COL = ["#38BDF8", "#FF3D7F", "#8B5CF6", "#34D399", "#FBBF24"];
+// translations the draft still lacks (older drafts have no English, for example)
+const TR = ["en", "fa", "ru", "uk"];
+const missingTr = () => !D ? 0 : TR.filter(l => !(D.tr && D.tr[l] && D.tr[l].title)).length
+  + D.scenes.reduce((n, sc) => n + TR.filter(l => !sc.title[l]).length + sc.lines.reduce((m, ln) => m + TR.filter(l => !ln[l]).length, 0), 0)
+  + (D.phrases || []).reduce((n, ph) => n + TR.filter(l => !ph[l]).length, 0);
 const TYPE = { talk: "Conversation", lesson: "Lesson", story: "Story" };
 const STATUS = { draft: "Draft", review: "Review", published: "Published" };
 let D = null, SHA = null, lang = (() => { try { const l = localStorage.getItem("lapp:lang"); return ["fa", "ru", "uk"].includes(l) ? l : "en"; } catch { return "en"; } })(), dirty = false, saving = null, audioFor = null;
@@ -118,6 +123,7 @@ function render() {
   $("#main").innerHTML = `<div class="top"><h1 class="de">${esc(D.title)}</h1>
       ${["en", "fa", "ru", "uk"].map(l => `<span class="chip ${l === lang ? "on" : ""}" data-l="${l}">${l.toUpperCase()}</span>`).join("")}
       <button class="b" data-run="write">✦ Write with AI</button>
+      ${missingTr() ? `<button class="b" data-run="translate" title="Only the missing ones; nothing else changes">🌐 Fill ${missingTr()} missing translations</button>` : ""}
       <button class="b" data-run="voice" ${rows.length ? "" : "disabled"}>🎙 Make audio</button>
       <button class="b pr" data-run="publish" ${rows.length && done === rows.length && audioFor ? "" : "disabled"} title="When every line is approved and the audio is made">🚀 Publish</button></div>
     <p class="brief">${esc(D.brief || "")}</p>
@@ -161,7 +167,7 @@ document.addEventListener("click", async e => {
     await save();
     const what = run.dataset.run;
     if (what === "write" && D.scenes.length && !confirm("The new text replaces the current text. Continue?")) return;
-    try { await call(`/run/${what}/${D.slug}`, { method: "POST", body: "{}" }); toast({ write: "Writing started…", voice: "Making audio started…", publish: "Publishing started…" }[what]); setTimeout(runs, 3000); }
+    try { await call(`/run/${what}/${D.slug}`, { method: "POST", body: "{}" }); toast({ write: "Writing started…", translate: "Translating started…", voice: "Making audio started…", publish: "Publishing started…" }[what]); setTimeout(runs, 3000); }
     catch (err) { toast(err.message); }
   }
 });

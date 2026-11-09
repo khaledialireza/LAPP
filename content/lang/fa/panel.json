@@ -116,6 +116,7 @@
  "Fees": "شهریه‌ها",
  "File": "فایل",
  "Fill the gaps — Im Hotel": "جای خالی را پر کن — Im Hotel",
+ "Fill {a} missing translations": "{a} ترجمهٔ جاافتاده را پر کن",
  "Finance": "مالی",
  "First lesson": "اولین جلسه",
  "First payment due": "مهلت اولین پرداخت",
@@ -261,6 +262,7 @@
  "Only an admin can change team accounts.": "فقط مدیر می‌تواند حساب‌های تیم را تغییر دهد.",
  "Only an admin can change these.": "فقط مدیر می‌تواند این‌ها را تغییر دهد.",
  "Only an admin manages schools.": "فقط مدیر مدرسه‌ها را مدیریت می‌کند.",
+ "Only the missing ones; nothing else changes": "فقط جاافتاده‌ها؛ چیز دیگری عوض نمی‌شود",
  "Open": "باز کردن",
  "Open Stripe ↗": "باز کردن Stripe ↗",
  "Open fees": "شهریه‌های باز",
@@ -400,6 +402,7 @@
  "Topic (optional)": "موضوع (اختیاری)",
  "Topic and wishes": "موضوع و خواسته‌ها",
  "Total": "جمع",
+ "Translating started…": "ترجمه شروع شد…",
  "Trial": "آزمایشی",
  "Type": "نوع",
  "Undo": "برگرداندن",
@@ -447,6 +450,7 @@
  "installments": "قسط",
  "invited": "دعوت‌شده",
  "leave empty": "خالی بگذار",
+ "made from the title": "از روی عنوان ساخته می‌شود",
  "monthly": "ماهانه",
  "name, username, password, role, class": "name, username, password, role, class",
  "not verified": "تأیید نشده",
@@ -492,6 +496,5 @@
  "{a} students": "‏{a} شاگرد",
  "{a} · this person signed up themselves and manages their own password.": "‏{a} · این فرد خودش ثبت‌نام کرده و رمزش را خودش مدیریت می‌کند.",
  "{a} · {b}": "{a} · {b}",
- "{a}/{b} handed in": "‏{a}/{b} تحویل شده",
- "made from the title": "از روی عنوان ساخته می‌شود"
+ "{a}/{b} handed in": "‏{a}/{b} تحویل شده"
 }

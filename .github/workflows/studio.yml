@@ -1,5 +1,6 @@
 # LAPP Studio: the heavy steps the web panel (lapp.khaledi.eu/studio) asks for.
 # write   → Claude writes the script from the draft's brief
+# translate → Claude fills only the translations a draft is missing
 # voice   → every line is spoken, joined, timed (Piper offline, or Azure when its key is set)
 # publish → the approved draft becomes content/lessons/<NN-slug>/ and the site updates
 name: studio
@@ -8,7 +9,7 @@ run-name: "studio ${{ inputs.action }} ${{ inputs.slug }}"
 on:
   workflow_dispatch:
     inputs:
-      action: { description: "write, voice or publish", type: choice, options: [write, voice, publish], required: true }
+      action: { description: "write, translate, voice or publish", type: choice, options: [write, translate, voice, publish], required: true }
       slug: { description: "draft folder in _studio/drafts", type: string, required: true }
       force: { description: "skip the checks", type: boolean, default: false }
 
@@ -39,7 +40,7 @@ jobs:
           AZURE_SPEECH_REGION: ${{ secrets.AZURE_SPEECH_REGION }}
         run: |
           [[ "$SLUG" =~ ^[a-z0-9][a-z0-9-]{1,40}$ ]] || { echo "bad slug"; exit 1; }
-          if [ "$ACTION" = "write" ]; then python3 _studio/studio.py write "$SLUG"
+          if [ "$ACTION" = "write" ] || [ "$ACTION" = "translate" ]; then python3 _studio/studio.py "$ACTION" "$SLUG"
           else python3 _studio/studio.py "$ACTION" "$SLUG" $FORCE; fi
       - name: save
         env: { ACTION: "${{ inputs.action }}", SLUG: "${{ inputs.slug }}" }

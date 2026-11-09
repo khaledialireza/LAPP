@@ -158,6 +158,63 @@ def cmd_write(a):
     cmd_check(argparse.Namespace(slug=a.slug))
 
 
+def cmd_translate(a):
+    """Claude fills only the missing translations (title, summary, lines, phrases); nothing else changes"""
+    if not os.environ.get("ANTHROPIC_API_KEY"): sys.exit("ANTHROPIC_API_KEY is not set")
+    import anthropic
+    d = load(a.slug)
+    names = {"en": "English", "fa": "Persian", "ru": "Russian", "uk": "Ukrainian"}
+    todo = {"tr": {l: d["tr"].get(l, {}) for l in LANGS if not d["tr"].get(l, {}).get("title")}, "scenes": [], "lines": [], "phrases": []}
+    for si, sc in enumerate(d["scenes"]):
+        miss = [l for l in LANGS if not sc["title"].get(l)]
+        if miss: todo["scenes"].append({"id": si, "text": sc["title"].get("de", ""), "need": miss})
+    for si, li, ln in lines_of(d):
+        miss = [l for l in LANGS if not ln.get(l)]
+        if miss: todo["lines"].append({"id": f"{si}.{li}", "text": ln["de"], "need": miss})
+    for pi, ph in enumerate(d.get("phrases", [])):
+        miss = [l for l in LANGS if not ph.get(l)]
+        if miss: todo["phrases"].append({"id": pi, "text": ph.get("de", ""), "need": miss})
+    if not any(todo.values()): print("✓ nothing missing"); return
+    lang = COURSES[course(d)]["name"]
+    script = "\n".join(ln["de"] for *_, ln in lines_of(d))
+    prompt = f"""This is a {lang} lesson for learners ({d['level']}), titled "{d['title']}":
+{script}
+
+Translate naturally (not word for word) only what is listed below. Languages: {", ".join(f"{k} = {v}" for k, v in names.items())}.
+- "tr": for each language key, a short "title" and a one-sentence "summary" of the lesson
+- "scenes" (scene titles), "lines" and "phrases": for each id, the text in every language listed in "need"
+Answer with JSON only: {{"tr": {{"<lang>": {{"title": "", "summary": ""}}}}, "scenes": {{"<id>": {{"<lang>": ""}}}}, "lines": {{"<id>": {{"<lang>": ""}}}}, "phrases": {{"<id>": {{"<lang>": ""}}}}}}
+
+{json.dumps(todo, ensure_ascii=False)}"""
+    client = anthropic.Anthropic()
+    with client.beta.messages.stream(
+            model="claude-opus-5-5", max_tokens=64000,
+            thinking={"type": "adaptive"}, output_config={"effort": "low"},
+            betas=["server-side-fallback-2026-07-01"], fallbacks="default",
+            messages=[{"role": "user", "content": prompt}]) as stream:
+        msg = stream.get_final_message()
+    if msg.stop_reason == "refusal": sys.exit(f"the model declined: {getattr(msg.stop_details, 'explanation', '')}")
+    if msg.stop_reason == "max_tokens": sys.exit("the answer was cut off (max_tokens)")
+    m = re.search(r"\{.*\}", "".join(b.text for b in msg.content if b.type == "text"), re.S)
+    if not m: sys.exit("no JSON in the answer")
+    got = json.loads(m.group(0)); n = 0
+    for l, v in (got.get("tr") or {}).items():
+        if l in LANGS and v.get("title"): d["tr"][l] = {"title": v["title"], "summary": v.get("summary", "")}; n += 1
+    for k, v in (got.get("scenes") or {}).items():
+        for l, t in (v or {}).items():
+            if str(k).isdigit() and int(k) < len(d["scenes"]) and l in LANGS and t and not d["scenes"][int(k)]["title"].get(l): d["scenes"][int(k)]["title"][l] = t; n += 1
+    lines = {f"{si}.{li}": ln for si, li, ln in lines_of(d)}
+    for k, v in (got.get("lines") or {}).items():
+        for l, t in (v or {}).items():
+            if k in lines and l in LANGS and t and not lines[k].get(l): lines[k][l] = t; n += 1
+    for k, v in (got.get("phrases") or {}).items():
+        ph = d.get("phrases", [])
+        for l, t in (v or {}).items():
+            if str(k).isdigit() and int(k) < len(ph) and l in LANGS and t and not ph[int(k)].get(l): ph[int(k)][l] = t; n += 1
+    save(a.slug, d); print(f"✓ {n} translations added")
+    cmd_check(argparse.Namespace(slug=a.slug))
+
+
 # ---------------------------------------------------------------- check
 def dict_forms(c="de"):
     de = json.loads((CONTENT / f"lang/{c}/dict.json").read_text("utf-8"))
@@ -169,15 +226,16 @@ def dict_forms(c="de"):
     return forms, names
 
 
-def cmd_check(a):
+def cmd_check(a, translations=True):
+    """translations=False: only what the audio needs (the course-language text and its speakers)"""
     d = load(a.slug); forms, names = dict_forms(course(d)); problems, unknown = [], {}
     if not d["scenes"]: problems.append("no scenes yet")
-    for l in LANGS:
+    for l in LANGS if translations else []:
         if not d["tr"].get(l, {}).get("title"): problems.append(f"title missing in {l}")
     for si, li, ln in lines_of(d):
         at = f"scene {si + 1} line {li + 1}"
         if ln.get("who") and ln["who"] not in d["cast"]: problems.append(f"{at}: speaker {ln['who']} has no voice")
-        for l in LANGS:
+        for l in LANGS if translations else []:
             if not ln.get(l): problems.append(f"{at}: no {l}")
         words = re.findall(r"[^\W\d_]+", ln["de"])
         if len(words) > MAX_WORDS[d["level"]]: problems.append(f"{at}: {len(words)} words (> {MAX_WORDS[d['level']]} for {d['level']})")
@@ -286,7 +344,7 @@ def write_mp3(path, x):
 def cmd_voice(a):
     import numpy as np
     d = load(a.slug)
-    if cmd_check(argparse.Namespace(slug=a.slug)) and not a.force: sys.exit("fix the problems first (or --force)")
+    if cmd_check(argparse.Namespace(slug=a.slug), translations=False) and not a.force: sys.exit("fix the problems first (or --force)")
     parts, timings, t = [], [], 0.4
     parts.append(np.zeros(int(0.4 * RATE), np.float32))
     cdir = DRAFTS / a.slug / "clips"; cdir.mkdir(exist_ok=True)
@@ -429,11 +487,12 @@ def main():
     p = sub.add_parser("import"); p.add_argument("slug"); p.add_argument("file")
     sub.add_parser("check").add_argument("slug")
     sub.add_parser("write").add_argument("slug")
+    sub.add_parser("translate").add_argument("slug")
     for c in ("voice", "publish"):
         p = sub.add_parser(c); p.add_argument("slug"); p.add_argument("--force", action="store_true")
     sub.add_parser("serve").add_argument("--port", type=int, default=8787)
     a = ap.parse_args()
-    r = {"new": cmd_new, "prompt": cmd_prompt, "write": cmd_write, "import": cmd_import, "check": cmd_check, "voice": cmd_voice, "publish": cmd_publish, "serve": cmd_serve}[a.cmd](a)
+    r = {"new": cmd_new, "prompt": cmd_prompt, "write": cmd_write, "translate": cmd_translate, "import": cmd_import, "check": cmd_check, "voice": cmd_voice, "publish": cmd_publish, "serve": cmd_serve}[a.cmd](a)
     if a.cmd == "check" and r: sys.exit(1)
 
 
