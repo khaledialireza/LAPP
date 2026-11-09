@@ -13,6 +13,7 @@ body::before{content:"";position:fixed;inset:-30% -10% auto auto;width:720px;hei
 button{font:inherit;color:inherit;cursor:pointer}
 aside{background:var(--p1);border-inline-start:1px solid var(--ln);padding:16px;display:flex;flex-direction:column;gap:10px;height:100vh;position:sticky;top:0;overflow:auto;z-index:1}
 .lg{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px}.lg i{width:36px;height:36px;border-radius:11px;background:var(--g);display:grid;place-items:center;font:800 17px Inter;font-style:normal;box-shadow:0 8px 24px rgba(255,61,127,.35)}
+.nav{display:flex;gap:6px;margin:0 0 4px}.nav a{flex:1;text-align:center;padding:7px;border-radius:10px;background:rgba(255,255,255,.06);color:inherit;text-decoration:none;font-size:12.5px}.nav a:hover{background:rgba(255,255,255,.12)}
 .me{font-size:11.5px;color:var(--mu2);margin:-4px 0 6px 46px}
 .new{height:40px;border-radius:12px;border:0;background:var(--g);font-weight:700}
 .dr{padding:10px 12px;border-radius:12px;border:1px solid transparent;cursor:pointer}.dr:hover{background:var(--p2)}.dr.on{background:var(--p3);border-color:var(--ln2)}
@@ -51,6 +52,7 @@ dialog textarea{min-height:90px}.row2{display:grid;grid-template-columns:1fr 1fr
 </style></head><body>
 <aside>
   <div class="lg"><i>L</i>Studio</div><div class="me" id="me"></div>
+  <nav class="nav"><a href="/admin">🛠 پنل مدیریت</a><a href="/">← اپ</a></nav>
   <button class="new" id="newBtn">＋ محتوای تازه</button>
   <div id="list"></div>
   <div class="runs"><h4>کارهای در جریان</h4><div id="runs"></div></div>
