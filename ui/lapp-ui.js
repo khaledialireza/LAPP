@@ -16,7 +16,7 @@
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 
   const css = `
-  l-select,l-date{display:block;position:relative;min-width:0;font:inherit}
+  l-select>option{display:none}l-select,l-date{display:block;position:relative;min-width:0;font:inherit}
   .lu-field{width:100%;display:flex;align-items:center;gap:8px;min-height:42px;padding:6px 10px 6px 11px;border-radius:var(--ui-radius,10px);
     background:var(--ui-surface-2,#1C1C29);border:1px solid var(--ui-line,rgba(255,255,255,.14));color:var(--ui-text,#F4F4F8);cursor:pointer;text-align:start;font:inherit}
   .lu-field:focus-visible,l-select[open] .lu-field,l-date[open] .lu-field{outline:none;border-color:var(--ui-accent,#8B5CF6);box-shadow:0 0 0 3px color-mix(in srgb,var(--ui-accent,#8B5CF6) 22%,transparent)}
@@ -94,7 +94,10 @@
   class LSelect extends Base {
     static get observedAttributes() { return ["disabled"]; }
     connectedCallback() {
-      if (this._ready) return; this._ready = true;
+      if (this._ready) return;
+      // written in the page itself: the <option> children are not parsed yet, so wait for them
+      if (!this._options && document.readyState === "loading") { document.addEventListener("DOMContentLoaded", () => this.isConnected && this.connectedCallback(), { once: true }); return; }
+      this._ready = true;
       if (!this._options) this._options = [...this.querySelectorAll("option")].map(o => ({ value: o.value, label: o.textContent.trim(), sub: o.dataset.sub, img: o.dataset.img, icon: o.dataset.icon, font: o.dataset.font, disabled: o.disabled }));
       if (this._values === undefined) this._values = (this.getAttribute("value") || "").split(this.multiple ? "," : "\u0000").filter(v => v !== "");
       this.innerHTML = `<button type="button" class="lu-field" role="combobox" aria-haspopup="listbox" aria-expanded="false"><span class="lu-val"></span><span class="lu-chev">▼</span></button>`;
