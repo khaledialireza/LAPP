@@ -2,52 +2,98 @@
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>LAPP Admin</title>
 <meta name="robots" content="noindex">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#F2F2F7;--tile:#fff;--text:#111;--mu:rgba(60,60,67,.6);--sep:rgba(60,60,67,.14);--ac:#FF2D55;--ac2:#5856D6;--ok:#34C759;--bad:#FF3B30;--g:linear-gradient(135deg,#FF2D55,#5856D6);--side:#0F0F16}
-@media (prefers-color-scheme:dark){:root{--bg:#000;--tile:#1C1C1E;--text:#fff;--mu:rgba(235,235,245,.6);--sep:rgba(84,84,88,.6)}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+/* same look as the studio (studio.html) */
+:root{--bg:#07070B;--p1:#0F0F16;--p2:#15151F;--p3:#1C1C29;--ln:rgba(255,255,255,.08);--ln2:rgba(255,255,255,.14);--tx:#F4F4F8;--mu:rgba(235,235,245,.55);--mu2:rgba(235,235,245,.35);
+--pk:#FF3D7F;--vi:#8B5CF6;--cy:#22D3EE;--gr:#34D399;--am:#FBBF24;--rd:#F87171;--g:linear-gradient(135deg,#FF3D7F,#8B5CF6 55%,#22D3EE)}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--tx);font:14px/1.5 Inter,system-ui,sans-serif;min-height:100vh;display:grid;grid-template-columns:240px 1fr}
+body.drawer{grid-template-columns:240px 1fr 380px}
+body::before{content:"";position:fixed;inset:-30% auto auto -10%;width:720px;height:720px;background:radial-gradient(closest-side,rgba(139,92,246,.12),transparent);pointer-events:none}
 button,input,select{font:inherit;color:inherit}button{cursor:pointer;border:0;background:none}
-.app{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
-.sbar{background:var(--side);color:#eee;padding:16px 12px;display:flex;flex-direction:column;gap:4px;position:sticky;top:0;height:100vh}
-.lg{display:flex;gap:9px;align-items:center;font-weight:800;margin:0 0 14px 4px}.lg i{width:32px;height:32px;border-radius:10px;background:var(--g);display:grid;place-items:center;font-style:normal;font-weight:800}
-.sbar a{padding:9px 11px;border-radius:10px;color:#bbb;text-decoration:none;display:flex;gap:9px;font-size:13.5px}.sbar a.on,.sbar a:hover{background:#1f1f2e;color:#fff}
-.sp{flex:1}.me{font-size:12px;color:#888;border-top:1px solid #222;padding:10px 4px 0;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
-.main{padding:22px 26px;display:flex;flex-direction:column;gap:14px;min-width:0}
-.top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.top h1{font-size:22px;font-weight:800;margin:0 auto 0 0}
-.kp{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}.kp div{background:var(--tile);border-radius:14px;padding:13px}.kp b{font-size:24px;font-weight:800;display:block}.kp span{font-size:12px;color:var(--mu)}
-.card{background:var(--tile);border-radius:14px;padding:14px}.card h3{margin:0 0 10px;font-size:14px}
+aside{background:var(--p1);border-right:1px solid var(--ln);padding:16px;display:flex;flex-direction:column;gap:6px;height:100vh;position:sticky;top:0;z-index:1}
+.lg{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px;margin-bottom:14px}.lg i{width:36px;height:36px;border-radius:11px;background:var(--g);display:grid;place-items:center;font-style:normal;font-weight:800;box-shadow:0 8px 24px rgba(255,61,127,.35)}
+.nv{padding:10px 12px;border-radius:12px;color:var(--mu);display:flex;justify-content:space-between;align-items:center;text-decoration:none;border:1px solid transparent}.nv:hover{background:var(--p2);color:var(--tx)}
+.nv.on{background:var(--p3);color:var(--tx);border-color:var(--ln2)}.nv em{font-style:normal;font-size:11px;background:rgba(255,255,255,.08);padding:0 7px;border-radius:6px}
+.sp{flex:1}.me{border-top:1px solid var(--ln);padding-top:12px;font-size:12px;color:var(--mu);display:flex;justify-content:space-between;align-items:center;gap:8px}
+main{padding:22px 26px 60px;display:flex;flex-direction:column;gap:14px;min-width:0;z-index:1}
+.top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.top h1{font-size:28px;font-weight:800;margin-right:auto}
+.b{height:36px;padding:0 14px;border-radius:10px;border:1px solid var(--ln2);background:var(--p2);font-weight:700;font-size:13px;display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;text-decoration:none;color:var(--tx)}
+.b:hover{background:var(--p3)}.b.pr{background:var(--g);border:0;box-shadow:0 8px 24px rgba(139,92,246,.3)}.b.d{color:var(--rd);border-color:rgba(248,113,113,.4);background:rgba(248,113,113,.08)}.b.sm{height:30px;padding:0 10px;font-size:12.5px}.b:disabled{opacity:.4;cursor:default}
+.kp{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}.kp div{background:var(--p2);border:1px solid var(--ln);border-radius:14px;padding:12px 14px}.kp b{font-size:24px;font-weight:800;display:block}.kp span{font-size:12px;color:var(--mu)}
+.card{background:var(--p2);border:1px solid var(--ln);border-radius:16px;padding:16px}.card h3{font-size:14px;margin-bottom:10px}
 .two{display:grid;grid-template-columns:1.4fr 1fr;gap:14px}
-table{width:100%;border-collapse:collapse;font-size:13px}th{text-align:left;color:var(--mu);font-weight:600;font-size:12px;padding:9px 12px;border-bottom:1px solid var(--sep)}td{padding:9px 12px;border-bottom:1px solid var(--sep);vertical-align:middle}tr:last-child td{border:0}
-.tbl{background:var(--tile);border-radius:14px;overflow:auto}tr.sel td{background:rgba(88,86,214,.08)}tbody tr[data-u]{cursor:pointer}
-.chip{padding:5px 11px;border-radius:99px;background:var(--tile);border:1px solid var(--sep);font-size:12.5px}.chip.on{background:var(--text);color:var(--bg);border-color:var(--text)}
-.search{background:var(--tile);border:1px solid var(--sep);border-radius:10px;padding:8px 12px;width:260px}
-.role{font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:7px}.r-admin{background:#111;color:#fff}.r-manager{background:#EDE9FE;color:#6D28D9}.r-designer{background:#E0F2FE;color:#0369A1}.r-user{background:rgba(120,120,128,.14);color:var(--mu)}
-.badge{display:inline-block;font-size:11px;font-weight:800;padding:2px 9px;border-radius:99px}.free{background:rgba(120,120,128,.14);color:var(--mu)}.plus{background:var(--g);color:#fff}.ir{background:#E6F8EC;color:#1E8E3E}.trial{background:#FFF4E5;color:#B45309}.off{background:#FDE8E8;color:#B91C1C}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.btn{padding:8px 13px;border-radius:10px;background:var(--g);color:#fff;font-weight:700;text-decoration:none}.btn.w{background:var(--tile);color:var(--text);border:1px solid var(--sep)}.btn.d{background:none;border:1px solid var(--bad);color:var(--bad)}
-.mu{color:var(--mu)}.list .r{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--sep)}.list .r:last-child{border:0}
-.tg{position:relative;width:42px;height:24px;border-radius:99px;background:#ccc;flex:none;transition:.2s}.tg::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s}.tg.on{background:var(--ok)}.tg.on::after{left:21px}.tg:disabled{opacity:.5;cursor:default}
-.bars{display:flex;align-items:flex-end;gap:3px;height:90px}.bars i{flex:1;background:var(--ac2);border-radius:3px 3px 0 0;min-height:2px;opacity:.85}
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:10px 16px;border-radius:12px;font-weight:600;opacity:0;transition:.25s;pointer-events:none}.toast.on{opacity:1}
-.empty{padding:26px;text-align:center;color:var(--mu)}
-select,input[type=number]{padding:6px 8px;border-radius:8px;border:1px solid var(--sep);background:var(--bg)}
-@media (max-width:860px){.app{grid-template-columns:1fr}.sbar{position:static;height:auto;flex-direction:row;flex-wrap:wrap}.sp{display:none}.me{border:0;padding:0}.two{grid-template-columns:1fr}.search{width:100%}.main{padding:16px}}
+.flt{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.srch{flex:1;min-width:220px;background:var(--p2);border:1px solid var(--ln2);border-radius:10px;padding:8px 12px;outline:none}.srch:focus{border-color:rgba(139,92,246,.7)}
+.chip{padding:5px 11px;border-radius:99px;background:var(--p3);border:1px solid var(--ln);font-size:12.5px;color:var(--mu)}.chip.on{color:var(--tx);border-color:rgba(139,92,246,.7);background:rgba(139,92,246,.16)}
+.row{display:grid;grid-template-columns:44px 1.6fr 1fr 1fr 90px 110px;gap:12px;align-items:center;padding:10px 12px;border-radius:12px;border:1px solid var(--ln);background:rgba(21,21,31,.8);cursor:pointer}
+.row:hover{border-color:var(--ln2)}.row.sel{box-shadow:0 0 0 1px var(--vi);background:rgba(139,92,246,.1)}.row.off{opacity:.55}
+.row.hd{background:none;border:0;padding:0 12px;color:var(--mu2);font-size:12px;cursor:default}
+.av{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-weight:800;color:#fff;flex:none}
+.u{min-width:0}.u b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.u small{color:var(--mu);font-size:12px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mu{color:var(--mu);font-size:12.5px}
+.role{font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:7px;display:inline-block}.r-admin{background:#fff;color:#111}.r-manager{background:rgba(139,92,246,.22);color:#C4B5FD}.r-designer{background:rgba(34,211,238,.16);color:var(--cy)}.r-user{background:rgba(255,255,255,.07);color:var(--mu)}
+.pl{font-size:11px;font-weight:800;padding:2px 9px;border-radius:99px;display:inline-block}.p-plus{background:var(--g);color:#fff}.p-free{background:rgba(255,255,255,.07);color:var(--mu)}.p-ir{background:rgba(52,211,153,.16);color:var(--gr)}.p-off{background:rgba(248,113,113,.14);color:var(--rd)}.p-trial{background:rgba(251,191,36,.16);color:var(--am)}
+.dr{background:var(--p1);border-left:1px solid var(--ln);padding:20px;display:flex;flex-direction:column;gap:12px;height:100vh;position:sticky;top:0;overflow:auto;z-index:1}
+.dh{display:flex;gap:12px;align-items:center}.dh .av{width:54px;height:54px;font-size:22px}.dh b{font-size:18px;display:block}
+.x{margin-left:auto;width:30px;height:30px;border-radius:50%;background:var(--p3);color:var(--mu)}
+.f label{display:block;font-size:12px;color:var(--mu);margin-bottom:4px}
+.in{width:100%;background:var(--p3);border:1px solid var(--ln2);border-radius:10px;padding:9px 11px;outline:none}.in:focus{border-color:rgba(139,92,246,.7)}.in:disabled{opacity:.6}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.seg{display:flex;background:var(--p3);border:1px solid var(--ln2);border-radius:10px;padding:3px}.seg button{flex:1;padding:6px 0;border-radius:8px;font-size:12.5px;color:var(--mu)}.seg button.on{background:rgba(139,92,246,.32);color:var(--tx)}.seg button:disabled{cursor:default}
+.tg{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--ln);border-radius:12px;background:var(--p2)}.tg small{display:block;color:var(--mu);font-size:11.5px}
+.sw{position:relative;width:42px;height:24px;border-radius:99px;background:rgba(255,255,255,.15);flex:none;transition:.2s}.sw::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s}.sw.on{background:var(--gr)}.sw.on::after{left:21px}.sw:disabled{opacity:.45;cursor:default}
+.acts{display:flex;gap:8px;flex-wrap:wrap}.foot{margin-top:auto;display:flex;gap:8px;padding-top:8px}
+.list .r{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--ln)}.list .r:last-child{border:0}
+.bars{display:flex;align-items:flex-end;gap:3px;height:110px}.bars i{flex:1;background:linear-gradient(to top,var(--vi),var(--pk));border-radius:3px 3px 0 0;min-height:2px;opacity:.9}
+.empty{padding:30px;text-align:center;color:var(--mu)}
+.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--p3);border:1px solid var(--ln2);border-radius:12px;padding:10px 16px;z-index:9;opacity:0;transition:.2s;pointer-events:none}.toast.on{opacity:1}
+dialog{background:var(--p2);color:var(--tx);border:1px solid var(--ln2);border-radius:18px;padding:22px;width:min(480px,92vw)}dialog::backdrop{background:rgba(0,0,0,.6)}
+dialog form{display:flex;flex-direction:column;gap:12px}dialog h3{font-size:18px}
+.grp{font-size:12px;font-weight:800;color:var(--mu);margin:8px 0 2px;letter-spacing:.4px;text-transform:uppercase}
+@media (max-width:1100px){body,body.drawer{grid-template-columns:200px 1fr}.dr{position:fixed;right:0;top:0;width:min(380px,100%);box-shadow:-20px 0 60px rgba(0,0,0,.5)}.two{grid-template-columns:1fr}}
+@media (max-width:760px){body,body.drawer{grid-template-columns:1fr}aside{position:static;height:auto;flex-direction:row;flex-wrap:wrap}.sp,.me{display:none}.row{grid-template-columns:40px 1fr auto}.row>:nth-child(n+4){display:none}.row.hd{display:none}main{padding:16px}}
 </style></head><body>
-<div class="app">
- <nav class="sbar"><div class="lg"><i>L</i>LAPP Admin</div>
-  <a href="#dash" data-v="dash">📊 Dashboard</a><a href="#users" data-v="users">👥 Users</a><a href="#customers" data-v="customers">💳 Customers</a><a href="#access" data-v="access">📚 Content & access</a>
-  <a href="/studio">🎬 Studio</a><a href="/">← Back to the app</a>
-  <div class="sp"></div><div class="me" id="me"></div></nav>
- <main class="main" id="view"></main>
-</div>
+<aside>
+  <div class="lg"><i>L</i>LAPP Admin</div>
+  <a class="nv" href="#dash" data-v="dash">📊 Dashboard</a>
+  <a class="nv" href="#users" data-v="users">👥 Users <em id="nU"></em></a>
+  <a class="nv" href="#customers" data-v="customers">💳 Customers <em id="nC"></em></a>
+  <a class="nv" href="#access" data-v="access">📚 Content & access</a>
+  <a class="nv" href="/studio">🎬 Studio</a>
+  <a class="nv" href="/">← Back to the app</a>
+  <div class="sp"></div><div class="me" id="me"></div>
+</aside>
+<main id="view"></main>
 <div class="toast" id="toast"></div>
+
+<dialog id="addDlg"><form method="dialog" id="addForm">
+  <h3>Add user</h3>
+  <div class="f2"><div class="f"><label>Name</label><input class="in" name="name" maxlength="40"></div>
+  <div class="f"><label>Username</label><input class="in" name="username" required pattern="[a-zA-Z0-9_.]{3,20}" maxlength="20"></div></div>
+  <div class="f"><label>E-mail</label><input class="in" name="email" type="email" required></div>
+  <div class="f"><label>Role</label><div class="seg" id="addRole"></div></div>
+  <div class="tg"><div>Send an invitation e-mail<small>They choose their own password from the link (valid 7 days)</small></div><button type="button" class="sw on" id="addInvite" aria-pressed="true"></button></div>
+  <div class="acts" style="justify-content:flex-end"><button class="b" value="cancel" formnovalidate>Cancel</button><button class="b pr" value="ok">Create</button></div>
+</form></dialog>
+
+<dialog id="delDlg"><form method="dialog" id="delForm">
+  <h3>Delete account?</h3>
+  <p class="mu" id="delText"></p>
+  <input class="in" id="delName" autocomplete="off" placeholder="type the username">
+  <div class="acts" style="justify-content:flex-end"><button class="b" value="cancel" formnovalidate>Cancel</button><button class="b d" value="ok" id="delGo" disabled>Delete for good</button></div>
+</form></dialog>
+
 <script>
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 const flag = c => c && /^[A-Z]{2}$/.test(c) ? String.fromCodePoint(...[...c].map(x => 127397 + x.charCodeAt(0))) + " " + c : "—";
 const day = ms => ms ? new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "—";
-const ago = ms => { if (!ms) return "—"; const m = (Date.now() - ms) / 60000; return m < 60 ? Math.max(1, Math.round(m)) + " min ago" : m < 1440 ? Math.round(m / 60) + " h ago" : m < 2880 ? "yesterday" : Math.round(m / 1440) + " days ago"; };
+const ago = ms => { if (!ms) return "—"; const m = (Date.now() - ms) / 60000; return m < 2 ? "now" : m < 60 ? Math.round(m) + " min ago" : m < 1440 ? Math.round(m / 60) + " h ago" : m < 2880 ? "yesterday" : Math.round(m / 1440) + " days ago"; };
 const ROLE = { user: "Learner", designer: "Designer", manager: "Manager", admin: "Admin" };
+const GRAD = ["#FF6B9A,#8A6CF0", "#F59E0B,#EF4444", "#34D399,#22D3EE", "#22D3EE,#8B5CF6", "#8B5CF6,#FF3D7F", "#FBBF24,#34D399"];
+const avatar = (u, cls = "") => `<div class="av ${cls}" style="background:${u.disabled ? "#444" : `linear-gradient(135deg,${GRAD[u.id % GRAD.length]})`}">${esc((u.name || u.username || "?").trim().charAt(0).toUpperCase())}</div>`;
 let ME = null, toastT;
 function toast(t) { const e = $("#toast"); e.textContent = t; e.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(() => e.classList.remove("on"), 2600); }
 async function api(method, path, body) {
@@ -57,68 +103,103 @@ async function api(method, path, body) {
   if (!r.ok) throw new Error(j.error || r.statusText);
   return j;
 }
-const planBadge = u => u.sub_status === "active" ? `<span class="badge plus">Plus · ${u.sub_interval === "year" ? "yearly" : "monthly"}</span>`
-  : u.sub_status === "trialing" ? `<span class="badge trial">Trial</span>`
-  : u.plus_until > Date.now() ? `<span class="badge plus">Plus (gift)</span>`
-  : u.role !== "user" ? "—" : u.country === "IR" ? `<span class="badge ir">Iran · free</span>` : `<span class="badge free">Free</span>`;
+const isAdmin = () => ME.role === "admin";
+const plan = u => u.disabled ? `<span class="pl p-off">Disabled</span>`
+  : u.sub_status === "active" ? `<span class="pl p-plus">Plus · ${u.sub_interval === "year" ? "yearly" : "monthly"}</span>`
+  : u.sub_status === "trialing" ? `<span class="pl p-trial">Trial</span>`
+  : u.plus_until > Date.now() ? `<span class="pl p-plus">Plus · gift</span>`
+  : u.role !== "user" ? `<span class="mu">—</span>` : u.country === "IR" ? `<span class="pl p-ir">Iran · free</span>` : `<span class="pl p-free">Free</span>`;
 
-/* ---------- views ---------- */
+/* ================= views ================= */
 const V = {};
+let STATS = null;
+async function stats() { STATS = await api("GET", "/admin/stats"); $("#nU").textContent = STATS.users.toLocaleString("en"); $("#nC").textContent = (STATS.plus + STATS.trial) || ""; return STATS; }
+
 V.dash = async () => {
-  const s = await api("GET", "/admin/stats");
-  const max = Math.max(1, ...s.days.map(d => d.n));
-  const byDay = new Map(s.days.map(d => [d.d, d.n])), today = Math.floor(Date.now() / 864e5);
+  const s = await stats();
+  const max = Math.max(1, ...s.days.map(d => d.n)), byDay = new Map(s.days.map(d => [d.d, d.n])), today = Math.floor(Date.now() / 864e5);
   const bars = Array.from({ length: 30 }, (_, i) => byDay.get(today - 29 + i) || 0);
-  return `<div class="top"><h1>Dashboard</h1></div>
+  return `<div class="top"><h1>Dashboard</h1><a class="b pr" href="/studio">🎬 Open the studio</a></div>
   <div class="kp"><div><b>${s.users}</b><span>Users · ${s.verified} verified</span></div><div><b>${s.activeWeek}</b><span>Active this week</span></div><div><b>${s.newWeek}</b><span>New this week</span></div>
-   <div><b>${s.plus}</b><span>Plus subscribers</span></div><div><b>${s.trial}</b><span>In trial</span></div><div><b>${s.grants}</b><span>Plus gifts</span></div><div><b>${s.staff}</b><span>Team</span></div></div>
+   <div><b>${s.plus}</b><span>Plus subscribers</span></div><div><b>${s.trial}</b><span>In trial</span></div><div><b>${s.iran}</b><span>Iran · free</span></div><div><b>${s.staff}</b><span>Team</span></div></div>
   <div class="two"><div class="card"><h3>Sign-ups · last 30 days</h3><div class="bars">${bars.map(n => `<i style="height:${n / max * 100}%" title="${n}"></i>`).join("")}</div></div>
    <div class="card"><h3>Countries</h3><div class="list">${s.countries.map(c => `<div class="r"><span>${flag(c.country)}</span><b>${c.n}</b></div>`).join("") || `<div class="empty">No users yet</div>`}</div></div></div>
   <div class="card"><h3>Newest users</h3><div class="list">${s.recent.map(u => `<div class="r"><span><b>@${esc(u.username)}</b> <span class="mu">${esc(u.email)}</span></span><span class="mu">${flag(u.country)} · ${ago(u.created_at)}</span></div>`).join("") || `<div class="empty">No users yet</div>`}</div></div>`;
 };
 
-let U = { q: "", filter: "all", page: 0, sel: null, rows: [] };
+/* ---- users: list + edit drawer ---- */
+let U = { q: "", filter: "all", page: 0, sel: null, rows: [], edit: null };
 V.users = async () => {
-  const r = await api("GET", `/admin/users?q=${encodeURIComponent(U.q)}&filter=${U.filter}&page=${U.page}`);
+  const [r] = await Promise.all([api("GET", `/admin/users?q=${encodeURIComponent(U.q)}&filter=${U.filter}&page=${U.page}`), STATS ? null : stats()]);
   U.rows = r.users;
-  const F = [["all", "All"], ["free", "Free"], ["plus", "Plus"], ["iran", "Iran"], ["staff", "Team"], ["unverified", "Unverified"], ["disabled", "Disabled"]];
-  const sel = U.rows.find(u => u.id === U.sel);
-  return `<div class="top"><h1>Users</h1><input class="search" id="q" placeholder="🔍 Search name, e-mail, username…" value="${esc(U.q)}">${F.map(([k, l]) => `<button class="chip ${U.filter === k ? "on" : ""}" data-f="${k}">${l}</button>`).join("")}</div>
-  <div class="tbl"><table><thead><tr><th>User</th><th>E-mail</th><th>Role</th><th>Plan</th><th>Country</th><th>Last seen</th><th>Joined</th></tr></thead><tbody>
-  ${U.rows.map(u => `<tr data-u="${u.id}" class="${u.id === U.sel ? "sel" : ""}"><td><b>@${esc(u.username)}</b>${u.name ? ` <span class="mu">${esc(u.name)}</span>` : ""}</td><td>${esc(u.email)} ${u.verified ? "" : `<span class="badge trial">unverified</span>`}</td>
-   <td><span class="role r-${u.role}">${ROLE[u.role]}</span>${u.disabled ? ` <span class="badge off">disabled</span>` : ""}</td><td>${planBadge(u)}</td><td>${flag(u.country)}</td><td>${ago(u.last_seen)}</td><td>${day(u.created_at)}</td></tr>`).join("") || `<tr><td colspan="7" class="empty">Nobody here</td></tr>`}
-  </tbody></table></div>
-  <div class="row">${U.page ? `<button class="btn w" data-pg="-1">‹ Newer</button>` : ""}${r.more ? `<button class="btn w" data-pg="1">Older ›</button>` : ""}</div>
-  ${sel ? userCard(sel) : `<p class="mu">Click a user to manage them.</p>`}`;
+  const s = STATS, F = [["all", "All"], ["free", "Free"], ["plus", "Plus"], ["iran", "Iran"], ["staff", "Team"], ["unverified", "Unverified"], ["disabled", "Disabled"]];
+  return `<div class="top"><h1>Users</h1><button class="b" id="export">⬇ Export</button><button class="b pr" id="add">＋ Add user</button></div>
+  <div class="kp"><div><b>${s.users}</b><span>All users</span></div><div><b>${s.plus + s.trial + s.grants}</b><span>Plus</span></div><div><b>${s.iran}</b><span>Iran · free</span></div><div><b>${s.staff}</b><span>Team</span></div></div>
+  <div class="flt"><input class="srch" id="q" placeholder="🔍 Search name, e-mail, username…" value="${esc(U.q)}">${F.map(([k, l]) => `<button class="chip ${U.filter === k ? "on" : ""}" data-f="${k}">${l}</button>`).join("")}</div>
+  <div class="row hd"><span></span><span>User</span><span>Role</span><span>Plan</span><span>Country</span><span>Last seen</span></div>
+  ${U.rows.map(u => `<div class="row ${u.id === U.sel ? "sel" : ""} ${u.disabled ? "off" : ""}" data-u="${u.id}">${avatar(u)}
+    <div class="u"><b>@${esc(u.username)}${u.name ? ` · ${esc(u.name)}` : ""}</b><small>${esc(u.email)}${u.verified ? "" : ` · <span style="color:var(--am)">unverified</span>`}</small></div>
+    <div><span class="role r-${u.role}">${ROLE[u.role]}</span></div><div>${plan(u)}</div><div>${flag(u.country)}</div><div class="mu">${ago(u.last_seen)}</div></div>`).join("") || `<div class="empty">Nobody here</div>`}
+  <div class="acts">${U.page ? `<button class="b" data-pg="-1">‹ Newer</button>` : ""}${r.more ? `<button class="b" data-pg="1">Older ›</button>` : ""}</div>`;
 };
-function userCard(u) {
-  const admin = ME.role === "admin", canTouch = admin || u.role === "user", self = u.id === ME.id, gift = u.plus_until > Date.now();
-  return `<div class="card"><h3>👤 @${esc(u.username)} <span class="mu" style="font-weight:400">· ${esc(u.email)} · joined ${day(u.created_at)}${gift ? " · Plus gift until " + day(u.plus_until) : ""}</span></h3>
-  <div class="row">
-   ${admin && !self ? `<label class="row">Role <select id="role">${Object.entries(ROLE).map(([k, l]) => `<option value="${k}" ${u.role === k ? "selected" : ""}>${l}</option>`).join("")}</select></label>` : ""}
-   ${canTouch ? `<button class="btn w" data-act="gift">🎁 ${gift ? "Change Plus gift" : "Give Plus"}</button>
-   ${gift ? `<button class="btn w" data-act="ungift">Remove gift</button>` : ""}
-   ${u.verified ? "" : `<button class="btn w" data-act="verify">✓ Mark e-mail verified</button>`}
-   <button class="btn w" data-act="reset">📧 Send password-reset link</button>
-   ${self ? "" : `<button class="btn ${u.disabled ? "w" : "d"}" data-act="disable">${u.disabled ? "Enable account" : "Disable account"}</button>`}` : `<span class="mu">Only an admin can change team accounts.</span>`}
-  </div></div>`;
+function drawer() {
+  let d = $("#drawer");
+  const u = U.rows.find(x => x.id === U.sel);
+  document.body.classList.toggle("drawer", !!u);
+  if (!u) { d && d.remove(); return; }
+  if (!d) { d = document.createElement("div"); d.id = "drawer"; d.className = "dr"; document.body.append(d); }
+  const E = U.edit;
+  const self = u.id === ME.id, can = isAdmin() || u.role === "user", gift = u.plus_until > Date.now();
+  const stripe = u.sub_status ? `${u.sub_status === "trialing" ? "Trial" : "Plus"} · ${u.sub_interval === "year" ? "yearly" : "monthly"} (Stripe)` : "";
+  d.innerHTML = `<div class="dh">${avatar(u)}<div><b>@${esc(u.username)}</b><span class="mu">Joined ${day(u.created_at)} · ${flag(u.country)} · seen ${ago(u.last_seen)}</span></div><button class="x" id="close" aria-label="Close">✕</button></div>
+    <div class="f2"><div class="f"><label>Name</label><input class="in" data-e="name" value="${esc(E.name)}" maxlength="40" ${can ? "" : "disabled"}></div>
+    <div class="f"><label>Username</label><input class="in" data-e="username" value="${esc(E.username)}" maxlength="20" ${can ? "" : "disabled"}></div></div>
+    <div class="f"><label>E-mail ${u.verified ? `<span style="color:var(--gr)">✓ verified</span>` : `<span style="color:var(--am)">not verified</span>`}</label><input class="in" data-e="email" type="email" value="${esc(E.email)}" ${can ? "" : "disabled"}></div>
+    <div class="f"><label>Role${isAdmin() && !self ? "" : " · only an admin can change it"}</label><div class="seg">${Object.entries(ROLE).map(([k, l]) => `<button type="button" data-role="${k}" class="${E.role === k ? "on" : ""}" ${isAdmin() && !self ? "" : "disabled"}>${l}</button>`).join("")}</div></div>
+    <div class="tg"><div>${stripe ? `💳 ${stripe}<small>${u.period_end ? "Until " + day(u.period_end) : ""}</small>` : gift ? `🎁 Plus gift<small>Until ${day(u.plus_until)}</small>` : `No Plus<small>${u.country === "IR" ? "Free full access from Iran" : "Free plan"}</small>`}</div>
+      ${can ? `<span class="acts">${gift ? `<button class="b sm" data-act="ungift">Remove</button>` : ""}<button class="b sm" data-act="gift">${gift ? "Change" : "Gift Plus"}</button></span>` : ""}</div>
+    <div class="tg"><div>Account active<small>Off = signed out everywhere and can't sign in</small></div><button class="sw ${E.disabled ? "" : "on"}" id="active" ${can && !self ? "" : "disabled"}></button></div>
+    ${can ? `<div class="acts"><button class="b" data-act="reset">📧 Send reset link</button>${u.verified ? "" : `<button class="b" data-act="verify">✓ Mark verified</button>`}<button class="b" data-act="progress">↻ Reset progress</button></div>` : `<p class="mu">Only an admin can change team accounts.</p>`}
+    <div class="foot">${can ? `<button class="b pr" style="flex:1" id="save">Save changes</button>` : ""}${isAdmin() && !self ? `<button class="b d" id="del">🗑 Delete</button>` : ""}</div>`;
+}
+function select(id) {
+  U.sel = id;
+  const u = U.rows.find(x => x.id === id);
+  U.edit = u ? { name: u.name || "", username: u.username, email: u.email, role: u.role, disabled: !!u.disabled } : null;
+  document.querySelectorAll(".row[data-u]").forEach(r => r.classList.toggle("sel", Number(r.dataset.u) === id));
+  drawer();
+}
+async function saveUser() {
+  const u = U.rows.find(x => x.id === U.sel), E = U.edit, patch = {};
+  if (E.name !== (u.name || "")) patch.name = E.name;
+  if (E.username !== u.username) patch.username = E.username;
+  if (E.email !== u.email) patch.email = E.email;
+  if (E.role !== u.role) patch.role = E.role;
+  if (E.disabled !== !!u.disabled) patch.disabled = E.disabled;
+  if (!Object.keys(patch).length) return toast("Nothing changed");
+  if (patch.disabled && !confirm(`Disable @${u.username}? They are signed out everywhere.`)) return;
+  await api("PATCH", `/admin/users/${u.id}`, patch);
+  toast("Saved"); STATS = null; await show(); select(u.id);
 }
 
+/* ---- customers ---- */
 V.customers = async () => {
   const r = await api("GET", "/admin/customers");
-  const st = s => ({ active: "plus", trialing: "trial", past_due: "off", canceled: "free", unpaid: "off" })[s] || "free";
-  return `<div class="top"><h1>Customers</h1>${r.stripe ? `<a class="btn w" href="https://dashboard.stripe.com/" target="_blank" rel="noopener">Open Stripe ↗</a>` : `<span class="badge trial">Stripe is not connected yet</span>`}</div>
-  <div class="tbl"><table><thead><tr><th>User</th><th>Status</th><th>Plan</th><th>Renews / ends</th><th>Country</th><th>Updated</th></tr></thead><tbody>
-  ${r.subscriptions.map(s => `<tr><td><b>@${esc(s.username)}</b> <span class="mu">${esc(s.email)}</span></td><td><span class="badge ${st(s.status)}">${esc(s.status)}</span></td><td>${s.interval === "year" ? "Yearly" : s.interval === "month" ? "Monthly" : "—"}</td>
-   <td>${day(s.period_end)}${s.cancel_at_end ? ` <span class="badge off">cancels</span>` : ""}</td><td>${flag(s.country)}</td><td>${ago(s.updated_at)}</td></tr>`).join("") || `<tr><td colspan="6" class="empty">No subscriptions yet</td></tr>`}
-  </tbody></table></div>
+  const st = s => ({ active: "p-plus", trialing: "p-trial", past_due: "p-off", canceled: "p-free", unpaid: "p-off" })[s] || "p-free";
+  return `<div class="top"><h1>Customers</h1>${r.stripe ? `<a class="b" href="https://dashboard.stripe.com/" target="_blank" rel="noopener">Open Stripe ↗</a>` : `<span class="pl p-trial">Stripe is not connected yet</span>`}</div>
+  <div class="row hd" style="grid-template-columns:1.6fr 1fr 1fr 1.2fr 90px 110px"><span>User</span><span>Status</span><span>Plan</span><span>Renews / ends</span><span>Country</span><span>Updated</span></div>
+  ${r.subscriptions.map(s => `<div class="row" style="grid-template-columns:1.6fr 1fr 1fr 1.2fr 90px 110px;cursor:default"><div class="u"><b>@${esc(s.username)}</b><small>${esc(s.email)}</small></div>
+    <div><span class="pl ${st(s.status)}">${esc(s.status)}</span></div><div>${s.interval === "year" ? "Yearly" : s.interval === "month" ? "Monthly" : "—"}</div>
+    <div>${day(s.period_end)}${s.cancel_at_end ? ` <span class="pl p-off">cancels</span>` : ""}</div><div>${flag(s.country)}</div><div class="mu">${ago(s.updated_at)}</div></div>`).join("") || `<div class="card empty">No subscriptions yet</div>`}
   <div class="card"><h3>🎁 Plus gifts</h3><div class="list">${r.grants.map(g => `<div class="r"><span><b>@${esc(g.username)}</b> <span class="mu">${esc(g.email)}</span></span><span class="mu">until ${day(g.plus_until)}</span></div>`).join("") || `<div class="empty">None</div>`}</div></div>`;
 };
 
-let LESSONS = null, A = null;
+/* ---- content & access: free or Plus per lesson, by course ---- */
+let LESSONS = null, A = null, COURSES = [];
 async function lessons() {
   if (LESSONS) return LESSONS;
   const idx = await (await fetch("/content/index.json")).json();
+  COURSES = idx.courses;
   const all = idx.courses.flatMap(c => c.lessons.map(dir => ({ dir, course: c.code })));
   LESSONS = await Promise.all(all.map(async x => { const L = await (await fetch(`/content/lessons/${x.dir}/lesson.json`)).json(); return { ...x, title: L.title, level: L.level }; }));
   return LESSONS;
@@ -126,59 +207,112 @@ async function lessons() {
 V.access = async () => {
   const [{ access }, ls] = await Promise.all([api("GET", "/admin/settings"), lessons()]);
   A = access;
-  const admin = ME.role === "admin";
-  const tg = (on, attrs) => `<button class="tg ${on ? "on" : ""}" ${attrs} ${admin ? "" : "disabled"} aria-pressed="${on}"></button>`;
-  return `<div class="top"><h1>Content & access</h1>${admin ? "" : `<span class="mu">Only an admin can change these.</span>`}</div>
-  <div class="two"><div class="card"><h3>📚 Free or Plus — per lesson</h3><p class="mu" style="margin:-4px 0 8px">On = free for everyone. Off = Plus only (the lesson shows a lock and its audio is refused).</p>
-   <div class="list">${ls.map(L => `<div class="r"><span><b>${esc(L.title)}</b> <span class="mu">${esc(L.course.toUpperCase())} · ${esc(L.level)} · ${esc(L.dir)}</span></span>${tg(!A.locked.includes(L.dir), `data-lock="${esc(L.dir)}"`)}</div>`).join("")}</div></div>
+  const sw = (on, attrs) => `<button class="sw ${on ? "on" : ""}" ${attrs} ${isAdmin() ? "" : "disabled"}></button>`;
+  return `<div class="top"><h1>Content & access</h1>${isAdmin() ? "" : `<span class="mu">Only an admin can change these.</span>`}</div>
+  <div class="two"><div class="card"><h3>📚 Free or Plus — per lesson</h3><p class="mu" style="margin:-4px 0 6px">On = free for everyone. Off = Plus only (the lesson shows a lock and its audio is refused).</p>
+   ${COURSES.map(c => `<div class="grp">${esc(c.name)}</div><div class="list">${ls.filter(L => L.course === c.code).map(L => `<div class="r"><span><b>${esc(L.title)}</b> <span class="mu">${esc(L.level)}</span></span>${sw(!A.locked.includes(L.dir), `data-lock="${esc(L.dir)}"`)}</div>`).join("") || `<div class="r mu">No lessons yet — make them in the studio</div>`}</div>`).join("")}</div>
    <div class="card"><h3>⚙️ Rules</h3><div class="list">
-    <div class="r"><span><b>Full access, free, from Iran</b><br><span class="mu">By connection country (Cloudflare); someone on a VPN counts as their VPN's country.</span></span>${tg(A.iranFree, `data-k="iranFree"`)}</div>
-    <div class="r"><span><b>Free trial</b><br><span class="mu">Days before the first payment, once per person.</span></span><input type="number" min="0" max="30" value="${A.trialDays}" id="trialDays" style="width:70px" ${admin ? "" : "disabled"}></div>
+    <div class="r"><span><b>Full access, free, from Iran</b><br><span class="mu">By connection country (Cloudflare); on a VPN, the VPN's country counts.</span></span>${sw(A.iranFree, `data-k="iranFree"`)}</div>
+    <div class="r"><span><b>Free trial</b><br><span class="mu">Days before the first payment, once per person.</span></span><input class="in" type="number" min="0" max="30" value="${A.trialDays}" id="trialDays" style="width:76px" ${isAdmin() ? "" : "disabled"}></div>
    </div></div></div>`;
 };
-
-/* ---------- router & events ---------- */
-async function show() {
-  const v = location.hash.slice(1) || "dash";
-  document.querySelectorAll(".sbar a[data-v]").forEach(a => a.classList.toggle("on", a.dataset.v === v));
-  try { $("#view").innerHTML = await (V[v] || V.dash)(); } catch (e) { $("#view").innerHTML = `<div class="card">⚠️ ${esc(e.message)}</div>`; }
-}
-addEventListener("hashchange", show);
-let qT;
-document.addEventListener("input", e => {
-  if (e.target.id !== "q") return;
-  clearTimeout(qT);
-  qT = setTimeout(async () => { U.q = e.target.value; U.page = 0; await show(); const q = $("#q"); q.focus(); q.setSelectionRange(q.value.length, q.value.length); }, 300);
-});
 async function saveAccess(patch) {
   try { const r = await api("PUT", "/admin/settings", { access: { ...A, ...patch } }); A = r.access; toast("Saved"); show(); } catch (x) { toast(x.message); }
 }
-document.addEventListener("change", async e => {
-  if (e.target.id === "role") { try { await api("PATCH", `/admin/users/${U.sel}`, { role: e.target.value }); toast("Role saved"); show(); } catch (x) { toast(x.message); } }
-  if (e.target.id === "trialDays") saveAccess({ trialDays: Number(e.target.value) });
+
+/* ================= router & events ================= */
+async function show() {
+  const v = location.hash.slice(1) || "dash";
+  document.querySelectorAll(".nv[data-v]").forEach(a => a.classList.toggle("on", a.dataset.v === v));
+  if (v !== "users") { U.sel = null; drawer(); }
+  try { $("#view").innerHTML = await (V[v] || V.dash)(); } catch (e) { $("#view").innerHTML = `<div class="card">⚠️ ${esc(e.message)}</div>`; }
+  if (v === "users") drawer();
+}
+addEventListener("hashchange", show);
+
+let qT;
+document.addEventListener("input", e => {
+  if (e.target.id === "q") { clearTimeout(qT); qT = setTimeout(async () => { U.q = e.target.value; U.page = 0; await show(); const q = $("#q"); q.focus(); q.setSelectionRange(q.value.length, q.value.length); }, 300); }
+  if (e.target.dataset.e) U.edit[e.target.dataset.e] = e.target.value.trim();
+  if (e.target.id === "delName") $("#delGo").disabled = e.target.value.trim().toLowerCase() !== (U.rows.find(x => x.id === U.sel) || {}).username;
 });
+document.addEventListener("change", e => { if (e.target.id === "trialDays") saveAccess({ trialDays: Number(e.target.value) }); });
+
 document.addEventListener("click", async e => {
-  const f = e.target.closest("[data-f]"); if (f) { U.filter = f.dataset.f; U.page = 0; U.sel = null; return show(); }
-  const pg = e.target.closest("[data-pg]"); if (pg) { U.page += Number(pg.dataset.pg); return show(); }
-  const tr = e.target.closest("tr[data-u]"); if (tr) { U.sel = Number(tr.dataset.u); return show(); }
-  const lk = e.target.closest("[data-lock]"); if (lk && !lk.disabled) { const d = lk.dataset.lock; return saveAccess({ locked: A.locked.includes(d) ? A.locked.filter(x => x !== d) : [...A.locked, d] }); }
-  const k = e.target.closest(".tg[data-k]"); if (k && !k.disabled) return saveAccess({ [k.dataset.k]: !A[k.dataset.k] });
-  const a = e.target.closest("[data-act]"); if (!a) return;
-  const u = U.rows.find(x => x.id === U.sel); if (!u) return;
+  const t = e.target;
+  const f = t.closest("[data-f]"); if (f) { U.filter = f.dataset.f; U.page = 0; U.sel = null; return show(); }
+  const pg = t.closest("[data-pg]"); if (pg) { U.page += Number(pg.dataset.pg); return show(); }
+  const row = t.closest(".row[data-u]"); if (row) return select(Number(row.dataset.u));
+  if (t.closest("#close")) return select(null);
+  const rl = t.closest("[data-role]"); if (rl && !rl.disabled && rl.closest("#drawer")) { U.edit.role = rl.dataset.role; return drawer(); }
+  if (t.closest("#active") && !t.closest("#active").disabled) { U.edit.disabled = !U.edit.disabled; return drawer(); }
+  const lk = t.closest("[data-lock]"); if (lk && !lk.disabled) { const d = lk.dataset.lock; return saveAccess({ locked: A.locked.includes(d) ? A.locked.filter(x => x !== d) : [...A.locked, d] }); }
+  const k = t.closest(".sw[data-k]"); if (k && !k.disabled) return saveAccess({ [k.dataset.k]: !A[k.dataset.k] });
+  if (t.closest("#export")) return exportCsv();
+  if (t.closest("#add")) return openAdd();
   try {
+    if (t.closest("#save")) return await saveUser();
+    if (t.closest("#del")) return openDel();
+    const a = t.closest("[data-act]"); if (!a) return;
+    const u = U.rows.find(x => x.id === U.sel); if (!u) return;
     if (a.dataset.act === "gift") { const d = prompt("Plus for how many days?", "30"); if (!d) return; await api("PATCH", `/admin/users/${u.id}`, { plusDays: Number(d) }); toast("Plus given"); }
     if (a.dataset.act === "ungift") { await api("PATCH", `/admin/users/${u.id}`, { plusDays: 0 }); toast("Gift removed"); }
     if (a.dataset.act === "verify") { await api("PATCH", `/admin/users/${u.id}`, { verified: true }); toast("Marked verified"); }
-    if (a.dataset.act === "reset") { const r = await api("POST", `/admin/users/${u.id}/reset`); toast(r.sent ? "Reset link sent" : "No mail service yet — the link is in the Worker log"); }
-    if (a.dataset.act === "disable") { if (!u.disabled && !confirm(`Disable @${u.username}? They are signed out everywhere.`)) return; await api("PATCH", `/admin/users/${u.id}`, { disabled: !u.disabled }); toast(u.disabled ? "Enabled" : "Disabled"); }
-    show();
+    if (a.dataset.act === "reset") { const r = await api("POST", `/admin/users/${u.id}/reset`); toast(r.sent ? "Reset link sent" : "No mail service — the link is in the Worker log"); return; }
+    if (a.dataset.act === "progress") { if (!confirm(`Clear all progress of @${u.username}? This can't be undone.`)) return; await api("DELETE", `/admin/users/${u.id}/progress`); toast("Progress cleared"); return; }
+    STATS = null; await show(); select(u.id);
   } catch (x) { toast(x.message); }
 });
+
+/* ---- add user ---- */
+let addRole = "user";
+function openAdd() {
+  addRole = "user";
+  const paint = () => $("#addRole").innerHTML = Object.entries(ROLE).map(([k, l]) => `<button type="button" data-ar="${k}" class="${addRole === k ? "on" : ""}" ${k === "user" || isAdmin() ? "" : "disabled"}>${l}</button>`).join("");
+  paint();
+  $("#addRole").onclick = e => { const b = e.target.closest("[data-ar]"); if (b && !b.disabled) { addRole = b.dataset.ar; paint(); } };
+  $("#addInvite").onclick = () => $("#addInvite").classList.toggle("on");
+  $("#addForm").reset(); $("#addInvite").classList.add("on");
+  $("#addDlg").showModal();
+}
+$("#addDlg").addEventListener("close", async () => {
+  if ($("#addDlg").returnValue !== "ok") return;
+  const f = Object.fromEntries(new FormData($("#addForm")));
+  try {
+    const r = await api("POST", "/admin/users", { ...f, role: addRole, invite: $("#addInvite").classList.contains("on") });
+    toast(r.sent ? "User added · invitation sent" : "User added");
+    STATS = null; U.q = ""; U.filter = "all"; U.page = 0; location.hash = "users"; await show(); select(r.id);
+  } catch (x) { toast(x.message); }
+});
+
+/* ---- delete user: type the username to confirm ---- */
+function openDel() {
+  const u = U.rows.find(x => x.id === U.sel);
+  $("#delText").textContent = `@${u.username} (${u.email}) and all their progress are removed for good. Type the username to confirm.`;
+  $("#delName").value = ""; $("#delGo").disabled = true;
+  $("#delDlg").showModal();
+}
+$("#delDlg").addEventListener("close", async () => {
+  if ($("#delDlg").returnValue !== "ok") return;
+  try { await api("DELETE", `/admin/users/${U.sel}`); toast("Account deleted"); U.sel = null; STATS = null; await show(); } catch (x) { toast(x.message); }
+});
+
+/* ---- export the current list ---- */
+async function exportCsv() {
+  const rows = [], q = s => `"${String(s ?? "").replace(/"/g, '""')}"`;
+  for (let page = 0; page < 200; page++) {
+    const r = await api("GET", `/admin/users?q=${encodeURIComponent(U.q)}&filter=${U.filter}&page=${page}`);
+    rows.push(...r.users); if (!r.more) break;
+  }
+  const csv = ["id,username,name,email,role,verified,disabled,country,plan,joined,last_seen", ...rows.map(u => [u.id, u.username, u.name, u.email, u.role, u.verified, u.disabled, u.country, u.sub_status || (u.plus_until > Date.now() ? "gift" : ""), new Date(u.created_at).toISOString(), u.last_seen ? new Date(u.last_seen).toISOString() : ""].map(q).join(","))].join("\n");
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); a.download = `lapp-users-${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+}
+
 (async () => {
   const m = await api("GET", "/me");
   if (!m.user) { location.href = "/?login=1&next=/admin"; return; }
   ME = m.user;
-  $("#me").innerHTML = `<span>@${esc(ME.username)} · <span class="role r-${ME.role}">${ROLE[ME.role]}</span></span><button class="btn w" id="out" style="padding:5px 10px">Sign out</button>`;
+  $("#me").innerHTML = `<span>@${esc(ME.username)} <span class="role r-${ME.role}">${ROLE[ME.role]}</span></span><button class="b sm" id="out">Sign out</button>`;
   $("#out").onclick = async () => { await api("POST", "/auth/logout"); location.href = "/"; };
   show();
 })();

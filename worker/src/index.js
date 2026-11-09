@@ -134,6 +134,7 @@ async function me(env, req, u) { return { user: publicUser(u), plan: await planO
 /* ================= e-mail ================= */
 const T = {
   verify: (code) => ({ subject: `Your LAPP code: ${code}`, text: `Your verification code is ${code}\n\nIt is valid for 30 minutes. If you did not sign up for LAPP, you can ignore this e-mail.` }),
+  invite: (link, who) => ({ subject: "You're invited to LAPP", text: `${who} created a LAPP account for you.\n\nOpen this link to choose your password and sign in (valid for 7 days):\n${link}` }),
   reset: (link) => ({ subject: "Reset your LAPP password", text: `Someone (hopefully you) asked to reset the password of your LAPP account.\n\nOpen this link to choose a new password (valid for 1 hour):\n${link}\n\nIf this wasn't you, ignore this e-mail — your password stays the same.` })
 };
 async function sendMail(env, to, { subject, text }) {
@@ -146,10 +147,10 @@ async function sendMail(env, to, { subject, text }) {
   if (!r.ok) console.error("resend", r.status, await r.text());
   return r.ok;
 }
-async function newCode(env, user, kind) {
+async function newCode(env, user, kind, ttl) {
   await env.DB.prepare("UPDATE codes SET used = 1 WHERE user_id = ? AND kind = ? AND used = 0").bind(user.id, kind).run();
   const code = kind === "verify" ? String(100000 + (crypto.getRandomValues(new Uint32Array(1))[0] % 900000)) : b64url(rand(32));
-  const ttl = kind === "verify" ? 30 * 60e3 : 60 * 60e3;
+  ttl = ttl || (kind === "verify" ? 30 * 60e3 : 60 * 60e3);
   await env.DB.prepare("INSERT INTO codes (user_id, kind, code_hash, expires) VALUES (?, ?, ?, ?)").bind(user.id, kind, await sha(code), now() + ttl).run();
   return code;
 }
@@ -518,10 +519,11 @@ async function adminApi(req, env, p, url) {
       q("SELECT COUNT(*) n FROM users WHERE plus_until > ?", t),
       q("SELECT COUNT(*) n FROM users WHERE role != 'user'")
     ]);
+    const iran = await q("SELECT COUNT(*) n FROM users WHERE country = 'IR'");
     const countries = (await env.DB.prepare("SELECT country, COUNT(*) n FROM users GROUP BY country ORDER BY n DESC LIMIT 8").all()).results;
     const days = (await env.DB.prepare("SELECT (created_at / 86400000) d, COUNT(*) n FROM users WHERE created_at > ? GROUP BY d ORDER BY d").bind(t - 30 * DAY).all()).results;
     const recent = (await env.DB.prepare("SELECT id, username, email, country, created_at FROM users ORDER BY id DESC LIMIT 6").all()).results;
-    return json({ users: all.n, verified: verified.n, newWeek: week.n, activeWeek: active.n, plus: plus.n, trial: trial.n, grants: grants.n, staff: staff.n, countries, days, recent });
+    return json({ users: all.n, verified: verified.n, newWeek: week.n, activeWeek: active.n, plus: plus.n, trial: trial.n, grants: grants.n, staff: staff.n, iran: iran.n, countries, days, recent });
   }
 
   if (p === "/users" && M === "GET") {
@@ -546,10 +548,24 @@ async function adminApi(req, env, p, url) {
     const target = await env.DB.prepare("SELECT * FROM users WHERE id = ?").bind(id).first();
     if (!target) throw fail("no such user", 404);
     // managers look after learners; only admins change roles or touch staff accounts
-    if (me.role !== "admin" && (target.role !== "user" || b.role !== undefined)) throw fail("only an admin can do this", 403);
-    if (id === me.id && (b.role !== undefined || b.disabled)) throw fail("you can't change your own role or disable yourself", 400);
+    if (me.role !== "admin" && (target.role !== "user" || (b.role !== undefined && b.role !== target.role))) throw fail("only an admin can do this", 403);
+    if (id === me.id && ((b.role !== undefined && b.role !== target.role) || b.disabled)) throw fail("you can't change your own role or disable yourself", 400);
     const sets = [], vals = [];
-    if (b.role !== undefined) { if (!ROLES.includes(b.role)) throw fail("bad role"); sets.push("role = ?"); vals.push(b.role); }
+    if (b.name !== undefined) { sets.push("name = ?"); vals.push(String(b.name).trim().slice(0, 40)); }
+    if (b.username !== undefined && cleanUser(b.username) !== target.username) {
+      const un = cleanUser(b.username);
+      if (!USERNAME.test(un) || RESERVED.has(un)) throw fail("username: 3–20 letters, digits, _ or .");
+      if (await env.DB.prepare("SELECT 1 FROM users WHERE username = ?").bind(un).first()) throw fail("this username is taken", 409);
+      sets.push("username = ?"); vals.push(un);
+    }
+    if (b.email !== undefined && cleanEmail(b.email) !== target.email) {
+      const e = cleanEmail(b.email);
+      if (!EMAIL.test(e)) throw fail("enter a valid e-mail");
+      if (await env.DB.prepare("SELECT 1 FROM users WHERE email = ?").bind(e).first()) throw fail("this e-mail already has an account", 409);
+      // a new address has to be proven again
+      sets.push("email = ?", "verified = 0"); vals.push(e);
+    }
+    if (b.role !== undefined && b.role !== target.role) { if (!ROLES.includes(b.role)) throw fail("bad role"); sets.push("role = ?"); vals.push(b.role); }
     if (b.disabled !== undefined) { sets.push("disabled = ?"); vals.push(b.disabled ? 1 : 0); }
     if (b.plusDays !== undefined) { const d = Math.max(0, Math.min(3650, Number(b.plusDays) || 0)); sets.push("plus_until = ?"); vals.push(d ? now() + d * DAY : 0); }
     if (b.verified !== undefined) { sets.push("verified = ?"); vals.push(b.verified ? 1 : 0); }
@@ -557,6 +573,51 @@ async function adminApi(req, env, p, url) {
     const stmts = [env.DB.prepare(`UPDATE users SET ${sets.join(", ")} WHERE id = ?`).bind(...vals, id)];
     if (b.disabled) stmts.push(env.DB.prepare("DELETE FROM sessions WHERE user_id = ?").bind(id));
     await env.DB.batch(stmts);
+    return json({ ok: true });
+  }
+
+  // add someone by hand: they get an invitation link and choose their own password
+  if (p === "/users" && M === "POST") {
+    const b = await body(req);
+    const e = cleanEmail(b.email), un = cleanUser(b.username), role = b.role || "user";
+    if (!EMAIL.test(e)) throw fail("enter a valid e-mail");
+    if (!USERNAME.test(un) || RESERVED.has(un)) throw fail("username: 3–20 letters, digits, _ or .");
+    if (!ROLES.includes(role)) throw fail("bad role");
+    if (role !== "user" && me.role !== "admin") throw fail("only an admin can add team members", 403);
+    const taken = await env.DB.prepare("SELECT email = ? AS mail FROM users WHERE email = ? OR username = ?").bind(e, e, un).first();
+    if (taken) throw fail(taken.mail ? "this e-mail already has an account" : "this username is taken", 409);
+    const h = await hashPassword(b64url(rand(24)));        // nobody knows it; the invite sets the real one
+    const t = now();
+    const u = await env.DB.prepare("INSERT INTO users (email, username, name, pw_hash, salt, iter, role, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING *")
+      .bind(e, un, String(b.name || "").trim().slice(0, 40), h.pw_hash, h.salt, h.iter, role, t).first();
+    let sent = false, dev = {};
+    if (b.invite !== false) {
+      const token = await newCode(env, u, "reset", 7 * DAY);
+      const link = `${appUrl(env, req)}/?reset=${token}`;
+      sent = await sendMail(env, e, T.invite(link, me.name || me.username));
+      if (env.DEV === "1") dev = { devToken: token };
+    }
+    return json({ ok: true, id: u.id, sent, ...dev });
+  }
+
+  if ((m = p.match(/^\/users\/(\d+)$/)) && M === "DELETE") {
+    const id = Number(m[1]);
+    if (me.role !== "admin") throw fail("only an admin can delete accounts", 403);
+    if (id === me.id) throw fail("you can't delete yourself");
+    const s = await env.DB.prepare("SELECT status FROM subscriptions WHERE user_id = ?").bind(id).first();
+    if (s && ["active", "trialing", "past_due"].includes(s.status)) throw fail("this user has a running subscription — cancel it in Stripe first", 409);
+    await env.DB.batch(["sessions", "codes", "progress", "subscriptions"].map(t => env.DB.prepare(`DELETE FROM ${t} WHERE user_id = ?`).bind(id))
+      .concat(env.DB.prepare("DELETE FROM users WHERE id = ?").bind(id)));
+    return json({ ok: true });
+  }
+
+  if ((m = p.match(/^\/users\/(\d+)\/progress$/)) && M === "DELETE") {
+    const id = Number(m[1]);
+    const u = await env.DB.prepare("SELECT role FROM users WHERE id = ?").bind(id).first();
+    if (!u) throw fail("no such user", 404);
+    if (me.role !== "admin" && u.role !== "user") throw fail("only an admin can do this", 403);
+    // an empty, newer version: their devices clear it on the next start instead of uploading it again
+    await env.DB.prepare("UPDATE progress SET data = '{}', version = version + 1, updated_at = ? WHERE user_id = ?").bind(now(), id).run();
     return json({ ok: true });
   }
 
