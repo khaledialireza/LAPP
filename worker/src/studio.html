@@ -2,9 +2,10 @@
 <html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex">
 <title>LAPP Studio</title>
+<script src="/ui/lapp-ui.js?v=1"></script>
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#07070B;--p1:#0F0F16;--p2:#15151F;--p3:#1C1C29;--ln:rgba(255,255,255,.08);--ln2:rgba(255,255,255,.14);--tx:#F4F4F8;--mu:rgba(235,235,245,.55);--mu2:rgba(235,235,245,.35);
+:root{--ui-surface:#15151F;--ui-surface-2:#1C1C29;--ui-line:rgba(255,255,255,.14);--ui-text:#F4F4F8;--ui-muted:rgba(235,235,245,.55);--ui-accent:#8B5CF6;--bg:#07070B;--p1:#0F0F16;--p2:#15151F;--p3:#1C1C29;--ln:rgba(255,255,255,.08);--ln2:rgba(255,255,255,.14);--tx:#F4F4F8;--mu:rgba(235,235,245,.55);--mu2:rgba(235,235,245,.35);
 --pk:#FF3D7F;--vi:#8B5CF6;--cy:#22D3EE;--gr:#34D399;--am:#FBBF24;--rd:#F87171;--g:linear-gradient(135deg,#FF3D7F,#8B5CF6 55%,#22D3EE)}
 *{box-sizing:border-box;margin:0}
 body{background:var(--bg);color:var(--tx);font:14px/1.55 Vazirmatn,Inter,system-ui,sans-serif;min-height:100vh;display:grid;grid-template-columns:290px 1fr}
@@ -62,9 +63,9 @@ dialog textarea{min-height:90px}.row2{display:grid;grid-template-columns:1fr 1fr
 <div class="toast" id="toast"></div>
 <dialog id="dlg"><form method="dialog" id="newForm">
   <h3>محتوای تازه</h3>
-  <label>زبان درس</label><select name="course"><option value="de">آلمانی · Deutsch</option><option value="nl">هلندی · Nederlands</option><option value="pl">لهستانی · Polski</option></select>
-  <div class="row2"><div><label>نوع</label><select name="type"><option value="talk">مکالمه</option><option value="lesson">درس</option><option value="story">داستان</option></select></div>
-  <div><label>سطح</label><select name="level"><option>A1</option><option>A2</option><option>B1</option><option>B2</option></select></div></div>
+  <label>زبان درس</label><l-select name="course" value="de"><option value="de" data-icon="🇩🇪" data-sub="Deutsch">آلمانی</option><option value="nl" data-icon="🇳🇱" data-sub="Nederlands">هلندی</option><option value="pl" data-icon="🇵🇱" data-sub="Polski">لهستانی</option></l-select>
+  <div class="row2"><div><label>نوع</label><l-select name="type" value="talk"><option value="talk" data-icon="💬">مکالمه</option><option value="lesson" data-icon="🎧">درس</option><option value="story" data-icon="📖">داستان</option></l-select></div>
+  <div><label>سطح</label><l-select name="level" value="A1"><option value="A1">A1</option><option value="A2">A2</option><option value="B1">B1</option><option value="B2">B2</option></l-select></div></div>
   <label>عنوان (به زبان درس)</label><input name="title" required placeholder="Am Bahnhof" class="de">
   <label>نام کوتاه (برای پوشه)</label><input name="slug" required pattern="[a-z0-9][a-z0-9\-]{1,40}" placeholder="am-bahnhof" class="de">
   <label>موضوع و خواسته‌ها</label><textarea name="brief" placeholder="بلیت خریدن، سکوی قطار، تأخیر… واژه‌ها و گرامری که باید داشته باشد"></textarea>

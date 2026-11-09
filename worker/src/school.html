@@ -2,11 +2,13 @@
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>LAPP School</title>
 <meta name="robots" content="noindex">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@500;700&display=swap" rel="stylesheet">
+<script src="/ui/lapp-ui.js?v=1"></script>
 <style>
 /* the school portal — same look as the studio and the admin panel */
 :root{--bg:#07070B;--p1:#0F0F16;--p2:#15151F;--p3:#1C1C29;--ln:rgba(255,255,255,.08);--ln2:rgba(255,255,255,.14);--tx:#F4F4F8;--mu:rgba(235,235,245,.55);--mu2:rgba(235,235,245,.35);
---pk:#FF3D7F;--vi:#8B5CF6;--cy:#22D3EE;--gr:#34D399;--am:#FBBF24;--rd:#F87171;--g:linear-gradient(135deg,#FF3D7F,#8B5CF6 55%,#22D3EE);--org:#8B5CF6;color-scheme:dark}
+--pk:#FF3D7F;--vi:#8B5CF6;--cy:#22D3EE;--gr:#34D399;--am:#FBBF24;--rd:#F87171;--g:linear-gradient(135deg,#FF3D7F,#8B5CF6 55%,#22D3EE);--org:#8B5CF6;color-scheme:dark;
+--ui-surface:var(--p2);--ui-surface-2:var(--p3);--ui-line:var(--ln2);--ui-text:var(--tx);--ui-muted:var(--mu);--ui-accent:var(--vi);--ui-radius:10px}
 *{box-sizing:border-box;margin:0}[hidden]{display:none!important}
 body{background:var(--bg);color:var(--tx);font:14px/1.5 Inter,system-ui,sans-serif;min-height:100vh;display:grid;grid-template-columns:240px 1fr}
 button,input,select,textarea{font:inherit;color:inherit}button{cursor:pointer;border:0;background:none}a{color:inherit}
@@ -43,7 +45,8 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 .bar{height:6px;border-radius:3px;background:var(--p3);overflow:hidden}.bar i{display:block;height:100%;background:var(--gr)}
 .toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--p3);border:1px solid var(--ln2);border-radius:12px;padding:10px 16px;z-index:50;opacity:0;transition:.2s;pointer-events:none;max-width:90vw}.toast.on{opacity:1}
 dialog{margin:auto;background:var(--p2);color:var(--tx);border:1px solid var(--ln2);border-radius:18px;padding:22px;width:min(520px,94vw);max-height:90vh}dialog::backdrop{background:rgba(0,0,0,.6)}
-dialog form{display:flex;flex-direction:column;gap:12px}dialog h3{font-size:18px}.f2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+dialog form{display:flex;flex-direction:column;gap:12px}dialog.wide{width:min(860px,96vw)}
+.qtbl td{padding:4px}.qtbl td.qn{color:var(--mu);width:28px;text-align:center}.qtbl .in{padding:7px 9px;min-width:120px}.qtbl th{white-space:nowrap}dialog h3{font-size:18px}.f2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .checks{display:flex;flex-direction:column;gap:4px;max-height:240px;overflow:auto;border:1px solid var(--ln);border-radius:10px;padding:8px}.checks label{display:flex;gap:8px;align-items:center;font-size:13px}
 .q{border:1px solid var(--ln);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px}.q label.opt{display:flex;gap:8px;align-items:center;padding:7px 10px;border:1px solid var(--ln2);border-radius:9px;cursor:pointer}.q .right{border-color:var(--gr);background:rgba(52,211,153,.1)}.q .wrong{border-color:var(--rd);background:rgba(248,113,113,.08)}
 .mat{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--ln)}.mat:last-child{border:0}.mat .ic{width:38px;height:38px;border-radius:10px;background:var(--p3);display:grid;place-items:center;font-size:18px;flex:none}.mat .tx{flex:1;min-width:0}.mat .tx p{color:var(--mu);font-size:13px;white-space:pre-wrap;margin-top:3px}
@@ -71,6 +74,45 @@ canvas.board{position:absolute;inset:0;width:100%;height:100%;border-radius:16px
 @media (max-width:1000px){.g2,.g3{grid-template-columns:1fr}.week{grid-template-columns:repeat(2,minmax(0,1fr))}.lv{grid-template-columns:1fr;grid-template-rows:56px auto 1fr 62px}.lv-side{border-left:0;border-top:1px solid var(--ln);max-height:34vh}.lv-tools{grid-column:1}.lv-top{grid-column:1}}
 @media (max-width:760px){body{grid-template-columns:1fr}aside{position:sticky;height:auto;flex-direction:row;flex-wrap:nowrap;overflow-x:auto;gap:4px;padding:10px 12px}.lg span,.org,.sp,.me{display:none}.nv{white-space:nowrap}main{padding:16px 16px 60px}.week{grid-template-columns:1fr}.f2{grid-template-columns:1fr}.top h1{font-size:22px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* ===== students: the LAPP app's look ===== */
+body.student{--bg:#F2F2F7;--p1:#FFFFFF;--p2:#FFFFFF;--p3:rgba(120,120,128,.12);--ln:rgba(60,60,67,.12);--ln2:rgba(60,60,67,.18);--tx:#000;--mu:rgba(60,60,67,.6);--mu2:rgba(60,60,67,.35);
+  --accent:#FF2D55;--accent2:#5856D6;--g:linear-gradient(135deg,#FF2D55,#5856D6);--ui-accent:#5856D6;color-scheme:light;
+  display:block;font-family:Inter,system-ui,-apple-system,sans-serif}
+@media (prefers-color-scheme:dark){body.student{--bg:#000;--p1:#1C1C1E;--p2:#1C1C1E;--p3:rgba(120,120,128,.24);--ln:rgba(84,84,88,.5);--ln2:rgba(84,84,88,.7);--tx:#FFF;--mu:rgba(235,235,245,.6);--mu2:rgba(235,235,245,.35);
+  --accent:#FF375F;--accent2:#5E5CE6;--g:linear-gradient(135deg,#FF375F,#5E5CE6);--ui-accent:#5E5CE6;color-scheme:dark}}
+body.student aside{position:sticky;top:0;height:auto;flex-direction:row;align-items:center;gap:12px;padding:14px max(16px,calc((100vw - 760px)/2));border:0;
+  background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);overflow:visible}
+body.student .st-top{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+body.student .st-top i{width:34px;height:34px;border-radius:10px;background:var(--org);display:grid;place-items:center;font-style:normal;font-weight:800;color:#fff;flex:none}
+body.student .st-top b{display:block;font-size:14px}body.student .st-top small{color:var(--mu);font-size:12px}
+body.student .st-me{width:36px;height:36px;border-radius:50%;background:var(--g);color:#fff;font-weight:800;display:grid;place-items:center;border:0;flex:none}
+body.student main{max-width:760px;margin:0 auto;padding:6px 16px calc(120px + env(safe-area-inset-bottom));gap:16px}
+body.student .top h1{font-size:30px;letter-spacing:-.4px}
+body.student .card{border:0;border-radius:22px;padding:16px 18px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+body.student .kp div{border:0;border-radius:18px}
+body.student .b{background:var(--p3);border:0;color:var(--tx)}body.student .b.pr{background:var(--g);color:#fff}
+body.student .chip{background:var(--p2);border:0}body.student .chip.on{background:var(--tx);color:var(--bg)}
+body.student .r{border-color:var(--ln)}
+body.student .hero{border-radius:28px;padding:22px;background:var(--g);color:#fff;min-height:170px;align-items:flex-end;box-shadow:0 18px 40px color-mix(in srgb,var(--accent) 25%,transparent)}
+body.student .hero b{font-size:26px;line-height:1.15;margin:6px 0 4px}body.student .hero .b{background:#fff;color:#111;height:44px;padding:0 20px;border-radius:14px;font-size:15px}
+body.student .hero .tag{font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;opacity:.9}
+body.student .week{grid-template-columns:1fr;gap:10px}body.student .day{min-height:0;border:0;border-radius:20px;flex-direction:row;align-items:flex-start;gap:14px;padding:14px 16px}
+body.student .day h4{flex-direction:column;align-items:center;width:42px;flex:none;color:var(--mu)}body.student .day h4 b{font-size:22px;color:var(--tx)}
+body.student .day.today h4 b{color:var(--accent)}body.student .day .evs{flex:1;display:flex;flex-direction:column;gap:6px;min-width:0}
+body.student .ev{background:var(--p3);border-left:0;border-radius:14px;padding:9px 12px}body.student .ev.live{background:color-mix(in srgb,var(--accent) 16%,transparent)}
+body.student .tabbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom));z-index:20;display:flex;gap:2px;padding:6px;border-radius:30px;
+  background:color-mix(in srgb,var(--p1) 88%,transparent);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 10px 30px rgba(0,0,0,.14);border:1px solid var(--ln)}
+body.student .tabbar a{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:64px;padding:7px 8px;border-radius:24px;color:var(--mu);text-decoration:none;font-size:11px;font-weight:600}
+body.student .tabbar a span{font-size:20px;line-height:1.1}body.student .tabbar a.on{background:var(--p3);color:var(--accent)}
+body.student .hw{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--ln);text-decoration:none}.hw:last-child{border:0}
+body.student .hw .ic{width:40px;height:40px;border-radius:12px;background:var(--p3);display:grid;place-items:center;font-size:19px;flex:none}
+body.student .hw .tx{flex:1;min-width:0}body.student .hw .tx b{display:block}body.student .hw .tx small{color:var(--mu);font-size:12.5px}
+body.student .rings{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center}
+body.student .rings div{background:var(--p3);border-radius:18px;padding:14px 8px}body.student .rings b{display:block;font-size:24px;font-weight:800;font-variant-numeric:tabular-nums}body.student .rings span{font-size:12px;color:var(--mu)}
+body.student .menu{position:absolute;right:max(16px,calc((100vw - 760px)/2));top:60px;background:var(--p1);border-radius:16px;box-shadow:0 14px 40px rgba(0,0,0,.18);padding:6px;display:flex;flex-direction:column;min-width:200px;z-index:30}
+body.student .menu a,body.student .menu button{padding:10px 12px;border-radius:10px;text-align:left;text-decoration:none;color:var(--tx);font-size:14px}body.student .menu a:hover,body.student .menu button:hover{background:var(--p3)}
+body.student.live main{max-width:none;padding:0}body.student.live aside,body.student.live .tabbar{display:none}
 </style></head><body>
 <aside id="side"></aside>
 <main id="view"><div class="empty">Loading…</div></main>
@@ -88,6 +130,11 @@ const fmtTime = ms => new Date(ms).toLocaleTimeString("en-GB", { hour: "2-digit"
 const fmtDate = s => s ? new Date(s + "T12:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "—";
 const ago = ms => { if (!ms) return "—"; const m = (Date.now() - ms) / 6e4; return m < 2 ? "now" : m < 60 ? Math.round(m) + " min ago" : m < 1440 ? Math.round(m / 60) + " h ago" : Math.round(m / 1440) + " days ago"; };
 const COURSE = { de: "German", nl: "Dutch", pl: "Polish" };
+const FLAG = { de: "🇩🇪", nl: "🇳🇱", pl: "🇵🇱" };
+const courseOpts = () => Object.entries(COURSE).map(([k, l]) => [k, l, { icon: FLAG[k], sub: { de: "Deutsch", nl: "Nederlands", pl: "Polski" }[k] }]);
+const ROLE_ICON = { admin: "🛠", teacher: "👩‍🏫", finance: "💶", student: "🎓" };
+const roleOpts = () => Object.entries(ROLE).map(([k, l]) => [k, l, { icon: ROLE_ICON[k] }]);
+const personOpt = m => [m.id, nameOf(m), { icon: (nameOf(m) || "?").charAt(0).toUpperCase(), sub: m.email || "@" + m.username }];
 const ROLE = { admin: "School admin", teacher: "Teacher", finance: "Finance", student: "Student" };
 let S = { org: null, role: null, me: null, counts: null }, toastT;
 function toast(t) { const e = $("#toast"); e.textContent = t; e.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(() => e.classList.remove("on"), 2800); }
@@ -106,19 +153,27 @@ const can = (...roles) => roles.includes(S.role);
 /* ---------------- a small form dialog: fields → values ---------------- */
 function form(title, fields, submit, okLabel = "Save") {
   const d = $("#dlg"), f = $("#dlgForm");
+  d.classList.remove("wide");
   f.innerHTML = `<h3>${esc(title)}</h3>` + fields.map(x => {
     const id = "f_" + x.name;
     if (x.type === "html") return x.html;
-    if (x.type === "select") return `<div class="f"><label for="${id}">${esc(x.label)}</label><select class="in" id="${id}" name="${x.name}">${x.options.map(([v, l]) => `<option value="${esc(v)}" ${String(v) === String(x.value ?? "") ? "selected" : ""}>${esc(l)}</option>`).join("")}</select></div>`;
+    if (x.type === "select" || x.type === "multi") return `<div class="f"><label for="${id}">${esc(x.label)}</label><l-select id="${id}" name="${x.name}" ${x.type === "multi" ? "multiple" : ""} ${x.search ? "search" : ""} placeholder="${esc(x.ph || (x.type === "multi" ? "Choose…" : "Choose one"))}" ${x.required ? "required" : ""}></l-select></div>`;
+    if (x.type === "date" || x.type === "datetime-local") return `<div class="f"><label for="${id}">${esc(x.label)}</label><l-date id="${id}" name="${x.name}" type="${x.type === "date" ? "date" : "datetime"}" value="${esc(x.value || "")}" ${x.required ? "required" : ""}></l-date></div>`;
     if (x.type === "checks") return `<div class="f"><label>${esc(x.label)}</label><div class="checks">${x.options.map(([v, l]) => `<label><input type="checkbox" name="${x.name}" value="${esc(v)}" ${(x.value || []).map(String).includes(String(v)) ? "checked" : ""}> ${esc(l)}</label>`).join("") || `<span class="mu">Nothing to choose yet</span>`}</div></div>`;
     if (x.type === "textarea") return `<div class="f"><label for="${id}">${esc(x.label)}</label><textarea class="in" id="${id}" name="${x.name}" placeholder="${esc(x.ph || "")}">${esc(x.value || "")}</textarea></div>`;
     return `<div class="f"><label for="${id}">${esc(x.label)}</label><input class="in" id="${id}" name="${x.name}" type="${x.type || "text"}" value="${esc(x.value ?? "")}" placeholder="${esc(x.ph || "")}" ${x.required ? "required" : ""} ${x.attrs || ""}></div>`;
   }).join("") + `<div class="f err mu" id="dlgErr" style="color:var(--rd)"></div><div style="display:flex;gap:8px;justify-content:flex-end"><button class="b" value="cancel" formnovalidate>Cancel</button><button class="b pr" value="ok">${esc(okLabel)}</button></div>`;
+  // the controls get their options (with pictures, fonts, second lines) after they exist
+  for (const x of fields) if (x.type === "select" || x.type === "multi") {
+    const el = f.querySelector(`#f_${x.name}`);
+    el.options = x.options.map(o => Array.isArray(o) ? { value: String(o[0]), label: String(o[1]), ...(o[2] || {}) } : o);
+    el.value = x.type === "multi" ? (x.value || []).map(String) : (x.value ?? (x.options[0] ? (Array.isArray(x.options[0]) ? x.options[0][0] : x.options[0].value) : ""));
+  }
   f.onsubmit = async e => {
     if (e.submitter && e.submitter.value === "cancel") return;
     e.preventDefault();
     const v = {}; const fd = new FormData(f);
-    for (const x of fields) if (x.name) v[x.name] = x.type === "checks" ? fd.getAll(x.name) : fd.get(x.name);
+    for (const x of fields) if (x.name) v[x.name] = x.type === "checks" || x.type === "multi" ? fd.getAll(x.name) : (fd.get(x.name) ?? "");
     try { await submit(v, f); d.close(); } catch (err) { $("#dlgErr").textContent = err.message; }
   };
   d.showModal();
@@ -133,6 +188,24 @@ const NAV = {
 };
 function side() {
   const nav = NAV[S.role] || [];
+  document.body.classList.toggle("student", S.role === "student");
+  if (S.role === "student") {
+    $("#side").innerHTML = `<div class="st-top"><i>${esc(S.org.name.charAt(0))}</i><span><b>${esc(S.org.name)}</b><small>${esc(S.me.name || "@" + S.me.username)}</small></span></div>
+      <button class="st-me" id="meBtn" aria-label="Account">${esc((S.me.name || S.me.username).charAt(0).toUpperCase())}</button>`;
+    const ICONS = { home: "🏠", calendar: "📅", classes: "📚", homework: "📝", fees: "💶" };
+    let bar = $("#tabbar"); if (!bar) { bar = document.createElement("nav"); bar.id = "tabbar"; bar.className = "tabbar"; bar.setAttribute("aria-label", "Sections"); document.body.append(bar); }
+    bar.innerHTML = nav.map(([k, l]) => `<a href="#${k}" data-v="${k}" class="nv"><span>${ICONS[k]}</span>${esc(l.replace(/^\S+\s/, "").replace(/^My (.)/, (m, c) => c.toUpperCase()))}</a>`).join("");
+    $("#meBtn").onclick = e => {
+      e.stopPropagation();
+      let m = $("#meMenu"); if (m) return m.remove();
+      m = document.createElement("div"); m.id = "meMenu"; m.className = "menu";
+      m.innerHTML = `<a href="/">🎧 Practise in the LAPP app</a><button id="out">↩ Sign out</button>`;
+      $("#side").append(m);
+      $("#out").onclick = async () => { await fetch("/api/auth/logout", { method: "POST", headers: { "X-LAPP": "1" } }); location.href = "/"; };
+      document.addEventListener("click", () => m.remove(), { once: true });
+    };
+    return;
+  }
   $("#side").innerHTML = `<div class="lg"><i style="background:${esc(S.org.color)}">${esc(S.org.name.charAt(0))}</i><span>${esc(S.org.name)}</span></div><div class="org">${ROLE[S.role]}</div>
     ${nav.map(([k, l]) => `<a class="nv" href="#${k}" data-v="${k}">${l}</a>`).join("")}
     <div class="sp"></div><div class="me"><span>@${esc(S.me.username)}</span><a class="b sm" href="/">Open the LAPP app</a><button class="b sm" id="out">Sign out</button></div>`;
@@ -212,6 +285,10 @@ function hwRows(list) {
 /* ---- homework ---- */
 V.homework = async () => {
   const list = (await api("GET", "/assignments")).assignments;
+  if (can("student")) {
+    const todo = list.filter(a => !a.my_at), done = list.filter(a => a.my_at);
+    return `<div class="top"><h1>Homework</h1></div><div class="card"><h3>To do</h3>${todo.length ? hwTiles(todo) : `<div class="empty">Nothing to do ✓</div>`}</div>${done.length ? `<div class="card"><h3>Handed in</h3>${hwTiles(done)}</div>` : ""}`;
+  }
   return `<div class="top"><h1>Homework</h1></div><div class="card">${hwRows(list)}</div>`;
 };
 V.hw = async id => {
@@ -279,25 +356,33 @@ async function weekView(title, mine) {
   return `<div class="top"><h1>${title}</h1><button class="b" data-week="-1">‹</button><button class="b" data-week="0">This week</button><button class="b" data-week="1">›</button>${can("admin", "teacher") ? `<button class="b pr" data-go="newevents">＋ Plan lessons</button>` : ""}</div>
   <div class="week">${Array.from({ length: 7 }, (_, i) => { const day = from + i * DAYMS, list = ev.filter(e => e.starts_at >= day && e.starts_at < day + DAYMS);
     return `<div class="day ${new Date(day).toDateString() === todayKey ? "today" : ""}"><h4><span>${new Date(day).toLocaleDateString("en-GB", { weekday: "short" })}</span><b>${new Date(day).getDate()}</b></h4>
-      ${list.map(e => `<a class="ev ${e.status}" href="${e.status === "live" ? "#live/" + e.id : "#class/" + e.class_id}"><small>${fmtTime(e.starts_at)}–${fmtTime(e.ends_at)}${e.status === "live" ? " · LIVE" : ""}</small><b>${esc(e.class_name)}</b><small>${esc(e.title || e.place)}${!mine && (e.teacher_name || e.teacher_username) ? " · " + esc(e.teacher_name || e.teacher_username) : ""}</small></a>`).join("")}</div>`; }).join("")}</div>`;
+      <div class="evs">${!list.length && can("student") ? `<span class="mu" style="padding-top:8px">No lessons</span>` : ""}${list.map(e => `<a class="ev ${e.status}" href="${e.status === "live" ? "#live/" + e.id : "#class/" + e.class_id}"><small>${fmtTime(e.starts_at)}–${fmtTime(e.ends_at)}${e.status === "live" ? " · LIVE" : ""}</small><b>${esc(e.class_name)}</b><small>${esc(e.title || e.place)}${!mine && (e.teacher_name || e.teacher_username) ? " · " + esc(e.teacher_name || e.teacher_username) : ""}</small></a>`).join("")}</div></div>`; }).join("")}</div>`;
 }
 V.timetable = () => weekView("Timetable");
 V.week = () => weekView("My week", true);
 V.calendar = () => weekView("Calendar", true);
 
 /* ---- student home ---- */
+const hello = () => { const h = new Date().getHours(); return h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening"; };
+const HW_ICON = { quiz: "✅", write: "✍️", speak: "🎤" };
+function hwTiles(list) {
+  return list.map(a => `<a class="hw" href="#hw/${a.id}"><span class="ic">${HW_ICON[a.kind]}</span><span class="tx"><b>${esc(a.title)}</b><small>${esc(a.class_name)}${a.due_at ? " · due " + fmtDay(a.due_at) : ""}</small></span>
+    ${a.my_at ? `<span class="pl ${a.my_score == null ? "cy-p" : a.my_score >= 60 ? "ok-p" : "wa-p"}">${a.my_score == null ? "handed in" : a.my_score + "%"}</span>` : `<span class="pl ${a.due_at && a.due_at < Date.now() ? "bad-p" : "wa-p"}">${a.due_at && a.due_at < Date.now() ? "late" : "to do"}</span>`}</a>`).join("");
+}
 V.home = async () => {
   const now = Date.now(), [ev, hw, prog, fees] = await Promise.all([events(now - DAYMS, now + 14 * DAYMS), api("GET", "/assignments"), api("GET", "/me"), api("GET", "/fees")]);
   const live = ev.find(e => e.status === "live"), next = ev.find(e => e.status === "planned" && e.ends_at > now);
   const todo = hw.assignments.filter(a => !a.my_at);
   const nextPay = fees.fees.flatMap(f => f.installments.filter(i => i.paid < i.amount)).sort((a, b) => a.due_on.localeCompare(b.due_on))[0];
-  return `<div class="top"><h1>Hello, ${esc(S.me.name || S.me.username)}</h1></div>
-  ${live ? `<div class="hero"><span><span class="live-dot">CLASS IS LIVE</span><b>${esc(live.class_name)}${live.teacher_name ? " — with " + esc(live.teacher_name) : ""}</b><span>started at ${fmtTime(live.starts_at)}</span></span><a class="b" href="#live/${live.id}">Join class</a></div>`
-    : next ? `<div class="hero"><span><span>Next lesson</span><b>${esc(next.class_name)}</b><span>${fmtDay(next.starts_at)} · ${fmtTime(next.starts_at)}–${fmtTime(next.ends_at)} · ${esc(next.place)}</span></span><a class="b" href="#calendar">Calendar</a></div>` : ""}
-  <div class="g2"><div class="card"><h3>📝 Homework to do <a class="b sm" href="#homework">All</a></h3>${todo.length ? hwRows(todo.slice(0, 6)) : `<div class="empty">Nothing to do — all handed in ✓</div>`}</div>
-  <div class="card"><h3>📈 Progress</h3><div class="r"><span>Attendance</span><b>${prog.attendance == null ? "—" : prog.attendance + "%"}</b></div><div class="r"><span>Homework handed in</span><b>${prog.handedIn} / ${prog.homework}</b></div><div class="r"><span>Average score</span><b>${prog.average == null ? "—" : prog.average + "%"}</b></div>
-    ${prog.homework ? `<div class="bar" style="margin-top:8px"><i style="width:${Math.round(prog.handedIn / prog.homework * 100)}%"></i></div>` : ""}
-    ${nextPay ? `<div class="r" style="margin-top:8px"><span>💶 Next payment</span><a href="#fees"><b>${money(nextPay.amount - nextPay.paid)}</b> · ${fmtDate(nextPay.due_on)}</a></div>` : ""}</div></div>`;
+  const upcoming = ev.filter(e => e.status === "planned" && e.starts_at > now).slice(0, 3);
+  return `<div class="top"><div><h1>${hello()}, ${esc((S.me.name || S.me.username).split(" ")[0])}</h1><span class="mu">${new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}</span></div></div>
+  ${live ? `<div class="hero"><span><span class="tag">● Class is live</span><b>${esc(live.class_name)}</b><span>${live.teacher_name ? "with " + esc(live.teacher_name) + " · " : ""}started ${fmtTime(live.starts_at)}</span></span><a class="b" href="#live/${live.id}">Join class</a></div>`
+    : next ? `<div class="hero"><span><span class="tag">Next lesson</span><b>${esc(next.class_name)}</b><span>${fmtDay(next.starts_at)} · ${fmtTime(next.starts_at)}–${fmtTime(next.ends_at)} · ${esc(next.place)}</span></span><a class="b" href="#calendar">Calendar</a></div>`
+    : `<div class="hero"><span><span class="tag">${esc(S.org.name)}</span><b>No lessons planned</b><span>Your teacher will add them soon.</span></span><a class="b" href="/">Practise in the app</a></div>`}
+  <div class="rings"><div><b>${prog.attendance == null ? "—" : prog.attendance + "%"}</b><span>Attendance</span></div><div><b>${prog.handedIn}/${prog.homework}</b><span>Homework</span></div><div><b>${prog.average == null ? "—" : prog.average + "%"}</b><span>Average</span></div></div>
+  <div class="card"><h3>📝 Homework <a class="b sm" href="#homework">All</a></h3>${todo.length ? hwTiles(todo.slice(0, 5)) : `<div class="empty">Nothing to do — all handed in ✓</div>`}</div>
+  ${upcoming.length ? `<div class="card"><h3>📅 Coming up <a class="b sm" href="#calendar">Calendar</a></h3>${upcoming.map(e => `<div class="hw"><span class="ic">${FLAG[e.course] || "📚"}</span><span class="tx"><b>${esc(e.class_name)}</b><small>${fmtDay(e.starts_at)} · ${fmtTime(e.starts_at)} · ${esc(e.place)}</small></span></div>`).join("")}</div>` : ""}
+  ${nextPay ? `<a class="card" href="#fees" style="text-decoration:none;display:flex;justify-content:space-between;align-items:center"><span><b>💶 Next payment</b><br><span class="mu">${fmtDate(nextPay.due_on)}</span></span><b style="font-size:20px">${money(nextPay.amount - nextPay.paid)}</b></a>` : ""}`;
 };
 
 /* ---- fees (student) ---- */
@@ -345,7 +430,7 @@ V.people = async () => {
 V.settings = async () => `<div class="top"><h1>Settings</h1></div><div class="card" style="max-width:560px"><form id="setForm" style="display:flex;flex-direction:column;gap:12px">
   <div class="f"><label for="s_name">School name</label><input class="in" id="s_name" name="name" value="${esc(S.org.name)}"></div>
   <div class="f2"><div class="f"><label for="s_color">Colour</label><input class="in" id="s_color" name="color" type="color" value="${esc(S.org.color)}" style="height:42px;padding:4px"></div>
-  <div class="f"><label for="s_cur">Currency</label><select class="in" id="s_cur" name="currency">${["EUR", "PLN", "CHF", "GBP", "USD"].map(c => `<option ${c === S.org.currency ? "selected" : ""}>${c}</option>`).join("")}</select></div></div>
+  <div class="f"><label for="s_cur">Currency</label><l-select id="s_cur" name="currency" value="${esc(S.org.currency)}">${[["EUR", "Euro", "€"], ["PLN", "Polish złoty", "zł"], ["CHF", "Swiss franc", "Fr"], ["GBP", "British pound", "£"], ["USD", "US dollar", "$"]].map(([c, n, i]) => `<option value="${c}" data-sub="${n}" data-icon="${i}">${c}</option>`).join("")}</l-select></div></div>
   <p class="mu">Your school's address: <b>${location.origin}/s/${SLUG}</b> — share it with teachers and students.</p>
   <button class="b pr" style="align-self:flex-start">Save</button></form></div>`;
 document.addEventListener("submit", async e => {
@@ -377,11 +462,11 @@ ACT.invite = async () => {
   form("Add a person", [
     { type: "html", html: `<p class="mu">The school gives each person a username and a password. No e-mail is needed.</p><div class="f2">` },
     { name: "name", label: "Name", required: true, ph: "Sara Müller" },
-    { name: "role", label: "Role", type: "select", options: Object.entries(ROLE), value: "student" },
+    { name: "role", label: "Role", type: "select", options: roleOpts(), value: "student" },
     { name: "username", label: "Username", required: true, ph: "sara.mueller", attrs: `pattern="[a-zA-Z0-9_.]{3,20}" autocomplete="off"` },
     { name: "password", label: "Password", value: pw, required: true, attrs: `minlength="8" autocomplete="off"` },
     { type: "html", html: `</div>` },
-    { name: "classIds", label: "Classes (students join them, teachers teach them)", type: "checks", options: cl.map(k => [k.id, k.name]) },
+    { name: "classIds", label: "Classes (students join them, teachers teach them)", type: "multi", options: cl.map(k => [k.id, k.name, { icon: FLAG[k.course], sub: `${COURSE[k.course]} ${k.level} · ${k.place}` }]) },
     { name: "email", label: "E-mail (optional — only if they want password resets by e-mail)", type: "email" }
   ], async v => {
     const r = await api("POST", "/members", { name: v.name, role: v.role, username: v.username, password: v.password, email: v.email || undefined, classIds: v.classIds, notify: false });
@@ -414,8 +499,8 @@ ACT.person = async btn => {
   const m = (await members()).find(x => x.id === Number(btn.dataset.u));
   form(`${nameOf(m)}`, [
     { name: "name", label: "Name", value: m.name },
-    { name: "role", label: "Role", type: "select", options: Object.entries(ROLE), value: m.role },
-    { name: "active", label: "Status", type: "select", options: [["1", "Active"], ["0", "Inactive (can't open the school)"]], value: m.active ? "1" : "0" },
+    { name: "role", label: "Role", type: "select", options: roleOpts(), value: m.role },
+    { name: "active", label: "Status", type: "select", options: [["1", "Active", { icon: "🟢" }], ["0", "Inactive", { icon: "⏸", sub: "can't open the school" }]], value: m.active ? "1" : "0" },
     ...(m.managed ? [
       { type: "html", html: `<div class="f2">` }, { name: "username", label: "Username", value: m.username, attrs: `pattern="[a-zA-Z0-9_.]{3,20}"` },
       { name: "password", label: "New password (empty = keep)", attrs: `minlength="8" autocomplete="off"`, ph: "leave empty" }, { type: "html", html: `</div>` },
@@ -434,13 +519,13 @@ async function classForm(k) {
   form(k ? "Edit class" : "New class", [
     { name: "name", label: "Name", value: k ? k.name : "", required: true, ph: "A1 · Morning" },
     { type: "html", html: `<div class="f2">` },
-    { name: "course", label: "Language", type: "select", options: Object.entries(COURSE), value: k ? k.course : "de" },
-    { name: "level", label: "Level", type: "select", options: ["A1", "A2", "B1", "B2", "C1", "C2"].map(x => [x, x]), value: k ? k.level : "A1" },
-    { name: "teacherId", label: "Teacher", type: "select", options: [["", "— none yet —"], ...t.map(x => [x.id, nameOf(x)])], value: k ? k.teacher_id || "" : "" },
+    { name: "course", label: "Language", type: "select", options: courseOpts(), value: k ? k.course : "de" },
+    { name: "level", label: "Level", type: "select", options: [["A1", "A1", { sub: "Beginner" }], ["A2", "A2", { sub: "Elementary" }], ["B1", "B1", { sub: "Intermediate" }], ["B2", "B2", { sub: "Upper intermediate" }], ["C1", "C1", { sub: "Advanced" }], ["C2", "C2", { sub: "Mastery" }]], value: k ? k.level : "A1" },
+    { name: "teacherId", label: "Teacher", type: "select", search: true, options: [["", "No teacher yet", { icon: "—" }], ...t.map(personOpt)], value: k ? k.teacher_id || "" : "" },
     { name: "place", label: "Where", value: k ? k.place : "Online", ph: "Online or Room 2" },
     { name: "startsOn", label: "Starts", type: "date", value: k ? k.starts_on : "" }, { name: "endsOn", label: "Ends", type: "date", value: k ? k.ends_on : "" },
     { type: "html", html: `</div>` },
-    ...(k ? [{ name: "archived", label: "Status", type: "select", options: [["0", "Running"], ["1", "Archived"]], value: k.archived ? "1" : "0" }, { type: "html", html: `<button type="button" class="b d" data-go="delclass" data-k="${k.id}" style="align-self:flex-start">Delete class</button>` }] : [])
+    ...(k ? [{ name: "archived", label: "Status", type: "select", options: [["0", "Running", { icon: "🟢" }], ["1", "Archived", { icon: "📦" }]], value: k.archived ? "1" : "0" }, { type: "html", html: `<button type="button" class="b d" data-go="delclass" data-k="${k.id}" style="align-self:flex-start">Delete class</button>` }] : [])
   ], async v => {
     const body = { ...v, archived: v.archived === "1" };
     if (k) await api("PATCH", `/classes/${k.id}`, body); else { const r = await api("POST", "/classes", body); location.hash = `class/${r.class.id}`; }
@@ -455,7 +540,7 @@ ACT.delclass = async btn => {
 };
 ACT.classstudents = async btn => {
   const [st, { students: cur }] = await Promise.all([students(), api("GET", `/classes/${btn.dataset.k}`)]);
-  form("Students in this class", [{ name: "ids", label: "Students", type: "checks", options: st.map(s => [s.id, `${nameOf(s)} · ${s.email || "@" + s.username}`]), value: cur.map(s => s.id) }],
+  form("Students in this class", [{ name: "ids", label: "Students", type: "multi", search: true, options: st.map(personOpt), value: cur.map(s => s.id) }],
     async v => { await api("PUT", `/classes/${btn.dataset.k}/students`, { ids: v.ids.map(Number) }); CLASSES = null; toast("Saved"); show(); });
 };
 ACT.newevents = async btn => {
@@ -463,10 +548,10 @@ ACT.newevents = async btn => {
   const d = new Date(); d.setDate(d.getDate() + 1); d.setHours(9, 0, 0, 0);
   const local = new Date(d.getTime() - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 16);
   form("Plan lessons", [
-    { name: "classId", label: "Class", type: "select", options: cl.map(k => [k.id, k.name]), value: btn.dataset.k || (cl[0] && cl[0].id) },
+    { name: "classId", label: "Class", type: "select", options: cl.map(k => [k.id, k.name, { icon: FLAG[k.course], sub: `${COURSE[k.course]} ${k.level}` }]), value: btn.dataset.k || (cl[0] && cl[0].id) },
     { type: "html", html: `<div class="f2">` }, { name: "start", label: "First lesson", type: "datetime-local", value: local, required: true },
     { name: "minutes", label: "Length (minutes)", type: "number", value: 90, attrs: `min="15" max="600"` }, { type: "html", html: `</div>` },
-    { name: "weekdays", label: "Repeat on (leave empty for once a week on the same day)", type: "checks", options: [["1", "Mon"], ["2", "Tue"], ["3", "Wed"], ["4", "Thu"], ["5", "Fri"], ["6", "Sat"], ["0", "Sun"]] },
+    { name: "weekdays", label: "Repeat on (empty = once a week on the same day)", type: "multi", ph: "Same day each week", options: [["1", "Monday"], ["2", "Tuesday"], ["3", "Wednesday"], ["4", "Thursday"], ["5", "Friday"], ["6", "Saturday"], ["0", "Sunday"]] },
     { name: "weeks", label: "For how many weeks", type: "number", value: 1, attrs: `min="1" max="60"` },
     { name: "title", label: "Topic (optional)" }
   ], async v => {
@@ -490,7 +575,7 @@ ACT.attend = async btn => {
   form(`Attendance · ${fmtDay(r.event.starts_at)}`, [{ name: "present", label: "Present", type: "checks", options: r.students.map(s => [s.id, nameOf(s)]), value: r.students.filter(s => s.present).map(s => s.id) }],
     async v => { const marks = Object.fromEntries(r.students.map(s => [s.id, v.present.includes(String(s.id))])); await api("PUT", `/events/${btn.dataset.e}/attendance`, { marks }); if (r.event.status === "planned" && r.event.starts_at < Date.now()) await api("PATCH", `/events/${btn.dataset.e}`, { status: "done" }); toast("Attendance saved"); show(); });
 };
-ACT["mat-text"] = btn => form("Add a text", [{ name: "title", label: "Title", required: true }, { name: "body", label: "Text", type: "textarea" }, { name: "shared", label: "Students see it", type: "select", options: [["1", "Yes"], ["0", "Not yet"]] }],
+ACT["mat-text"] = btn => form("Add a text", [{ name: "title", label: "Title", required: true }, { name: "body", label: "Text", type: "textarea" }, { name: "shared", label: "Students see it", type: "select", options: [["1", "Yes, share now", { icon: "👀" }], ["0", "Not yet", { icon: "🙈" }]] }],
   async v => { await api("POST", "/materials", { classId: btn.dataset.k, kind: "text", title: v.title, body: v.body, shared: v.shared === "1" }); show(); });
 ACT["mat-link"] = btn => form("Add a link or video", [{ name: "title", label: "Title", required: true }, { name: "url", label: "Address (https://…)", type: "url", required: true }, { name: "body", label: "Note (optional)", type: "textarea" }],
   async v => { await api("POST", "/materials", { classId: btn.dataset.k, kind: "link", title: v.title, url: v.url, body: v.body }); show(); });
@@ -504,26 +589,59 @@ ACT["mat-file"] = btn => form("Add a file (PDF, image or audio, up to 2 MB)", [{
 ACT["mat-lesson"] = async btn => {
   const idx = await (await fetch("/content/index.json")).json(), c = idx.courses.find(x => x.code === btn.dataset.c) || idx.courses[0];
   const ls = await Promise.all(c.lessons.map(async dir => ({ dir, ...(await (await fetch(`/content/lessons/${dir}/lesson.json`)).json()) })));
-  form("Add a lesson from the LAPP library", [{ name: "dir", label: `${c.name} lessons`, type: "select", options: ls.map(l => [l.dir, `${l.title} · ${l.level}`]) }],
+  form("Add a lesson from the LAPP library", [{ name: "dir", label: `${c.name} lessons`, type: "select", search: true, options: ls.map(l => [l.dir, l.title, { icon: { talk: "💬", story: "📖" }[l.type] || "🎧", sub: `${l.level} · ${l.type || "lesson"}` }]) }],
     async v => { const l = ls.find(x => x.dir === v.dir); await api("POST", "/materials", { classId: btn.dataset.k, kind: "lesson", title: l.title, url: l.dir }); show(); });
   if (!ls.length) $("#dlgErr").textContent = "This language has no library lessons yet.";
 };
 ACT.matshare = async btn => { await api("PATCH", `/materials/${btn.dataset.m}`, { shared: btn.dataset.s === "1" }); show(); };
 ACT.matdel = async btn => { if (btn.dataset.sure !== "1") { btn.dataset.sure = "1"; btn.textContent = "Sure?"; return; } await api("DELETE", `/materials/${btn.dataset.m}`); show(); };
+// homework: quiz questions are rows in a table, not one big text box
+const qRow = (q = {}) => `<tr><td class="qn"></td><td><input class="in" data-q="q" value="${esc(q.q || "")}" placeholder="Wann gibt es Frühstück?" aria-label="Question"></td>
+  <td><input class="in" data-q="a" value="${esc(q.answer || "")}" placeholder="Von 7 bis 10 Uhr" aria-label="Right answer"></td>
+  <td><input class="in" data-q="w" value="${esc((q.wrong || []).join(", "))}" placeholder="Um 18 Uhr, Nie" aria-label="Wrong answers"></td>
+  <td><button type="button" class="b sm" data-qdel aria-label="Remove question">✕</button></td></tr>`;
+const quizTable = () => `<div class="f" id="qWrap"><label>Questions</label>
+  <div class="tbl qtbl"><table><thead><tr><th>#</th><th>Question</th><th>Right answer</th><th>Wrong answers <span class="mu">(optional · comma)</span></th><th></th></tr></thead>
+  <tbody id="qBody">${qRow()}${qRow()}${qRow()}</tbody></table></div>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button type="button" class="b sm" id="qAdd">＋ Add a question</button>
+  <span class="mu">With wrong answers students pick one; without, they type the answer.</span></div></div>`;
+function quizRows() {
+  return [...$$("#qBody tr")].map(tr => {
+    const g = k => tr.querySelector(`[data-q="${k}"]`).value.trim();
+    const q = g("q"), answer = g("a"), wrong = g("w").split(/[,;]/).map(x => x.trim()).filter(Boolean);
+    return { q, answer, options: wrong.length ? [answer, ...wrong].sort(() => Math.random() - .5) : [] };
+  }).filter(r => r.q || r.answer);
+}
+function numberRows() { $$("#qBody tr").forEach((tr, i) => tr.querySelector(".qn").textContent = i + 1); }
 ACT.newhw = btn => {
   const d = new Date(Date.now() + 7 * DAYMS); d.setHours(20, 0, 0, 0);
   const local = new Date(d.getTime() - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 16);
   form("New homework", [
     { name: "title", label: "Title", required: true, ph: "Fill the gaps — Im Hotel" },
-    { name: "kind", label: "Type", type: "select", options: [["quiz", "Quiz — graded automatically"], ["write", "Writing — you grade it"], ["speak", "Speaking — students record, you grade"]] },
-    { name: "instructions", label: "Instructions", type: "textarea" },
-    { name: "items", label: "Quiz questions — one per line: question | right answer | wrong answer | …  (no wrong answers = type the answer)", type: "textarea", ph: "Wann gibt es Frühstück? | Von 7 bis 10 Uhr | Um 18 Uhr | Nie\nIch habe ein Zimmer ___ . | reserviert" },
-    { name: "due", label: "Due", type: "datetime-local", value: local }
+    { type: "html", html: `<div class="f2">` },
+    { name: "kind", label: "Type", type: "select", options: [["quiz", "Quiz", { icon: "✅", sub: "graded automatically" }], ["write", "Writing", { icon: "✍️", sub: "you grade it" }], ["speak", "Speaking", { icon: "🎤", sub: "students record, you grade" }]] },
+    { name: "due", label: "Due", type: "datetime-local", value: local },
+    { type: "html", html: `</div>` },
+    { name: "instructions", label: "Instructions", type: "textarea", ph: "What should the students do?" },
+    { type: "html", html: quizTable() }
   ], async v => {
-    const items = v.items.split(/\r?\n/).map(l => l.split("|").map(x => x.trim())).filter(p => p[0]).map(([q, answer, ...wrong]) => ({ q, answer: answer || "", options: wrong.length ? [answer, ...wrong].sort(() => Math.random() - .5) : [] }));
+    const items = v.kind === "quiz" ? quizRows() : [];
+    if (v.kind === "quiz") {
+      if (!items.length) throw new Error("Add at least one question");
+      const bad = items.findIndex(it => !it.q || !it.answer);
+      if (bad >= 0) throw new Error(`Question ${bad + 1} needs both the question and the right answer`);
+    }
     await api("POST", "/assignments", { classId: btn.dataset.k, title: v.title, kind: v.kind, instructions: v.instructions, items, dueAt: v.due ? new Date(v.due).getTime() : 0 });
     toast("Homework set"); show();
   }, "Set homework");
+  $("#dlg").classList.add("wide");
+  numberRows();
+  $("#qAdd").onclick = () => { $("#qBody").insertAdjacentHTML("beforeend", qRow()); numberRows(); $("#qBody tr:last-child input").focus(); };
+  $("#qBody").addEventListener("click", e => { const x = e.target.closest("[data-qdel]"); if (x && $$("#qBody tr").length > 1) { x.closest("tr").remove(); numberRows(); } });
+  // Enter in the last row adds the next question
+  $("#qBody").addEventListener("keydown", e => { if (e.key === "Enter" && e.target.matches("input")) { e.preventDefault(); const tr = e.target.closest("tr"); if (!tr.nextElementSibling) $("#qAdd").click(); else tr.nextElementSibling.querySelector("input").focus(); } });
+  const kind = $("#f_kind"), sync = () => { $("#qWrap").hidden = kind.value !== "quiz"; };
+  kind.addEventListener("change", sync); sync();
 };
 ACT.hwdel = async btn => { if (btn.dataset.sure !== "1") { btn.dataset.sure = "1"; btn.textContent = "Click again to delete with all answers"; return; } await api("DELETE", `/assignments/${btn.dataset.a}`); history.back(); };
 ACT.grade = btn => form("Grade", [{ name: "score", label: "Score (%)", type: "number", value: btn.dataset.s, attrs: `min="0" max="100" required` }, { name: "feedback", label: "Feedback", type: "textarea", value: btn.dataset.f }],
@@ -532,8 +650,8 @@ ACT.newfee = async () => {
   const [st, cl] = await Promise.all([students(), classes()]);
   const t = new Date().toISOString().slice(0, 10);
   form("New fee", [
-    { name: "studentId", label: "Student", type: "select", options: st.map(s => [s.id, `${nameOf(s)} · ${s.email || "@" + s.username}`]) },
-    { name: "classId", label: "Class (optional)", type: "select", options: [["", "—"], ...cl.map(k => [k.id, k.name])] },
+    { name: "studentId", label: "Student", type: "select", search: true, options: st.map(personOpt) },
+    { name: "classId", label: "Class (optional)", type: "select", options: [["", "No class", { icon: "—" }], ...cl.map(k => [k.id, k.name, { icon: FLAG[k.course] }])] },
     { name: "title", label: "What for", value: "Course fee" },
     { type: "html", html: `<div class="f2">` }, { name: "total", label: `Amount (${S.org.currency})`, type: "number", attrs: `min="1" step="0.01" required` },
     { name: "installments", label: "Installments", type: "number", value: 1, attrs: `min="1" max="24"` }, { type: "html", html: `</div>` },
@@ -545,9 +663,9 @@ async function feeById(id) { return (await api("GET", "/fees")).fees.find(f => f
 ACT.pay = async btn => {
   const f = await feeById(btn.dataset.f), open = f.installments.filter(i => i.paid < i.amount);
   form(`Record payment · ${f.student_name || f.student_username}`, [
-    { name: "inst", label: "Installment", type: "select", options: open.map(i => [i.id, `${fmtDate(i.due_on)} · ${money(i.amount - i.paid)} open`]) },
+    { name: "inst", label: "Installment", type: "select", options: open.map(i => [i.id, fmtDate(i.due_on), { icon: "🧾", sub: `${money(i.amount - i.paid)} open` }]) },
     { type: "html", html: `<div class="f2">` }, { name: "amount", label: `Amount (${S.org.currency}, empty = all of it)`, type: "number", attrs: `min="0" step="0.01"` },
-    { name: "method", label: "Paid by", type: "select", options: [["bank", "Bank transfer"], ["cash", "Cash"], ["card", "Card"], ["voucher", "Voucher"], ["other", "Other"]] }, { type: "html", html: `</div>` },
+    { name: "method", label: "Paid by", type: "select", options: [["bank", "Bank transfer", { icon: "🏦" }], ["cash", "Cash", { icon: "💶" }], ["card", "Card", { icon: "💳" }], ["voucher", "Voucher", { icon: "🎟" }], ["other", "Other", { icon: "•" }]] }, { type: "html", html: `</div>` },
     { name: "date", label: "Date", type: "date", value: new Date().toISOString().slice(0, 10) }
   ], async v => { await api("POST", `/installments/${v.inst}/pay`, { amount: v.amount === "" ? undefined : v.amount, method: v.method, date: v.date }); toast("Payment recorded"); show(); }, "Record");
 };
@@ -656,7 +774,7 @@ function liveStart(id, info) {
     cv.onpointerup = () => { if (!L.drawing) return; const s = L.drawing; L.drawing = null; if (s.pts.length >= 4) { page().strokes.push(s); send({ t: "stroke", s }); } draw(); };
   }
   function askText(x, y) {
-    form("Write on the board", [{ name: "text", label: "Text", required: true }, { name: "size", label: "Size", type: "select", options: [["22", "Small"], ["32", "Medium"], ["48", "Large"]], value: "32" }],
+    form("Write on the board", [{ name: "text", label: "Text", required: true }, { name: "size", label: "Size", type: "select", options: [["22", "Small", { font: "Inter" }], ["32", "Medium", { font: "Inter" }], ["48", "Large", { font: "Inter" }]], value: "32" }],
       async v => send({ t: "text", x, y, text: v.text, c: L.color, s: Number(v.size) }), "Write");
   }
   $(".lv-tools").onclick = async e => {
@@ -673,7 +791,7 @@ function liveStart(id, info) {
       async v => send({ t: "poll", poll: { q: v.q, options: v.opts.split(/\r?\n/).map(s => s.trim()).filter(Boolean) } }), "Ask");
     if (t === "show") {
       const { materials } = await api("GET", `/materials?class=${info.class.id}`);
-      form("Show on the board", [{ name: "m", label: "Material", type: "select", options: materials.map(m => [m.id, `${ICON[m.kind]} ${m.title}`]) }], async v => {
+      form("Show on the board", [{ name: "m", label: "Material", type: "select", search: true, options: materials.map(m => [m.id, m.title, { icon: ICON[m.kind], sub: m.kind === "file" ? m.file_name : m.kind }]) }], async v => {
         const m = materials.find(x => String(x.id) === v.m); if (!m) throw new Error("Add material to the class first");
         send({ t: "show", show: { kind: m.kind, title: m.title, body: m.body, type: m.file_type || "", url: m.kind === "file" ? `/api/org/${SLUG}/files/${m.file_id}` : m.url } });
       }, "Show");
