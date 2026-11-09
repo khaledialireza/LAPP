@@ -18,6 +18,7 @@ content/lang/<de|nl|pl>/dict.json           دیکشنری زبان درس: نو
 content/lang/<de|nl|pl>/verbs.json          صرف فعل‌های بی‌قاعده
 content/lang/<de|nl|pl>/names.json          اسم‌های خاص
 content/lang/<رابط>/ui.json                 متن‌های رابط کاربری (+ "_pos" نوع کلمه)
+content/lang/<رابط>/panel.json              ترجمهٔ پنل‌ها (ادمین، استودیو، مدرسه): متن انگلیسی ← ترجمه
 content/lang/<رابط>/grammar.json            قالب نکته‌های گرامری
 content/lang/<رابط>/dict.<de|nl|pl>.json    معنی کلمه‌های هر زبان درس (فارسی: {"m": معنی, "g": نکته})
 content/lang/<رابط>/names.json              اسم‌ها به این زبان
@@ -27,6 +28,8 @@ content/lessons/<درس>/<رابط>.json           ترجمهٔ درس به یک
 ```
 
 زبان‌های رابط: en (پیش‌فرض)، fa، ru، uk.
+
+**زبان هر کاربر:** زبان روی حساب ذخیره می‌شود (`users.lang`) و اپ، استودیو، ادمین و پرتال مدرسه همه به همان زبان نمایش داده می‌شوند. پنل‌ها انگلیسی نوشته شده‌اند و `ui/panel-i18n.js` آن‌ها را با `panel.json` ترجمه می‌کند. متن‌های تازهٔ بی‌ترجمه: `node tools/panel-strings.js --missing`.
 
 **زبان رابط جدید:** پوشهٔ `content/lang/<کد>/` با همان فایل‌ها، فایل `<کد>.json` در هر درس، و یک خط در `languages` در `index.json`.
 

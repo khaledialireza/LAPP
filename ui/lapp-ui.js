@@ -16,7 +16,7 @@
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 
   const css = `
-  l-select>option{display:none}l-select,l-date{display:block;position:relative;min-width:0;font:inherit}
+  l-select>option{display:none}.lu-cal-h{direction:ltr}l-select,l-date{display:block;position:relative;min-width:0;font:inherit}
   .lu-field{width:100%;display:flex;align-items:center;gap:8px;min-height:42px;padding:6px 10px 6px 11px;border-radius:var(--ui-radius,10px);
     background:var(--ui-surface-2,#1C1C29);border:1px solid var(--ui-line,rgba(255,255,255,.14));color:var(--ui-text,#F4F4F8);cursor:pointer;text-align:start;font:inherit}
   .lu-field:focus-visible,l-select[open] .lu-field,l-date[open] .lu-field{outline:none;border-color:var(--ui-accent,#8B5CF6);box-shadow:0 0 0 3px color-mix(in srgb,var(--ui-accent,#8B5CF6) 22%,transparent)}
@@ -58,7 +58,8 @@
     const h = pop.offsetHeight, w = pop.offsetWidth;
     const below = r.bottom + 6 + h <= vh || r.top < h;
     pop.style.top = (below ? Math.min(r.bottom + 6, vh - h - 8) : r.top - h - 6) + "px";
-    pop.style.left = Math.max(8, Math.min(r.left, vw - w - 8)) + "px";
+    const rtl = getComputedStyle(field).direction === "rtl";
+    pop.style.left = Math.max(8, Math.min(rtl ? r.right - w : r.left, vw - w - 8)) + "px";
   }
   document.addEventListener("pointerdown", e => { if (openOne && !openOne.contains(e.target) && !openOne._pop.contains(e.target)) openOne.close(); }, true);
   addEventListener("resize", () => openOne && openOne.close());
@@ -184,7 +185,7 @@
     render() {
       const v = this._v;
       let txt = `<span class="lu-ph">${esc(this.getAttribute("placeholder") || (this.withTime ? "Pick a day and time" : "Pick a day"))}</span>`;
-      if (v) { const d = new Date(this.withTime ? v : v + "T12:00"); txt = d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" }) + (this.withTime ? " · " + v.slice(11, 16) : ""); }
+      if (v) { const d = new Date(this.withTime ? v : v + "T12:00"); txt = d.toLocaleDateString((window.PanelI18N ? PanelI18N.locale : "en-GB"), { weekday: "short", day: "numeric", month: "short", year: "numeric" }) + (this.withTime ? " · " + v.slice(11, 16) : ""); }
       this.querySelector(".lu-val").innerHTML = txt;
       if (this._i) { this._i.setFormValue(v); this._i.setValidity(this.required && !v ? { valueMissing: true } : {}, "Please pick a date", this._field); }
     }
@@ -198,8 +199,8 @@
       const draw = () => {
         const first = new Date(y, m, 1), start = new Date(y, m, 1 - ((first.getDay() + 6) % 7)), today = ymd(new Date()), sel = v ? v.slice(0, 10) : "";
         const days = Array.from({ length: 42 }, (_, i) => new Date(start.getFullYear(), start.getMonth(), start.getDate() + i));
-        cal.innerHTML = `<div class="lu-cal-h"><button type="button" class="lu-nav" data-n="-1" aria-label="Previous month">‹</button><b>${first.toLocaleDateString("en-GB", { month: "long", year: "numeric" })}</b><button type="button" class="lu-nav" data-n="1" aria-label="Next month">›</button></div>
-          <div class="lu-grid">${["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map(d => `<span>${d}</span>`).join("")}${days.map(d => { const k = ymd(d); return `<button type="button" class="lu-day ${d.getMonth() !== m ? "out" : ""} ${k === today ? "today" : ""} ${k === sel ? "sel" : ""}" data-d="${k}" ${(min && k < min) || (max && k > max) ? "disabled" : ""}>${d.getDate()}</button>`; }).join("")}</div>
+        cal.innerHTML = `<div class="lu-cal-h"><button type="button" class="lu-nav" data-n="-1" aria-label="Previous month">‹</button><b>${first.toLocaleDateString((window.PanelI18N ? PanelI18N.locale : "en-GB"), { month: "long", year: "numeric" })}</b><button type="button" class="lu-nav" data-n="1" aria-label="Next month">›</button></div>
+          <div class="lu-grid">${Array.from({ length: 7 }, (_, i) => new Date(2024, 0, 1 + i).toLocaleDateString(window.PanelI18N ? PanelI18N.locale : "en-GB", { weekday: /^fa/.test(window.PanelI18N ? PanelI18N.locale : "") ? "narrow" : "short" })).map(d => /^[A-Za-z]/.test(d) ? d.slice(0, 2) : d).map(d => `<span>${d}</span>`).join("")}${days.map(d => { const k = ymd(d); return `<button type="button" class="lu-day ${d.getMonth() !== m ? "out" : ""} ${k === today ? "today" : ""} ${k === sel ? "sel" : ""}" data-d="${k}" ${(min && k < min) || (max && k > max) ? "disabled" : ""}>${d.getDate()}</button>`; }).join("")}</div>
           ${this.withTime ? `<div class="lu-time"><span>🕘</span><input type="number" min="0" max="23" value="${hh}" aria-label="Hour" data-t="h">:<input type="number" min="0" max="59" step="5" value="${mm}" aria-label="Minutes" data-t="m"></div>` : ""}
           <div class="lu-foot"><button type="button" data-a="today">Today</button>${this.required ? "" : `<button type="button" data-a="clear">Clear</button>`}</div>`;
         place(pop, this._field);

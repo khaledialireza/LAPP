@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<script src="/ui/panel-i18n.js?v=1"></script>
 <title>LAPP Admin</title>
 <meta name="robots" content="noindex">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -12,13 +13,13 @@ body{background:var(--bg);color:var(--tx);font:14px/1.5 Inter,system-ui,sans-ser
 body.drawer{grid-template-columns:240px 1fr 380px}
 body::before{content:"";position:fixed;inset:-30% auto auto -10%;width:720px;height:720px;background:radial-gradient(closest-side,rgba(139,92,246,.12),transparent);pointer-events:none}
 button,input,select{font:inherit;color:inherit}button{cursor:pointer;border:0;background:none}
-aside{background:var(--p1);border-right:1px solid var(--ln);padding:16px;display:flex;flex-direction:column;gap:6px;height:100vh;position:sticky;top:0;z-index:1}
+aside{background:var(--p1);border-inline-end:1px solid var(--ln);padding:16px;display:flex;flex-direction:column;gap:6px;height:100vh;position:sticky;top:0;z-index:1}
 .lg{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px;margin-bottom:14px}.lg i{width:36px;height:36px;border-radius:11px;background:var(--g);display:grid;place-items:center;font-style:normal;font-weight:800;box-shadow:0 8px 24px rgba(255,61,127,.35)}
 .nv{padding:10px 12px;border-radius:12px;color:var(--mu);display:flex;justify-content:space-between;align-items:center;text-decoration:none;border:1px solid transparent}.nv:hover{background:var(--p2);color:var(--tx)}
 .nv.on{background:var(--p3);color:var(--tx);border-color:var(--ln2)}.nv em{font-style:normal;font-size:11px;background:rgba(255,255,255,.08);padding:0 7px;border-radius:6px}
 .sp{flex:1}.me{border-top:1px solid var(--ln);padding-top:12px;font-size:12px;color:var(--mu);display:flex;justify-content:space-between;align-items:center;gap:8px}
 main{padding:22px 26px 60px;display:flex;flex-direction:column;gap:14px;min-width:0;z-index:1}
-.top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.top h1{font-size:28px;font-weight:800;margin-right:auto}
+.top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.top h1{font-size:28px;font-weight:800;margin-inline-end:auto}
 .b{height:36px;padding:0 14px;border-radius:10px;border:1px solid var(--ln2);background:var(--p2);font-weight:700;font-size:13px;display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;text-decoration:none;color:var(--tx)}
 .b:hover{background:var(--p3)}.b.pr{background:var(--g);border:0;box-shadow:0 8px 24px rgba(139,92,246,.3)}.b.d{color:var(--rd);border-color:rgba(248,113,113,.4);background:rgba(248,113,113,.08)}.b.sm{height:30px;padding:0 10px;font-size:12.5px}.b:disabled{opacity:.4;cursor:default}
 .kp{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}.kp div{background:var(--p2);border:1px solid var(--ln);border-radius:14px;padding:12px 14px}.kp b{font-size:24px;font-weight:800;display:block}.kp span{font-size:12px;color:var(--mu)}
@@ -35,9 +36,9 @@ main{padding:22px 26px 60px;display:flex;flex-direction:column;gap:14px;min-widt
 .mu{color:var(--mu);font-size:12.5px}
 .role{font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:7px;display:inline-block}.r-admin{background:#fff;color:#111}.r-manager{background:rgba(139,92,246,.22);color:#C4B5FD}.r-designer{background:rgba(34,211,238,.16);color:var(--cy)}.r-user{background:rgba(255,255,255,.07);color:var(--mu)}
 .pl{font-size:11px;font-weight:800;padding:2px 9px;border-radius:99px;display:inline-block}.p-plus{background:var(--g);color:#fff}.p-free{background:rgba(255,255,255,.07);color:var(--mu)}.p-ir{background:rgba(52,211,153,.16);color:var(--gr)}.p-off{background:rgba(248,113,113,.14);color:var(--rd)}.p-trial{background:rgba(251,191,36,.16);color:var(--am)}
-.dr{background:var(--p1);border-left:1px solid var(--ln);padding:20px;display:flex;flex-direction:column;gap:12px;height:100vh;position:sticky;top:0;overflow:auto;z-index:1}
+.dr{background:var(--p1);border-inline-start:1px solid var(--ln);padding:20px;display:flex;flex-direction:column;gap:12px;height:100vh;position:sticky;top:0;overflow:auto;z-index:1}
 .dh{display:flex;gap:12px;align-items:center}.dh .av{width:54px;height:54px;font-size:22px}.dh b{font-size:18px;display:block}
-.x{margin-left:auto;width:30px;height:30px;border-radius:50%;background:var(--p3);color:var(--mu)}
+.x{margin-inline-start:auto;width:30px;height:30px;border-radius:50%;background:var(--p3);color:var(--mu)}
 .f label{display:block;font-size:12px;color:var(--mu);margin-bottom:4px}
 .in{width:100%;background:var(--p3);border:1px solid var(--ln2);border-radius:10px;padding:9px 11px;outline:none}.in:focus{border-color:rgba(139,92,246,.7)}.in:disabled{opacity:.6}
 .f2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -52,7 +53,7 @@ main{padding:22px 26px 60px;display:flex;flex-direction:column;gap:14px;min-widt
 dialog{margin:auto;background:var(--p2);color:var(--tx);border:1px solid var(--ln2);border-radius:18px;padding:22px;width:min(480px,92vw)}dialog::backdrop{background:rgba(0,0,0,.6)}
 dialog form{display:flex;flex-direction:column;gap:12px}dialog h3{font-size:18px}
 .grp{font-size:12px;font-weight:800;color:var(--mu);margin:8px 0 2px;letter-spacing:.4px;text-transform:uppercase}
-@media (max-width:1100px){body,body.drawer{grid-template-columns:200px 1fr}.dr{position:fixed;right:0;top:0;width:min(380px,100%);box-shadow:-20px 0 60px rgba(0,0,0,.5)}.two{grid-template-columns:1fr}}
+@media (max-width:1100px){body,body.drawer{grid-template-columns:200px 1fr}.dr{position:fixed;inset-inline-end:0;top:0;width:min(380px,100%);box-shadow:-20px 0 60px rgba(0,0,0,.5)}.two{grid-template-columns:1fr}}
 @media (max-width:760px){body,body.drawer{grid-template-columns:1fr}aside{position:static;height:auto;flex-direction:row;flex-wrap:wrap}.sp,.me{display:none}.row{grid-template-columns:40px 1fr auto}.row>:nth-child(n+4){display:none}.row.hd{display:none}main{padding:16px}}
 </style></head><body>
 <aside>
@@ -100,7 +101,7 @@ dialog form{display:flex;flex-direction:column;gap:12px}dialog h3{font-size:18px
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 const flag = c => c && /^[A-Z]{2}$/.test(c) ? String.fromCodePoint(...[...c].map(x => 127397 + x.charCodeAt(0))) + " " + c : "—";
-const day = ms => ms ? new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "—";
+const day = ms => ms ? new Date(ms).toLocaleDateString((window.PanelI18N ? PanelI18N.locale : "en-GB"), { day: "numeric", month: "short", year: "numeric" }) : "—";
 const ago = ms => { if (!ms) return "—"; const m = (Date.now() - ms) / 60000; return m < 2 ? "now" : m < 60 ? Math.round(m) + " min ago" : m < 1440 ? Math.round(m / 60) + " h ago" : m < 2880 ? "yesterday" : Math.round(m / 1440) + " days ago"; };
 const ROLE = { user: "Learner", designer: "Designer", manager: "Manager", admin: "Admin" };
 const GRAD = ["#FF6B9A,#8A6CF0", "#F59E0B,#EF4444", "#34D399,#22D3EE", "#22D3EE,#8B5CF6", "#8B5CF6,#FF3D7F", "#FBBF24,#34D399"];
@@ -266,6 +267,7 @@ async function show() {
   if (v === "users") drawer();
 }
 addEventListener("hashchange", show);
+addEventListener("panel:lang", () => { show(); if (ME) $("#lng").textContent = "🌐 " + PanelI18N.lang.toUpperCase(); });
 
 let qT;
 document.addEventListener("input", e => {
@@ -355,7 +357,8 @@ async function exportCsv() {
   const m = await api("GET", "/me");
   if (!m.user) { location.href = "/?login=1&next=/admin"; return; }
   ME = m.user;
-  $("#me").innerHTML = `<span>@${esc(ME.username)} <span class="role r-${ME.role}">${ROLE[ME.role]}</span></span><button class="b sm" id="out">Sign out</button>`;
+  $("#me").innerHTML = `<span>@${esc(ME.username)} <span class="role r-${ME.role}">${ROLE[ME.role]}</span></span><button class="b sm" id="lng" title="Language">🌐 ${(window.PanelI18N ? PanelI18N.lang : "en").toUpperCase()}</button><button class="b sm" id="out">Sign out</button>`;
+  $("#lng").onclick = e => { e.stopPropagation(); PanelI18N.menu(e.currentTarget); };
   $("#out").onclick = async () => { await api("POST", "/auth/logout"); location.href = "/"; };
   show();
 })();

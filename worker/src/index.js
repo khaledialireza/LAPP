@@ -24,6 +24,7 @@ const SESSION_DAYS = 60;
 const COOKIE = "__Host-lapp";
 const ITER = 100000;                 // the most PBKDF2 iterations Workers allow
 const ROLES = ["user", "designer", "manager", "admin"];
+const UI_LANGS = ["en", "fa", "ru", "uk"];
 const STAFF = ["designer", "manager", "admin"];
 const USERNAME = /^[a-z0-9_.]{3,20}$/;
 const RESERVED = new Set(["admin", "administrator", "studio", "lapp", "root", "support", "help", "api", "system", "staff", "moderator", "official"]);
@@ -136,7 +137,7 @@ async function planOf(env, req, u) {
   if (iran) return { tier: "plus", why: "iran" };
   return { tier: "free", why: "", status: s ? s.status : "" };
 }
-const publicUser = u => ({ id: u.id, email: hasEmail(u.email) ? u.email : "", managed: !!u.managed_by, username: u.username, name: u.name, role: u.role, verified: !!u.verified, since: new Date(u.created_at).toISOString().slice(0, 10) });
+const publicUser = u => ({ id: u.id, email: hasEmail(u.email) ? u.email : "", managed: !!u.managed_by, username: u.username, name: u.name, role: u.role, lang: u.lang || "", verified: !!u.verified, since: new Date(u.created_at).toISOString().slice(0, 10) });
 async function me(env, req, u) {
   const orgs = (await env.DB.prepare("SELECT o.slug, o.name, m.role FROM org_members m JOIN orgs o ON o.id = m.org_id WHERE m.user_id = ? AND m.active = 1 AND o.disabled = 0 ORDER BY o.name").bind(u.id).all()).results;
   return { user: publicUser(u), plan: await planOf(env, req, u), country: country(req), orgs };
@@ -309,6 +310,7 @@ async function api(req, env, url, ctx) {
     const b = await body(req);
     const sets = [], vals = [];
     if (b.name !== undefined) { sets.push("name = ?"); vals.push(String(b.name).trim().slice(0, 40)); }
+    if (b.lang !== undefined) { const l = String(b.lang); if (!UI_LANGS.includes(l)) throw fail("unknown language", 400); sets.push("lang = ?"); vals.push(l); }
     if (b.username !== undefined && cleanUser(b.username) !== u.username) {
       const un = cleanUser(b.username);
       if (!USERNAME.test(un) || RESERVED.has(un)) throw fail("username: 3–20 letters, digits, _ or .", 400, { code: "username" });

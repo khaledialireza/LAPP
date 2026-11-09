@@ -37,6 +37,9 @@
     if (p) plan = p;
     if (o) orgs = o;
     if (!u) return;
+    // the account's language is the person's language everywhere; a new account takes this device's
+    if (u.lang && u.lang !== I18N.lang) { if (I18N.langs.includes(u.lang)) I18N.setLang(u.lang); else try { localStorage.setItem("lapp:lang", u.lang); } catch {} }
+    else if (!u.lang) call("PATCH", "/me", { lang: I18N.lang }).catch(() => {});
     const s = Auth.session || {};
     Auth.setSession({ type: "account", id: u.id, email: u.email, username: u.username, name: u.name, role: u.role, verified: u.verified, since: u.since || s.since });
     if (!jget("lapp:name", "")) rawSet.call(localStorage, "lapp:name", JSON.stringify(u.name || u.username));
@@ -108,6 +111,8 @@
       } else if (isAccount()) { wipe(); Auth.signOut(); }
     } catch (e) { console.warn("account", e); }
   })();
+
+  window.addEventListener("lapp:lang", e => { if (isAccount()) call("PATCH", "/me", { lang: e.detail }).catch(() => {}); });
 
   /* ---------- Plus ---------- */
   const isPlus = () => plan.tier === "plus";
