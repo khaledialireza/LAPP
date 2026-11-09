@@ -3,192 +3,948 @@
 <meta name="robots" content="noindex">
 <title>LAPP Studio</title>
 <script src="/ui/lapp-ui.js?v=3"></script>
-<script src="/ui/panel-i18n.js?v=1"></script>
-<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="/ui/panel-i18n.js?v=2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--ui-surface:#15151F;--ui-surface-2:#1C1C29;--ui-line:rgba(255,255,255,.14);--ui-text:#F4F4F8;--ui-muted:rgba(235,235,245,.55);--ui-accent:#8B5CF6;--bg:#07070B;--p1:#0F0F16;--p2:#15151F;--p3:#1C1C29;--ln:rgba(255,255,255,.08);--ln2:rgba(255,255,255,.14);--tx:#F4F4F8;--mu:rgba(235,235,245,.55);--mu2:rgba(235,235,245,.35);
---pk:#FF3D7F;--vi:#8B5CF6;--cy:#22D3EE;--gr:#34D399;--am:#FBBF24;--rd:#F87171;--g:linear-gradient(135deg,#FF3D7F,#8B5CF6 55%,#22D3EE)}
-*{box-sizing:border-box;margin:0}
-body{background:var(--bg);color:var(--tx);font:14px/1.55 Inter,Vazirmatn,system-ui,sans-serif;min-height:100vh;display:grid;grid-template-columns:290px 1fr}
-body::before{content:"";position:fixed;inset:-30% -10% auto auto;width:720px;height:720px;background:radial-gradient(closest-side,rgba(139,92,246,.14),transparent);pointer-events:none}
+/* LAPP Studio: ⌘ command centre · ✎ live script · 〰 voice desk · 🎭 universe · 📈 insights */
+:root{--ui-surface:#15151F;--ui-surface-2:#1C1C29;--ui-line:rgba(255,255,255,.14);--ui-text:#F4F4F8;--ui-muted:rgba(235,235,245,.55);--ui-accent:#8B5CF6;
+ --bg:#07070B;--p1:#0F0F16;--p2:#15151F;--p3:#1C1C29;--ln:rgba(255,255,255,.07);--ln2:rgba(255,255,255,.13);--tx:#F4F4F8;--mu:rgba(235,235,245,.58);--mu2:rgba(235,235,245,.36);
+ --pk:#FF3D7F;--vi:#8B5CF6;--cy:#22D3EE;--gr:#34D399;--am:#FBBF24;--rd:#F87171;--g:linear-gradient(135deg,#FF3D7F 0%,#8B5CF6 55%,#22D3EE 100%)}
+*{box-sizing:border-box;margin:0}[hidden]{display:none!important}
+html,body{height:100%}
+body{background:var(--bg);color:var(--tx);font:13.5px/1.55 Inter,system-ui,sans-serif;display:grid;grid-template-columns:64px 1fr;overflow:hidden}
+body::before{content:"";position:fixed;inset:-35% -10% auto auto;width:760px;height:760px;background:radial-gradient(closest-side,rgba(139,92,246,.15),transparent);pointer-events:none}
+body::after{content:"";position:fixed;inset:auto auto -45% -5%;width:700px;height:700px;background:radial-gradient(closest-side,rgba(255,61,127,.10),transparent);pointer-events:none}
+button,input,textarea,select{font:inherit;color:inherit}button{cursor:pointer;background:none;border:0}
+a{color:inherit}
 .de{font-family:Inter,system-ui,sans-serif;direction:ltr;text-align:left;unicode-bidi:isolate}
-button{font:inherit;color:inherit;cursor:pointer}
-aside{background:var(--p1);border-inline-start:1px solid var(--ln);padding:16px;display:flex;flex-direction:column;gap:10px;height:100vh;position:sticky;top:0;overflow:auto;z-index:1}
-.lg{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px}.lg i{width:36px;height:36px;border-radius:11px;background:var(--g);display:grid;place-items:center;font:800 17px Inter;font-style:normal;box-shadow:0 8px 24px rgba(255,61,127,.35)}
-.nav{display:flex;gap:6px;margin:0 0 4px}.nav a{flex:1;text-align:center;padding:7px;border-radius:10px;background:rgba(255,255,255,.06);color:inherit;text-decoration:none;font-size:12.5px}.nav a:hover{background:rgba(255,255,255,.12)}
-.me{font-size:11.5px;color:var(--mu2);margin:-4px 0 6px 46px}
-.new{height:40px;border-radius:12px;border:0;background:var(--g);font-weight:700}
-.dr{padding:10px 12px;border-radius:12px;border:1px solid transparent;cursor:pointer}.dr:hover{background:var(--p2)}.dr.on{background:var(--p3);border-color:var(--ln2)}
-.dr b{display:block}.dr small{color:var(--mu);font-size:12px}
-.st{display:inline-block;font-size:10.5px;font-weight:700;padding:0 7px;border-radius:6px;margin-inline-start:4px;background:rgba(255,255,255,.07)}
-.st.review{background:rgba(251,191,36,.18);color:var(--am)}.st.published{background:rgba(52,211,153,.16);color:var(--gr)}
-.bar{height:4px;border-radius:3px;background:var(--p3);margin-top:6px;overflow:hidden}.bar i{display:block;height:100%;background:var(--gr)}
-.runs{margin-top:auto;border-top:1px solid var(--ln);padding-top:10px}.runs h4{font-size:12px;color:var(--mu);margin-bottom:6px}
-.run{display:flex;gap:8px;align-items:center;font-size:12px;padding:4px 0;color:var(--mu)}.run a{color:inherit;text-decoration:none;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--mu2);flex:none}.dot.run-on{background:var(--cy);box-shadow:0 0 10px var(--cy);animation:pulse 1s infinite alternate}.dot.ok{background:var(--gr)}.dot.bad{background:var(--rd)}
-@keyframes pulse{to{opacity:.35}}
-main{padding:22px 30px 130px;max-width:1120px;z-index:1}
-.top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
-.top h1{font:800 28px Inter;margin-inline-end:auto}
-.chip{padding:5px 11px;border-radius:99px;background:var(--p3);border:1px solid var(--ln);font-size:12.5px;color:var(--mu)}.chip.on{color:var(--tx);border-color:rgba(139,92,246,.7);background:rgba(139,92,246,.16)}
-.b{height:36px;padding:0 14px;border-radius:10px;border:1px solid var(--ln2);background:var(--p2);font-weight:700;font-size:13px;white-space:nowrap}.b.pr{background:var(--g);border:0;box-shadow:0 8px 24px rgba(139,92,246,.3)}.b:disabled{opacity:.4;cursor:default}
-.brief{color:var(--mu);margin:0 0 14px;font-size:13.5px}
-.meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.meta span{background:var(--p2);border:1px solid var(--ln);border-radius:10px;padding:6px 10px;font-size:12.5px}
-.sc{margin:22px 0 8px;font-weight:800;color:var(--mu);font-size:13px}
-.ln{display:grid;grid-template-columns:34px 130px 1fr 40px;gap:12px;align-items:start;padding:10px 12px;border-radius:12px;border:1px solid var(--ln);background:rgba(21,21,31,.8);margin-bottom:6px}
-.ln.ok{border-color:rgba(52,211,153,.35)}.ln.cur{box-shadow:0 0 0 1px var(--cy)}
-.pl{width:30px;height:30px;border-radius:50%;background:rgba(34,211,238,.14);color:var(--cy);border:0}.pl:disabled{opacity:.3}
-.who{font:700 11.5px Inter;letter-spacing:.4px;text-transform:uppercase;padding-top:6px}
-[contenteditable]{outline:none;border-radius:6px;padding:2px 4px}[contenteditable]:focus{background:rgba(139,92,246,.16)}
-.t-de{font:500 16px Inter}.t-tr{color:var(--mu);margin-top:3px}
-.ck{width:32px;height:32px;border-radius:9px;border:1px solid var(--ln);background:var(--p3);color:var(--mu)}.ln.ok .ck{background:rgba(52,211,153,.2);color:var(--gr);border-color:rgba(52,211,153,.5)}
-.empty{color:var(--mu);margin-top:60px;text-align:center}.empty b{display:block;font-size:20px;color:var(--tx);margin-bottom:6px}
-.dock{position:fixed;bottom:16px;inset-inline-start:306px;inset-inline-end:16px;display:flex;align-items:center;gap:12px;background:rgba(21,21,31,.92);backdrop-filter:blur(14px);border:1px solid var(--ln2);border-radius:16px;padding:10px 14px;z-index:2}
-.dock audio{flex:1;height:34px}.saved{font-size:12px;color:var(--mu2);min-width:70px}
-.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--p3);border:1px solid var(--ln2);border-radius:12px;padding:10px 16px;z-index:9;display:none}.toast.on{display:block}
-dialog{background:var(--p2);color:var(--tx);border:1px solid var(--ln2);border-radius:18px;padding:20px;width:min(520px,92vw);margin:auto}dialog::backdrop{background:rgba(0,0,0,.6)}
-dialog h3{margin-bottom:12px}dialog label{display:block;font-size:12px;color:var(--mu);margin:10px 0 4px}
-dialog input,dialog textarea,dialog select{width:100%;background:var(--p3);border:1px solid var(--ln2);border-radius:10px;padding:9px 11px;color:var(--tx);font:inherit}
-dialog textarea{min-height:90px}.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.acts{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
-@media (max-width:820px){body{grid-template-columns:1fr}aside{position:static;height:auto}.dock{inset-inline-start:16px}.ln{grid-template-columns:30px 1fr 36px}.ln .who{grid-column:2}.ln>div:nth-child(3){grid-column:1/-1}}
+/* rail */
+.rail{background:var(--p1);border-inline-end:1px solid var(--ln);display:flex;flex-direction:column;align-items:center;padding:14px 0;gap:8px;z-index:2;height:100vh}
+.lg{width:38px;height:38px;border-radius:12px;background:var(--g);display:grid;place-items:center;font:800 18px Inter;margin-bottom:10px;box-shadow:0 8px 24px rgba(255,61,127,.35);text-decoration:none}
+.ri{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;color:var(--mu);font-size:17px;position:relative;text-decoration:none}
+.ri:hover{background:var(--p2);color:var(--tx)}.ri.on{background:var(--p3);color:var(--tx);box-shadow:inset 0 0 0 1px var(--ln2)}
+.ri[data-tip]:hover::after{content:attr(data-tip);position:absolute;inset-inline-start:52px;top:50%;transform:translateY(-50%);background:#20202E;border:1px solid var(--ln2);padding:4px 9px;border-radius:8px;font-size:12px;white-space:nowrap;color:var(--tx);z-index:9}
+.ri.off{opacity:.35}
+.rail .sp{flex:1}.me{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#F59E0B,#EF4444);display:grid;place-items:center;font-weight:800;font-size:13px}
+/* main */
+.main{display:flex;flex-direction:column;min-width:0;height:100vh;z-index:1}
+.top{min-height:56px;display:flex;align-items:center;gap:10px;padding:8px 18px;border-bottom:1px solid var(--ln);flex-wrap:wrap}
+.crumb{color:var(--mu);font-size:13px;display:flex;gap:6px;align-items:center;min-width:0}.crumb b{color:var(--tx);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:320px}
+.crumb a{text-decoration:none}.crumb a:hover{color:var(--tx)}
+.top .sp{flex:1}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:99px;background:var(--p3);border:1px solid var(--ln);font-size:12px;color:var(--mu);white-space:nowrap}
+button.chip:hover{color:var(--tx);border-color:var(--ln2)}
+.chip.on{color:var(--tx);border-color:rgba(139,92,246,.6);background:rgba(139,92,246,.14)}
+.chip.ok{color:var(--gr);border-color:rgba(52,211,153,.35)}.chip.warn{color:var(--am);border-color:rgba(251,191,36,.35)}.chip.bad{color:var(--rd);border-color:rgba(248,113,113,.35)}
+.btn{display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 14px;border-radius:10px;font-weight:700;font-size:13px;border:1px solid var(--ln2);background:var(--p2);color:var(--tx);white-space:nowrap;text-decoration:none}
+.btn:hover{border-color:rgba(255,255,255,.25)}.btn:disabled{opacity:.45;cursor:default}
+.btn.pr{background:var(--g);border:0;box-shadow:0 8px 24px rgba(139,92,246,.35)}
+.btn.gn{background:rgba(52,211,153,.14);border-color:rgba(52,211,153,.4);color:var(--gr)}
+.btn.sm{height:28px;padding:0 10px;font-size:12px;border-radius:8px}
+.btn.danger{color:var(--rd)}
+.view{flex:1;min-height:0;overflow:auto;padding:16px}
+.pn{background:rgba(21,21,31,.72);backdrop-filter:blur(12px);border:1px solid var(--ln);border-radius:16px;padding:14px;min-width:0}
+.pn h3{font-size:12px;font-weight:700;color:var(--mu);letter-spacing:.3px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.pn h3 .r{margin-inline-start:auto}
+.ai{background:linear-gradient(var(--p2),var(--p2)) padding-box,var(--g) border-box;border:1px solid transparent}
+.spark{background:var(--g);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800}
+.mu{color:var(--mu)}.mu2{color:var(--mu2)}.sm{font-size:12px}
+.bar{height:6px;border-radius:4px;background:var(--p3);overflow:hidden}.bar i{display:block;height:100%;border-radius:4px;background:var(--g)}
+.in{width:100%;background:var(--p3);border:1px solid var(--ln2);border-radius:10px;padding:9px 11px;color:var(--tx);outline:none}
+.in:focus{border-color:var(--vi);box-shadow:0 0 0 3px rgba(139,92,246,.2)}
+textarea.in{resize:vertical;min-height:70px}
+.empty{color:var(--mu);text-align:center;padding:36px 16px}.empty b{display:block;color:var(--tx);font-size:16px;margin-bottom:6px}
+.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--p3);border:1px solid var(--ln2);border-radius:12px;padding:10px 16px;z-index:99;display:none;max-width:90vw}.toast.on{display:block}
+dialog{background:var(--p2);color:var(--tx);border:1px solid var(--ln2);border-radius:18px;padding:20px;width:min(560px,94vw);margin:auto}
+dialog::backdrop{background:rgba(0,0,0,.6)}dialog h3{margin-bottom:12px;font-size:17px}
+dialog label{display:block;font-size:12px;color:var(--mu);margin:10px 0 4px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.acts{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+.err{color:var(--rd);font-size:12.5px;margin-top:8px;min-height:1em}
+
+/* ===== ⌘ command centre ===== */
+.cc{display:grid;grid-template-columns:1.25fr 1fr;gap:14px;align-items:start}
+.ask{grid-column:1/-1;padding:18px 20px}
+.ask .q{display:flex;gap:12px;align-items:center}
+.ask .q input{flex:1;background:none;border:0;outline:none;font-size:17px;color:var(--tx);min-width:0}
+.ask .opts{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center}
+.ask .opts l-select{width:150px}
+.sug{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.plan{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin-top:14px}
+.pc{background:var(--p3);border:1px solid var(--ln);border-radius:12px;padding:11px;display:flex;flex-direction:column;gap:5px}
+.pc.off{opacity:.45}.pc b{font-size:13.5px}.pc .t{font-size:12px;color:var(--mu)}
+.pc .h{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.map{display:grid;grid-template-columns:110px repeat(6,1fr);gap:5px;font-size:11.5px}
+.map .h{color:var(--mu2);text-align:center;font:600 11px Inter}
+.map .rl{color:var(--mu);display:flex;align-items:center}
+.cell{height:34px;border-radius:8px;display:grid;place-items:center;font:700 11px Inter;position:relative}
+button.cell:hover{outline:2px solid rgba(255,255,255,.35)}
+.c0{background:rgba(255,255,255,.03);border:1px dashed rgba(255,255,255,.12);color:var(--mu2)}
+.c1{background:rgba(139,92,246,.22)}.c2{background:rgba(139,92,246,.45)}.c3{background:rgba(139,92,246,.75)}
+.cell.hot{box-shadow:0 0 0 2px var(--pk),0 0 18px rgba(255,61,127,.45)}
+.cell.hot::after{content:"✨";position:absolute;top:-8px;inset-inline-start:-6px;font-size:12px}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.kp{background:var(--p3);border-radius:12px;padding:10px;border:1px solid var(--ln)}.kp b{font:800 20px Inter;display:block}.kp span{font-size:11.5px;color:var(--mu)}
+.feed{display:flex;flex-direction:column;gap:9px}
+.fi{display:flex;gap:10px;align-items:center;background:var(--p3);border:1px solid var(--ln);border-radius:12px;padding:10px}
+.fi .ic{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;flex:none;font-size:14px}
+.fi b{font-size:13px;display:block}.fi .t{font-size:12px;color:var(--mu)}.fi .btn{margin-inline-start:auto;flex:none}
+.lsgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.lc{background:var(--p3);border:1px solid var(--ln);border-radius:14px;padding:12px;text-decoration:none;display:flex;flex-direction:column;gap:6px}
+.lc:hover{border-color:var(--ln2);transform:translateY(-1px)}
+.lc .t1{display:flex;gap:6px;align-items:center;font-size:11.5px;color:var(--mu)}
+.lc b{font-size:15px}
+.st{font:700 10.5px Inter;padding:2px 7px;border-radius:6px;text-transform:uppercase;letter-spacing:.4px}
+.st-draft{background:rgba(255,255,255,.08);color:var(--mu)}.st-review{background:rgba(251,191,36,.16);color:var(--am)}.st-published{background:rgba(52,211,153,.16);color:var(--gr)}
+
+/* ===== ✎ live script ===== */
+.ed{display:grid;grid-template-columns:220px 1fr 300px;gap:14px;height:100%;min-height:0}
+.ed>.pn{overflow:auto}
+.outl .sc{padding:9px 10px;border-radius:10px;margin-bottom:6px;border:1px solid transparent;cursor:pointer;display:block;width:100%;text-align:start}
+.outl .sc:hover{background:var(--p3)}.outl .sc.on{background:var(--p3);border-color:var(--ln2)}
+.outl .sc b{display:block;font-size:12.5px}.outl .sc span{font-size:11px;color:var(--mu)}
+.beat{display:flex;gap:2px;margin-top:6px}.beat i{height:4px;flex:1;border-radius:2px;background:var(--p1)}
+.doc{padding:18px 22px;position:relative}
+.sch{font-size:12px;font-weight:700;color:var(--mu);margin:16px 0 4px;display:flex;gap:8px;align-items:center}.sch:first-child{margin-top:0}
+.sch [contenteditable]{outline:none;border-bottom:1px dashed transparent}.sch [contenteditable]:focus{border-color:var(--vi)}
+.dl{display:grid;grid-template-columns:22px 118px 1fr 26px;gap:10px;padding:9px 6px;border-bottom:1px solid var(--ln);align-items:start;border-radius:8px;position:relative}
+.dl:hover,.dl.sel{background:rgba(255,255,255,.025)}
+.dl .no{font:600 11px Inter;color:var(--mu2);padding-top:5px}
+.who{font:700 11px Inter;letter-spacing:.5px;text-transform:uppercase;padding-top:5px;display:flex;align-items:center;gap:6px;text-align:start;min-width:0}
+.who i{width:8px;height:8px;border-radius:50%;flex:none}.who span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.txt .d{font:500 16.5px/1.5 Inter;outline:none;border-radius:4px;min-height:1.5em;direction:ltr;text-align:left}
+.txt .d:focus,.txt .f:focus{background:rgba(139,92,246,.1)}
+.txt .f{font-size:13.5px;color:var(--mu);margin-top:3px;outline:none;min-height:1.3em;border-radius:4px}
+.txt .f:empty::before{content:"＋ translation";color:var(--mu2);font-style:italic}
+.txt .over{color:var(--am);font-size:11px;margin-top:2px}
+.ok-b{width:24px;height:24px;border-radius:7px;border:1px solid var(--ln2);display:grid;place-items:center;font-size:12px;color:var(--mu2);margin-top:3px}
+.ok-b.on{background:rgba(52,211,153,.18);border-color:rgba(52,211,153,.5);color:var(--gr)}
+.hw{text-decoration:underline wavy rgba(251,191,36,.9);text-underline-offset:4px}
+.nw{background:rgba(34,211,238,.14);border-radius:4px;padding:0 2px;color:#A5F3FC}
+.float{position:absolute;inset-inline-end:34px;top:-18px;display:flex;gap:2px;background:#20202E;border:1px solid var(--ln2);border-radius:12px;padding:4px;box-shadow:0 18px 40px rgba(0,0,0,.6);z-index:5}
+.float button{padding:5px 9px;border-radius:8px;font-size:12px;white-space:nowrap;color:var(--tx)}.float button:hover{background:rgba(139,92,246,.25)}
+.sugg{margin-top:6px;background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.35);border-radius:10px;padding:8px 10px;font-size:12.5px;display:flex;flex-direction:column;gap:6px}
+.sugg .op{display:flex;gap:10px;align-items:center;padding:4px;border-radius:8px}.sugg .op:hover{background:rgba(139,92,246,.12)}
+.sugg .d2{font:500 14px Inter;direction:ltr;text-align:left}
+.sugg .op .btn{margin-inline-start:auto}
+.wl{font:500 15px Inter;color:var(--tx);padding:3px 0;animation:fi .4s}
+@keyframes fi{from{opacity:0;transform:translateY(4px)}}
+.score{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+.ring{width:72px;height:72px;border-radius:50%;display:grid;place-items:center;flex:none}
+.ring b{width:58px;height:58px;border-radius:50%;background:var(--p2);display:grid;place-items:center;font:800 20px Inter}
+.ck{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:6px 0;border-bottom:1px solid var(--ln)}
+.ck .v{margin-inline-start:auto;font:700 12px Inter}
+.cef{display:flex;height:22px;border-radius:7px;overflow:hidden;margin:6px 0 10px;background:var(--p3)}
+.cef span{display:grid;place-items:center;font:700 10px Inter;min-width:0;overflow:hidden}
+.phr{display:flex;flex-direction:column;gap:6px}
+.phr div{background:var(--p3);border-radius:9px;padding:6px 9px;font-size:12.5px}
+.phr .x{font-size:11.5px;color:var(--mu)}
+
+/* ===== 〰 voice desk ===== */
+.vd{display:grid;grid-template-columns:1fr 290px;grid-template-rows:1fr auto;gap:14px;height:100%;min-height:0}
+.daw{padding:0;display:flex;flex-direction:column;overflow:hidden}
+.ruler{height:30px;border-bottom:1px solid var(--ln);position:relative;font:600 10px Inter;color:var(--mu2);direction:ltr;flex:none}
+.ruler span{position:absolute;bottom:4px;transform:translateX(-50%)}
+.tracks{flex:1;direction:ltr;position:relative;overflow:auto}
+.trk{display:grid;grid-template-columns:170px 1fr;height:92px;border-bottom:1px solid var(--ln)}
+.th{padding:12px;display:flex;gap:10px;align-items:center;border-right:1px solid var(--ln);background:rgba(255,255,255,.015);min-width:0}
+.th .fc{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:20px;flex:none;font-weight:800}
+.th b{font:700 12.5px Inter;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.th span{font-size:11px;color:var(--mu);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+.lane{position:relative;overflow:hidden}
+.clip{position:absolute;top:14px;height:64px;border-radius:10px;padding:5px 7px;overflow:hidden;font:600 11px Inter;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;color:#fff;min-width:6px}
+.clip.sel{box-shadow:0 0 0 2px #fff,0 0 22px rgba(255,255,255,.35)}
+.clip.est{opacity:.55;background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.08) 0 6px,transparent 6px 12px)!important}
+.clip .wf{display:flex;align-items:center;gap:1.5px;height:28px}.clip .wf i{flex:1;border-radius:1px;background:rgba(255,255,255,.75)}
+.clip .emo{position:absolute;top:5px;right:6px;font-size:10px;background:rgba(0,0,0,.35);border-radius:5px;padding:0 5px}
+.ph{position:absolute;top:0;bottom:0;width:2px;background:var(--cy);box-shadow:0 0 14px var(--cy);pointer-events:none;z-index:3}
+.ph::before{content:"";position:absolute;top:-2px;left:-6px;border:7px solid transparent;border-top-color:var(--cy)}
+.words{display:flex;gap:6px;flex-wrap:wrap;direction:ltr;margin-top:8px}
+.words span{font:600 12px Inter;padding:4px 8px;border-radius:7px;background:var(--p3);border:1px solid var(--ln)}
+.slider{display:grid;grid-template-columns:90px 1fr 52px;align-items:center;gap:10px;font-size:12px;margin:10px 0}
+.slider input{width:100%;accent-color:var(--vi)}.slider b{font:700 12px Inter;text-align:end}
+.transport{grid-column:1/-1;display:flex;align-items:center;gap:12px;padding:10px 14px;flex-wrap:wrap}
+.tp{width:40px;height:40px;border-radius:50%;background:#fff;color:#000;display:grid;place-items:center;font-size:15px;flex:none}
+.tp:disabled{opacity:.3}
+.job{display:flex;align-items:center;gap:8px}
+.spin{width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,.25);border-top-color:var(--cy);animation:sp 1s linear infinite;flex:none}@keyframes sp{to{transform:rotate(360deg)}}
+
+/* ===== 🎭 universe ===== */
+.uv{display:grid;grid-template-columns:1fr 1.35fr;gap:14px;align-items:start}
+.cast{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cc2{background:var(--p3);border:1px solid var(--ln);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px;text-align:start}
+button.cc2:hover{border-color:var(--ln2)}
+.cc2 .hd{display:flex;gap:10px;align-items:center}
+.port{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;font-size:26px;flex:none}
+.cc2 b{font:700 14px Inter}.cc2 .t{font-size:11.5px;color:var(--mu)}
+.traits{display:flex;gap:5px;flex-wrap:wrap}.traits span{font-size:11px;padding:2px 7px;border-radius:6px;background:rgba(255,255,255,.06)}
+.cc2.add{border-style:dashed;align-items:center;justify-content:center;color:var(--mu);min-height:140px}
+.board{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.fr{border-radius:14px;overflow:hidden;border:1px solid var(--ln);background:var(--p3)}
+.img{height:130px;position:relative;display:flex;align-items:flex-end;padding:8px}
+.img .lb{font:700 10px Inter;background:rgba(0,0,0,.5);padding:2px 7px;border-radius:6px}
+.img .sub{position:absolute;left:8px;right:8px;bottom:32px;text-align:center;font:700 12.5px Inter;text-shadow:0 1px 6px #000;direction:ltr}
+.img .who2{position:absolute;top:8px;inset-inline-end:8px;display:flex;gap:2px;font-size:18px}
+.fr .cap{padding:8px 10px;font-size:11.5px;color:var(--mu)}
+.picks{display:flex;gap:6px;flex-wrap:wrap}
+
+/* ===== 📈 insights ===== */
+.ins{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;align-items:start}
+.hl{display:grid;grid-template-columns:26px 1fr 46px auto;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid var(--ln);font:500 13px Inter}
+.hl .m{font:700 12px Inter;text-align:end}.hl.bad .m{color:var(--rd)}.hl.mid .m{color:var(--am)}.hl.ok .m{color:var(--gr)}
+.spark2{display:flex;align-items:flex-end;gap:3px;height:110px;direction:ltr}
+.spark2 i{flex:1;border-radius:4px 4px 0 0;background:linear-gradient(to top,rgba(139,92,246,.4),rgba(34,211,238,.8));min-height:2px}
+.spark2 i.drop{background:linear-gradient(to top,rgba(248,113,113,.4),rgba(248,113,113,.9))}
+
+@media (max-width:1100px){.ed{grid-template-columns:1fr}.ed>.pn.outl{display:none}.cc,.uv,.ins{grid-template-columns:1fr}.vd{grid-template-columns:1fr}}
+@media (max-width:700px){body{grid-template-columns:1fr;grid-template-rows:1fr auto}.rail{flex-direction:row;height:auto;order:2;padding:6px;justify-content:space-around}.rail .lg,.rail .sp,.rail .me{display:none}.main{height:calc(100vh - 56px)}.map{grid-template-columns:80px repeat(6,1fr)}.board{grid-template-columns:1fr 1fr}.cast{grid-template-columns:1fr}.row3{grid-template-columns:1fr}}
 </style></head><body>
-<aside>
-  <div class="lg"><i>L</i>Studio</div><div class="me" id="me"></div>
-  <nav class="nav"><a href="/admin">🛠 Admin panel</a><a href="/">← App</a><a href="#" id="lng">🌐 Language</a></nav>
-  <button class="new" id="newBtn">＋ New content</button>
-  <div id="list"></div>
-  <div class="runs"><h4>Running jobs</h4><div id="runs"></div></div>
-</aside>
-<main id="main"><div class="empty"><b>Welcome to the studio</b>Pick a draft or make new content.</div></main>
-<div class="dock"><span>🎧</span><audio id="player" controls></audio><span class="saved" id="saved"></span></div>
+<nav class="rail" aria-label="Studio">
+  <a class="lg" href="/" title="LAPP">L</a>
+  <a class="ri" href="#home" data-v="home" data-tip="Command centre">⌘</a>
+  <a class="ri" href="#script" data-v="script" data-tip="Live script">✎</a>
+  <a class="ri" href="#voice" data-v="voice" data-tip="Voice desk">〰</a>
+  <a class="ri" href="#universe" data-v="universe" data-tip="Universe">🎭</a>
+  <a class="ri" href="#insights" data-v="insights" data-tip="Insights">📈</a>
+  <div class="sp"></div>
+  <button class="ri" id="lng" data-tip="Language">🌐</button>
+  <a class="ri" id="back" href="/admin" data-tip="Back to the panel">↩</a>
+  <div class="me" id="me" title=""></div>
+</nav>
+<div class="main">
+  <div class="top" id="top"></div>
+  <div class="view" id="view"><div class="empty">Loading…</div></div>
+</div>
 <div class="toast" id="toast"></div>
-<dialog id="dlg"><form method="dialog" id="newForm">
-  <h3>New content</h3>
-  <label>Course language</label><l-select name="course" value="de"><option value="de" data-icon="🇩🇪" data-sub="Deutsch">German</option><option value="nl" data-icon="🇳🇱" data-sub="Nederlands">Dutch</option><option value="pl" data-icon="🇵🇱" data-sub="Polski">Polish</option></l-select>
-  <div class="row2"><div><label>Type</label><l-select name="type" value="talk"><option value="talk" data-icon="💬">Conversation</option><option value="lesson" data-icon="🎧">Lesson</option><option value="story" data-icon="📖">Story</option></l-select></div>
-  <div><label>Level</label><l-select name="level" value="A1"><option value="A1">A1</option><option value="A2">A2</option><option value="B1">B1</option><option value="B2">B2</option></l-select></div></div>
-  <label>Title (in the course language)</label><input name="title" required placeholder="Am Bahnhof" class="de">
-  <label>Topic and wishes</label><textarea name="brief" placeholder="Buying a ticket, the platform, a delay… words and grammar it should have"></textarea>
-  <div class="acts"><button class="b" value="cancel" formnovalidate>Cancel</button><button class="b pr" value="ok">Create</button></div>
-</form></dialog>
+<dialog id="dlg"><form method="dialog" id="dlgForm"></form></dialog>
+<audio id="player" preload="none"></audio>
 <script>
-const $ = s => document.querySelector(s);
-const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-const COL = ["#38BDF8", "#FF3D7F", "#8B5CF6", "#34D399", "#FBBF24"];
-// translations the draft still lacks (older drafts have no English, for example)
-const TR = ["en", "fa", "ru", "uk"];
-const missingTr = () => !D ? 0 : TR.filter(l => !(D.tr && D.tr[l] && D.tr[l].title)).length
-  + D.scenes.reduce((n, sc) => n + TR.filter(l => !sc.title[l]).length + sc.lines.reduce((m, ln) => m + TR.filter(l => !ln[l]).length, 0), 0)
-  + (D.phrases || []).reduce((n, ph) => n + TR.filter(l => !ph[l]).length, 0);
-const TYPE = { talk: "Conversation", lesson: "Lesson", story: "Story" };
-const STATUS = { draft: "Draft", review: "Review", published: "Published" };
-let D = null, SHA = null, lang = (() => { try { const l = localStorage.getItem("lapp:lang"); return ["fa", "ru", "uk"].includes(l) ? l : "en"; } catch { return "en"; } })(), dirty = false, saving = null, audioFor = null;
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const ORG = new URLSearchParams(location.search).get("org") || "";
+const TRL = ["en", "fa", "ru", "uk"];
+const FLAG = { de: "🇩🇪", nl: "🇳🇱", pl: "🇵🇱" };
+const SPEECH = { de: "de-DE", nl: "nl-NL", pl: "pl-PL" };
+const TYPE = { talk: ["💬", "Conversation"], lesson: ["🎧", "Lesson"], story: ["📖", "Story"] };
+const TOPIC = { daily: "Daily life", travel: "Travel & hotel", food: "Food & shopping", health: "Health & doctor", work: "Work & office", home: "Home & family", city: "City & transport", school: "School & study", story: "Stories", other: "Other" };
+const COLORS = ["#38BDF8", "#FF3D7F", "#8B5CF6", "#F59E0B", "#10B981", "#EF4444", "#22D3EE", "#A3E635"];
+const S = { scope: null, lessons: [], L: null, dirty: false, saving: null, tr: "en", sel: -1, chars: null, dicts: {}, ov: null };
 
-async function call(path, opt = {}) {
-  const r = await fetch("/api/studio" + path, { ...opt, headers: { "Content-Type": "application/json", "X-LAPP": "1", ...(opt.headers || {}) } });
-  const b = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error(b.error || r.status);
-  return b;
+/* ---------- small helpers ---------- */
+let toastT;
+function toast(m) { const t = $("#toast"); t.textContent = m; t.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("on"), 3500); }
+async function api(m, p, b) {
+  const q = ORG ? (p.includes("?") ? "&" : "?") + "org=" + encodeURIComponent(ORG) : "";
+  const r = await fetch("/api/studio" + p + q, { method: m, headers: { "Content-Type": "application/json", "X-LAPP": "1" }, body: b ? JSON.stringify(b) : undefined });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw Object.assign(new Error(j.error || r.status), { status: r.status, code: j.code });
+  return j;
 }
-function toast(t) { const e = $("#toast"); e.textContent = t; e.classList.add("on"); clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.remove("on"), 3500); }
+const rows = L => (L || S.L).data.scenes.flatMap(s => s.lines);
+const speakerColor = who => { const c = S.L && S.L.data.cast[who]; if (c && c.color) return c.color; const names = Object.keys(S.L ? S.L.data.cast : {}); return COLORS[Math.max(0, names.indexOf(who)) % COLORS.length]; };
+const words = t => (t.match(/[\p{L}\p{M}'’-]+/gu) || []);
+const fmtT = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+function opts(el, list, v) { el.options = list; if (v !== undefined) el.value = v; return el; }
+const levelOpts = () => S.scope.levels.map(l => ({ value: l, label: l }));
+const courseOpts = () => Object.entries(S.scope.courses).map(([k, c]) => ({ value: k, label: c.name, icon: FLAG[k] }));
+const typeOpts = () => Object.entries(TYPE).map(([k, [i, l]]) => ({ value: k, label: l, icon: i }));
+const topicOpts = () => S.scope.topics.map(k => ({ value: k, label: TOPIC[k] || k }));
+const voiceName = v => (v || "").replace(/^piper:/, "").replace(/^[a-z]{2}_[A-Z]{2}-/, "").replace(/-(x_low|low|medium|high)$/, "").replace(/^./, c => c.toUpperCase());
 
-async function list() {
-  const ds = await call("/drafts").catch(e => (toast(e.message), []));
-  $("#list").innerHTML = ds.map(d => `<div class="dr ${D && D.slug === d.slug ? "on" : ""}" data-s="${d.slug}"><b class="de">${esc(d.title)}</b>
-    <small>${(d.course || "de").toUpperCase()} · ${TYPE[d.type] || d.type} · ${d.level} · ${d.ok}/${d.lines}</small><span class="st ${d.status}">${STATUS[d.status] || d.status}</span>
-    <div class="bar"><i style="width:${d.lines ? d.ok / d.lines * 100 : 0}%"></i></div></div>`).join("") || `<p class="brief">No drafts yet.</p>`;
+// the browser's own voice, for a quick listen before the real audio is made
+function say(text, course, rate = 1) {
+  try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = SPEECH[course] || "de-DE"; u.rate = rate; speechSynthesis.speak(u); } catch { toast("This browser cannot speak"); }
 }
-async function runs() {
-  const rs = await call("/runs").catch(() => []);
-  $("#runs").innerHTML = rs.slice(0, 6).map(r => `<div class="run"><i class="dot ${r.status !== "completed" ? "run-on" : r.conclusion === "success" ? "ok" : "bad"}"></i><a class="de" href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.title)}</a></div>`).join("") || `<div class="run">—</div>`;
-  const busy = rs.some(r => r.status !== "completed");
-  if (runs.busy && !busy && D) { toast("Job finished"); open(D.slug); list(); }
-  runs.busy = busy;
-  clearTimeout(runs.t); runs.t = setTimeout(runs, busy ? 5000 : 30000);
-}
-async function open(slug) {
-  if (dirty) await save();
-  const { draft, sha } = await call("/drafts/" + slug); D = draft; SHA = sha; audioFor = null; render(); list(); loadAudio();
-}
-async function loadAudio() {
-  // fetched whole, so seeking to a line works even without Range support
-  const r = await fetch("/api/studio/audio/" + D.slug);
-  if (!r.ok) { $("#player").removeAttribute("src"); audioFor = null; return render(); }
-  $("#player").src = URL.createObjectURL(await r.blob()); audioFor = D.slug; render();
-}
-function render() {
-  const who = Object.keys(D.cast || {}), col = w => COL[Math.max(0, who.indexOf(w)) % COL.length], T = D.timings || null;
-  const rows = D.scenes.flatMap(s => s.lines), done = rows.filter(r => r.ok).length;
-  let n = 0;
-  $("#main").innerHTML = `<div class="top"><h1 class="de">${esc(D.title)}</h1>
-      ${["en", "fa", "ru", "uk"].map(l => `<span class="chip ${l === lang ? "on" : ""}" data-l="${l}">${l.toUpperCase()}</span>`).join("")}
-      <button class="b" data-run="write">✦ Write with AI</button>
-      ${missingTr() ? `<button class="b" data-run="translate" title="Only the missing ones; nothing else changes">🌐 Fill ${missingTr()} missing translations</button>` : ""}
-      <button class="b" data-run="voice" ${rows.length ? "" : "disabled"}>🎙 Make audio</button>
-      <button class="b pr" data-run="publish" ${rows.length && done === rows.length && audioFor ? "" : "disabled"} title="When every line is approved and the audio is made">🚀 Publish</button></div>
-    <p class="brief">${esc(D.brief || "")}</p>
-    <div class="meta"><span>${(D.course || "de").toUpperCase()} · ${TYPE[D.type]} · ${D.level}</span><span>${done} / ${rows.length} approved</span>
-      ${who.map(w => `<span><b class="de" style="color:${col(w)}">${esc(w)}</b> · <span class="de">${esc(D.cast[w].voice)}</span></span>`).join("")}
-      ${rows.length ? `<button class="chip" data-all>✓ Approve all</button>` : ""}</div>
-    ${rows.length ? "" : `<div class="empty"><b>No text yet</b>Press “✦ Write with AI”; in a few minutes the text and translations are here.</div>`}
-    ${D.scenes.map((sc, si) => `<div class="sc"><span class="de">${esc(sc.title.de)}</span> · ${esc(sc.title[lang] || "")}</div>` + sc.lines.map((ln, li) => { const k = n++; return `
-      <div class="ln ${ln.ok ? "ok" : ""}" data-si="${si}" data-li="${li}" data-k="${k}"><button class="pl" data-play ${audioFor ? "" : "disabled"}>▶</button>
-      <div class="who de" style="color:${col(ln.who)}">${k + 1} · ${esc(ln.who)}</div>
-      <div><div class="t-de de" contenteditable data-f="de">${esc(ln.de)}</div><div class="t-tr" contenteditable data-f="${lang}" dir="${lang === "fa" ? "rtl" : "ltr"}">${esc(ln[lang])}</div></div>
-      <button class="ck" data-ok>✓</button></div>`; }).join("")).join("")}`;
-}
-async function save() {
-  if (!dirty || !D) return;
-  if (saving) return saving;
-  $("#saved").textContent = "Saving…";
-  saving = call("/drafts/" + D.slug, { method: "PUT", body: JSON.stringify({ draft: D, sha: SHA }) })
-    .then(r => { SHA = r.sha; dirty = false; $("#saved").textContent = "Saved ✓"; list(); })
-    .catch(e => { $("#saved").textContent = ""; toast(e.message); })
-    .finally(() => { saving = null; });
-  return saving;
-}
-const touch = () => { dirty = true; $("#saved").textContent = "…"; clearTimeout(touch.t); touch.t = setTimeout(save, 1500); };
 
-document.addEventListener("click", async e => {
-  const dr = e.target.closest("[data-s]"); if (dr) return open(dr.dataset.s);
-  const l = e.target.closest("[data-l]"); if (l) { lang = l.dataset.l; return render(); }
-  if (e.target.closest("[data-all]")) { D.scenes.forEach(s => s.lines.forEach(x => x.ok = true)); render(); touch(); return; }
-  const row = e.target.closest(".ln");
-  if (row && e.target.closest("[data-ok]")) { const ln = D.scenes[row.dataset.si].lines[row.dataset.li]; ln.ok = !ln.ok; render(); touch(); return; }
-  if (row && e.target.closest("[data-play]")) {
-    const t = (D.timings || [])[row.dataset.k]; const p = $("#player");
-    if (!t) return toast("Make the audio first");
-    p.currentTime = t[0]; p.play(); clearInterval(p.stopT);
-    p.stopT = setInterval(() => { if (p.currentTime >= t[1]) { p.pause(); clearInterval(p.stopT); } }, 50);
+// the words LAPP's dictionary knows (anything else is new for learners)
+async function dictOf(course) {
+  if (S.dicts[course]) return S.dicts[course];
+  const forms = new Set();
+  try {
+    const [d, n] = await Promise.all([fetch(`/content/lang/${course}/dict.json`).then(r => r.json()), fetch(`/content/lang/${course}/names.json`).then(r => r.json()).catch(() => [])]);
+    for (const [k, v] of Object.entries(d)) { const b = k.split("_")[0]; forms.add(b.toLowerCase()); for (const f of v.f || []) forms.add(f.toLowerCase()); }
+    for (const x of n) forms.add(String(x).toLowerCase());
+  } catch {}
+  return (S.dicts[course] = forms);
+}
+function known(w, forms) {
+  if (!forms || !forms.size) return true;
+  const lw = w.toLowerCase();
+  if (forms.has(lw) || /^\d/.test(lw)) return true;
+  if (["en", "em", "er", "es", "e", "n", "s", "t", "st", "te"].some(e => lw.endsWith(e) && forms.has(lw.slice(0, -e.length)))) return true;
+  return [lw + "n", lw.slice(0, -1) + "en", lw.slice(0, -2) + "en", lw.slice(0, -1) + "n", lw.slice(0, -2) + "n", lw.slice(0, -3) + "en"].some(c => forms.has(c));
+}
+
+/* ---------- top bar ---------- */
+function bar(crumb, right = "") { $("#top").innerHTML = `<span class="crumb">${crumb}</span><span class="sp"></span>${right}`; }
+function scopeCrumb() { return S.scope.kind === "school" ? `<a href="/s/${esc(ORG)}">🏫 ${esc(S.scope.name)}</a> ›` : `<a href="#home">LAPP library</a> ›`; }
+function lessonCrumb(part) {
+  const L = S.L;
+  return `${scopeCrumb()} ${L.series ? `<span>${esc(L.series)}</span> ›` : ""} <b class="de">${FLAG[L.course] || ""} ${esc(L.title)}</b> <span class="st st-${L.status}">${L.status}</span>${part ? ` › <span>${part}</span>` : ""}`;
+}
+
+/* ---------- router ---------- */
+let SEQ = 0;
+async function show() {
+  const seq = ++SEQ;
+  const [v, id] = (location.hash.slice(1) || "home").split("/");
+  $$(".ri[data-v]").forEach(a => a.classList.toggle("on", a.dataset.v === v));
+  stopPlayer();
+  try {
+    if (id && (!S.L || S.L.id !== Number(id))) await openLesson(Number(id));
+    if (seq !== SEQ) return;
+    if ((v === "script" || v === "voice") && !S.L) { location.hash = "home"; toast("Open a lesson first"); return; }
+    $$(".ri[data-v=script],.ri[data-v=voice]").forEach(a => { a.classList.toggle("off", !S.L); if (S.L) a.href = `#${a.dataset.v}/${S.L.id}`; });
+    await (V[v] || V.home)();
+  } catch (e) { $("#view").innerHTML = `<div class="empty"><b>⚠️ ${esc(e.message)}</b></div>`; }
+}
+async function openLesson(id) {
+  await flush();
+  const L = await api("GET", `/lessons/${id}`);
+  S.L = L; S.sel = -1;
+  S.tr = TRL.includes(window.PanelI18N && PanelI18N.lang) ? PanelI18N.lang : "en";
+  dictOf(L.course).then(() => { if (/^#script/.test(location.hash) && $("#doc") && !$(".txt .d:focus")) renderDoc(); });
+}
+const V = {};
+const ACT = {};
+
+/* ================= ⌘ command centre ================= */
+V.home = async () => {
+  const ov = S.ov = await api("GET", "/overview");
+  S.lessons = ov.lessons;
+  const inWork = ov.lessons.filter(l => l.status !== "published").length;
+  bar(`${S.scope.kind === "school" ? `<a href="/s/${esc(ORG)}">🏫 ${esc(S.scope.name)}</a> ›` : ""} <b>Command centre</b>`,
+    `${inWork ? `<span class="chip">✎ ${inWork} in progress</span>` : ""}<button class="btn pr" data-act="new">＋ New lesson</button>`);
+  const course = S.homeCourse || (ov.lessons[0] || {}).course || "de";
+  const mine = ov.lessons.filter(l => l.course === course);
+  const count = (tp, lv) => mine.filter(l => l.topic === tp && l.level === lv).length;
+  const used = S.scope.levels.filter(lv => mine.some(l => l.level === lv));
+  const maxLv = used.length ? S.scope.levels.indexOf(used[used.length - 1]) : -1;
+  // a gap: an empty cell at a level that is in use, on a topic that is in use
+  const hot = (tp, lv) => !count(tp, lv) && S.scope.levels.indexOf(lv) <= maxLv && mine.some(l => l.topic === tp);
+  const published = ov.lessons.filter(l => l.status === "published").length;
+  const noAudio = ov.lessons.filter(l => l.lines && l.audio !== "ready"), noText = ov.lessons.filter(l => !l.lines);
+  const gaps = [];
+  for (const tp of S.scope.topics) for (const lv of S.scope.levels) if (hot(tp, lv)) gaps.push([tp, lv]);
+  $("#view").innerHTML = `<div class="cc">
+    <div class="pn ai ask">
+      <div class="q"><span class="spark" style="font-size:20px">✦</span><input id="ask" placeholder="Describe what you want — e.g. a 6-part A1 trip to Vienna, one real situation per part, practising modal verbs" autocomplete="off"><button class="btn pr" data-act="plan" ${S.scope.ai ? "" : "disabled"}>✦ Plan it</button></div>
+      <div class="opts"><l-select id="askCourse"></l-select><l-select id="askLevel" placeholder="Any level"></l-select>
+        ${S.scope.ai ? "" : `<span class="chip warn">AI is not set up yet — you can still write lessons by hand</span>`}</div>
+      <div class="sug">
+        ${gaps.slice(0, 2).map(([tp, lv]) => `<button class="chip" data-ask="${esc(`${lv} lessons about ${TOPIC[tp]}`)}">↳ Fill the ${lv} gap in ${esc(TOPIC[tp])}</button>`).join("")}
+        <button class="chip" data-ask="A short bedtime story for B1 with a surprising ending">↳ A bedtime story for B1</button>
+        <button class="chip" data-ask="Three A1 conversations for the first day in a new city: bakery, bus ticket, asking the way">↳ First day in a new city (A1)</button>
+        ${ov.hard.length ? `<button class="chip" data-act="hard">↳ Rewrite the lines learners find hardest</button>` : ""}
+      </div>
+      <div id="planOut"></div>
+    </div>
+    <div class="pn">
+      <h3>Curriculum map · topic × level <span class="r"><l-select id="mapCourse" style="width:150px"></l-select></span></h3>
+      <div class="map">
+        <span></span>${S.scope.levels.map(l => `<span class="h">${l}</span>`).join("")}
+        ${S.scope.topics.map(tp => `<span class="rl">${esc(TOPIC[tp])}</span>${S.scope.levels.map(lv => { const n = count(tp, lv); return `<button class="cell c${Math.min(3, n)} ${hot(tp, lv) ? "hot" : ""}" data-cell="${tp}|${lv}" title="${esc(TOPIC[tp])} · ${lv}">${n || "—"}</button>`; }).join("")}`).join("")}
+      </div>
+      <div class="mu sm" style="margin-top:8px">✨ = a gap next to lessons you already have · click a cell to make a lesson there</div>
+    </div>
+    <div class="pn">
+      <div class="kpis"><div class="kp"><b>${ov.learners}</b><span>${S.scope.kind === "school" ? "students active this week" : "learners active this week"}</span></div><div class="kp"><b style="color:var(--gr)">${ov.says}</b><span>sentences spoken this week</span></div><div class="kp"><b>${published}</b><span>lessons published</span></div></div>
+      <h3>Next steps</h3>
+      <div class="feed">
+        ${ov.hard.slice(0, 3).map(h => `<div class="fi"><span class="ic" style="background:rgba(248,113,113,.16)">🎯</span><div><b>${h.avg}% say “<span class="de">${esc(h.text)}</span>” right</b><div class="t">${esc(h.title)} · line ${h.line + 1} · ${h.n} tries</div></div><a class="btn sm pr" href="#script/${h.lesson}" data-line="${h.line}">✦ Rewrite</a></div>`).join("")}
+        ${noText.length ? `<div class="fi"><span class="ic" style="background:rgba(139,92,246,.18)">✎</span><div><b>${noText.length} lesson${noText.length > 1 ? "s have" : " has"} no text yet</b><div class="t">Open one and write it, with AI or by hand</div></div><a class="btn sm" href="#script/${noText[0].id}">Open</a></div>` : ""}
+        ${noAudio.length ? `<div class="fi"><span class="ic" style="background:rgba(34,211,238,.14)">〰</span><div><b>${noAudio.length} lesson${noAudio.length > 1 ? "s need" : " needs"} audio</b><div class="t">The voice desk makes it in a few minutes</div></div><a class="btn sm" href="#voice/${noAudio[0].id}">Voice desk</a></div>` : ""}
+        ${gaps.length ? `<div class="fi"><span class="ic" style="background:rgba(255,61,127,.14)">🧩</span><div><b>${gaps.length} gap${gaps.length > 1 ? "s" : ""} in the map</b><div class="t">e.g. ${esc(TOPIC[gaps[0][0]])} at ${gaps[0][1]}</div></div><button class="btn sm" data-cell="${gaps[0][0]}|${gaps[0][1]}">Make it</button></div>` : ""}
+        ${!ov.hard.length && !noText.length && !noAudio.length && !gaps.length ? `<div class="mu sm">Nothing waiting. Plan something new above ✦</div>` : ""}
+      </div>
+    </div>
+    <div class="pn" style="grid-column:1/-1">
+      <h3>Lessons <span class="r mu2">${ov.lessons.length}</span></h3>
+      ${ov.lessons.length ? `<div class="lsgrid">${ov.lessons.map(l => `<a class="lc" href="#script/${l.id}">
+        <div class="t1">${FLAG[l.course] || ""} ${l.level} · ${TYPE[l.type][0]} ${esc(TOPIC[l.topic] || "")}<span style="flex:1"></span><span class="st st-${l.status}">${l.status}</span></div>
+        <b class="de">${esc(l.title)}</b>
+        <div class="t1">${l.lines ? `${l.approved}/${l.lines} lines approved` : "no text yet"} · ${{ ready: "🎧 audio", old: "🎧 audio is older than the text", none: "no audio" }[l.audio]}</div>
+        <div class="bar"><i style="width:${l.lines ? Math.round(l.approved / l.lines * 100) : 0}%"></i></div>
+        ${l.series ? `<div class="t1">📚 ${esc(l.series)}</div>` : ""}</a>`).join("")}</div>`
+        : `<div class="empty"><b>No lessons yet</b>Plan a series above, or make one lesson with ＋ New lesson.</div>`}
+    </div></div>`;
+  opts($("#askCourse"), courseOpts(), S.askCourse || course);
+  opts($("#askLevel"), levelOpts(), S.askLevel || "");
+  opts($("#mapCourse"), courseOpts(), course).addEventListener("change", e => { S.homeCourse = e.target.value; V.home(); });
+  $("#ask").addEventListener("keydown", e => { if (e.key === "Enter") ACT.plan(); });
+  if (S.plan) drawPlan();
+};
+document.addEventListener("click", e => {
+  const a = e.target.closest("[data-act]"); if (a && ACT[a.dataset.act]) { e.preventDefault(); ACT[a.dataset.act](a); return; }
+  const k = e.target.closest("[data-ask]"); if (k) { $("#ask").value = k.dataset.ask; ACT.plan(); return; }
+  const c = e.target.closest("[data-cell]"); if (c) { const [topic, level] = c.dataset.cell.split("|"); newLesson({ topic, level, course: S.homeCourse || ($("#mapCourse") || {}).value }); return; }
+  const ln = e.target.closest("a[data-line]"); if (ln) { S.focusLine = Number(ln.dataset.line); S.focusRewrite = true; }
+});
+ACT.new = () => newLesson({});
+function newLesson(pre) {
+  form("New lesson", `
+    <label>Title (in the course language)</label><input class="in de" name="title" required placeholder="Am Bahnhof" maxlength="80">
+    <div class="row3"><div><label>Course</label><l-select name="course" id="nCourse"></l-select></div><div><label>Level</label><l-select name="level" id="nLevel"></l-select></div><div><label>Type</label><l-select name="type" id="nType"></l-select></div></div>
+    <label>Topic</label><l-select name="topic" id="nTopic"></l-select>
+    <label>What should it be about? (the AI writes from this)</label><textarea class="in" name="brief" placeholder="Buying a ticket, finding the platform, a delay… words and grammar it should practise"></textarea>
+    ${S.chars && S.chars.length ? `<label>Characters (optional)</label><l-select name="characters" id="nChars" multiple></l-select>` : ""}`,
+    async f => {
+      const l = await api("POST", "/lessons", { ...f, characters: f.characters ? f.characters.split(",").map(Number) : [] });
+      location.hash = `script/${l.id}`;
+    }, "Create lesson");
+  opts($("#nCourse"), courseOpts(), pre.course || "de"); opts($("#nLevel"), levelOpts(), pre.level || "A1");
+  opts($("#nType"), typeOpts(), pre.type || "talk"); opts($("#nTopic"), topicOpts(), pre.topic || "daily");
+  if ($("#nChars")) opts($("#nChars"), S.chars.map(c => ({ value: String(c.id), label: c.name, icon: c.emoji, sub: c.bio })));
+}
+ACT.hard = () => { const h = S.ov.hard[0]; S.focusLine = h.line; S.focusRewrite = true; location.hash = `script/${h.lesson}`; };
+ACT.plan = async () => {
+  const q = $("#ask").value.trim(); if (!q) return $("#ask").focus();
+  S.askCourse = $("#askCourse").value; S.askLevel = $("#askLevel").value;
+  $("#planOut").innerHTML = `<div class="plan"><div class="pc"><div class="job"><span class="spin"></span> Planning…</div></div></div>`;
+  try { S.plan = await api("POST", "/plan", { prompt: q, course: S.askCourse, level: S.askLevel }); S.plan.lessons.forEach(l => l.on = true); drawPlan(); }
+  catch (e) { $("#planOut").innerHTML = `<div class="err">${esc(e.message)}</div>`; }
+};
+function drawPlan() {
+  const P = S.plan, n = P.lessons.filter(l => l.on).length;
+  $("#planOut").innerHTML = `<div style="margin-top:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><b>📚 ${esc(P.series)}</b><span class="mu sm">${esc(P.summary)}</span><span style="flex:1"></span>
+    <button class="btn sm" data-act="planClear">✕</button><button class="btn" data-act="planCreate" ${n ? "" : "disabled"}>Create ${n} lessons</button><button class="btn pr" data-act="planWrite" ${n && S.scope.ai ? "" : "disabled"}>✦ Create and write ${n}</button></div>
+    <div class="plan">${P.lessons.map((l, i) => `<button class="pc ${l.on ? "" : "off"}" data-plan="${i}" style="text-align:start">
+      <div class="h"><span class="chip">${FLAG[l.course] || ""} ${l.level}</span><span class="chip">${TYPE[l.type][0]} ${esc(TOPIC[l.topic] || l.topic)}</span><span style="flex:1"></span>${l.on ? "☑" : "☐"}</div>
+      <b class="de">${esc(l.title)}</b><div class="t">${esc(l.brief)}</div></button>`).join("")}</div><div id="planFeed" class="feed" style="margin-top:10px"></div>`;
+  $$("[data-plan]").forEach(b => b.onclick = () => { const l = P.lessons[b.dataset.plan]; l.on = !l.on; drawPlan(); });
+}
+ACT.planClear = () => { S.plan = null; $("#planOut").innerHTML = ""; };
+ACT.planCreate = async (btn, write) => {
+  const P = S.plan, list = P.lessons.filter(l => l.on);
+  btn.disabled = true;
+  let r;
+  try { r = await api("POST", "/lessons", { lessons: list.map(l => ({ ...l, series: P.series })) }); } catch (e) { btn.disabled = false; return toast(e.message); }
+  S.plan = null;
+  if (!write) { toast(`${r.lessons.length} lessons created`); return V.home(); }
+  // write them one after another; the feed shows where it is
+  $$("#planOut .plan, #planOut [data-act]").forEach(x => x.remove());
+  const feed = $("#planFeed");
+  feed.innerHTML = r.lessons.map(l => `<div class="fi" id="pf${l.id}"><span class="ic" style="background:rgba(139,92,246,.18)">✦</span><div><b class="de">${esc(l.title)}</b><div class="t">waiting…</div></div></div>`).join("");
+  for (const l of r.lessons) {
+    const t = $(`#pf${l.id} .t`);
+    try { await writeStream(l.id, n => { t.textContent = `writing… ${n} lines`; }); t.innerHTML = `✓ written · <a href="#script/${l.id}">open</a>`; }
+    catch (e) { t.textContent = "⚠️ " + e.message; }
+  }
+  toast("All written ✓");
+};
+ACT.planWrite = btn => ACT.planCreate(btn, true);
+
+/* ---------- streaming the AI writer ---------- */
+async function writeStream(id, onLines) {
+  const q = ORG ? "?org=" + encodeURIComponent(ORG) : "";
+  const r = await fetch(`/api/studio/lessons/${id}/write${q}`, { method: "POST", headers: { "X-LAPP": "1" } });
+  if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error(j.error || r.status); }
+  const rd = r.body.getReader(), dec = new TextDecoder();
+  let buf = "", out = null;
+  for (;;) {
+    const { value, done } = await rd.read(); if (done) break;
+    buf += dec.decode(value, { stream: true });
+    let i;
+    while ((i = buf.indexOf("\n")) >= 0) {
+      const line = buf.slice(0, i); buf = buf.slice(i + 1);
+      if (!line) continue;
+      const m = JSON.parse(line);
+      // the lines that are complete so far, read out of the JSON as it grows
+      if (m.t === "text") { const des = [...m.text.matchAll(/"who"\s*:\s*"((?:[^"\\]|\\.)*)"\s*,\s*"de"\s*:\s*"((?:[^"\\]|\\.)*)"/g)].map(x => { try { return [JSON.parse(`"${x[1]}"`), JSON.parse(`"${x[2]}"`)]; } catch { return [x[1], x[2]]; } }); onLines && onLines(des.length, des); }
+      else if (m.t === "done") out = m;
+      else if (m.t === "error") throw new Error(m.error);
+    }
+  }
+  if (!out) throw new Error("the writer stopped early — try again");
+  return out;
+}
+
+/* ================= ✎ live script ================= */
+V.script = async () => {
+  const L = S.L;
+  const missingTr = countMissing();
+  bar(lessonCrumb(), `${TRL.map(l => `<button class="chip ${S.tr === l ? "on" : ""}" data-tr="${l}">${l.toUpperCase()}</button>`).join("")}
+    <span id="saved" class="mu2 sm"></span>
+    <button class="btn" data-act="settings" title="Title, level, topic…">⚙</button>
+    ${missingTr && rows().length ? `<button class="btn" data-act="translate" ${S.scope.ai ? "" : "disabled"}>🌐 Fill ${missingTr} translations</button>` : ""}
+    <button class="btn" data-act="write" ${S.scope.ai ? "" : "disabled"}>✦ ${rows().length ? "Rewrite all" : "Write with AI"}</button>
+    <button class="btn" data-act="listen" ${rows().length ? "" : "disabled"}>▶ Listen</button>
+    <button class="btn gn" data-act="approveAll" ${rows().length ? "" : "disabled"}>✓ Approve all</button>`);
+  $("#view").innerHTML = `<div class="ed">
+    <div class="pn outl"><h3>Scenes</h3><div id="outline"></div>
+      <button class="btn sm" data-act="addScene" style="margin-top:6px">＋ Scene</button>
+      <div class="pn" style="background:var(--p3);margin-top:14px;padding:10px"><h3 style="margin-bottom:6px">Brief</h3><div class="mu sm" style="white-space:pre-wrap">${esc(L.brief || "—")}</div></div>
+      <div class="pn" style="background:var(--p3);margin-top:10px;padding:10px"><h3 style="margin-bottom:6px">Cast</h3><div id="castList" class="sm"></div></div>
+    </div>
+    <div class="pn doc" id="doc"></div>
+    <div class="pn" id="quality"></div></div>`;
+  renderDoc();
+  if (S.focusLine != null) { const i = S.focusLine; S.focusLine = null; selLine(i, true); if (S.focusRewrite) { S.focusRewrite = false; rewrite(i, "simpler"); } }
+};
+function countMissing() {
+  const d = S.L.data; let n = 0;
+  for (const s of d.scenes) { n += TRL.filter(l => !s.title[l]).length; for (const r of s.lines) n += TRL.filter(l => !r[l]).length; }
+  for (const p of d.phrases || []) n += TRL.filter(l => !p[l]).length;
+  return n + TRL.filter(l => !(d.tr[l] || {}).title).length;
+}
+function hiDe(text, i) {
+  const forms = S.dicts[S.L.course], hard = new Set(((S.L.data.check && S.L.data.check.lines || []).find(x => x.i === i) || {}).hard || []);
+  return esc(text).replace(/[\p{L}\p{M}'’-]+/gu, w => hard.has(w) ? `<span class="hw" title="above ${S.L.level}">${w}</span>` : !known(w, forms) ? `<span class="nw" title="new word for LAPP">${w}</span>` : w);
+}
+function renderDoc() {
+  const L = S.L, d = L.data, doc = $("#doc"); if (!doc) return;
+  if (!d.scenes.length) {
+    doc.innerHTML = `<div class="empty"><b>No text yet</b>${S.scope.ai ? "Press ✦ Write with AI — the lines appear here as they are written. Or start by hand." : "Start by hand."}
+      <div class="acts" style="justify-content:center"><button class="btn" data-act="addScene">＋ Start by hand</button>${S.scope.ai ? `<button class="btn pr" data-act="write">✦ Write with AI</button>` : ""}</div></div>`;
+  } else {
+    let n = 0;
+    doc.innerHTML = d.scenes.map((sc, si) => `<div class="sch" id="sc${si}"><span>${si + 1} ·</span><span class="de" contenteditable data-scene="${si}">${esc(sc.title.de)}</span><span class="mu2">· ${esc(sc.title[S.tr] || "")}</span>
+        <span style="flex:1"></span><button class="btn sm" data-addline="${si}">＋ line</button>${d.scenes.length > 1 ? `<button class="btn sm danger" data-delscene="${si}" title="Delete scene">🗑</button>` : ""}</div>` +
+      sc.lines.map(ln => { const i = n++; const wc = words(ln.de).length, over = wc > S.scope.maxWords[L.level]; return `<div class="dl ${S.sel === i ? "sel" : ""}" data-i="${i}">
+        <span class="no">${i + 1}</span>
+        <button class="who" data-who="${i}" style="color:${speakerColor(ln.who)}"><i style="background:${speakerColor(ln.who)}"></i><span>${esc(ln.who || "—")}</span></button>
+        <div class="txt"><div class="d" contenteditable spellcheck="false" data-f="de" data-i="${i}">${hiDe(ln.de, i)}</div>
+          <div class="f" contenteditable data-f="${S.tr}" data-i="${i}" dir="${S.tr === "fa" ? "rtl" : "ltr"}">${esc(ln[S.tr] || "")}</div>
+          ${over ? `<div class="over">${wc} words — ${L.level} lines have at most ${S.scope.maxWords[L.level]}</div>` : ""}
+          <div class="slot" id="slot${i}"></div></div>
+        <button class="ok-b ${ln.ok ? "on" : ""}" data-ok="${i}" title="Approve">✓</button></div>`; }).join("")).join("");
+  }
+  renderSide();
+}
+function renderSide() {
+  const L = S.L, d = L.data, all = rows();
+  if (!$("#outline")) return;
+  $("#outline").innerHTML = d.scenes.map((sc, si) => `<button class="sc" data-goscene="${si}"><b class="de">${si + 1} · ${esc(sc.title.de || "…")}</b><span>${sc.lines.length} lines · ${sc.lines.filter(x => x.ok).length} approved</span>
+    <div class="beat">${sc.lines.map(x => `<i style="background:${x.ok ? "var(--gr)" : words(x.de).length > S.scope.maxWords[L.level] ? "var(--am)" : "var(--p1)"}"></i>`).join("")}</div></button>`).join("") || `<div class="mu sm">—</div>`;
+  $("#castList").innerHTML = Object.entries(d.cast).map(([who, c]) => `<div style="display:flex;gap:6px;align-items:center;padding:3px 0"><i style="width:8px;height:8px;border-radius:50%;background:${speakerColor(who)}"></i><b class="de">${esc(who)}</b><span class="mu2">${esc(voiceName(c.voice))}</span></div>`).join("") || `<span class="mu2">—</span>`;
+  // quality: what still keeps this lesson from being good
+  const n = all.length, max = S.scope.maxWords[L.level];
+  const over = all.filter(x => words(x.de).length > max).length, ok = all.filter(x => x.ok).length;
+  const forms = S.dicts[L.course], fresh = new Set(all.flatMap(x => words(x.de)).filter(w => !known(w, forms)).map(w => w.toLowerCase()));
+  const miss = countMissing(), check = d.check && d.check.lines ? d.check : null;
+  const hardN = check ? check.lines.reduce((a, x) => a + (x.hard || []).length, 0) : 0;
+  const lvIdx = S.scope.levels.indexOf(L.level);
+  const above = check ? check.lines.filter(x => S.scope.levels.indexOf(x.level) > lvIdx).length : 0;
+  let score = 0;
+  if (n) score = Math.max(0, 100 - Math.min(25, over * 5) - Math.min(20, miss) - Math.min(20, above * 4) - Math.round((n - ok) / n * 20) - (L.audio === "ready" ? 0 : 5));
+  const col = score >= 85 ? "var(--gr)" : score >= 60 ? "var(--am)" : "var(--rd)";
+  const dist = check ? S.scope.levels.map(lv => [lv, check.lines.filter(x => x.level === lv).length]).filter(x => x[1]) : [];
+  const LC = { A1: "rgba(52,211,153,.55)", A2: "rgba(34,211,238,.45)", B1: "rgba(251,191,36,.7)", B2: "rgba(249,115,22,.7)", C1: "rgba(248,113,113,.7)", C2: "rgba(239,68,68,.8)" };
+  $("#quality").innerHTML = `<div class="score"><div class="ring" style="background:conic-gradient(${col} 0 ${score}%,var(--p3) 0)"><b>${n ? score : "–"}</b></div>
+      <div><b style="font-size:15px">${!n ? "Nothing to rate yet" : score >= 85 && L.audio === "ready" ? "Ready to publish" : score >= 85 ? "Ready for audio" : "Needs work"}</b><div class="mu sm">${n} lines · ${ok} approved</div></div></div>
+    <h3>Level of the lines (CEFR) <button class="r btn sm" data-act="check" ${S.scope.ai && n ? "" : "disabled"}>${check ? "Check again" : "Check level"}</button></h3>
+    ${check ? `<div class="cef">${dist.map(([lv, c]) => `<span style="flex:${c};background:${LC[lv]}">${lv} ${Math.round(c / check.lines.length * 100)}%</span>`).join("")}</div>${check.rev !== L.rev - 1 && check.rev !== L.rev ? `<div class="mu2 sm">checked before the last changes</div>` : ""}` : `<div class="mu2 sm" style="margin-bottom:10px">Let the AI rate every line and mark the words above ${L.level}.</div>`}
+    <div class="ck">🗣 Line length (≤ ${max} words)<span class="v" style="color:${over ? "var(--am)" : "var(--gr)"}">${over ? over + " too long" : "✓"}</span></div>
+    <div class="ck">🧠 Lines above ${L.level}<span class="v" style="color:${!check ? "var(--mu2)" : above ? "var(--am)" : "var(--gr)"}">${check ? above || "✓" : "—"}</span></div>
+    <div class="ck">〰 Hard words marked<span class="v" style="color:${hardN ? "var(--am)" : "var(--mu2)"}">${check ? hardN : "—"}</span></div>
+    <div class="ck">🆕 New words for LAPP<span class="v" style="color:var(--cy)">${fresh.size}</span></div>
+    <div class="ck">🌍 Translations EN·FA·RU·UK<span class="v" style="color:${miss ? "var(--am)" : "var(--gr)"}">${miss ? miss + " missing" : "✓ ✓ ✓ ✓"}</span></div>
+    <div class="ck">✓ Approved lines<span class="v" style="color:${ok === n && n ? "var(--gr)" : "var(--mu)"}">${ok}/${n}</span></div>
+    <div class="ck" style="border:0">🎧 Audio<span class="v" style="color:${L.audio === "ready" ? "var(--gr)" : "var(--am)"}">${{ ready: "✓ up to date", old: "older than the text", none: "not made yet" }[L.audio]}</span></div>
+    ${check && check.grammar.length ? `<h3 style="margin-top:12px">Grammar it practises</h3><div class="traits">${check.grammar.map(g => `<span>${esc(g)}</span>`).join("")}</div>` : ""}
+    ${check && check.note ? `<div class="mu sm" style="margin-top:8px">💡 ${esc(check.note)}</div>` : ""}
+    <h3 style="margin-top:14px">Key phrases <button class="r btn sm" data-act="addPhrase">＋</button></h3>
+    <div class="phr">${(d.phrases || []).map((p, i) => `<div><span class="de" contenteditable data-phrase="${i}" style="outline:none">${esc(p.de)}</span><div class="x" contenteditable data-phrase-tr="${i}" style="outline:none">${esc(p[S.tr] || "")}</div></div>`).join("") || `<span class="mu2 sm">—</span>`}</div>
+    <div class="acts" style="justify-content:stretch;margin-top:16px"><a class="btn" style="flex:1;justify-content:center" href="#voice/${L.id}">〰 Voice desk →</a></div>`;
+}
+function selLine(i, scroll) {
+  S.sel = i;
+  $$(".dl").forEach(x => x.classList.toggle("sel", Number(x.dataset.i) === i));
+  $$(".float").forEach(x => x.remove());
+  const el = $(`.dl[data-i="${i}"]`); if (!el) return;
+  if (scroll) el.scrollIntoView({ block: "center", behavior: "smooth" });
+  const f = document.createElement("div"); f.className = "float";
+  f.innerHTML = `${S.scope.ai ? `<button data-rw="simpler">✦ Simpler</button><button data-rw="natural">More natural</button><button data-rw="question">＋ Question</button><button data-rw="shorter">Shorter</button><button data-rw="custom">✎ …</button>` : ""}
+    <button data-speak title="Listen">🔊</button><button data-insert title="Line below">＋</button><button data-del title="Delete line">🗑</button>`;
+  el.append(f);
+}
+// edits in the document
+document.addEventListener("focusin", e => {
+  const t = e.target;
+  if (t.matches && t.matches(".txt .d")) { t.textContent = t.textContent; selLine(Number(t.dataset.i)); }   // plain text while editing
+});
+document.addEventListener("focusout", e => {
+  const t = e.target; if (!t.matches || !S.L || !$("#doc")) return;
+  const clean = x => x.textContent.replace(/\s+/g, " ").trim();
+  if (t.matches(".txt .d")) { const i = Number(t.dataset.i), v = clean(t), r = rows()[i]; if (r && r.de !== v) { r.de = v; r.ok = false; changed(); } t.innerHTML = hiDe(r ? r.de : v, i); renderSide(); }
+  else if (t.matches(".txt .f")) { const i = Number(t.dataset.i), v = clean(t), r = rows()[i]; if (r && (r[t.dataset.f] || "") !== v) { r[t.dataset.f] = v; changed(); renderSide(); } }
+  else if (t.matches("[data-scene]")) { const sc = S.L.data.scenes[t.dataset.scene], v = clean(t); if (sc && sc.title.de !== v) { sc.title.de = v; changed(); renderSide(); } }
+  else if (t.matches("[data-phrase]")) { const p = S.L.data.phrases[t.dataset.phrase], v = clean(t); if (p && p.de !== v) { p.de = v; changed(); } }
+  else if (t.matches("[data-phrase-tr]")) { const p = S.L.data.phrases[t.dataset.phraseTr], v = clean(t); if (p && (p[S.tr] || "") !== v) { p[S.tr] = v; changed(); } }
+});
+document.addEventListener("keydown", e => {
+  const t = e.target;
+  if (t.matches && t.matches(".txt .d, .txt .f, [data-scene], [data-phrase], [data-phrase-tr]") && e.key === "Enter") { e.preventDefault(); t.blur(); }
+  if (e.key === "Escape") $$(".sugg").forEach(x => x.remove());
+});
+document.addEventListener("click", e => {
+  if (!S.L || !$("#doc")) return;
+  const t = e.target;
+  const tr = t.closest("[data-tr]"); if (tr) { S.tr = tr.dataset.tr; V.script(); return; }
+  const dl = t.closest(".dl"); if (dl && !t.closest(".float, .sugg, [data-ok], [data-who]")) selLine(Number(dl.dataset.i));
+  const okb = t.closest("[data-ok]"); if (okb) { const r = rows()[okb.dataset.ok]; r.ok = !r.ok; okb.classList.toggle("on", r.ok); changed(); renderSide(); return; }
+  const rw = t.closest("[data-rw]"); if (rw) { rewrite(S.sel, rw.dataset.rw); return; }
+  if (t.closest("[data-speak]")) { const r = rows()[S.sel]; say(r.de, S.L.course, r.speed || (S.L.data.cast[r.who] || {}).speed || 0.95); return; }
+  if (t.closest("[data-insert]")) { insertLine(S.sel); return; }
+  if (t.closest("[data-del]")) { delLine(S.sel); return; }
+  const who = t.closest("[data-who]"); if (who) { pickSpeaker(Number(who.dataset.who)); return; }
+  const gs = t.closest("[data-goscene]"); if (gs) { $(`#sc${gs.dataset.goscene}`).scrollIntoView({ behavior: "smooth", block: "start" }); return; }
+  const al = t.closest("[data-addline]"); if (al) { const si = Number(al.dataset.addline); const end = S.L.data.scenes.slice(0, si + 1).reduce((a, s) => a + s.lines.length, 0); insertLine(end - 1, si); return; }
+  const ds = t.closest("[data-delscene]"); if (ds) { if (confirm("Delete this scene and its lines?")) { S.L.data.scenes.splice(Number(ds.dataset.delscene), 1); changed(); renderDoc(); } return; }
+  const pick = t.closest("[data-pick]"); if (pick) { const [i, k] = pick.dataset.pick.split("|").map(Number); const o = S.rw[k], r = rows()[i]; r.de = o.de; TRL.forEach(l => { if (o[l]) r[l] = o[l]; }); r.ok = false; changed(); renderDoc(); selLine(i); toast("Line replaced"); return; }
+});
+// where line i sits: [scene, index in scene]
+function locate(i) { let n = 0; for (const [si, s] of S.L.data.scenes.entries()) { if (i < n + s.lines.length) return [si, i - n]; n += s.lines.length; } const last = S.L.data.scenes.length - 1; return [last, S.L.data.scenes[last].lines.length - 1]; }
+function insertLine(i, scene) {
+  const d = S.L.data;
+  if (!d.scenes.length) d.scenes.push({ title: { de: "", en: "", fa: "", ru: "", uk: "" }, lines: [] });
+  let si, li;
+  if (scene != null && !d.scenes[scene].lines.length) { si = scene; li = -1; }
+  else if (scene != null) { si = scene; li = d.scenes[scene].lines.length - 1; }
+  else if (i < 0) { si = 0; li = -1; }
+  else [si, li] = locate(i);
+  const prev = d.scenes[si].lines[li], names = Object.keys(d.cast);
+  const who = prev ? (names.find(n => n !== prev.who) || prev.who) : names[0] || "Anna";
+  if (!d.cast[who]) d.cast[who] = defaultVoice("f");
+  d.scenes[si].lines.splice(li + 1, 0, { who, de: "", en: "", fa: "", ru: "", uk: "", ok: false });
+  changed(); renderDoc();
+  const ni = d.scenes.slice(0, si).reduce((a, s) => a + s.lines.length, 0) + li + 1;
+  selLine(ni); const el = $(`.txt .d[data-i="${ni}"]`); el && el.focus();
+}
+function delLine(i) { if (i < 0) return; const [si, li] = locate(i); S.L.data.scenes[si].lines.splice(li, 1); S.sel = -1; changed(); renderDoc(); }
+function defaultVoice(g) {
+  const v = S.scope.courses[S.L.course].voices, used = Object.values(S.L.data.cast).map(c => c.voice);
+  const list = v.filter(x => x.g === g); return { voice: (list.find(x => !used.includes(x.id)) || list[0] || v[0]).id, speed: 0.95, gender: g };
+}
+ACT.addScene = () => { const d = S.L.data; d.scenes.push({ title: { de: `Szene ${d.scenes.length + 1}`, en: "", fa: "", ru: "", uk: "" }, lines: [] }); insertLine(-1, d.scenes.length - 1); };
+ACT.addPhrase = () => { (S.L.data.phrases = S.L.data.phrases || []).push({ de: "…", en: "", fa: "", ru: "", uk: "" }); changed(); renderSide(); };
+function pickSpeaker(i) {
+  const r = rows()[i], names = Object.keys(S.L.data.cast);
+  form("Speaker", `<label>Who says line ${i + 1}?</label><l-select id="spk" name="who"></l-select><label>…or a new speaker</label><input class="in de" name="nw" placeholder="Name"><label>New speaker's voice</label><l-select name="g" id="spg"></l-select>`, async f => {
+    const who = (f.nw || "").trim() || f.who; if (!who) return;
+    if (!S.L.data.cast[who]) S.L.data.cast[who] = defaultVoice(f.g || "f");
+    r.who = who; changed(); renderDoc(); selLine(i);
+  }, "Save");
+  opts($("#spk"), names.map(n => ({ value: n, label: n, icon: "●" })), r.who);
+  opts($("#spg"), [{ value: "f", label: "female" }, { value: "m", label: "male" }], "f");
+}
+async function rewrite(i, mode) {
+  if (i < 0) return;
+  let instruction = "";
+  if (mode === "custom") { instruction = prompt("How should the line change?"); if (!instruction) return; }
+  const slot = $(`#slot${i}`); if (!slot) return;
+  await flush();
+  slot.innerHTML = `<div class="sugg"><div class="job"><span class="spin"></span> ✦ thinking…</div></div>`;
+  try {
+    const r = await api("POST", `/lessons/${S.L.id}/rewrite`, { line: i, mode, instruction });
+    S.rw = r.options;
+    slot.innerHTML = `<div class="sugg">${r.options.map((o, k) => `<div class="op"><span class="spark">✦</span><div><div class="d2">${esc(o.de)}</div><div class="mu" style="font-size:11.5px">${esc(o[S.tr] || "")} · ${esc(o.why)}</div></div><button class="btn sm" data-pick="${i}|${k}">Use</button></div>`).join("")}<div class="mu2" style="font-size:11px">Esc to close</div></div>`;
+  } catch (e) { slot.innerHTML = `<div class="sugg err">${esc(e.message)}</div>`; }
+}
+ACT.approveAll = () => { rows().forEach(r => r.ok = true); changed(); renderDoc(); toast("All lines approved"); };
+ACT.listen = () => {
+  const all = rows(); let k = Math.max(0, S.sel);
+  speechSynthesis.cancel();
+  const next = () => { if (k >= all.length || !/^#script/.test(location.hash)) return; selLine(k, true); const r = all[k++]; const u = new SpeechSynthesisUtterance(r.de); u.lang = SPEECH[S.L.course]; u.rate = r.speed || 0.95; u.onend = next; speechSynthesis.speak(u); };
+  next(); toast("Browser voice — the real voices come from the voice desk");
+};
+ACT.write = async () => {
+  if (rows().length && !confirm("The AI writes a new text and replaces the current one. Continue?")) return;
+  await flush();
+  $("#doc").innerHTML = `<div class="job" style="margin-bottom:12px"><span class="spin"></span> <b>✦ Writing…</b> <span class="mu sm" id="wn"></span></div><div id="wl"></div>`;
+  let shown = 0;
+  try {
+    const out = await writeStream(S.L.id, (n, list) => {
+      $("#wn").textContent = `${n} lines`;
+      for (; shown < list.length; shown++) $("#wl").insertAdjacentHTML("beforeend", `<div class="wl de"><b style="color:${COLORS[shown % 3]}">${esc(list[shown][0])}:</b> ${esc(list[shown][1])}</div>`);
+    });
+    S.L.data = out.data; S.L.rev = out.rev; if (S.L.status === "draft") S.L.status = "review"; S.L.audio = S.L.audioRev ? "old" : "none";
+    toast("Written ✓ — read it, change what you like, approve the lines");
+  } catch (e) { toast(e.message); }
+  V.script();
+};
+ACT.translate = async btn => {
+  await flush(); btn.disabled = true; btn.innerHTML = `<span class="spin"></span> Translating…`;
+  try { const r = await api("POST", `/lessons/${S.L.id}/translate`); S.L.data = r.data; S.L.rev = r.rev; toast(`${r.added} translations added`); }
+  catch (e) { toast(e.message); }
+  V.script();
+};
+ACT.check = async btn => {
+  await flush(); btn.disabled = true; btn.innerHTML = `<span class="spin"></span>`;
+  try { const r = await api("POST", `/lessons/${S.L.id}/check`); S.L.data.check = r.check; S.L.rev = r.rev; renderDoc(); }
+  catch (e) { toast(e.message); btn.disabled = false; btn.textContent = "Check level"; }
+};
+ACT.settings = () => {
+  const L = S.L;
+  form("Lesson", `<label>Title</label><input class="in de" name="title" value="${esc(L.title)}" required maxlength="80">
+    <div class="row3"><div><label>Course</label><l-select name="course" id="eCourse"></l-select></div><div><label>Level</label><l-select name="level" id="eLevel"></l-select></div><div><label>Type</label><l-select name="type" id="eType"></l-select></div></div>
+    <div class="row2"><div><label>Topic</label><l-select name="topic" id="eTopic"></l-select></div><div><label>Series</label><input class="in" name="series" value="${esc(L.series)}" maxlength="60"></div></div>
+    ${S.scope.kind === "lapp" ? `<label>Who can open it</label><l-select name="access" id="eAccess"></l-select>` : ""}
+    <label>Brief</label><textarea class="in" name="brief">${esc(L.brief)}</textarea>
+    <div class="acts" style="justify-content:space-between"><button class="btn danger" type="button" id="delLesson">🗑 Delete lesson</button>
+      ${L.status === "published" ? `<button class="btn" type="button" id="unpub">Take offline</button>` : ""}</div>`,
+    async f => { await flush(); const r = await api("PUT", `/lessons/${L.id}`, { rev: S.L.rev, ...f }); Object.assign(S.L, f, { rev: r.rev }); show(); }, "Save");
+  opts($("#eCourse"), courseOpts(), L.course); opts($("#eLevel"), levelOpts(), L.level); opts($("#eType"), typeOpts(), L.type); opts($("#eTopic"), topicOpts(), L.topic);
+  if ($("#eAccess")) opts($("#eAccess"), [{ value: "free", label: "Everyone (free)", icon: "🌍" }, { value: "plus", label: "Plus members", icon: "⭐" }], L.access);
+  $("#delLesson").onclick = async () => { if (!confirm(`Delete “${L.title}” for good?`)) return; await api("DELETE", `/lessons/${L.id}`); $("#dlg").close(); S.L = null; S.dirty = false; location.hash = "home"; };
+  if ($("#unpub")) $("#unpub").onclick = async () => { await api("POST", `/lessons/${L.id}/unpublish`); $("#dlg").close(); S.L.status = "review"; toast("Taken offline"); show(); };
+};
+
+/* ---------- saving: a moment after the last change ---------- */
+let saveT;
+function changed() { S.dirty = true; S.L.audio = S.L.audioRev ? "old" : "none"; const s = $("#saved"); if (s) s.textContent = "…"; clearTimeout(saveT); saveT = setTimeout(flush, 1200); }
+async function flush() {
+  clearTimeout(saveT);
+  if (S.saving) await S.saving;
+  if (!S.dirty || !S.L) return;
+  S.dirty = false;
+  const L = S.L;
+  S.saving = api("PUT", `/lessons/${L.id}`, { rev: L.rev, data: L.data }).then(r => { L.rev = r.rev; if (L.status === "draft" && L.data.scenes.length) L.status = "review"; const s = $("#saved"); if (s) s.textContent = "Saved ✓"; })
+    .catch(e => { S.dirty = true; toast(e.code === "rev" ? "Someone else changed this lesson — reload the page" : "Not saved: " + e.message); })
+    .finally(() => { S.saving = null; });
+  return S.saving;
+}
+addEventListener("beforeunload", e => { if (S.dirty) { flush(); e.preventDefault(); } });
+
+/* ================= 〰 voice desk ================= */
+let pollT, vSel = -1;
+V.voice = async () => {
+  const L = S.L, all = rows();
+  await flush();
+  const fresh = await api("GET", `/lessons/${L.id}`);
+  Object.assign(L, { audio: fresh.audio, audioRev: fresh.audioRev, timings: fresh.timings, job: fresh.job, rev: fresh.rev, status: fresh.status });
+  const real = L.audio !== "none" && L.timings.length === all.length;
+  // where each line sits: the real timings, or an estimate from the number of words
+  const pos = [];
+  if (real) L.timings.forEach(t => pos.push(t));
+  else { let t = 0.4; L.data.scenes.forEach((sc, si) => { if (si) t += L.data.scenePause ?? 1.4; sc.lines.forEach(r => { const d = Math.max(0.8, words(r.de).length * 0.42 / (r.speed || 0.95)); pos.push([t, t + d]); t += d + (r.pause ?? L.data.pause ?? 0.6); }); }); }
+  const total = Math.max(5, (pos[pos.length - 1] || [0, 5])[1] + 0.6);
+  S.vpos = pos; S.vtotal = total;
+  const speakers = Object.keys(L.data.cast).filter(w => all.some(r => r.who === w));
+  const job = L.job && ["queued", "running"].includes(L.job.status) && Date.now() - L.job.updated_at < 20 * 6e4 ? L.job : null;
+  bar(lessonCrumb("voice"), `<span class="chip">⚡ ${all.length} lines · ≈ ${fmtT(total)}</span>
+    ${L.audio === "ready" ? `<span class="chip ok">🎧 audio up to date</span>` : L.audio === "old" ? `<span class="chip warn">🎧 audio is older than the text</span>` : `<span class="chip">no audio yet</span>`}
+    ${job ? `<span class="chip on job"><span class="spin"></span> ${esc(job.status === "queued" ? "starting… (about a minute)" : job.log || "making…")}</span>` : L.job && L.job.status === "failed" ? `<span class="chip bad" title="${esc(L.job.log)}">last try failed</span>` : ""}
+    <button class="btn ${L.audio === "ready" ? "" : "pr"}" data-act="voiceMake" ${job || !all.length || !S.scope.voice ? "disabled" : ""}>🎙 ${L.audio === "none" ? "Make audio" : "Make audio again"}</button>
+    <button class="btn ${L.audio === "ready" ? "pr" : ""}" data-act="publish" ${L.audio === "none" ? "disabled" : ""}>🚀 ${L.status === "published" ? "Publish again" : "Publish"}</button>`);
+  if (!all.length) { $("#view").innerHTML = `<div class="empty"><b>No text yet</b><a class="btn" href="#script/${L.id}">✎ Write the text first</a></div>`; return; }
+  const W = 100 / total;
+  $("#view").innerHTML = `<div class="vd">
+    <div class="pn daw">
+      <div class="ruler" style="margin-left:170px">${(st => Array.from({ length: Math.floor(total / st) + 1 }, (_, k) => `<span style="left:${k * st * W}%">${fmtT(k * st)}</span>`).join(""))(total <= 20 ? 2 : total <= 60 ? 5 : total <= 180 ? 15 : 30)}</div>
+      <div class="tracks">${speakers.map(w => { const c = L.data.cast[w], col = speakerColor(w); return `<div class="trk">
+        <div class="th"><div class="fc" style="background:${col}33;color:${col}">${esc(c.emoji || w.charAt(0))}</div><div style="min-width:0"><b>${esc(w)}</b><span>${esc(voiceName(c.voice))} · ${c.speed || 0.95}×</span></div></div>
+        <div class="lane">${all.map((r, i) => r.who !== w ? "" : `<div class="clip ${real ? "" : "est"} ${vSel === i ? "sel" : ""}" data-clip="${i}" style="left:${pos[i][0] * W}%;width:${(pos[i][1] - pos[i][0]) * W}%;background:linear-gradient(135deg,${col},${col}99)">${r.speed && r.speed !== c.speed ? `<span class="emo">${r.speed}×</span>` : ""}<span>${i + 1}</span><div class="wf">${wave(Math.max(3, Math.round((pos[i][1] - pos[i][0]) * 5)), i)}</div></div>`).join("")}</div></div>`; }).join("")}
+        <div class="ph" id="ph" style="left:170px"></div></div>
+    </div>
+    <div class="pn" id="insp"></div>
+    <div class="pn transport">
+      <button class="tp" id="play" ${L.audio === "none" ? "disabled" : ""} aria-label="Play">▶</button><span class="de" style="font:700 15px Inter" id="clock">0:00 <span class="mu">/ ${fmtT(total)}</span></span>
+      <button class="chip" id="loop">🔁 Line</button><button class="chip" id="slow">🐢 Slow</button><span style="flex:1"></span>
+      <span class="chip">⏸ between lines <input type="range" min="0.2" max="2" step="0.1" value="${L.data.pause ?? 0.6}" id="gp" style="width:80px;accent-color:var(--vi)"> <b id="gpv">${L.data.pause ?? 0.6}s</b></span>
+      <span class="chip">⏸ between scenes <input type="range" min="0.5" max="4" step="0.1" value="${L.data.scenePause ?? 1.4}" id="spz" style="width:80px;accent-color:var(--vi)"> <b id="spv">${L.data.scenePause ?? 1.4}s</b></span>
+      ${real ? "" : `<span class="chip warn">positions are estimated until the audio is made</span>`}
+      ${S.scope.voice ? "" : `<span class="chip bad">the voice service is not set up</span>`}
+    </div></div>`;
+  inspector();
+  const pl = $("#player");
+  if (L.audio !== "none") pl.src = `/api/studio/lessons/${L.id}/audio?r=${L.audioRev}${ORG ? "&org=" + encodeURIComponent(ORG) : ""}`;
+  $("#play").onclick = () => pl.paused ? pl.play() : pl.pause();
+  $("#loop").onclick = e => { S.loop = !S.loop; e.currentTarget.classList.toggle("on", S.loop); };
+  $("#slow").onclick = e => { pl.playbackRate = pl.playbackRate === 1 ? 0.8 : 1; e.currentTarget.classList.toggle("on", pl.playbackRate !== 1); };
+  $("#gp").oninput = e => { L.data.pause = Number(e.target.value); $("#gpv").textContent = L.data.pause + "s"; changed(); };
+  $("#spz").oninput = e => { L.data.scenePause = Number(e.target.value); $("#spv").textContent = L.data.scenePause + "s"; changed(); };
+  $$("[data-clip]").forEach(c => c.onclick = () => { vSel = Number(c.dataset.clip); $$(".clip").forEach(x => x.classList.toggle("sel", x === c)); inspector(); if (real && pl.src) pl.currentTime = pos[vSel][0]; });
+  clearInterval(pollT);
+  if (job) pollT = setInterval(async () => {
+    if (!/^#voice/.test(location.hash)) return clearInterval(pollT);
+    const f = await api("GET", `/lessons/${L.id}`).catch(() => null);
+    if (f && (!f.job || !["queued", "running"].includes(f.job.status) || f.job.log !== (L.job || {}).log)) {
+      if (f.job && f.job.status === "done") toast("Audio ready ✓");
+      if (f.job && f.job.status === "failed") toast("Making the audio failed: " + f.job.log);
+      V.voice();
+    }
+  }, 5000);
+};
+function wave(n, seed) { return Array.from({ length: Math.min(n, 60) }, (_, i) => `<i style="height:${18 + Math.abs(Math.sin(i * .9 + seed) * 60 + Math.sin(i * .31 + seed * 2) * 22)}%"></i>`).join(""); }
+function inspector() {
+  const L = S.L, all = rows(), el = $("#insp"); if (!el) return;
+  const voices = S.scope.courses[L.course].voices;
+  const vopts = () => voices.map(v => ({ value: v.id, label: voiceName(v.id), sub: v.g === "f" ? "female" : "male", icon: v.g === "f" ? "♀" : "♂" }));
+  if (vSel < 0 || !all[vSel]) {
+    el.innerHTML = `<h3>Voices</h3>${Object.keys(L.data.cast).map(w => `<div style="margin-bottom:10px"><div class="sm" style="margin-bottom:4px"><b style="color:${speakerColor(w)}">${esc(w)}</b></div><l-select data-voice="${esc(w)}"></l-select></div>`).join("")}
+      <div class="mu sm" style="margin-top:12px">Click a clip to change one line: its speed and the pause after it. Changes are heard after 🎙 Make audio (free, a few minutes).</div>`;
+    $$("[data-voice]").forEach(s => { opts(s, vopts(), L.data.cast[s.dataset.voice].voice); s.addEventListener("change", () => { L.data.cast[s.dataset.voice].voice = s.value; changed(); }); });
     return;
   }
-  const run = e.target.closest("[data-run]");
-  if (run) {
-    await save();
-    const what = run.dataset.run;
-    if (what === "write" && D.scenes.length && !confirm("The new text replaces the current text. Continue?")) return;
-    try { await call(`/run/${what}/${D.slug}`, { method: "POST", body: "{}" }); toast({ write: "Writing started…", translate: "Translating started…", voice: "Making audio started…", publish: "Publishing started…" }[what]); setTimeout(runs, 3000); }
-    catch (err) { toast(err.message); }
-  }
+  const r = all[vSel], c = L.data.cast[r.who] || {};
+  el.innerHTML = `<h3>Line ${vSel + 1} · <span style="color:${speakerColor(r.who)}">${esc(r.who)}</span><button class="r btn sm" id="insClose">✕</button></h3>
+    <div class="de" style="font:600 15px Inter">${esc(r.de)}</div><div class="mu sm">${esc(r[S.tr] || "")}</div>
+    <div class="words">${words(r.de).map(w => `<span>${esc(w)}</span>`).join("")}</div>
+    <h3 style="margin-top:14px">Delivery</h3>
+    <div class="slider">Speed<input type="range" min="0.7" max="1.3" step="0.05" value="${r.speed || c.speed || 0.95}" id="lsp"><b id="lspv">${r.speed || c.speed || 0.95}×</b></div>
+    <div class="slider">Pause after<input type="range" min="0" max="3" step="0.1" value="${r.pause ?? L.data.pause ?? 0.6}" id="lpa"><b id="lpav">${r.pause ?? L.data.pause ?? 0.6}s</b></div>
+    <h3 style="margin-top:12px">Voice of ${esc(r.who)}</h3><l-select id="lvo"></l-select>
+    <div class="acts" style="justify-content:flex-start"><button class="btn sm" id="lsay">🔊 Quick listen</button><a class="btn sm" href="#script/${L.id}" id="ledit">✎ Edit text</a></div>
+    <div class="mu2 sm" style="margin-top:8px">Quick listen uses the browser's voice; 🎙 Make audio uses the real one.</div>`;
+  $("#insClose").onclick = () => { vSel = -1; $$(".clip").forEach(x => x.classList.remove("sel")); inspector(); };
+  $("#lsp").oninput = e => { r.speed = Number(e.target.value); $("#lspv").textContent = r.speed + "×"; changed(); };
+  $("#lpa").oninput = e => { r.pause = Number(e.target.value); $("#lpav").textContent = r.pause + "s"; changed(); };
+  opts($("#lvo"), vopts(), c.voice).addEventListener("change", e => { c.voice = e.target.value; changed(); });
+  $("#lsay").onclick = () => say(r.de, L.course, r.speed || c.speed || 0.95);
+  $("#ledit").onclick = () => { S.focusLine = vSel; };
+}
+function stopPlayer() { const p = $("#player"); try { p.pause(); } catch {} try { speechSynthesis.cancel(); } catch {} }
+$("#player").addEventListener("timeupdate", () => {
+  const p = $("#player"), ph = $("#ph"); if (!ph || !S.vpos) return;
+  ph.style.left = `calc(170px + (100% - 170px) * ${Math.min(1, p.currentTime / S.vtotal)})`;
+  $("#clock").innerHTML = `${fmtT(p.currentTime)} <span class="mu">/ ${fmtT(S.vtotal)}</span>`;
+  if (S.loop && vSel >= 0 && p.currentTime > S.vpos[vSel][1] + 0.2) p.currentTime = S.vpos[vSel][0];
+  const i = S.vpos.findIndex(t => p.currentTime >= t[0] && p.currentTime < t[1] + 0.3);
+  $$(".clip").forEach(c => c.classList.toggle("sel", Number(c.dataset.clip) === (S.loop && vSel >= 0 ? vSel : i)));
 });
-document.addEventListener("input", e => {
-  const f = e.target.dataset.f, row = e.target.closest(".ln"); if (!f || !row) return;
-  const ln = D.scenes[row.dataset.si].lines[row.dataset.li]; ln[f] = e.target.textContent.trim();
-  if (ln.ok) { ln.ok = false; row.classList.remove("ok"); }
-  touch();
-});
-$("#newBtn").onclick = () => $("#dlg").showModal();
+["play", "pause"].forEach(ev => $("#player").addEventListener(ev, () => { const b = $("#play"); if (b) b.textContent = $("#player").paused ? "▶" : "❚❚"; }));
+ACT.voiceMake = async btn => {
+  btn.disabled = true; await flush();
+  try { await api("POST", `/lessons/${S.L.id}/voice`); toast("Started — the audio is ready in a few minutes"); }
+  catch (e) { toast(e.message); }
+  V.voice();
+};
+ACT.publish = async () => {
+  await flush();
+  const L = S.L;
+  const go = async force => {
+    try { await api("POST", `/lessons/${L.id}/publish`, force ? { force: true } : {}); L.status = "published"; toast(S.scope.kind === "school" ? "Published — your students can open it now" : "Published — learners can open it now"); show(); }
+    catch (e) {
+      if (e.code === "stale" && confirm("The text changed after the audio was made, so the audio doesn't match it. Publish anyway?")) return go(true);
+      if (e.code === "tr") { if (confirm(e.message + "\n\nOpen the script to fill them?")) location.hash = `script/${L.id}`; return; }
+      toast(e.message);
+    }
+  };
+  go(false);
+};
 
-$("#dlg").addEventListener("close", async () => {
-  if ($("#dlg").returnValue !== "ok") return;
-  const f = Object.fromEntries(new FormData($("#newForm")));
-  try { const r = await call("/drafts", { method: "POST", body: JSON.stringify(f) }); $("#newForm").reset(); await list(); open(r.draft.slug); }
-  catch (err) { toast(err.message); }
-});
-addEventListener("beforeunload", e => { if (dirty) { save(); e.preventDefault(); } });
-call("/me").then(m => $("#me").textContent = m.email).catch(() => {});
-list(); runs();
-$("#lng").onclick = e => { e.preventDefault(); e.stopPropagation(); PanelI18N.menu(e.currentTarget); };
-addEventListener("panel:lang", () => { list(); if (D) render(); });
+/* ================= 🎭 universe ================= */
+V.universe = async () => {
+  bar(`${scopeCrumb()} <b>Universe</b> <span class="mu">· recurring characters, each with their own voice</span>`, `<button class="btn" data-act="charNew">＋ Character</button>${S.L ? `<button class="btn pr" data-act="boardCast">🎭 Characters of this lesson</button>` : ""}`);
+  const r = await api("GET", "/characters"); S.chars = r.characters;
+  const L = S.L;
+  $("#view").innerHTML = `<div class="uv">
+    <div class="pn"><h3>Characters <span class="r mu2">${S.chars.length}</span></h3>
+      <div class="cast">${S.chars.map(c => `<button class="cc2" data-char="${c.id}"><div class="hd"><div class="port" style="background:linear-gradient(135deg,${esc(c.color)},${esc(c.color)}55)">${esc(c.emoji)}</div><div><b>${esc(c.name)}${c.age ? `, ${c.age}` : ""}</b><div class="t">${esc(c.bio)}</div></div></div>
+        <div class="traits">${c.traits.map(t => `<span>${esc(t)}</span>`).join("")}</div>
+        <div class="t">🎙 ${Object.entries(c.voices).map(([k, v]) => `${FLAG[k]} ${esc(voiceName(v))}`).join(" · ") || "voice chosen per lesson"} · in ${c.lessons} lessons</div></button>`).join("")}
+        <button class="cc2 add" data-act="charNew"><span style="font-size:22px">＋</span>New character</button></div>
+      <div class="mu sm" style="margin-top:10px">Characters picked for a lesson come back with the same personality and the same voice — learners get to know them.</div>
+    </div>
+    <div class="pn">${L ? board(L) : `<h3>Storyboard</h3><div class="empty"><b>No lesson open</b>Open a lesson to see its storyboard here.</div>`}</div></div>`;
+};
+function board(L) {
+  const d = L.data, all = rows(L), T = L.timings && L.timings.length === all.length ? L.timings : null;
+  const G = ["#7C2D12,#1E1B4B", "#312E81,#0F172A", "#14532D,#0C0A09", "#78350F,#1C1917", "#831843,#1E1B4B", "#164E63,#0F172A"];
+  const glow = ["#FDBA74", "#A5B4FC", "#86EFAC", "#FDE68A", "#F9A8D4", "#67E8F9"];
+  let n = 0;
+  const frames = d.scenes.map((sc, si) => {
+    const first = n; n += sc.lines.length;
+    const who = [...new Set(sc.lines.map(x => x.who))].slice(0, 4);
+    const ln = sc.lines[0] || { de: "" };
+    return `<div class="fr"><div class="img" style="background:radial-gradient(circle at ${30 + si * 17 % 50}% 35%,${glow[si % 6]},transparent 55%),linear-gradient(160deg,${G[si % 6]})">
+      <span class="who2">${who.map(w => `<span title="${esc(w)}">${esc((d.cast[w] || {}).emoji || "👤")}</span>`).join("")}</span>
+      <span class="sub">${esc(ln.de.length > 42 ? ln.de.slice(0, 40) + "…" : ln.de)}</span><span class="lb">${T && T[first] ? fmtT(T[first][0]) : `#${first + 1}`} · ${esc(sc.title.de)}</span></div>
+      <div class="cap">${esc(sc.title[S.tr] || sc.title.en || "")} · ${sc.lines.length} lines</div></div>`;
+  }).join("");
+  return `<h3>Storyboard · <span class="de">${esc(L.title)}</span><span class="r chip">${d.scenes.length} scenes</span></h3>
+    ${d.scenes.length ? `<div class="board">${frames}</div>` : `<div class="empty"><b>No scenes yet</b><a class="btn" href="#script/${L.id}">✎ Write the text</a></div>`}
+    <h3 style="margin-top:14px">Characters in this lesson</h3>
+    <div class="picks">${(d.characters || []).map(id => S.chars.find(c => c.id === id)).filter(Boolean).map(c => `<span class="chip on">${esc(c.emoji)} ${esc(c.name)}</span>`).join("") || `<span class="mu2 sm">none picked — the AI invents the speakers</span>`}</div>
+    <div class="mu2 sm" style="margin-top:6px">Picked characters are used the next time the AI writes this lesson.</div>`;
+}
+ACT.boardCast = () => {
+  const L = S.L;
+  form("Characters of this lesson", `<label>Who plays in it?</label><l-select id="bc" name="ids" multiple></l-select>`, async f => {
+    L.data.characters = f.ids ? f.ids.split(",").map(Number) : [];
+    // a character already in the cast keeps their own look and voice
+    for (const c of S.chars) { const cast = L.data.cast[c.name]; if (cast) Object.assign(cast, { character: c.id, emoji: c.emoji, color: c.color, ...(c.voices[L.course] ? { voice: c.voices[L.course] } : {}) }); }
+    changed(); await flush(); V.universe();
+  }, "Save");
+  opts($("#bc"), S.chars.map(c => ({ value: String(c.id), label: c.name, icon: c.emoji, sub: c.bio })), (L.data.characters || []).map(String));
+};
+ACT.charNew = () => charForm({});
+document.addEventListener("click", e => { const c = e.target.closest("[data-char]"); if (c) charForm(S.chars.find(x => x.id === Number(c.dataset.char))); });
+function charForm(c) {
+  const courses = Object.keys(S.scope.courses);
+  form(c.id ? c.name : "New character", `<div class="row2"><div><label>Name</label><input class="in" name="name" value="${esc(c.name || "")}" required maxlength="40"></div><div><label>Age</label><input class="in" name="age" type="number" min="0" max="120" value="${c.age || ""}"></div></div>
+    <label>Who are they?</label><input class="in" name="bio" value="${esc(c.bio || "")}" maxlength="400" placeholder="graphic designer from Hamburg, a bit chaotic">
+    <label>Traits (comma)</label><input class="in" name="traits" value="${esc((c.traits || []).join(", "))}" placeholder="curious, funny, loves coffee">
+    <div class="row3"><div><label>Emoji</label><input class="in" name="emoji" value="${esc(c.emoji || "🙂")}" maxlength="8"></div><div><label>Colour</label><input class="in" name="color" type="color" value="${esc(c.color || "#8B5CF6")}" style="height:40px;padding:4px"></div><div><label>Voice</label><l-select name="gender" id="cg"></l-select></div></div>
+    ${courses.map(k => `<label>${FLAG[k]} ${esc(S.scope.courses[k].name)} voice</label><div style="display:flex;gap:6px"><l-select name="v_${k}" id="cv_${k}" style="flex:1"></l-select><button type="button" class="btn sm" data-tryvoice="${k}">🔊</button></div>`).join("")}
+    ${c.id ? `<div class="acts" style="justify-content:flex-start"><button type="button" class="btn danger" id="cdel">🗑 Delete</button></div>` : ""}`, async f => {
+    const body = { name: f.name, age: f.age, bio: f.bio, traits: f.traits.split(",").map(x => x.trim()).filter(Boolean), emoji: f.emoji, color: f.color, gender: f.gender, voices: Object.fromEntries(courses.map(k => [k, f["v_" + k]]).filter(x => x[1])) };
+    if (c.id) await api("PUT", `/characters/${c.id}`, body); else await api("POST", "/characters", body);
+    V.universe();
+  }, c.id ? "Save" : "Create");
+  opts($("#cg"), [{ value: "f", label: "female" }, { value: "m", label: "male" }], c.gender || "f");
+  for (const k of courses) opts($(`#cv_${k}`), [{ value: "", label: "chosen per lesson" }, ...S.scope.courses[k].voices.map(v => ({ value: v.id, label: voiceName(v.id), sub: v.g === "f" ? "female" : "male" }))], (c.voices || {})[k] || "");
+  $$("[data-tryvoice]").forEach(b => b.onclick = () => { const nm = $("#dlgForm [name=name]").value || "neu"; say({ de: `Hallo! Ich bin ${nm}.`, nl: `Hallo! Ik ben ${nm}.`, pl: `Cześć! Jestem ${nm}.` }[b.dataset.tryvoice], b.dataset.tryvoice); });
+  if ($("#cdel")) $("#cdel").onclick = async () => { if (!confirm(`Delete ${c.name}?`)) return; await api("DELETE", `/characters/${c.id}`); $("#dlg").close(); V.universe(); };
+}
+
+/* ================= 📈 insights ================= */
+V.insights = async () => {
+  if (!S.lessons.length) S.lessons = (await api("GET", "/lessons")).lessons;
+  const pub = S.lessons.filter(l => l.status === "published");
+  let L = S.L && S.L.status === "published" ? S.L : null;
+  if (!L && pub[0]) { await openLesson(pub[0].id); L = S.L; }
+  bar(`${scopeCrumb()} <b>Insights</b>`, `${pub.length ? `<l-select id="insL" style="width:240px"></l-select>` : ""}${[7, 30, 90].map(d => `<button class="chip ${(S.days || 30) === d ? "on" : ""}" data-days="${d}">${d} days</button>`).join("")}`);
+  if (!L) { $("#view").innerHTML = `<div class="empty"><b>Nothing published yet</b>Insights start when learners use a published lesson: which sentences are hard to say, and where they stop listening.</div>`; return; }
+  opts($("#insL"), pub.map(l => ({ value: String(l.id), label: l.title, icon: FLAG[l.course], sub: `${l.level} · ${l.type}` })), String(L.id)).addEventListener("change", e => { location.hash = `insights/${e.target.value}`; });
+  const ins = await api("GET", `/lessons/${L.id}/insights?days=${S.days || 30}`);
+  const all = rows(L), said = ins.say.slice().sort((a, b) => a.avg - b.avg);
+  const top = ins.reach[0] || 0, pct = ins.reach.map(n => top ? Math.round(n / top * 100) : 0);
+  let drop = -1, dropBy = 0; for (let i = 1; i < pct.length; i++) if (pct[i - 1] - pct[i] > dropBy) { dropBy = pct[i - 1] - pct[i]; drop = i; }
+  $("#view").innerHTML = `<div class="kpis" style="max-width:640px"><div class="kp"><b>${ins.opens}</b><span>times opened</span></div><div class="kp"><b>${ins.learners}</b><span>signed-in learners</span></div><div class="kp"><b>${ins.say.reduce((a, x) => a + x.n, 0)}</b><span>sentences spoken</span></div></div>
+    <div class="ins">
+    <div class="pn"><h3>Hard to say <span class="r mu2">right %</span></h3>
+      ${said.length ? said.slice(0, 10).map(x => { const r = all[x.line]; return r ? `<div class="hl ${x.avg < 50 ? "bad" : x.avg < 75 ? "mid" : "ok"}"><span class="mu2">${x.line + 1}</span><span class="de">${esc(r.de)}</span><span class="m">${x.avg}%</span>${x.avg < 75 && S.scope.ai ? `<a class="btn sm" href="#script/${L.id}" data-line="${x.line}" title="Rewrite">✦</a>` : "<span></span>"}</div>` : ""; }).join("") : `<div class="mu sm">No spoken sentences yet.</div>`}
+    </div>
+    <div class="pn"><h3>Where learners stop</h3>
+      ${top ? `<div class="spark2">${pct.map((v, i) => `<i style="height:${Math.max(2, v)}%" class="${i === drop && dropBy >= 10 ? "drop" : ""}" title="line ${i + 1}: ${v}%"></i>`).join("")}</div>
+      <div class="mu sm" style="margin-top:8px">${drop > 0 && dropBy >= 10 ? `${dropBy}% stop around line ${drop + 1}: “<span class="de">${esc((all[drop] || {}).de || "")}</span>”` : "No big drop — learners stay to the end."}</div>
+      ${drop > 0 && dropBy >= 10 && S.scope.ai ? `<div class="fi" style="margin-top:10px"><span class="ic" style="background:rgba(139,92,246,.18)">✦</span><div><b>Make line ${drop + 1} easier to follow</b><div class="t">shorter or simpler lines keep learners listening</div></div><a class="btn sm" href="#script/${L.id}" data-line="${drop}">Rewrite</a></div>` : ""}`
+        : `<div class="mu sm">No listening data yet.</div>`}
+    </div>
+    <div class="pn"><h3>How it works</h3><div class="mu sm">The app reports, without any text or audio, which line a learner reached and how well each spoken sentence matched. Rewrite a hard line in the script, make the audio again and publish — the numbers show whether it helped.</div></div>
+    </div>`;
+};
+document.addEventListener("click", e => { const d = e.target.closest("[data-days]"); if (d) { S.days = Number(d.dataset.days); V.insights(); } });
+
+/* ---------- a small form dialog ---------- */
+function form(title, html, submit, okLabel = "Save") {
+  const d = $("#dlg"), f = $("#dlgForm");
+  f.innerHTML = `<h3>${esc(title)}</h3>${html}<div class="err" id="dlgErr"></div><div class="acts"><button class="btn" value="cancel" formnovalidate>Cancel</button><button class="btn pr" value="ok">${esc(okLabel)}</button></div>`;
+  f.onsubmit = async e => {
+    if (e.submitter && e.submitter.value === "cancel") return;
+    e.preventDefault();
+    const v = Object.fromEntries(new FormData(f));
+    const ok = f.querySelector("[value=ok]"); ok.disabled = true;
+    try { await submit(v); d.close(); } catch (err) { $("#dlgErr").textContent = err.message; } finally { ok.disabled = false; }
+  };
+  d.showModal();
+  const first = f.querySelector("input,textarea"); first && first.focus();
+}
+
+/* ---------- start ---------- */
+(async () => {
+  try { const r = await api("GET", "/scope"); S.scope = { ...r, ...r.scope }; }
+  catch (e) { $("#view").innerHTML = `<div class="empty"><b>${esc(e.message)}</b><a class="btn" href="/">Back to LAPP</a></div>`; return; }
+  const me = S.scope.me;
+  $("#me").textContent = (me.name || me.username || "?").charAt(0).toUpperCase(); $("#me").title = "@" + me.username;
+  $("#back").href = S.scope.kind === "school" ? `/s/${ORG}` : ["manager", "admin"].includes(me.role) ? "/admin" : "/";
+  $("#back").dataset.tip = S.scope.kind === "school" ? "Back to the school" : ["manager", "admin"].includes(me.role) ? "Back to the admin panel" : "Back to the app";
+  $("#lng").onclick = e => { e.stopPropagation(); PanelI18N.menu(e.currentTarget); };
+  addEventListener("panel:lang", () => show());
+  api("GET", "/characters").then(r => { S.chars = r.characters; }).catch(() => {});
+  addEventListener("hashchange", show);
+  show();
+})();
 </script>
 </body></html>

@@ -1,7 +1,7 @@
 # Deploys the whole site (static app + Worker API) to Cloudflare on every push to main.
 # Skips quietly until CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID are set as repository secrets.
 # Optional secrets, copied into the Worker when present: ADMIN_EMAILS, RESEND_API_KEY,
-# STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STUDIO_GITHUB_TOKEN (→ GITHUB_TOKEN).
+# STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STUDIO_GITHUB_TOKEN (→ GITHUB_TOKEN), ANTHROPIC_API_KEY.
 # Optional variables (Settings → Variables): STRIPE_PRICE_MONTHLY, STRIPE_PRICE_YEARLY.
 name: deploy
 
@@ -28,6 +28,9 @@ jobs:
       - uses: actions/setup-node@v4
         if: env.HAS_TOKEN == 'true'
         with: { node-version: 22 }
+      - name: worker dependencies
+        if: env.HAS_TOKEN == 'true'
+        run: cd worker && npm ci --no-audit --no-fund
       - name: database (created on the first run)
         if: env.HAS_TOKEN == 'true'
         run: |
@@ -55,9 +58,10 @@ jobs:
           STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
           STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
           GITHUB_TOKEN_STUDIO: ${{ secrets.STUDIO_GITHUB_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
           node -e '
-            const m = { ADMIN_EMAILS: "ADMIN_EMAILS", RESEND_API_KEY: "RESEND_API_KEY", STRIPE_SECRET_KEY: "STRIPE_SECRET_KEY", STRIPE_WEBHOOK_SECRET: "STRIPE_WEBHOOK_SECRET", GITHUB_TOKEN: "GITHUB_TOKEN_STUDIO" };
+            const m = { ADMIN_EMAILS: "ADMIN_EMAILS", RESEND_API_KEY: "RESEND_API_KEY", STRIPE_SECRET_KEY: "STRIPE_SECRET_KEY", STRIPE_WEBHOOK_SECRET: "STRIPE_WEBHOOK_SECRET", GITHUB_TOKEN: "GITHUB_TOKEN_STUDIO", ANTHROPIC_API_KEY: "ANTHROPIC_API_KEY" };
             const o = {}; for (const [k, e] of Object.entries(m)) if (process.env[e]) o[k] = process.env[e];
             require("fs").writeFileSync("/tmp/secrets.json", JSON.stringify(o));
             console.log("secrets:", Object.keys(o).join(", ") || "none");'

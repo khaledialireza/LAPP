@@ -26,6 +26,24 @@
   };
   const player = $("#player");
   let lines = [], timed = false;
+  /* ---------- what learners do, for the studio's insights (no text, no audio) ---------- */
+  // open a lesson · reach a line while listening · say a sentence (score 0–1)
+  const evQ = [], reach = { l: null, max: -1, sent: -1 };
+  function ev(k, i, v) {
+    const L = LESSONS[state.idx]; if (!L || !window.Account || !Account.api) return;
+    evQ.push({ l: L.id, k, ...(i != null ? { i } : {}), ...(v != null ? { v: Math.round(v * 100) / 100 } : {}) });
+    if (evQ.length >= 20) evSend();
+  }
+  function reachSend() {
+    if (reach.l != null && reach.max > reach.sent && window.Account && Account.api) { evQ.push({ l: reach.l, k: "reach", i: reach.max }); reach.sent = reach.max; }
+  }
+  function evSend() {
+    if (!evQ.length) return;
+    const body = JSON.stringify({ ev: evQ.splice(0, 60) });
+    try { fetch("/api/ev", { method: "POST", keepalive: true, credentials: "same-origin", headers: { "Content-Type": "application/json", "X-LAPP": "1" }, body }).catch(() => {}); } catch {}
+  }
+  setInterval(() => { reachSend(); evSend(); }, 30000);
+  document.addEventListener("visibilitychange", () => { if (document.hidden) { reachSend(); evSend(); } });
   // seconds where a line starts: real timings if present, else proportional estimate
   const lineStart = l => timed ? l.t0 : l.start * (player.duration || 0);
   // lessons and stories share one list; each category is numbered on its own (L1, L2 … / G1, G2 …)
@@ -124,6 +142,7 @@
     $$(".js-lesson-num").forEach(e => e.textContent = lsCode(i));
     $$(".js-lesson-word").forEach(e => e.textContent = lsKind(i));
     const seen = store.get("libSeen", {}); seen[L.id] = Date.now(); store.set("libSeen", seen);
+    reachSend(); reach.l = L.id; reach.max = -1; reach.sent = -1; ev("open");
     $("#lpName").textContent = L.title;
     const TR = lessonTr(L);
     $("#hLessonTitle").textContent = L.title; $("#hLessonFa").textContent = TR.title; $("#hLevel").textContent = L.level;
@@ -470,6 +489,7 @@
   // remember where we are; move on to the next story at the end; optional pause after each sentence
   let plSaveT = 0, posSaveT = 0;
   player.addEventListener("timeupdate", () => {
+    if (timed && LESSONS[state.idx] && reach.l === LESSONS[state.idx].id && curLine > reach.max) reach.max = curLine;
     if (player.paused || clipStop != null || Date.now() - posSaveT < 3000) return;
     posSaveT = Date.now(); const m = store.get("posMap", {}); m[LESSONS[state.idx].id] = player.ended ? 0 : Math.round(player.currentTime); store.set("posMap", m);
   });
@@ -848,6 +868,8 @@
     const reqOk = required.every(w => saids.some(sd => heardWord(window.Practice.norm(w), sd)));
     const ok = alts.length > 0 && pct >= 0.6 && reqOk;
     if (ok) logDay("s", 1);
+    const li = lines.findIndex(l => l.text === target);
+    if (li >= 0 && alts.length) ev("say", li, pct);
     return { pct, reqOk, hits, said: alts[0] || "", ok, html: wordsHtml(target, hits) };
   }
 

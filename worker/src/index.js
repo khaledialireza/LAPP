@@ -1,19 +1,21 @@
 // LAPP — one Worker for the whole site (lapp.khaledi.eu).
 //
 // The static app (index.html, app.js, content/…) is served from Workers Static Assets.
-// This code runs first only for: /api/*, /admin, /studio and the lessons' audio.mp3
+// This code runs first only for: /api/*, /admin, /studio, /s/<school>, the lessons' audio.mp3
+// and the studio's lessons (/content/lessons/s-<id>/…, kept in D1: worker/src/lessons.js)
 // (see run_worker_first in wrangler.toml).
 //
 //   accounts     e-mail + username + password, one form: /api/auth/check says whether the
 //                e-mail is known (→ password) or new (→ sign-up). Session = HttpOnly cookie.
 //   progress     the browser's lapp:* keys as one JSON blob per user (guests keep theirs local)
 //   plans        free · Plus (Stripe subscription, a hand grant, staff, or a connection from Iran)
-//   admin        /admin for managers and admins, /studio for designers too
+//   admin        /admin for managers and admins
+//   studio       /studio: LAPP staff make library lessons; a school's admins and teachers make their own
 //
 // Secrets: STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, RESEND_API_KEY, GITHUB_TOKEN, ADMIN_EMAILS.
 // Vars:    APP_URL, EMAIL_FROM, STRIPE_PRICE_MONTHLY, STRIPE_PRICE_YEARLY, REPO, BRANCH, DEV.
-import { studioApi } from "./studio.js";
 import STUDIO from "./studio.html";
+import { lessonsApi, libApi, eventsApi, servePublished, plusLessons } from "./lessons.js";
 import ADMIN from "./admin.html";
 import SCHOOL from "./school.html";
 import { orgApi, orgsList, adminOrgs } from "./school.js";
@@ -47,7 +49,10 @@ export default {
       // a school's portal: anyone signed in gets the page; the API decides what they may see
       let sm;
       if ((sm = p.match(/^\/s\/([a-z0-9][a-z0-9-]{1,30})\/?$/))) return await page(req, env, SCHOOL, ROLES, `/s/${sm[1]}`);
-      if (p === "/studio" || p === "/studio/") return await page(req, env, STUDIO, STAFF, "/studio");
+      // the studio: the API decides who may work on which lessons (LAPP staff, or a school's admins and teachers)
+      if (p === "/studio" || p === "/studio/") return await page(req, env, STUDIO, ROLES, "/studio" + url.search);
+      let lm;
+      if ((lm = p.match(/^\/content\/lessons\/s-(\d+)\/(lesson\.json|[a-z]{2}\.json|audio\.mp3)$/))) return await servePublished(req, env, H, Number(lm[1]), lm[2], planOf, currentUser);
       if (/^\/content\/lessons\/[^/]+\/audio\.mp3$/.test(p)) return await audio(req, env, p);
       return env.ASSETS.fetch(req);
     } catch (e) {
@@ -186,11 +191,15 @@ async function api(req, env, url, ctx) {
   // Stripe calls in with its own signature; everything else that changes state must carry
   // a header a cross-site form, link or image cannot send
   if (p === "/stripe/webhook" && M === "POST") return stripeWebhook(req, env);
+  // the voice job in GitHub Actions proves itself with its one-time token
+  if (/^\/studio\/jobs\/\d+(\/[a-z]+)?$/.test(p)) return lessonsApi(req, env, H, p.slice(7), url, ctx);
   if (M !== "GET" && M !== "HEAD" && req.headers.get("X-LAPP") !== "1") throw fail("missing X-LAPP header", 400);
 
   /* ---- public ---- */
   if (p === "/config" && M === "GET") {
     const access = await getSetting(env, "access", DEFAULT_ACCESS);
+    // studio lessons that need Plus are locked like the static ones (by folder name, s-<id>)
+    access.locked = [...access.locked, ...await plusLessons(env)];
     return json({ api: true, country: country(req), iran: access.iranFree && country(req) === "IR", access, billing: !!(env.STRIPE_SECRET_KEY && env.STRIPE_PRICE_MONTHLY),
       prices: { month: env.PRICE_MONTH_LABEL || "", year: env.PRICE_YEAR_LABEL || "", save: env.PRICE_SAVE_LABEL || "" } });
   }
@@ -414,11 +423,10 @@ async function api(req, env, url, ctx) {
   let om;
   if ((om = p.match(/^\/org\/([a-z0-9][a-z0-9-]{1,30})(\/.*)?$/))) return orgApi(req, env, H, om[1], om[2] || "", url);
 
-  /* ---- studio (designers and up) ---- */
-  if (p.startsWith("/studio/")) {
-    const u = await need(req, env, STAFF);
-    return studioApi(req, env, p.slice(7), u.email);
-  }
+  /* ---- studio: lessons made in the site ---- */
+  if (p.startsWith("/studio/")) return lessonsApi(req, env, H, p.slice(7), url, ctx);
+  if (p === "/lib" && M === "GET") return libApi(req, env, H, url, currentUser);
+  if (p === "/ev" && M === "POST") return eventsApi(req, env, H, currentUser);
 
   throw fail("not found", 404);
 }

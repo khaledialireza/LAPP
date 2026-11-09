@@ -9,7 +9,7 @@ routes = [{ pattern = "lapp.khaledi.eu", custom_domain = true }]
 [assets]
 directory = "."
 binding = "ASSETS"
-run_worker_first = ["/api/*", "/admin", "/admin/", "/studio", "/studio/", "/s/*", "/content/lessons/*/audio.mp3"]
+run_worker_first = ["/api/*", "/admin", "/admin/", "/studio", "/studio/", "/s/*", "/content/lessons/*/audio.mp3", "/content/lessons/s-*"]
 
 [[d1_databases]]
 binding = "DB"
@@ -47,4 +47,5 @@ PRICE_SAVE_LABEL = "45%"
 #   RESEND_API_KEY         e-mail (codes and password resets)
 #   STRIPE_SECRET_KEY      payments
 #   STRIPE_WEBHOOK_SECRET  signature of https://lapp.khaledi.eu/api/stripe/webhook
-#   GITHUB_TOKEN           studio: fine-grained token for this repository (Contents + Actions read/write)
+#   GITHUB_TOKEN           studio: fine-grained token for this repository (Actions read/write: starts the voice job)
+#   ANTHROPIC_API_KEY      studio: Claude writes, translates and rewrites lessons

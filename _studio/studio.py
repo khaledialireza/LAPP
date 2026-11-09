@@ -316,11 +316,12 @@ def trim(x, thr=0.004):
 def clip(d, ln):
     import numpy as np
     c = d["cast"][ln["who"]]
-    key = hashlib.sha1(f"{c['voice']}|{c.get('speed', 0.95)}|{ln['de']}".encode()).hexdigest()[:16]
+    speed = ln.get("speed") or c.get("speed", 0.95)          # a line may have its own speed
+    key = hashlib.sha1(f"{c['voice']}|{speed}|{ln['de']}".encode()).hexdigest()[:16]
     f = CACHE / f"{key}.npy"
     if f.exists(): return np.load(f)
     CACHE.mkdir(parents=True, exist_ok=True)
-    x = trim(synth(c["voice"], ln["de"], c.get("speed", 0.95)))
+    x = trim(synth(c["voice"], ln["de"], speed))
     np.save(f, x); return x
 
 

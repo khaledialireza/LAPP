@@ -9,6 +9,7 @@
 //       <code>.json   translation into one interface language
 // A new interface language = a new lang/<code>/ folder + <code>.json in each lesson + one line in index.json.
 // A course is listed once it has a lesson; each course keeps its own progress (see COURSE.prefix).
+// Studio lessons (worker/src/lessons.js) are folders s-<id>, served by the Worker in the same shape.
 (() => {
   const V = ((document.currentScript || {}).src || "").match(/[?&]v=([^&]+)/)?.[1] || "";
   const get = p => fetch("content/" + p + (V ? "?v=" + V : "")).then(r => r.ok ? r.json() : Promise.reject(new Error(p + " " + r.status)));
@@ -16,8 +17,11 @@
   const dicts = {}, names = {};
 
   async function boot() {
-    const idx = await get("index.json");
+    // lessons made in the studio (D1) come from the site, next to the ones in content/; a signed-in
+    // learner also gets their school's own. Without the API the app runs on content/ alone.
+    const [idx, lib] = await Promise.all([get("index.json"), fetch("/api/lib", { credentials: "same-origin" }).then(r => r.ok ? r.json() : { lessons: [] }).catch(() => ({ lessons: [] }))]);
     I18N.init(idx.languages);
+    for (const c of idx.courses) c.lessons = [...c.lessons, ...lib.lessons.filter(l => l.course === c.code).map(l => l.dir)];
     window.COURSES = idx.courses.map(c => ({ ...c, ready: c.lessons.length > 0 }));
     let want = null; try { want = JSON.parse(localStorage.getItem("lapp:course")); } catch {}
     const C = COURSES.find(c => c.code === want && c.ready) || COURSES.find(c => c.ready);
@@ -25,7 +29,8 @@
     window.COURSE = { ...C, chosen: !!want, prefix: C.code === COURSES[0].code ? "lapp:" : `lapp:${C.code}:` };
     const [de, verbs, deNames, lessons] = await Promise.all([
       get(`lang/${C.code}/dict.json`), get(`lang/${C.code}/verbs.json`).catch(() => ({})), get(`lang/${C.code}/names.json`).catch(() => []),
-      Promise.all(C.lessons.map(async dir => ({ dir, ...await get(`lessons/${dir}/lesson.json`) })))]);
+      // a studio lesson that is gone or no longer open to this person is left out, never breaks the app
+      Promise.all(C.lessons.map(async dir => dir.startsWith("s-") ? get(`lessons/${dir}/lesson.json`).then(L => ({ dir, ...L }), () => null) : ({ dir, ...await get(`lessons/${dir}/lesson.json`) }))).then(x => x.filter(Boolean))]);
     window.VERBS = verbs;
     window.DICT = {};
     for (const [k, v] of Object.entries(de)) DICT[k] = { p: v.p, f: v.f || [], fa: "", g: "" };

@@ -29,7 +29,7 @@ jobs:
         with: { python-version: "3.12" }
       - uses: actions/cache@v4
         with: { path: _studio/.voices, key: piper-voices-v1 }
-      - run: pip install sherpa-onnx av numpy anthropic
+      - run: pip install "sherpa-onnx<2" av numpy anthropic   # 2.x has no built-in phonemizer for Piper voices
       - name: studio ${{ inputs.action }}
         env:
           ACTION: ${{ inputs.action }}

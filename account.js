@@ -46,7 +46,7 @@
   }
   const isAccount = () => (Auth.session || {}).type === "account";
   // after sign-in, go back to the staff pages or a school portal that sent the person here
-  const okNext = n => !!n && ((/^\/(admin|studio)\/?$/.test(n) && isStaff()) || /^\/s\/[a-z0-9][a-z0-9-]{1,30}\/?$/.test(n));
+  const okNext = n => !!n && ((/^\/admin\/?$/.test(n) && isStaff()) || /^\/studio\/?(\?org=[a-z0-9][a-z0-9-]{1,30})?$/.test(n) || /^\/s\/[a-z0-9][a-z0-9-]{1,30}\/?$/.test(n));
   let orgs = [];
   const isStaff = () => ["designer", "manager", "admin"].includes((Auth.session || {}).role);
 

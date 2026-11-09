@@ -1,0 +1,37 @@
+# LAPP Studio: makes the audio of one lesson kept in the site's database.
+# The site starts this with a job id and a one-time token (worker/src/lessons.js → voice);
+# _studio/job.py fetches the script, speaks it with Piper and sends the MP3 back.
+name: studio-voice
+run-name: "studio voice · job ${{ inputs.job }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      job: { description: "job id", type: string, required: true }
+      token: { description: "one-time token for this job", type: string, required: true }
+      api: { description: "site address", type: string, default: "https://lapp.khaledi.eu" }
+
+permissions:
+  contents: read
+
+concurrency: { group: "studio-voice-${{ inputs.job }}", cancel-in-progress: true }
+
+jobs:
+  voice:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: hide the token in the log
+        run: echo "::add-mask::${{ inputs.token }}"
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - uses: actions/cache@v4
+        with: { path: _studio/.voices, key: piper-voices-v1 }
+      - run: pip install "sherpa-onnx<2" av numpy   # 2.x has no built-in phonemizer for Piper voices
+      - name: voice
+        env: { JOB: "${{ inputs.job }}", TOKEN: "${{ inputs.token }}", API: "${{ inputs.api }}" }
+        run: |
+          [[ "$JOB" =~ ^[0-9]+$ ]] || { echo "bad job"; exit 1; }
+          [[ "$API" =~ ^https://[a-z0-9.-]+$ ]] || { echo "bad api"; exit 1; }
+          python3 _studio/job.py "$API" "$JOB" "$TOKEN"

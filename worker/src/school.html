@@ -4,7 +4,7 @@
 <meta name="robots" content="noindex">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@500;700&display=swap" rel="stylesheet">
 <script src="/ui/lapp-ui.js?v=3"></script>
-<script src="/ui/panel-i18n.js?v=1"></script>
+<script src="/ui/panel-i18n.js?v=2"></script>
 <style>
 /* the school portal — same look as the studio and the admin panel */
 :root{--bg:#07070B;--p1:#0F0F16;--p2:#15151F;--p3:#1C1C29;--ln:rgba(255,255,255,.08);--ln2:rgba(255,255,255,.14);--tx:#F4F4F8;--mu:rgba(235,235,245,.55);--mu2:rgba(235,235,245,.35);
@@ -182,8 +182,8 @@ function form(title, fields, submit, okLabel = "Save") {
 
 /* ---------------- navigation by role ---------------- */
 const NAV = {
-  admin: [["overview", "📊 Overview"], ["classes", "🏫 Classes"], ["people", "👥 People"], ["timetable", "📅 Timetable"], ["homework", "📝 Homework"], ["finance", "💶 Finance"], ["settings", "⚙️ Settings"]],
-  teacher: [["week", "📅 My week"], ["classes", "🏫 My classes"], ["homework", "📝 Homework"]],
+  admin: [["overview", "📊 Overview"], ["classes", "🏫 Classes"], ["people", "👥 People"], ["timetable", "📅 Timetable"], ["homework", "📝 Homework"], ["lessons", "🎬 Lessons"], ["finance", "💶 Finance"], ["settings", "⚙️ Settings"]],
+  teacher: [["week", "📅 My week"], ["classes", "🏫 My classes"], ["homework", "📝 Homework"], ["lessons", "🎬 Lessons"]],
   finance: [["finance", "💶 Finance"], ["people", "🎓 Students"]],
   student: [["home", "🏠 Home"], ["calendar", "📅 Calendar"], ["classes", "📚 My classes"], ["homework", "📝 Homework"], ["fees", "💶 Fees"]]
 };
@@ -249,6 +249,36 @@ V.classes = async () => {
     <span class="mu">${k.teacher_name || k.teacher_username ? "👤 " + esc(k.teacher_name || k.teacher_username) : "No teacher yet"} · ${k.students} students</span>
     <span>${k.live_event ? `<span class="live-dot">LIVE NOW</span>` : k.next_at ? `<span class="pl cy-p">Next: ${fmtDay(k.next_at)} ${fmtTime(k.next_at)}</span>` : `<span class="pl no-p">No lessons planned</span>`}${k.archived ? ` <span class="pl no-p">archived</span>` : ""}</span></a>`).join("") || `<div class="card empty">No classes yet</div>`}</div>`;
 };
+// the school's own lessons, made in the studio (only its students see them)
+const studio = (p, m = "GET", b) => fetch(`/api/studio${p}${p.includes("?") ? "&" : "?"}org=${SLUG}`, { method: m, credentials: "same-origin", headers: { "Content-Type": "application/json", ...(m !== "GET" ? { "X-LAPP": "1" } : {}) }, body: b ? JSON.stringify(b) : undefined })
+  .then(async r => { const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error || r.statusText); return j; });
+const LTYPE = { talk: ["💬", "Conversation"], lesson: ["🎧", "Lesson"], story: ["📖", "Story"] };
+const LTOPIC = { daily: "Daily life", travel: "Travel & hotel", food: "Food & shopping", health: "Health & doctor", work: "Work & office", home: "Home & family", city: "City & transport", school: "School & study", story: "Stories", other: "Other" };
+V.lessons = async () => {
+  const { lessons } = await studio("/lessons");
+  const st = { draft: ["no-p", "draft"], review: ["wa-p", "in work"], published: ["ok-p", "published"] };
+  return `<div class="top"><h1>Lessons</h1><a class="b" href="/studio?org=${SLUG}">🎬 Open the studio</a><button class="b pr" data-go="newlesson">＋ New lesson</button></div>
+  <p class="mu">Your school's own audio lessons. Make one, then the studio opens: write it (with AI or by hand), make the audio, publish. Published lessons can be added to a class as material — only your students see them.</p>
+  ${lessons.length ? `<div class="g3">${lessons.map(l => `<a class="card" href="/studio?org=${SLUG}#script/${l.id}" style="text-decoration:none;display:flex;flex-direction:column;gap:6px">
+    <span class="mu">${FLAG[l.course] || ""} ${COURSE[l.course] || ""} · ${esc(l.level)} · ${LTYPE[l.type][0]} ${esc(LTOPIC[l.topic] || "")}</span><b style="font-size:17px">${esc(l.title)}</b>
+    <span class="mu">${l.lines ? `${l.approved}/${l.lines} lines approved` : "no text yet"} · ${{ ready: "🎧 audio", old: "🎧 audio older than text", none: "no audio" }[l.audio]}</span>
+    <span><span class="pl ${st[l.status][0]}">${st[l.status][1]}</span></span></a>`).join("")}</div>`
+    : `<div class="card empty">No lessons yet. Make the first one with ＋ New lesson.</div>`}`;
+};
+function newLessonForm() {
+  form("New lesson", [
+    { name: "title", label: "Title (in the course language)", required: true, ph: "Am Bahnhof" },
+    { type: "html", html: `<div class="f2">` },
+    { name: "course", label: "Language", type: "select", options: courseOpts(), value: S.org.course || "de" },
+    { name: "level", label: "Level", type: "select", options: ["A1", "A2", "B1", "B2", "C1", "C2"].map(x => [x, x]) },
+    { type: "html", html: `</div><div class="f2">` },
+    { name: "type", label: "Type", type: "select", options: Object.entries(LTYPE).map(([k, [i, l]]) => [k, l, { icon: i }]) },
+    { name: "topic", label: "Topic", type: "select", options: Object.entries(LTOPIC).map(([k, l]) => [k, l]) },
+    { type: "html", html: `</div>` },
+    { name: "brief", label: "What should it be about? (the AI writes from this)", type: "textarea", ph: "Buying a ticket, finding the platform, a delay…" }
+  ], async v => { const l = await studio("/lessons", "POST", v); location.href = `/studio?org=${SLUG}#script/${l.id}`; }, "Create and open the studio");
+};
+
 let CT = "material";
 V.class = async id => {
   const [{ class: k, teacher, students: st, canTeach }, mats, hw, ev] = await Promise.all([api("GET", `/classes/${id}`), api("GET", `/materials?class=${id}`), api("GET", `/assignments?class=${id}`), events(Date.now() - 30 * DAYMS, Date.now() + 60 * DAYMS, id)]);
@@ -445,6 +475,7 @@ document.addEventListener("submit", async e => {
 
 /* ================= actions ================= */
 const ACT = {};
+ACT.newlesson = () => newLessonForm();
 // a password a person can read out and type: no 0/O or 1/l/I
 function newPassword() {
   const A = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789", r = crypto.getRandomValues(new Uint32Array(10));
@@ -591,8 +622,10 @@ ACT["mat-file"] = btn => form("Add a file (PDF, image or audio, up to 2 MB)", [{
   });
 ACT["mat-lesson"] = async btn => {
   const idx = await (await fetch("/content/index.json")).json(), c = idx.courses.find(x => x.code === btn.dataset.c) || idx.courses[0];
-  const ls = await Promise.all(c.lessons.map(async dir => ({ dir, ...(await (await fetch(`/content/lessons/${dir}/lesson.json`)).json()) })));
-  form("Add a lesson from the LAPP library", [{ name: "dir", label: `${c.name} lessons`, type: "select", search: true, options: ls.map(l => [l.dir, l.title, { icon: { talk: "💬", story: "📖" }[l.type] || "🎧", sub: `${l.level} · ${l.type || "lesson"}` }]) }],
+  const lib = await (await fetch(`/api/lib?course=${c.code}`, { credentials: "same-origin" })).json().catch(() => ({ lessons: [] }));
+  const ls = [...(await Promise.all(c.lessons.map(async dir => ({ dir, ...(await (await fetch(`/content/lessons/${dir}/lesson.json`)).json()) })))),
+    ...(lib.lessons || []).map(l => ({ ...l, title: (l.school ? "🏫 " : "") + l.title }))];
+  form("Add a lesson (LAPP library or your school's own)", [{ name: "dir", label: `${c.name} lessons`, type: "select", search: true, options: ls.map(l => [l.dir, l.title, { icon: { talk: "💬", story: "📖" }[l.type] || "🎧", sub: `${l.level} · ${l.type || "lesson"}` }]) }],
     async v => { const l = ls.find(x => x.dir === v.dir); await api("POST", "/materials", { classId: btn.dataset.k, kind: "lesson", title: l.title, url: l.dir }); show(); });
   if (!ls.length) $("#dlgErr").textContent = "This language has no library lessons yet.";
 };
