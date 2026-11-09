@@ -33,14 +33,18 @@
   const timeout = (p, ms) => Promise.race([p, new Promise((_, no) => setTimeout(() => no(new Error("timeout")), ms))]);
 
   /* ---------- the session in this browser ---------- */
-  function setUser(u, p) {
+  function setUser(u, p, o) {
     if (p) plan = p;
+    if (o) orgs = o;
     if (!u) return;
     const s = Auth.session || {};
     Auth.setSession({ type: "account", id: u.id, email: u.email, username: u.username, name: u.name, role: u.role, verified: u.verified, since: u.since || s.since });
     if (!jget("lapp:name", "")) rawSet.call(localStorage, "lapp:name", JSON.stringify(u.name || u.username));
   }
   const isAccount = () => (Auth.session || {}).type === "account";
+  // after sign-in, go back to the staff pages or a school portal that sent the person here
+  const okNext = n => !!n && ((/^\/(admin|studio)\/?$/.test(n) && isStaff()) || /^\/s\/[a-z0-9][a-z0-9-]{1,30}\/?$/.test(n));
+  let orgs = [];
   const isStaff = () => ["designer", "manager", "admin"].includes((Auth.session || {}).role);
 
   /* ---------- progress: every lapp:* key, as one object ---------- */
@@ -98,7 +102,7 @@
       const m = await call("GET", "/me");
       plan = m.plan || plan;
       if (m.user) {
-        setUser(m.user, m.plan);
+        setUser(m.user, m.plan, m.orgs);
         const s = sync();
         if (s.dirty) await push(); else await pull();
       } else if (isAccount()) { wipe(); Auth.signOut(); }
@@ -226,11 +230,11 @@
   function close() { $("#welcome").hidden = true; document.body.classList.remove("ac-open"); }
 
   async function afterSignIn(m, fresh) {
-    setUser(m.user, m.plan);
+    setUser(m.user, m.plan, m.orgs);
     if (fresh) setSync({ v: 1, dirty: false, at: Date.now() });
     else { try { await pull(); } catch {} }
     const next = new URLSearchParams(location.search).get("next");
-    if (next && /^\/(admin|studio)\/?$/.test(next) && isStaff()) { location.href = next; return; }
+    if (okNext(next)) { location.href = next; return; }
     if (!m.user.verified) { go("verify"); return; }
     finish(fresh);
   }
@@ -272,8 +276,9 @@
       }
       if (kind === "verify") {
         const m = await call("POST", "/auth/verify", { code: $("#acCode").value.trim() });
-        setUser(m.user, m.plan);
-        if (["designer", "manager", "admin"].includes(m.user.role) && /next=/.test(location.search)) { location.href = new URLSearchParams(location.search).get("next"); return; }
+        setUser(m.user, m.plan, m.orgs);
+        const nx = new URLSearchParams(location.search).get("next");
+        if (okNext(nx)) { location.href = nx; return; }
         finish(true); return;
       }
       if (kind === "forgot") {
@@ -285,7 +290,8 @@
         const password = $("#acPw").value;
         if (password.length < 8) throw { code: "password" };
         const m = await call("POST", "/auth/reset", { token: W.token, password });
-        history.replaceState(null, "", location.pathname);
+        const nx = new URLSearchParams(location.search).get("next");
+        history.replaceState(null, "", location.pathname + (okNext(nx) ? `?next=${encodeURIComponent(nx)}` : ""));
         W.email = m.user.email;
         await afterSignIn(m, false); return;
       }
@@ -417,6 +423,7 @@
     const row = (ic, label, act, extra = "") => `<button type="button" class="pf-row pf-link" data-acct="${act}"><span>${ic} ${esc(label)}</span><span class="v">${extra}›</span></button>`;
     const rows = `<div class="pf-row pf-acct"><span class="pf-acct-ic">${esc(initial(s.name || s.username))}</span><span class="pf-acct-tx"><b><bdi>@${esc(s.username)}</bdi> ${badge()}</b><small><bdi>${esc(s.email)}</bdi> · ${esc(syncTx)}${planTx ? " · " + esc(planTx) : ""}</small></span></div>`
       + (plan.why === "stripe" || plan.status ? row("💳", t("acBilling"), "portal") : "")
+      + orgs.map(o => `<a class="pf-row pf-link" href="/s/${esc(o.slug)}"><span>🏫 ${esc(o.name)} <span class="ac-badge free">${esc(o.role)}</span></span><span class="v">›</span></a>`).join("")
       + (["manager", "admin"].includes(s.role) ? `<a class="pf-row pf-link" href="/admin"><span>🛠 ${esc(t("acAdmin"))}</span><span class="v">›</span></a>` : "")
       + (isStaff() ? `<a class="pf-row pf-link" href="/studio"><span>🎬 ${esc(t("acStudio"))}</span><span class="v">›</span></a>` : "")
       + row("🔒", t("acChangePw"), "password")
@@ -441,7 +448,7 @@
     if (q.get("login") && cfg && !isAccount()) { open("email", { closable: Auth.signedIn }); return true; }
     if (q.get("plus")) {
       history.replaceState(null, "", location.pathname);
-      if (q.get("plus") === "ok") { toast(t("plThanks")); setTimeout(async () => { try { const m = await call("GET", "/me"); setUser(m.user, m.plan); emit(); } catch {} }, 2500); }
+      if (q.get("plus") === "ok") { toast(t("plThanks")); setTimeout(async () => { try { const m = await call("GET", "/me"); setUser(m.user, m.plan, m.orgs); emit(); } catch {} }, 2500); }
     }
     return false;
   }

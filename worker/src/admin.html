@@ -60,6 +60,7 @@ dialog form{display:flex;flex-direction:column;gap:12px}dialog h3{font-size:18px
   <a class="nv" href="#dash" data-v="dash">📊 Dashboard</a>
   <a class="nv" href="#users" data-v="users">👥 Users <em id="nU"></em></a>
   <a class="nv" href="#customers" data-v="customers">💳 Customers <em id="nC"></em></a>
+  <a class="nv" href="#schools" data-v="schools">🏫 Schools <em id="nS"></em></a>
   <a class="nv" href="#access" data-v="access">📚 Content & access</a>
   <a class="nv" href="/studio">🎬 Studio</a>
   <a class="nv" href="/">← Back to the app</a>
@@ -76,6 +77,16 @@ dialog form{display:flex;flex-direction:column;gap:12px}dialog h3{font-size:18px
   <div class="f"><label>Role</label><div class="seg" id="addRole"></div></div>
   <div class="tg"><div>Send an invitation e-mail<small>They choose their own password from the link (valid 7 days)</small></div><button type="button" class="sw on" id="addInvite" aria-pressed="true"></button></div>
   <div class="acts" style="justify-content:flex-end"><button class="b" value="cancel" formnovalidate>Cancel</button><button class="b pr" value="ok">Create</button></div>
+</form></dialog>
+
+<dialog id="orgDlg"><form method="dialog" id="orgForm">
+  <h3>New school</h3>
+  <div class="f"><label>School name</label><input class="in" name="name" required placeholder="Sprachschule Berlin"></div>
+  <div class="f"><label>Address · lapp.khaledi.eu/s/…</label><input class="in" name="slug" required pattern="[a-z0-9][a-z0-9-]{1,30}" placeholder="berlin"></div>
+  <div class="f2"><div class="f"><label>School admin's e-mail</label><input class="in" name="adminEmail" type="email" placeholder="director@school.de"></div><div class="f"><label>Their name</label><input class="in" name="adminName"></div></div>
+  <div class="f"><label>Colour</label><input class="in" name="color" type="color" value="#8B5CF6" style="height:42px;padding:4px"></div>
+  <p class="mu">The admin gets an invitation e-mail and adds the school's teachers, staff and students.</p>
+  <div class="acts" style="justify-content:flex-end"><button class="b" value="cancel" formnovalidate>Cancel</button><button class="b pr" value="ok">Create school</button></div>
 </form></dialog>
 
 <dialog id="delDlg"><form method="dialog" id="delForm">
@@ -204,6 +215,32 @@ async function lessons() {
   LESSONS = await Promise.all(all.map(async x => { const L = await (await fetch(`/content/lessons/${x.dir}/lesson.json`)).json(); return { ...x, title: L.title, level: L.level }; }));
   return LESSONS;
 }
+/* ---- schools (organizations) ---- */
+V.schools = async () => {
+  if (!isAdmin()) return `<div class="top"><h1>Schools</h1></div><div class="card empty">Only an admin manages schools.</div>`;
+  const { orgs } = await api("GET", "/admin/orgs");
+  $("#nS").textContent = orgs.length || "";
+  return `<div class="top"><h1>Schools</h1><button class="b pr" id="addSchool">＋ New school</button></div>
+  <p class="mu">Each school gets its own portal at <b>${location.origin}/s/&lt;address&gt;</b> with its admins, teachers, finance staff and students. Private learners keep using the main app.</p>
+  <div class="row hd" style="grid-template-columns:44px 1.6fr 1fr 90px 90px 90px 170px"><span></span><span>School</span><span>Admin</span><span>Classes</span><span>Teachers</span><span>Students</span><span></span></div>
+  ${orgs.map(o => `<div class="row ${o.disabled ? "off" : ""}" style="grid-template-columns:44px 1.6fr 1fr 90px 90px 90px 170px;cursor:default">
+    <div class="av" style="background:${esc(o.color)}">${esc(o.name.charAt(0))}</div><div class="u"><b>${esc(o.name)}</b><small>/s/${esc(o.slug)} · since ${day(o.created_at)}</small></div>
+    <div class="mu">${esc(o.admin_email || "—")}</div><div>${o.classes}</div><div>${o.teachers}</div><div>${o.students}</div>
+    <div class="acts"><a class="b sm" href="/s/${esc(o.slug)}" target="_blank">Open</a><button class="b sm" data-org-toggle="${o.id}" data-d="${o.disabled ? 0 : 1}">${o.disabled ? "Enable" : "Disable"}</button><button class="b sm d" data-org-del="${o.id}" data-name="${esc(o.slug)}">🗑</button></div></div>`).join("") || `<div class="card empty">No schools yet. Create one and invite its admin — they add their teachers and students themselves.</div>`}`;
+};
+document.addEventListener("click", async e => {
+  try {
+    if (e.target.closest("#addSchool")) return $("#orgDlg").showModal();
+    const tg = e.target.closest("[data-org-toggle]");
+    if (tg) { await api("PATCH", `/admin/orgs/${tg.dataset.orgToggle}`, { disabled: tg.dataset.d === "1" }); toast("Saved"); return show(); }
+    const del = e.target.closest("[data-org-del]");
+    if (del) {
+      if (del.dataset.sure !== "1") { del.dataset.sure = "1"; del.textContent = `Delete ${del.dataset.name} and all its classes?`; return; }
+      await api("DELETE", `/admin/orgs/${del.dataset.orgDel}`); toast("School deleted — its people keep their accounts"); return show();
+    }
+  } catch (x) { toast(x.message); }
+});
+
 V.access = async () => {
   const [{ access }, ls] = await Promise.all([api("GET", "/admin/settings"), lessons()]);
   A = access;
@@ -283,6 +320,12 @@ $("#addDlg").addEventListener("close", async () => {
     toast(r.sent ? "User added · invitation sent" : "User added");
     STATS = null; U.q = ""; U.filter = "all"; U.page = 0; location.hash = "users"; await show(); select(r.id);
   } catch (x) { toast(x.message); }
+});
+
+$("#orgDlg").addEventListener("close", async () => {
+  if ($("#orgDlg").returnValue !== "ok") return;
+  const f = Object.fromEntries(new FormData($("#orgForm")));
+  try { const r = await api("POST", "/admin/orgs", f); toast(r.admin ? (r.admin.sent ? "School created · invitation sent" : "School created") : "School created"); $("#orgForm").reset(); location.hash = "schools"; show(); } catch (x) { toast(x.message); }
 });
 
 /* ---- delete user: type the username to confirm ---- */

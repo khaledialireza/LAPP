@@ -15,6 +15,9 @@
 import { studioApi } from "./studio.js";
 import STUDIO from "./studio.html";
 import ADMIN from "./admin.html";
+import SCHOOL from "./school.html";
+import { orgApi, orgsList, adminOrgs } from "./school.js";
+export { Room } from "./room.js";
 
 const DAY = 864e5;
 const SESSION_DAYS = 60;
@@ -38,6 +41,9 @@ export default {
     try {
       if (p.startsWith("/api/")) return await api(req, env, url, ctx);
       if (p === "/admin" || p === "/admin/") return await page(req, env, ADMIN, ["manager", "admin"], "/admin");
+      // a school's portal: anyone signed in gets the page; the API decides what they may see
+      let sm;
+      if ((sm = p.match(/^\/s\/([a-z0-9][a-z0-9-]{1,30})\/?$/))) return await page(req, env, SCHOOL, ROLES, `/s/${sm[1]}`);
       if (p === "/studio" || p === "/studio/") return await page(req, env, STUDIO, STAFF, "/studio");
       if (/^\/content\/lessons\/[^/]+\/audio\.mp3$/.test(p)) return await audio(req, env, p);
       return env.ASSETS.fetch(req);
@@ -129,7 +135,15 @@ async function planOf(env, req, u) {
   return { tier: "free", why: "", status: s ? s.status : "" };
 }
 const publicUser = u => ({ id: u.id, email: u.email, username: u.username, name: u.name, role: u.role, verified: !!u.verified, since: new Date(u.created_at).toISOString().slice(0, 10) });
-async function me(env, req, u) { return { user: publicUser(u), plan: await planOf(env, req, u), country: country(req) }; }
+async function me(env, req, u) {
+  const orgs = (await env.DB.prepare("SELECT o.slug, o.name, m.role FROM org_members m JOIN orgs o ON o.id = m.org_id WHERE m.user_id = ? AND m.active = 1 AND o.disabled = 0 ORDER BY o.name").bind(u.id).all()).results;
+  return { user: publicUser(u), plan: await planOf(env, req, u), country: country(req), orgs };
+}
+// what school.js needs from here
+const H = {
+  json, fail, body, need: (req, env, roles) => need(req, env, roles), sendMail, newCode, hashPassword, rand, b64url,
+  appUrl, cleanEmail, cleanUser, EMAIL, USERNAME, RESERVED, now, DAY
+};
 
 /* ================= e-mail ================= */
 const T = {
@@ -380,7 +394,13 @@ async function api(req, env, url, ctx) {
   }
 
   /* ---- admin ---- */
+  if (p === "/admin/orgs" || p.startsWith("/admin/orgs/")) return adminOrgs(req, env, H, p.slice(11));
   if (p.startsWith("/admin/")) return adminApi(req, env, p.slice(6), url);
+
+  /* ---- schools ---- */
+  if (p === "/orgs" && M === "GET") return orgsList(req, env, H);
+  let om;
+  if ((om = p.match(/^\/org\/([a-z0-9][a-z0-9-]{1,30})(\/.*)?$/))) return orgApi(req, env, H, om[1], om[2] || "", url);
 
   /* ---- studio (designers and up) ---- */
   if (p.startsWith("/studio/")) {
