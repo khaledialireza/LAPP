@@ -492,5 +492,6 @@
  "{a} students": "{a} учнів",
  "{a} · this person signed up themselves and manages their own password.": "{a} · ця людина зареєструвалася сама й сама керує паролем.",
  "{a} · {b}": "{a} · {b}",
- "{a}/{b} handed in": "{a}/{b} здано"
+ "{a}/{b} handed in": "{a}/{b} здано",
+ "made from the title": "створюється з назви"
 }

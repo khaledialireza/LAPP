@@ -492,5 +492,6 @@
  "{a} students": "‏{a} شاگرد",
  "{a} · this person signed up themselves and manages their own password.": "‏{a} · این فرد خودش ثبت‌نام کرده و رمزش را خودش مدیریت می‌کند.",
  "{a} · {b}": "{a} · {b}",
- "{a}/{b} handed in": "‏{a}/{b} تحویل شده"
+ "{a}/{b} handed in": "‏{a}/{b} تحویل شده",
+ "made from the title": "از روی عنوان ساخته می‌شود"
 }
