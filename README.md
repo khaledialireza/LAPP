@@ -82,7 +82,10 @@ python3 _studio/studio.py publish im-hotel       # فقط وقتی همهٔ خط
 کجا چه چیزی هست:
 - همه‌چیز در D1 (`worker/src/lessons.js`، جدول‌ها: `worker/migrations/0005_studio.sql`)، صدا هم در D1 (تکه‌های ۱٫۵ مگابایتی).
 - درس منتشرشده برای اپ: `/content/lessons/s-<id>/lesson.json`، `<زبان>.json`، `audio.mp3`؛ فهرست: `/api/lib`.
-- هوش مصنوعی: Claude از خود Worker (`ANTHROPIC_API_KEY` در GitHub Secrets؛ deploy آن را به Worker می‌دهد). سقف: ۸۰ درخواست در روز برای هر نفر.
+- هوش مصنوعی: از `/admin` ← AI (کد: `worker/src/ai.js`). پیش‌فرض **LAPP AI** است: مدل متن‌باز روی حساب Cloudflare خودمان
+  (Workers AI، بدون کلید و بدون وابستگی به شرکت دیگر). می‌شود GPT، Gemini، Claude یا هر سرور سازگار با OpenAI
+  (مثلاً Ollama روی سرور خودمان) را با کلید اضافه کرد و برای هر کار (نوشتن، ترجمه، بازنویسی، سطح، برنامه) یکی را انتخاب کرد.
+  کلیدها فقط در D1 می‌مانند و به مرورگر فرستاده نمی‌شوند. سقف: ۸۰ درخواست در روز برای هر نفر.
 - صدا: `.github/workflows/studio-voice.yml` ← `_studio/job.py` با توکن یک‌بارمصرف (نیاز: `STUDIO_GITHUB_TOKEN` با دسترسی Actions).
   بعداً برای Azure کافی است صدای گوینده `azure:<voice>` باشد.
 

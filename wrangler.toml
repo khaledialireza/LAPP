@@ -17,6 +17,10 @@ database_name = "lapp"
 database_id = "00000000-0000-0000-0000-000000000000"   # the deploy workflow puts the real id here
 migrations_dir = "worker/migrations"
 
+# LAPP AI: open-source models on our own Cloudflare account (the studio's default AI, no key)
+[ai]
+binding = "AI"
+
 # live classes: one Durable Object per lesson (worker/src/room.js)
 [[durable_objects.bindings]]
 name = "ROOM"
@@ -48,4 +52,3 @@ PRICE_SAVE_LABEL = "45%"
 #   STRIPE_SECRET_KEY      payments
 #   STRIPE_WEBHOOK_SECRET  signature of https://lapp.khaledi.eu/api/stripe/webhook
 #   GITHUB_TOKEN           studio: fine-grained token for this repository (Actions read/write: starts the voice job)
-#   ANTHROPIC_API_KEY      studio: Claude writes, translates and rewrites lessons

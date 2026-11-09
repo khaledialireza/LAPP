@@ -16,6 +16,7 @@
 // Vars:    APP_URL, EMAIL_FROM, STRIPE_PRICE_MONTHLY, STRIPE_PRICE_YEARLY, REPO, BRANCH, DEV.
 import STUDIO from "./studio.html";
 import { lessonsApi, libApi, eventsApi, servePublished, plusLessons } from "./lessons.js";
+import { adminAi } from "./ai.js";
 import ADMIN from "./admin.html";
 import SCHOOL from "./school.html";
 import { orgApi, orgsList, adminOrgs } from "./school.js";
@@ -416,6 +417,7 @@ async function api(req, env, url, ctx) {
 
   /* ---- admin ---- */
   if (p === "/admin/orgs" || p.startsWith("/admin/orgs/")) return adminOrgs(req, env, H, p.slice(11));
+  if (p === "/admin/ai" || p.startsWith("/admin/ai/")) return adminAi(req, env, H, p.slice(9));
   if (p.startsWith("/admin/")) return adminApi(req, env, p.slice(6), url);
 
   /* ---- schools ---- */

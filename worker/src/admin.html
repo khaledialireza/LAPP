@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<script src="/ui/panel-i18n.js?v=2"></script>
+<script src="/ui/panel-i18n.js?v=3"></script>
 <script src="/ui/lapp-ui.js?v=3"></script>
 <title>LAPP Admin</title>
 <meta name="robots" content="noindex">
@@ -66,6 +66,7 @@ dialog form{display:flex;flex-direction:column;gap:12px}dialog.wide{width:min(62
   <a class="nv" href="#schools" data-v="schools">🏫 Schools <em id="nS"></em></a>
   <a class="nv" href="#access" data-v="access">📚 Content & access</a>
   <a class="nv" href="#lessons" data-v="lessons">🎬 Lessons <em id="nL"></em></a>
+  <a class="nv" href="#ai" data-v="ai">🤖 AI</a>
   <a class="nv" href="/">← Back to the app</a>
   <div class="sp"></div><div class="me" id="me"></div>
 </aside>
@@ -90,6 +91,17 @@ dialog form{display:flex;flex-direction:column;gap:12px}dialog.wide{width:min(62
   <div class="f"><label>What should it be about? (the AI writes from this)</label><textarea class="in" name="brief" rows="3" placeholder="Buying a ticket, finding the platform, a delay…"></textarea></div>
   <p class="mu">The studio opens with the new lesson: write it (with AI or by hand), make the audio, publish.</p>
   <div class="acts" style="justify-content:flex-end"><button class="b" value="cancel" formnovalidate>Cancel</button><button class="b pr" value="ok">Create and open the studio</button></div>
+</form></dialog>
+
+<dialog id="aiDlg" class="wide"><form method="dialog" id="aiForm">
+  <h3 id="aiTitle">Add an AI</h3>
+  <div class="f"><label>Provider</label><l-select name="kind" id="aiKind"></l-select></div>
+  <div class="f2"><div class="f"><label>Name (as you'll see it)</label><input class="in" name="name" maxlength="60" placeholder="GPT for translations"></div>
+  <div class="f"><label>Model</label><input class="in" name="model" id="aiModel" list="aiModels" required maxlength="120"><datalist id="aiModels"></datalist></div></div>
+  <div class="f" id="aiUrlF"><label>Address of the server (…/v1)</label><input class="in" name="base_url" id="aiUrl" maxlength="300"></div>
+  <div class="f" id="aiKeyF"><label id="aiKeyL">API key</label><input class="in" name="api_key" id="aiKey" type="password" autocomplete="off" maxlength="400"></div>
+  <p class="mu" id="aiHint"></p>
+  <div class="acts" style="justify-content:flex-end"><button class="b" value="cancel" formnovalidate>Cancel</button><button class="b pr" value="ok" id="aiOk">Add</button></div>
 </form></dialog>
 
 <dialog id="orgDlg"><form method="dialog" id="orgForm">
@@ -259,6 +271,96 @@ document.addEventListener("submit", async e => {
   e.preventDefault();
   try { const l = await api("POST", "/studio/lessons", Object.fromEntries(new FormData(e.target))); location.href = `/studio#script/${l.id}`; }
   catch (x) { toast(x.message); }
+});
+
+/* ---- AI: which models the studio may use ---- */
+const AI_ICON = { workers: "🏠", openai: "🟢", gemini: "🔷", anthropic: "🟠", compatible: "🔌" };
+let AIS = null, AI_EDIT = null;
+V.ai = async () => {
+  if (!isAdmin()) return `<div class="top"><h1>AI</h1></div><div class="card empty">Only an admin manages the AI.</div>`;
+  AIS = await api("GET", "/admin/ai");
+  const { providers: P, setting: st, kinds: K, tasks: T } = AIS;
+  const opt = (v, empty) => `${empty ? `<option value="0">${empty}</option>` : ""}${P.filter(x => x.enabled).map(x => `<option value="${x.id}" ${+v === x.id ? "selected" : ""}>${AI_ICON[x.kind]} ${esc(x.name)} · ${esc(x.model)}</option>`).join("")}`;
+  const keyText = x => K[x.kind].key ? (x.hasKey ? `🔑 ••••${esc(x.keyEnd)}` : `<span style="color:var(--rd)">🔑 no key</span>`)
+    : x.kind === "workers" ? (AIS.builtin ? "no key needed" : `<span style="color:var(--rd)">not available on this server</span>`) : x.hasKey ? `🔑 ••••${esc(x.keyEnd)}` : "no key";
+  return `<div class="top"><h1>AI</h1><button class="b pr" id="aiAdd">＋ Add an AI</button></div>
+  <p class="mu">The studio's AI writes, translates, rewrites and checks lessons. <b>LAPP AI</b> is our own: an open-source model on our Cloudflare account — no key and no outside AI company. Add GPT, Gemini, Claude or a model on your own server whenever you want, and pick which one does what.</p>
+  <div class="two"><div class="card"><h3>🤖 AIs</h3><div class="list">
+    ${P.map(x => `<div class="r" style="align-items:flex-start;${x.enabled ? "" : "opacity:.5"}"><span style="flex:1;min-width:0"><b>${AI_ICON[x.kind]} ${esc(x.name)}</b> <span class="mu">${esc(K[x.kind].name)}</span><br>
+      <span class="mu" style="word-break:break-all">${esc(x.model)}${x.base_url ? " · " + esc(x.base_url) : ""}</span><br>
+      <span class="mu">${keyText(x)} · ${x.uses} uses${x.used_at ? " · last " + ago(x.used_at) : ""}</span>
+      <span class="mu" id="aiRes${x.id}" style="display:block"></span></span>
+      <span class="acts" style="flex-wrap:wrap;justify-content:flex-end"><button class="b sm" data-ai-test="${x.id}">Test</button><button class="b sm" data-ai-edit="${x.id}">Edit</button>
+      <button class="sw ${x.enabled ? "on" : ""}" data-ai-on="${x.id}" title="On / off"></button>${x.id !== 1 ? `<button class="b sm d" data-ai-del="${x.id}">✕</button>` : ""}</span></div>`).join("")}
+  </div></div>
+  <div class="card"><h3>⚙️ Which AI does what</h3><div class="list">
+    <div class="r"><span><b>Default</b><br><span class="mu">used for everything that says “same as default”</span></span><select class="in" id="aiDef" style="width:auto;max-width:260px">${opt(st.default)}</select></div>
+    ${Object.entries(T).map(([k, label]) => `<div class="r"><span>${esc(label)}</span><select class="in" data-ai-task="${k}" style="width:auto;max-width:260px">${opt(st.tasks[k] || 0, "Same as default")}</select></div>`).join("")}
+  </div><p class="mu" style="margin-top:10px">If a chosen AI is switched off or removed, LAPP AI takes over.</p></div></div>`;
+};
+const AI_HINT = {
+  workers: "Runs on our Cloudflare account. Any model from the Workers AI catalogue (@cf/…).",
+  openai: "Key from platform.openai.com → API keys.",
+  gemini: "Key from aistudio.google.com → Get API key.",
+  anthropic: "Key from console.anthropic.com → API keys.",
+  compatible: "Any server with the OpenAI chat API: your own (Ollama, vLLM, LM Studio), DeepSeek, Mistral, Groq, OpenRouter… Ollama's address is http://<server>:11434/v1."
+};
+function aiDialog(x) {
+  AI_EDIT = x || null;
+  const K = AIS.kinds, f = $("#aiForm");
+  f.reset();
+  $("#aiTitle").textContent = x ? `Edit ${x.name}` : "Add an AI";
+  $("#aiOk").textContent = x ? "Save" : "Add";
+  const kind = $("#aiKind");
+  kind.options = Object.entries(K).filter(([k]) => x || k !== "workers").map(([k, v]) => ({ value: k, label: v.name, icon: AI_ICON[k] }));
+  kind.value = x ? x.kind : "openai";
+  const fill = () => {
+    const k = kind.value, v = K[k];
+    $("#aiModels").innerHTML = v.models.map(m => `<option value="${esc(m)}">`).join("");
+    $("#aiUrlF").hidden = k === "workers";
+    $("#aiUrl").placeholder = v.url || "https://…/v1";
+    $("#aiKeyF").hidden = k === "workers";
+    $("#aiKeyL").textContent = v.key ? "API key" : "API key (if the server needs one)";
+    $("#aiKey").placeholder = x && x.hasKey ? `•••• ${x.keyEnd} — leave empty to keep it` : k === "gemini" ? "AIza…" : k === "anthropic" ? "sk-ant-…" : "sk-…";
+    $("#aiHint").textContent = AI_HINT[k];
+    if (!x) $("#aiModel").value = v.models[0];
+  };
+  kind.onchange = fill;
+  fill();
+  if (x) { f.elements.name.value = x.name; $("#aiModel").value = x.model; $("#aiUrl").value = x.base_url; }
+  $("#aiDlg").showModal();
+}
+document.addEventListener("click", async e => {
+  try {
+    if (e.target.closest("#aiAdd")) return aiDialog();
+    const ed = e.target.closest("[data-ai-edit]"); if (ed) return aiDialog(AIS.providers.find(x => x.id === +ed.dataset.aiEdit));
+    const on = e.target.closest("[data-ai-on]"); if (on) { await api("PATCH", `/admin/ai/${on.dataset.aiOn}`, { enabled: !on.classList.contains("on") }); toast("Saved"); return show(); }
+    const del = e.target.closest("[data-ai-del]");
+    if (del) { if (del.dataset.sure !== "1") { del.dataset.sure = "1"; del.textContent = "Remove?"; return; } await api("DELETE", `/admin/ai/${del.dataset.aiDel}`); toast("Removed"); return show(); }
+    const ts = e.target.closest("[data-ai-test]");
+    if (ts) {
+      const out = $(`#aiRes${ts.dataset.aiTest}`); out.textContent = "Testing…"; ts.disabled = true;
+      const r = await api("POST", `/admin/ai/${ts.dataset.aiTest}/test`);
+      ts.disabled = false;
+      out.innerHTML = r.ok ? `<span style="color:var(--gr)">✓ works · ${(r.ms / 1000).toFixed(1)} s</span> · ${esc(Object.values(r.answer || {}).join(" · ").slice(0, 160))}` : `<span style="color:var(--rd)">✗ ${esc(r.error)}</span>`;
+    }
+  } catch (x) { toast(x.message); }
+});
+document.addEventListener("change", async e => {
+  if (!e.target.matches || !e.target.matches("#aiDef, [data-ai-task]")) return;
+  const tasks = Object.fromEntries([...document.querySelectorAll("[data-ai-task]")].map(s => [s.dataset.aiTask, +s.value]));
+  try { await api("PUT", "/admin/ai/setting", { default: +$("#aiDef").value, tasks }); toast("Saved"); } catch (x) { toast(x.message); }
+});
+document.addEventListener("submit", async e => {
+  if (e.target.id !== "aiForm") return;
+  if (e.submitter && e.submitter.value === "cancel") return;
+  e.preventDefault();
+  const v = Object.fromEntries(new FormData(e.target));
+  try {
+    if (AI_EDIT) await api("PATCH", `/admin/ai/${AI_EDIT.id}`, { name: v.name, model: v.model, ...(AI_EDIT.kind !== "workers" ? { base_url: v.base_url } : {}), api_key: v.api_key });
+    else await api("POST", "/admin/ai", { kind: $("#aiKind").value, name: v.name, model: v.model, base_url: v.base_url, api_key: v.api_key });
+    $("#aiDlg").close(); toast("Saved"); show();
+  } catch (x) { toast(x.message); }
 });
 
 /* ---- schools (organizations) ---- */

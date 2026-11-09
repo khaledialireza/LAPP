@@ -1,8 +1,0 @@
-{
-  "name": "lapp-worker",
-  "private": true,
-  "description": "Dependencies of the Worker (wrangler bundles them from worker/node_modules)",
-  "dependencies": {
-    "@anthropic-ai/sdk": "1.6.0"
-  }
-}

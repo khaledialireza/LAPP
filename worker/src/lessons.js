@@ -7,9 +7,10 @@
 //   /content/lessons/s-<id>/   lesson.json · <lang>.json · audio.mp3, the same shape as the static lessons
 //   /api/ev                    what learners do in a lesson (for the studio's insights)
 //
-// Writing, translating and rewriting call Claude from here (ANTHROPIC_API_KEY); the voice is made
+// Writing, translating and rewriting use the AI the admin picks in /admin → AI (worker/src/ai.js;
+// by default LAPP's own, an open-source model on our Cloudflare account). The voice is made
 // with Piper in .github/workflows/studio-voice.yml (_studio/job.py), so it costs nothing.
-import Anthropic from "@anthropic-ai/sdk";
+import * as AI from "./ai.js";
 
 export const TR = ["en", "fa", "ru", "uk"];                       // translation languages
 const LANG_NAME = { en: "English", fa: "Persian", ru: "Russian", uk: "Ukrainian" };
@@ -24,7 +25,6 @@ export const TOPICS = ["daily", "travel", "food", "health", "work", "home", "cit
 const NARRATOR = /^(erzähler|erzählerin|verteller|vertelster|narrator|narratorka|narrador)$/i;
 const MAX_WORDS = { A1: 10, A2: 14, B1: 20, B2: 26, C1: 32, C2: 40 };
 const STAFF = ["designer", "manager", "admin"];
-const MODEL = "claude-opus-5-5";
 const BLOB_PART = 1_500_000;                                   // bytes per D1 row
 export const APP_ID = id => 100000 + id;                        // the id the app uses (static lessons stay below)
 
@@ -70,25 +70,11 @@ function summary(l) {
   };
 }
 
-/* ================= Claude ================= */
-function claude(env, H) {
-  if (!env.ANTHROPIC_API_KEY) throw H.fail("AI is not set up yet (ANTHROPIC_API_KEY)", 503, { code: "noai" });
-  return new Anthropic({ apiKey: env.ANTHROPIC_API_KEY });
-}
-// one request, the answer as JSON that matches the schema (structured outputs)
-async function ask(env, H, { prompt, schema, effort = "low", max = 16000 }) {
-  const client = claude(env, H);
-  const msg = await client.beta.messages.stream({
-    model: MODEL, max_tokens: max,
-    thinking: { type: "adaptive" }, output_config: { effort, format: { type: "json_schema", schema } },
-    // a declined request is re-run on Anthropic's recommended fallback model
-    betas: ["server-side-fallback-2026-07-01"], fallbacks: "default",
-    messages: [{ role: "user", content: prompt }]
-  }).finalMessage();
-  if (msg.stop_reason === "refusal") throw H.fail("the AI declined this request", 422);
-  if (msg.stop_reason === "max_tokens") throw H.fail("the answer was too long — try a shorter brief", 422);
-  const text = msg.content.filter(b => b.type === "text").map(b => b.text).join("");
-  try { return JSON.parse(text); } catch { throw H.fail("the AI answer was not readable — try again", 502); }
+/* ================= AI ================= */
+// a task's answer from the chosen AI, as JSON in the schema's shape
+async function ask(env, H, task, o) {
+  try { return (await AI.ask(env, task, o)).value; }
+  catch (e) { throw H.fail(e.message, e.status || 502, e.extra); }
 }
 const trObj = (extra = {}) => ({ type: "object", additionalProperties: false, required: [...Object.keys(extra), ...TR], properties: { ...extra, ...Object.fromEntries(TR.map(l => [l, { type: "string" }])) } });
 const SCRIPT_SCHEMA = {
@@ -289,7 +275,7 @@ export async function lessonsApi(req, env, H, p, url, ctx) {
   if (p === "/scope" && M === "GET") {
     const schools = (await env.DB.prepare("SELECT o.slug, o.name FROM org_members m JOIN orgs o ON o.id = m.org_id WHERE m.user_id = ? AND m.active = 1 AND m.role IN ('admin','teacher') AND o.disabled = 0").bind(sc.u.id).all()).results;
     return H.json({ scope: { kind: sc.kind, name: sc.name, slug: sc.slug, color: sc.color || "" }, me: { id: sc.u.id, name: sc.u.name, username: sc.u.username, role: sc.u.role },
-      staff: STAFF.includes(sc.u.role), schools, ai: !!env.ANTHROPIC_API_KEY, voice: !!env.GITHUB_TOKEN,
+      staff: STAFF.includes(sc.u.role), schools, ai: await AI.available(env), voice: !!env.GITHUB_TOKEN,
       courses: Object.fromEntries(Object.entries(COURSES).map(([k, v]) => [k, { name: v.name, voices: [...v.female.map(x => ({ id: x, g: "f" })), ...v.male.map(x => ({ id: x, g: "m" }))] }])),
       topics: TOPICS, levels: LEVELS, types: TYPES, maxWords: MAX_WORDS });
   }
@@ -375,33 +361,22 @@ export async function lessonsApi(req, env, H, p, url, ctx) {
   if ((m = p.match(/^\/lessons\/(\d+)\/write$/)) && M === "POST") {
     const l = await lessonIn(env, H, sc, int(m[1]));
     await limitAi(env, H, sc);
-    const client = claude(env, H);
+    await AI.providerFor(env, "write").catch(e => { throw H.fail(e.message, e.status || 503, e.extra); });
     const ids = l.data.characters || [];
     const chars = ids.length ? (await env.DB.prepare(`SELECT * FROM characters WHERE org_id = ? AND id IN (${ids.map(() => "?").join(",")})`).bind(sc.org, ...ids).all()).results : [];
     const { readable, writable } = new TransformStream();
     const w = writable.getWriter(), send = o => w.write(enc.encode(JSON.stringify(o) + "\n"));
     const work = (async () => {
       try {
-        const stream = client.beta.messages.stream({
-          model: MODEL, max_tokens: 64000,
-          thinking: { type: "adaptive" }, output_config: { effort: "medium", format: { type: "json_schema", schema: SCRIPT_SCHEMA } },
-          betas: ["server-side-fallback-2026-07-01"], fallbacks: "default",
-          messages: [{ role: "user", content: scriptPrompt(l, chars) }]
+        let last = 0;
+        const { value: src, provider } = await AI.ask(env, "write", {
+          prompt: scriptPrompt(l, chars), schema: SCRIPT_SCHEMA, max: 8000,
+          onText: async text => { if (Date.now() - last > 250) { last = Date.now(); await send({ t: "text", text }); } }
         });
-        let buf = "", last = 0;
-        for await (const ev of stream) {
-          if (ev.type === "content_block_delta" && ev.delta.type === "text_delta") {
-            buf += ev.delta.text;
-            if (Date.now() - last > 250) { await send({ t: "text", text: buf }); last = Date.now(); }
-          }
-        }
-        const msg = await stream.finalMessage();
-        if (msg.stop_reason === "refusal") throw new Error("the AI declined this request");
-        if (msg.stop_reason === "max_tokens") throw new Error("the answer was cut off");
-        const src = JSON.parse(msg.content.filter(b => b.type === "text").map(b => b.text).join(""));
-        const d = merge(l, src, chars);
+        const d = merge(l, normalize(src, l), chars);
+        if (!d.scenes.length) throw new Error("the AI wrote no lines — try again");
         const r = await env.DB.prepare("UPDATE lessons SET data = ?, rev = rev + 1, status = CASE WHEN status = 'draft' THEN 'review' ELSE status END, updated_at = ? WHERE id = ? RETURNING rev").bind(JSON.stringify(d), H.now(), l.id).first();
-        await send({ t: "done", data: d, rev: r.rev });
+        await send({ t: "done", data: d, rev: r.rev, provider });
       } catch (e) {
         await send({ t: "error", error: e.message || String(e) }).catch(() => {});
       } finally { await w.close().catch(() => {}); }
@@ -422,8 +397,8 @@ export async function lessonsApi(req, env, H, p, url, ctx) {
     (d.phrases || []).forEach((ph, pi) => { const n = TR.filter(x => !ph[x]); if (n.length) todo.push({ id: `p${pi}`, text: ph.de, need: n }); });
     const titleNeed = TR.filter(x => !(d.tr[x] || {}).title);
     if (!todo.length && !titleNeed.length) return H.json({ data: d, rev: l.rev, added: 0 });
-    const got = await ask(env, H, {
-      effort: "low", max: 32000,
+    const got = await ask(env, H, "translate", {
+      max: 8000,
       schema: { type: "object", additionalProperties: false, required: ["items", "titles"], properties: {
         items: { type: "array", items: { type: "object", additionalProperties: false, required: ["id", ...TR], properties: { id: { type: "string" }, ...Object.fromEntries(TR.map(x => [x, { type: "string" }])) } } },
         titles: { type: "object", additionalProperties: false, required: TR, properties: Object.fromEntries(TR.map(x => [x, { type: "object", additionalProperties: false, required: ["title", "summary"], properties: { title: { type: "string" }, summary: { type: "string" } } }])) }
@@ -459,8 +434,8 @@ export async function lessonsApi(req, env, H, p, url, ctx) {
       casual: "more casual / informal",
       custom: str(b.instruction, 300) || "better"
     }[b.mode] || "better";
-    const got = await ask(env, H, {
-      effort: "low",
+    const got = await ask(env, H, "rewrite", {
+      max: 2000,
       schema: { type: "object", additionalProperties: false, required: ["options"], properties: { options: { type: "array", items: { type: "object", additionalProperties: false, required: ["de", "why", ...TR], properties: { de: { type: "string" }, why: { type: "string" }, ...Object.fromEntries(TR.map(x => [x, { type: "string" }])) } } } } },
       prompt: `A ${COURSES[l.course].name} lesson for ${l.level} learners. Context (lines around it):\n${rows.slice(Math.max(0, i - 3), i + 4).map((x, k) => `${Math.max(0, i - 3) + k === i ? ">> " : "   "}${x.who}: ${x.de}`).join("\n")}\n\nGive 3 versions of the marked line (${ln.who}: "${ln.de}"), ${how}. At most ${MAX_WORDS[l.level]} words. For each: the ${COURSES[l.course].name} text in "de", its translations (en, fa, ru, uk), and in "why" a very short English reason.`
     });
@@ -473,8 +448,8 @@ export async function lessonsApi(req, env, H, p, url, ctx) {
     await limitAi(env, H, sc);
     const rows = l.data.scenes.flatMap(s => s.lines);
     if (!rows.length) throw H.fail("write the text first");
-    const got = await ask(env, H, {
-      effort: "low", max: 32000,
+    const got = await ask(env, H, "check", {
+      max: 6000,
       schema: { type: "object", additionalProperties: false, required: ["lines", "grammar", "note"], properties: {
         lines: { type: "array", items: { type: "object", additionalProperties: false, required: ["i", "level", "hard"], properties: { i: { type: "integer" }, level: { type: "string", enum: LEVELS }, hard: { type: "array", items: { type: "string" } } } } },
         grammar: { type: "array", items: { type: "string" } }, note: { type: "string" }
@@ -494,8 +469,8 @@ export async function lessonsApi(req, env, H, p, url, ctx) {
     const b = await H.body(req);
     const want = str(b.prompt, 1000); if (!want) throw H.fail("say what you want");
     const existing = (await env.DB.prepare("SELECT title, level, topic, course FROM lessons WHERE org_id = ? ORDER BY id DESC LIMIT 60").bind(sc.org).all()).results;
-    const got = await ask(env, H, {
-      effort: "medium",
+    const got = await ask(env, H, "plan", {
+      max: 4000,
       schema: { type: "object", additionalProperties: false, required: ["series", "summary", "lessons"], properties: {
         series: { type: "string" }, summary: { type: "string" },
         lessons: { type: "array", items: { type: "object", additionalProperties: false, required: ["title", "brief", "type", "level", "topic", "course"], properties: {
@@ -585,6 +560,23 @@ async function limitAi(env, H, sc) {
   const day = Math.floor(H.now() / H.DAY);
   const r = await env.DB.prepare("INSERT INTO hits (key, n, reset) VALUES (?1, 1, ?2) ON CONFLICT(key) DO UPDATE SET n = n + 1 RETURNING n").bind(`ai:${sc.u.id}:${day}`, (day + 2) * H.DAY).first();
   if (r.n > 80) throw H.fail("the daily AI limit is reached — try again tomorrow", 429);
+}
+
+// what a model wrote, made complete: strings where objects are missing, every language present
+function normalize(src, l) {
+  const tro = (v, de) => { const o = typeof v === "object" && v ? v : { de: String(v || de || "") }; for (const x of ["de", ...TR]) o[x] = String(o[x] || ""); return o; };
+  const scenes = (Array.isArray(src.scenes) ? src.scenes : []).map((s, i) => ({
+    title: tro(s.title, `Szene ${i + 1}`),
+    lines: (Array.isArray(s.lines) ? s.lines : []).filter(x => x && (x.de || x.text)).map(x => ({ ...tro(x), who: String(x.who || x.speaker || "Anna"), de: String(x.de || x.text) }))
+  })).filter(s => s.lines.length);
+  const speakers = [...new Set(scenes.flatMap(s => s.lines.map(x => x.who)))];
+  const cast = (Array.isArray(src.cast) ? src.cast : []).map(c => typeof c === "string" ? { name: c, gender: "f" } : { name: String(c.name || ""), gender: c.gender === "m" ? "m" : "f" }).filter(c => c.name);
+  for (const w of speakers) if (!cast.some(c => c.name === w)) cast.push({ name: w, gender: "f" });
+  return {
+    title: String(src.title || l.title), scenes, cast,
+    tr: Object.fromEntries(TR.map(x => [x, { title: String(((src.tr || {})[x] || {}).title || ""), summary: String(((src.tr || {})[x] || {}).summary || "") }])),
+    phrases: (Array.isArray(src.phrases) ? src.phrases : []).map(p => typeof p === "string" ? tro({ de: p }) : tro(p)).filter(p => p.de)
+  };
 }
 
 // a written script → the lesson's data; every speaker gets a voice (a character's own, or a free one)

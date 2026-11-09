@@ -3,7 +3,7 @@
 <meta name="robots" content="noindex">
 <title>LAPP Studio</title>
 <script src="/ui/lapp-ui.js?v=3"></script>
-<script src="/ui/panel-i18n.js?v=2"></script>
+<script src="/ui/panel-i18n.js?v=3"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 /* LAPP Studio: ⌘ command centre · ✎ live script · 〰 voice desk · 🎭 universe · 📈 insights */
@@ -329,7 +329,7 @@ V.home = async () => {
     <div class="pn ai ask">
       <div class="q"><span class="spark" style="font-size:20px">✦</span><input id="ask" placeholder="Describe what you want — e.g. a 6-part A1 trip to Vienna, one real situation per part, practising modal verbs" autocomplete="off"><button class="btn pr" data-act="plan" ${S.scope.ai ? "" : "disabled"}>✦ Plan it</button></div>
       <div class="opts"><l-select id="askCourse"></l-select><l-select id="askLevel" placeholder="Any level"></l-select>
-        ${S.scope.ai ? "" : `<span class="chip warn">AI is not set up yet — you can still write lessons by hand</span>`}</div>
+        ${S.scope.ai ? "" : `<span class="chip warn">No AI is switched on — an admin picks one in /admin → AI. You can still write by hand.</span>`}</div>
       <div class="sug">
         ${gaps.slice(0, 2).map(([tp, lv]) => `<button class="chip" data-ask="${esc(`${lv} lessons about ${TOPIC[tp]}`)}">↳ Fill the ${lv} gap in ${esc(TOPIC[tp])}</button>`).join("")}
         <button class="chip" data-ask="A short bedtime story for B1 with a surprising ending">↳ A bedtime story for B1</button>
@@ -449,7 +449,7 @@ async function writeStream(id, onLines) {
       if (!line) continue;
       const m = JSON.parse(line);
       // the lines that are complete so far, read out of the JSON as it grows
-      if (m.t === "text") { const des = [...m.text.matchAll(/"who"\s*:\s*"((?:[^"\\]|\\.)*)"\s*,\s*"de"\s*:\s*"((?:[^"\\]|\\.)*)"/g)].map(x => { try { return [JSON.parse(`"${x[1]}"`), JSON.parse(`"${x[2]}"`)]; } catch { return [x[1], x[2]]; } }); onLines && onLines(des.length, des); }
+      if (m.t === "text") { const des = [...m.text.matchAll(/\{[^{}]*"de"\s*:[^{}]*\}/g)].map(x => { try { const o = JSON.parse(x[0]); return o.who && o.de ? [o.who, o.de] : null; } catch { return null; } }).filter(Boolean); onLines && onLines(des.length, des); }
       else if (m.t === "done") out = m;
       else if (m.t === "error") throw new Error(m.error);
     }
