@@ -235,6 +235,11 @@
     else { try { await pull(); } catch {} }
     const next = new URLSearchParams(location.search).get("next");
     if (okNext(next)) { location.href = next; return; }
+    // staff go to their own workspace, not the learning app
+    const role = m.user.role, work = (m.orgs || []).find(o => o.role !== "student");
+    if (role === "admin" || role === "manager") { location.href = "/admin"; return; }
+    if (role === "designer") { location.href = "/studio"; return; }
+    if (work) { location.href = `/s/${work.slug}`; return; }
     if (m.user.managed && m.orgs && m.orgs.length) { location.href = `/s/${m.orgs[0].slug}`; return; }
     if (!m.user.verified) { go("verify"); return; }
     finish(fresh);
