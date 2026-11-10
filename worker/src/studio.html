@@ -434,7 +434,7 @@ ACT.planCreate = async (btn, write) => {
 ACT.planWrite = btn => ACT.planCreate(btn, true);
 
 /* ---------- streaming the AI writer ---------- */
-async function writeStream(id, onLines) {
+async function writeStream(id, onLines, onStatus) {
   const q = ORG ? "?org=" + encodeURIComponent(ORG) : "";
   const r = await fetch(`/api/studio/lessons/${id}/write${q}`, { method: "POST", headers: { "X-LAPP": "1" } });
   if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error(j.error || r.status); }
@@ -450,6 +450,8 @@ async function writeStream(id, onLines) {
       const m = JSON.parse(line);
       // the lines that are complete so far, read out of the JSON as it grows
       if (m.t === "text") { const des = [...m.text.matchAll(/\{[^{}]*"de"\s*:[^{}]*\}/g)].map(x => { try { const o = JSON.parse(x[0]); return o.who && o.de ? [o.who, o.de] : null; } catch { return null; } }).filter(Boolean); onLines && onLines(des.length, des); }
+      else if (m.t === "lines") { const all = m.data.scenes.flatMap(sc => sc.lines).map(x => [x.who, x.de]); onLines && onLines(all.length, all, true); }
+      else if (m.t === "status") onStatus && onStatus(m.text);
       else if (m.t === "done") out = m;
       else if (m.t === "error") throw new Error(m.error);
     }
@@ -653,10 +655,12 @@ ACT.write = async () => {
   $("#doc").innerHTML = `<div class="job" style="margin-bottom:12px"><span class="spin"></span> <b>✦ Writing…</b> <span class="mu sm" id="wn"></span></div><div id="wl"></div>`;
   let shown = 0;
   try {
-    const out = await writeStream(S.L.id, (n, list) => {
+    const out = await writeStream(S.L.id, (n, list, final) => {
       $("#wn").textContent = `${n} lines`;
+      // the finished text replaces the preview read out of the half-written answer
+      if (final) { $("#wl").innerHTML = ""; shown = 0; }
       for (; shown < list.length; shown++) $("#wl").insertAdjacentHTML("beforeend", `<div class="wl de"><b style="color:${COLORS[shown % 3]}">${esc(list[shown][0])}:</b> ${esc(list[shown][1])}</div>`);
-    });
+    }, text => { $("#wn").textContent = text; });
     S.L.data = out.data; S.L.rev = out.rev; if (S.L.status === "draft") S.L.status = "review"; S.L.audio = S.L.audioRev ? "old" : "none";
     toast("Written ✓ — read it, change what you like, approve the lines");
   } catch (e) { toast(e.message); }
@@ -738,7 +742,7 @@ V.voice = async () => {
     </div>
     <div class="pn" id="insp"></div>
     <div class="pn transport">
-      <button class="tp" id="play" ${L.audio === "none" ? "disabled" : ""} aria-label="Play">▶</button><span class="de" style="font:700 15px Inter" id="clock">0:00 <span class="mu">/ ${fmtT(total)}</span></span>
+      <button class="tp" id="play" aria-label="Play" title="${L.audio === "none" ? "Preview with the browser's voice" : "Play"}">▶</button><span class="de" style="font:700 15px Inter" id="clock">0:00 <span class="mu">/ ${fmtT(total)}</span></span>
       <button class="chip" id="loop">🔁 Line</button><button class="chip" id="slow">🐢 Slow</button><span style="flex:1"></span>
       <span class="chip">⏸ between lines <input type="range" min="0.2" max="2" step="0.1" value="${L.data.pause ?? 0.6}" id="gp" style="width:80px;accent-color:var(--vi)"> <b id="gpv">${L.data.pause ?? 0.6}s</b></span>
       <span class="chip">⏸ between scenes <input type="range" min="0.5" max="4" step="0.1" value="${L.data.scenePause ?? 1.4}" id="spz" style="width:80px;accent-color:var(--vi)"> <b id="spv">${L.data.scenePause ?? 1.4}s</b></span>
@@ -748,7 +752,12 @@ V.voice = async () => {
   inspector();
   const pl = $("#player");
   if (L.audio !== "none") pl.src = `/api/studio/lessons/${L.id}/audio?r=${L.audioRev}${ORG ? "&org=" + encodeURIComponent(ORG) : ""}`;
-  $("#play").onclick = () => pl.paused ? pl.play() : pl.pause();
+  $("#play").onclick = () => {
+    if (L.audio === "none") return preview(pos);
+    if (!pl.paused) return pl.pause();
+    pl.play().catch(e => toast("The audio could not be played: " + (e.message || e.name)));
+  };
+  pl.onerror = () => { if (L.audio !== "none") toast("The audio could not be loaded — make it again"); };
   $("#loop").onclick = e => { S.loop = !S.loop; e.currentTarget.classList.toggle("on", S.loop); };
   $("#slow").onclick = e => { pl.playbackRate = pl.playbackRate === 1 ? 0.8 : 1; e.currentTarget.classList.toggle("on", pl.playbackRate !== 1); };
   $("#gp").oninput = e => { L.data.pause = Number(e.target.value); $("#gpv").textContent = L.data.pause + "s"; changed(); };
@@ -765,6 +774,28 @@ V.voice = async () => {
     }
   }, 5000);
 };
+// no real audio yet: read the lines with the browser's voice and move the playhead along
+let pv = null;
+function preview(pos) {
+  if (pv) { pv.stop = true; speechSynthesis.cancel(); pv = null; $("#play").textContent = "▶"; return; }
+  const all = rows(), me = pv = { stop: false };
+  let k = Math.max(0, vSel);
+  $("#play").textContent = "❚❚";
+  const next = () => {
+    if (me.stop || k >= all.length || !/^#voice/.test(location.hash)) { if (pv === me) { pv = null; const b = $("#play"); if (b) b.textContent = "▶"; } return; }
+    const i = k++, r = all[i], c = S.L.data.cast[r.who] || {};
+    $$(".clip").forEach(x => x.classList.toggle("sel", Number(x.dataset.clip) === i));
+    const ph = $("#ph"); if (ph) ph.style.left = `calc(170px + (100% - 170px) * ${pos[i][0] / S.vtotal})`;
+    $("#clock").innerHTML = `${fmtT(pos[i][0])} <span class="mu">/ ${fmtT(S.vtotal)}</span> <span class="chip">browser voice</span>`;
+    const u = new SpeechSynthesisUtterance(r.de); u.lang = SPEECH[S.L.course]; u.rate = r.speed || c.speed || 0.95;
+    // a lower pitch for male speakers, so two people sound different even in the preview
+    u.pitch = c.gender === "m" ? 0.8 : 1.15;
+    u.onend = () => setTimeout(next, (r.pause ?? S.L.data.pause ?? 0.6) * 1000);
+    u.onerror = () => { pv = null; toast("This browser cannot speak"); };
+    speechSynthesis.speak(u);
+  };
+  next();
+}
 function wave(n, seed) { return Array.from({ length: Math.min(n, 60) }, (_, i) => `<i style="height:${18 + Math.abs(Math.sin(i * .9 + seed) * 60 + Math.sin(i * .31 + seed * 2) * 22)}%"></i>`).join(""); }
 function inspector() {
   const L = S.L, all = rows(), el = $("#insp"); if (!el) return;
@@ -793,7 +824,7 @@ function inspector() {
   $("#lsay").onclick = () => say(r.de, L.course, r.speed || c.speed || 0.95);
   $("#ledit").onclick = () => { S.focusLine = vSel; };
 }
-function stopPlayer() { const p = $("#player"); try { p.pause(); } catch {} try { speechSynthesis.cancel(); } catch {} }
+function stopPlayer() { if (typeof pv !== "undefined" && pv) { pv.stop = true; pv = null; } const p = $("#player"); try { p.pause(); } catch {} try { speechSynthesis.cancel(); } catch {} }
 $("#player").addEventListener("timeupdate", () => {
   const p = $("#player"), ph = $("#ph"); if (!ph || !S.vpos) return;
   ph.style.left = `calc(170px + (100% - 170px) * ${Math.min(1, p.currentTime / S.vtotal)})`;

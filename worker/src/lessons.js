@@ -15,9 +15,10 @@ import * as AI from "./ai.js";
 export const TR = ["en", "fa", "ru", "uk"];                       // translation languages
 const LANG_NAME = { en: "English", fa: "Persian", ru: "Russian", uk: "Ukrainian" };
 const COURSES = {
-  de: { name: "German", male: ["piper:thorsten-medium", "piper:karlsson-low"], female: ["piper:eva_k-x_low", "piper:kerstin-low"] },
-  nl: { name: "Dutch", male: ["piper:nl_NL-ronnie-medium", "piper:nl_NL-pim-medium"], female: ["piper:nl_BE-nathalie-medium"] },
-  pl: { name: "Polish", male: ["piper:pl_PL-darkman-medium"], female: ["piper:pl_PL-gosia-medium"] }
+  // the best Piper voices per language, best first (Piper has German women only in "low" quality)
+  de: { name: "German", male: ["piper:thorsten-high", "piper:thorsten_emotional-medium", "piper:karlsson-low", "piper:pavoque-low"], female: ["piper:kerstin-low", "piper:ramona-low", "piper:eva_k-x_low"] },
+  nl: { name: "Dutch", male: ["piper:nl_NL-ronnie-medium", "piper:nl_BE-rdh-medium", "piper:nl_NL-pim-medium"], female: ["piper:nl_BE-nathalie-medium"] },
+  pl: { name: "Polish", male: ["piper:pl_PL-darkman-medium", "piper:pl_PL-mc_speech-medium"], female: ["piper:pl_PL-gosia-medium"] }
 };
 const TYPES = ["talk", "lesson", "story"];
 const LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2"];
@@ -77,19 +78,57 @@ async function ask(env, H, task, o) {
   catch (e) { throw H.fail(e.message, e.status || 502, e.extra); }
 }
 const trObj = (extra = {}) => ({ type: "object", additionalProperties: false, required: [...Object.keys(extra), ...TR], properties: { ...extra, ...Object.fromEntries(TR.map(l => [l, { type: "string" }])) } });
+// the script in the course language only; translations are a second step (translateAll), in small
+// batches, so a long dialogue never runs out of room halfway and gets swapped for a retry
 const SCRIPT_SCHEMA = {
-  type: "object", additionalProperties: false, required: ["title", "tr", "cast", "scenes", "phrases"],
+  type: "object", additionalProperties: false, required: ["title", "cast", "scenes", "phrases"],
   properties: {
     title: { type: "string" },
-    tr: { type: "object", additionalProperties: false, required: TR, properties: Object.fromEntries(TR.map(l => [l, { type: "object", additionalProperties: false, required: ["title", "summary"], properties: { title: { type: "string" }, summary: { type: "string" } } }])) },
     cast: { type: "array", items: { type: "object", additionalProperties: false, required: ["name", "gender"], properties: { name: { type: "string" }, gender: { type: "string", enum: ["f", "m"] } } } },
     scenes: { type: "array", items: { type: "object", additionalProperties: false, required: ["title", "lines"], properties: {
-      title: trObj({ de: { type: "string" } }),
-      lines: { type: "array", items: trObj({ who: { type: "string" }, de: { type: "string" } }) }
+      title: { type: "string" },
+      lines: { type: "array", items: { type: "object", additionalProperties: false, required: ["who", "de"], properties: { who: { type: "string" }, de: { type: "string" } } } }
     } } },
-    phrases: { type: "array", items: trObj({ de: { type: "string" } }) }
+    phrases: { type: "array", items: { type: "string" } }
   }
 };
+
+// everything still without a translation, a batch at a time; onStep(done, total) reports progress
+async function translateAll(env, l, d, onStep) {
+  const todo = [];
+  d.scenes.forEach((s, si) => {
+    if (TR.some(x => !s.title[x])) todo.push({ id: `s${si}`, text: s.title.de });
+    s.lines.forEach((ln, li) => { if (TR.some(x => !ln[x])) todo.push({ id: `l${si}.${li}`, text: ln.de }); });
+  });
+  (d.phrases || []).forEach((ph, pi) => { if (TR.some(x => !ph[x])) todo.push({ id: `p${pi}`, text: ph.de }); });
+  const titleNeed = TR.filter(x => !(d.tr[x] || {}).title);
+  const batches = [];
+  for (let i = 0; i < todo.length; i += 14) batches.push(todo.slice(i, i + 14));
+  if (!batches.length && titleNeed.length) batches.push([]);
+  const script = d.scenes.flatMap(s => s.lines).map(x => `${x.who}: ${x.de}`).join("\n");
+  const byId = {};
+  let titles = null;
+  for (const [bi, batch] of batches.entries()) {
+    if (onStep) await onStep(bi, batches.length);
+    const wantTitles = bi === 0 && titleNeed.length;
+    const got = (await AI.ask(env, "translate", {
+      max: 6000,
+      schema: { type: "object", additionalProperties: false, required: ["items", ...(wantTitles ? ["titles"] : [])], properties: {
+        items: { type: "array", items: { type: "object", additionalProperties: false, required: ["id", ...TR], properties: { id: { type: "string" }, ...Object.fromEntries(TR.map(x => [x, { type: "string" }])) } } },
+        ...(wantTitles ? { titles: { type: "object", additionalProperties: false, required: TR, properties: Object.fromEntries(TR.map(x => [x, { type: "object", additionalProperties: false, required: ["title", "summary"], properties: { title: { type: "string" }, summary: { type: "string" } } }])) } } : {})
+      } },
+      prompt: `A ${COURSES[l.course].name} lesson for ${l.level} learners, titled "${l.title}":\n${script}\n\nTranslate each item below naturally (not word for word) into English (en), Persian (fa), Russian (ru) and Ukrainian (uk). Keep every id.${wantTitles ? " Also give a short title and a one-sentence summary of the whole lesson in each language (titles)." : ""}\n${JSON.stringify(batch)}`
+    })).value;
+    for (const x of got.items || []) byId[x.id] = x;
+    if (got.titles) titles = got.titles;
+  }
+  let added = 0;
+  const put = (o, g) => { if (g) TR.forEach(x => { if (!o[x] && g[x]) { o[x] = String(g[x]); added++; } }); };
+  d.scenes.forEach((s, si) => { put(s.title, byId[`s${si}`]); s.lines.forEach((ln, li) => put(ln, byId[`l${si}.${li}`])); });
+  (d.phrases || []).forEach((ph, pi) => put(ph, byId[`p${pi}`]));
+  for (const x of titleNeed) if (titles && titles[x] && titles[x].title) { d.tr[x] = { title: String(titles[x].title), summary: String(titles[x].summary || "") }; added++; }
+  return added;
+}
 
 function scriptPrompt(l, chars) {
   const kind = { talk: "a short everyday conversation", lesson: "a lesson dialogue", story: "a story told by a narrator with some dialogue" }[l.type];
@@ -101,10 +140,9 @@ Topic / brief: ${l.brief || l.title}${cast}
 Rules:
 - natural spoken ${lang}, one sentence per line, at most ${MAX_WORDS[l.level]} words per line, vocabulary and grammar a ${l.level} learner can follow
 - 2–4 scenes, 8–14 lines each; every line has a speaker ("who"); a story uses "Erzähler" (or the narrator word of ${lang}) for narration
-- translate the title, scene titles, lines and phrases naturally (not word for word) into English (en), Persian (fa), Russian (ru) and Ukrainian (uk)
-- "de" always holds the ${lang} text
-- "cast": every speaker once, with gender f or m
-- 6–10 key phrases from the text a learner should keep`;
+- "de" holds the ${lang} text of each line; scene titles and phrases are ${lang} too (no translations)
+- "cast": every speaker once, with gender "f" (female) or "m" (male), matching the name
+- "phrases": 6–10 key phrases from the text a learner should keep`;
 }
 
 /* ================= the voice job (GitHub Actions) ================= */
@@ -375,6 +413,9 @@ export async function lessonsApi(req, env, H, p, url, ctx) {
         });
         const d = merge(l, normalize(src, l), chars);
         if (!d.scenes.length) throw new Error("the AI wrote no lines — try again");
+        await send({ t: "lines", data: d });
+        try { await translateAll(env, l, d, (i, n) => send({ t: "status", text: `translating ${i + 1}/${n}` })); }
+        catch (e) { await send({ t: "status", text: "translations: " + e.message }); }
         const r = await env.DB.prepare("UPDATE lessons SET data = ?, rev = rev + 1, status = CASE WHEN status = 'draft' THEN 'review' ELSE status END, updated_at = ? WHERE id = ? RETURNING rev").bind(JSON.stringify(d), H.now(), l.id).first();
         await send({ t: "done", data: d, rev: r.rev, provider });
       } catch (e) {
@@ -389,30 +430,9 @@ export async function lessonsApi(req, env, H, p, url, ctx) {
   if ((m = p.match(/^\/lessons\/(\d+)\/translate$/)) && M === "POST") {
     const l = await lessonIn(env, H, sc, int(m[1]));
     await limitAi(env, H, sc);
-    const d = l.data, todo = [];
-    d.scenes.forEach((s, si) => {
-      const need = TR.filter(x => !s.title[x]); if (need.length) todo.push({ id: `s${si}`, text: s.title.de, need });
-      s.lines.forEach((ln, li) => { const n = TR.filter(x => !ln[x]); if (n.length) todo.push({ id: `l${si}.${li}`, text: ln.de, need: n }); });
-    });
-    (d.phrases || []).forEach((ph, pi) => { const n = TR.filter(x => !ph[x]); if (n.length) todo.push({ id: `p${pi}`, text: ph.de, need: n }); });
-    const titleNeed = TR.filter(x => !(d.tr[x] || {}).title);
-    if (!todo.length && !titleNeed.length) return H.json({ data: d, rev: l.rev, added: 0 });
-    const got = await ask(env, H, "translate", {
-      max: 8000,
-      schema: { type: "object", additionalProperties: false, required: ["items", "titles"], properties: {
-        items: { type: "array", items: { type: "object", additionalProperties: false, required: ["id", ...TR], properties: { id: { type: "string" }, ...Object.fromEntries(TR.map(x => [x, { type: "string" }])) } } },
-        titles: { type: "object", additionalProperties: false, required: TR, properties: Object.fromEntries(TR.map(x => [x, { type: "object", additionalProperties: false, required: ["title", "summary"], properties: { title: { type: "string" }, summary: { type: "string" } } }])) }
-      } },
-      prompt: `A ${COURSES[l.course].name} lesson for ${l.level} learners, titled "${l.title}":\n${d.scenes.flatMap(s => s.lines).map(x => x.de).join("\n")}\n\nTranslate each item below naturally (not word for word) into English (en), Persian (fa), Russian (ru) and Ukrainian (uk). Also give a short title and a one-sentence summary of the lesson in each language.\n${JSON.stringify(todo.map(({ id, text }) => ({ id, text })))}`
-    });
-    let added = 0;
-    const byId = Object.fromEntries((got.items || []).map(x => [x.id, x]));
-    d.scenes.forEach((s, si) => {
-      const g = byId[`s${si}`]; if (g) TR.forEach(x => { if (!s.title[x] && g[x]) { s.title[x] = g[x]; added++; } });
-      s.lines.forEach((ln, li) => { const g2 = byId[`l${si}.${li}`]; if (g2) TR.forEach(x => { if (!ln[x] && g2[x]) { ln[x] = g2[x]; added++; } }); });
-    });
-    (d.phrases || []).forEach((ph, pi) => { const g = byId[`p${pi}`]; if (g) TR.forEach(x => { if (!ph[x] && g[x]) { ph[x] = g[x]; added++; } }); });
-    for (const x of titleNeed) if (got.titles && got.titles[x]) { d.tr[x] = got.titles[x]; added++; }
+    const d = l.data;
+    let added;
+    try { added = await translateAll(env, l, d); } catch (e) { throw H.fail(e.message, e.status || 502, e.extra); }
     const r = await env.DB.prepare("UPDATE lessons SET data = ?, rev = rev + 1, updated_at = ? WHERE id = ? AND rev = ? RETURNING rev").bind(JSON.stringify(d), H.now(), l.id, l.rev).first();
     if (!r) throw H.fail("someone else changed this lesson — reload it", 409, { code: "rev" });
     return H.json({ data: d, rev: r.rev, added });
@@ -570,7 +590,7 @@ function normalize(src, l) {
     lines: (Array.isArray(s.lines) ? s.lines : []).filter(x => x && (x.de || x.text)).map(x => ({ ...tro(x), who: String(x.who || x.speaker || "Anna"), de: String(x.de || x.text) }))
   })).filter(s => s.lines.length);
   const speakers = [...new Set(scenes.flatMap(s => s.lines.map(x => x.who)))];
-  const cast = (Array.isArray(src.cast) ? src.cast : []).map(c => typeof c === "string" ? { name: c, gender: "f" } : { name: String(c.name || ""), gender: c.gender === "m" ? "m" : "f" }).filter(c => c.name);
+  const cast = (Array.isArray(src.cast) ? src.cast : []).map(c => typeof c === "string" ? { name: c, gender: "f" } : { name: String(c.name || ""), gender: /^(m|male|man|männlich)$/i.test(String(c.gender || "").trim()) ? "m" : "f" }).filter(c => c.name);
   for (const w of speakers) if (!cast.some(c => c.name === w)) cast.push({ name: w, gender: "f" });
   return {
     title: String(src.title || l.title), scenes, cast,
