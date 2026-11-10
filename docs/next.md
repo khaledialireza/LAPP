@@ -58,3 +58,11 @@
 - Order proposed: 1) core split (tenants, app catalog, plans) 2) admin.khaledi.eu console 3) school + studio as apps 4) accounting (first general app) 5) CRM 6) clinic last.
 - UPDATE (agreed): admin.khaledi.eu and app.khaledi.eu are the SAME panel (one codebase, the same /manage desktop, windows, command center, AI).
   The host only changes context and rules: on admin.* the platform-owner apps (tenants, plans, app catalog, servers, users, audit) appear and stricter security applies (2FA, Access/IP, own host-only cookie); on app.* the tenant's apps appear. Not two systems.
+
+## Classroom TV board over local Wi-Fi
+- Teacher shows class content on the classroom TV as a digital board they control; control traffic should go over the school Wi-Fi, not our server.
+- Plan: TV opens a LAPP "board" page (smart-TV browser / stick / any PC) and shows a short code (+QR). Teacher types the code in a "Show on screen" window.
+  Pairing (a few KB) goes through our server once; then WebRTC connects the two devices DIRECTLY over the LAN (data channel for board commands/strokes, optional screen/window stream). Keeps working if the internet drops after pairing.
+- Fully server-free discovery isn't possible in a normal browser (no LAN scan). Options for that: QR-only pairing (offline, clunkier) or a native TV app (Android TV) with local discovery — later.
+- Board features: show slide/lesson/line, pen & highlighter, timer, student answers, multiple screens, teacher phone as remote.
+- Reuses today's live class board (Durable Object) as fallback when direct connection fails (TURN-free LAN, server relay fallback).
