@@ -4,7 +4,8 @@
 <meta name="robots" content="noindex">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@500;700&display=swap" rel="stylesheet">
 <script src="/ui/lapp-ui.js?v=3"></script>
-<script src="/ui/panel-i18n.js?v=3"></script>
+<script src="/ui/panel-i18n.js?v=4"></script>
+<script src="/ui/shell.js?v=1"></script>
 <style>
 /* the school portal — same look as the studio and the admin panel */
 :root{--bg:#07070B;--p1:#0F0F16;--p2:#15151F;--p3:#1C1C29;--ln:rgba(255,255,255,.08);--ln2:rgba(255,255,255,.14);--tx:#F4F4F8;--mu:rgba(235,235,245,.55);--mu2:rgba(235,235,245,.35);
@@ -52,7 +53,7 @@ dialog form{display:flex;flex-direction:column;gap:12px}dialog.wide{width:min(86
 .q{border:1px solid var(--ln);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px}.q label.opt{display:flex;gap:8px;align-items:center;padding:7px 10px;border:1px solid var(--ln2);border-radius:9px;cursor:pointer}.q .right{border-color:var(--gr);background:rgba(52,211,153,.1)}.q .wrong{border-color:var(--rd);background:rgba(248,113,113,.08)}
 .mat{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--ln)}.mat:last-child{border:0}.mat .ic{width:38px;height:38px;border-radius:10px;background:var(--p3);display:grid;place-items:center;font-size:18px;flex:none}.mat .tx{flex:1;min-width:0}.mat .tx p{color:var(--mu);font-size:13px;white-space:pre-wrap;margin-top:3px}
 /* live class */
-body.live{grid-template-columns:1fr}body.live aside{display:none}body.live main{padding:0;max-width:none;height:100vh}
+body.live{grid-template-columns:1fr!important}body.live aside{display:none}body.live main{padding:0;max-width:none;height:100vh}body.live .sh-bar{display:none}body.live .sh-view{padding:0}
 .lv{display:grid;grid-template-columns:1fr 300px;grid-template-rows:56px 1fr 62px;height:100vh;background:#0B0B12}
 .lv-top{grid-column:1/3;display:flex;align-items:center;gap:10px;padding:0 16px;border-bottom:1px solid var(--ln);background:var(--p1);min-width:0}.lv-top b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .stage{position:relative;display:grid;place-items:center;padding:14px;min-height:0;min-width:0}
@@ -138,7 +139,13 @@ const roleOpts = () => Object.entries(ROLE).map(([k, l]) => [k, l, { icon: ROLE_
 const personOpt = m => [m.id, nameOf(m), { icon: (nameOf(m) || "?").charAt(0).toUpperCase(), sub: m.email || "@" + m.username }];
 const ROLE = { admin: "School admin", teacher: "Teacher", finance: "Finance", student: "Student" };
 let S = { org: null, role: null, me: null, counts: null }, toastT;
-function toast(t) { const e = $("#toast"); e.textContent = t; e.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(() => e.classList.remove("on"), 2800); }
+function toast(t, o) { if (window.Shell && Shell.active) return Shell.toast(t, o); const e = $("#toast"); e.textContent = t; e.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(() => e.classList.remove("on"), 2800); }
+// "are you sure?": our dialog in the panel, two clicks elsewhere
+async function sure(btn, title, text, again) {
+  if (window.Shell && Shell.active) { if ($("#dlg").open) $("#dlg").close(); return Shell.confirm({ title, text, ok: "Delete", danger: true }); }
+  if (btn.dataset.sure !== "1") { btn.dataset.sure = "1"; btn.textContent = again; return false; }
+  return true;
+}
 async function api(method, path, body, raw) {
   const r = await fetch(`/api/org/${SLUG}${path}`, { method, credentials: "same-origin",
     headers: { ...(raw ? raw.headers : body ? { "Content-Type": "application/json" } : {}), ...(method !== "GET" ? { "X-LAPP": "1" } : {}) },
@@ -208,11 +215,34 @@ function side() {
     };
     return;
   }
+  if (window.Shell && !Shell.active) return startShell(nav);
+  if (window.Shell && Shell.active) return;
   $("#side").innerHTML = `<div class="lg"><i style="background:${esc(S.org.color)}">${esc(S.org.name.charAt(0))}</i><span>${esc(S.org.name)}</span></div><div class="org">${ROLE[S.role]}</div>
     ${nav.map(([k, l]) => `<a class="nv" href="#${k}" data-v="${k}">${l}</a>`).join("")}
     <div class="sp"></div><div class="me"><span>@${esc(S.me.username)}</span><a class="b sm" href="/">Open the LAPP app</a><button class="b sm" id="lng">🌐 Language</button><button class="b sm" id="out">Sign out</button></div>`;
   $("#lng").onclick = e => { e.stopPropagation(); PanelI18N.menu(e.currentTarget); };
   $("#out").onclick = async () => { await fetch("/api/auth/logout", { method: "POST", headers: { "X-LAPP": "1" } }); location.href = "/"; };
+}
+
+function startShell(nav) {
+  const label = l => l.replace(/^\S+\s/, ""), icon = l => l.split(" ")[0];
+  const NAVS = [...nav.map(([k, l]) => ({ route: k, label: label(l), icon: icon(l), group: { overview: "School", classes: "School", people: "School", timetable: "School", week: "Teaching", homework: "Teaching", lessons: "Content", finance: "Money", settings: "System" }[k] || "School" })),
+    { route: "class", label: "Class", icon: "🏫", hidden: true }, { route: "hw", label: "Homework", icon: "📝", hidden: true }, { route: "live", label: "Live class", icon: "🔴", hidden: true }];
+  Shell.init({
+    side: $("#side"), main: $("#view"), key: `lapp.school.${SLUG}.${S.me.id}`, name: S.org.name, home: nav[0][0], nav: NAVS,
+    brand: `<div class="lg" style="margin-bottom:10px"><i style="background:${esc(S.org.color)}">${esc(S.org.name.charAt(0))}</i><span>${esc(S.org.name)}</span></div>`,
+    me: { name: S.me.name || "@" + S.me.username, sub: ROLE[S.role], initial: (S.me.name || S.me.username).charAt(0).toUpperCase(), color: `linear-gradient(135deg,${esc(S.org.color)},#22D3EE)` },
+    title: r => { const [v, a] = r.split("/"); if (v === "class" && CLASSES) { const c = CLASSES.find(x => String(x.id) === a); return c ? c.name : "Class"; } return null; },
+    render: async r => { const [v, arg] = r.split("/"); AFTER = null; return await (V[v] || V[nav[0][0]])(arg); },
+    after: () => { if (AFTER) { const f = AFTER; AFTER = null; f(); } },
+    onShow: r => { if (!String(r || "").startsWith("live/")) leaveLive(); },
+    menu: () => [{ icon: "🌐", label: "Language", run: () => PanelI18N.menu(document.querySelector(".sh-me")) }, { icon: "🎧", label: "Open the learner app ↗", run: () => window.open("/", "_blank") }],
+    commands: () => [
+      ...(can("admin") ? [{ icon: "🏫", label: "New class", run: () => ACT.newclass() }] : []),
+      ...(can("admin", "teacher") ? [{ icon: "🎬", label: "New lesson", run: () => ACT.newlesson && ACT.newlesson() }] : [])],
+    jobs: can("admin", "teacher") ? async () => (await studio("/jobs")).jobs.map(j => ({ ...j, what: "Audio", href: `/studio?org=${SLUG}#voice/${j.lesson}` })) : null,
+    signOut: async () => { await fetch("/api/auth/logout", { method: "POST", headers: { "X-LAPP": "1" } }); location.href = "/"; }
+  });
 }
 
 /* ================= views ================= */
@@ -259,7 +289,7 @@ V.lessons = async () => {
   const st = { draft: ["no-p", "draft"], review: ["wa-p", "in work"], published: ["ok-p", "published"] };
   return `<div class="top"><h1>Lessons</h1><button class="b pr" data-go="newlesson">＋ New lesson</button></div>
   <p class="mu">Your school's own audio lessons. Make one, then the studio opens: write it (with AI or by hand), make the audio, publish. Published lessons can be added to a class as material — only your students see them.</p>
-  ${lessons.length ? `<div class="g3">${lessons.map(l => `<a class="card" href="/studio?org=${SLUG}#script/${l.id}" style="text-decoration:none;display:flex;flex-direction:column;gap:6px">
+  ${lessons.length ? `<div class="g3">${lessons.map(l => `<a class="card" href="/studio?org=${SLUG}#script/${l.id}" target="_blank" rel="noopener" title="Opens the studio in a new browser tab" style="text-decoration:none;display:flex;flex-direction:column;gap:6px">
     <span class="mu">${FLAG[l.course] || ""} ${COURSE[l.course] || ""} · ${esc(l.level)} · ${LTYPE[l.type][0]} ${esc(LTOPIC[l.topic] || "")}</span><b style="font-size:17px">${esc(l.title)}</b>
     <span class="mu">${l.lines ? `${l.approved}/${l.lines} lines approved` : "no text yet"} · ${{ ready: "🎧 audio", old: "🎧 audio older than text", none: "no audio" }[l.audio]}</span>
     <span><span class="pl ${st[l.status][0]}">${st[l.status][1]}</span></span></a>`).join("")}</div>`
@@ -276,7 +306,14 @@ function newLessonForm() {
     { name: "topic", label: "Topic", type: "select", options: Object.entries(LTOPIC).map(([k, l]) => [k, l]) },
     { type: "html", html: `</div>` },
     { name: "brief", label: "What should it be about? (the AI writes from this)", type: "textarea", ph: "Buying a ticket, finding the platform, a delay…" }
-  ], async v => { const l = await studio("/lessons", "POST", v); location.href = `/studio?org=${SLUG}#script/${l.id}`; }, "Create and open the studio");
+  ], async v => {
+    const w = window.open("about:blank", "_blank");
+    try {
+      const l = await studio("/lessons", "POST", v), url = `/studio?org=${SLUG}#script/${l.id}`;
+      if (w) { w.location = url; toast("Lesson created · the studio opened in a new tab"); } else toast("Lesson created", { action: "Open the studio", run: () => window.open(url, "_blank") });
+      show();
+    } catch (e) { if (w) w.close(); throw e; }
+  }, "Create and open the studio ↗");
 };
 
 let CT = "material";
@@ -569,7 +606,7 @@ async function classForm(k) {
 ACT.newclass = () => classForm(null);
 ACT.editclass = async btn => classForm((await api("GET", `/classes/${btn.dataset.k}`)).class);
 ACT.delclass = async btn => {
-  if (btn.dataset.sure !== "1") { btn.dataset.sure = "1"; btn.textContent = "Click again: delete the class, its lessons, material and homework"; return; }
+  if (!await sure(btn, "Delete this class?", "Its lessons, material and homework are deleted too. Students keep their accounts.", "Click again: delete the class, its lessons, material and homework")) return;
   await api("DELETE", `/classes/${btn.dataset.k}`); $("#dlg").close(); CLASSES = null; location.hash = "classes"; toast("Class deleted");
 };
 ACT.classstudents = async btn => {
@@ -630,7 +667,7 @@ ACT["mat-lesson"] = async btn => {
   if (!ls.length) $("#dlgErr").textContent = "This language has no library lessons yet.";
 };
 ACT.matshare = async btn => { await api("PATCH", `/materials/${btn.dataset.m}`, { shared: btn.dataset.s === "1" }); show(); };
-ACT.matdel = async btn => { if (btn.dataset.sure !== "1") { btn.dataset.sure = "1"; btn.textContent = "Sure?"; return; } await api("DELETE", `/materials/${btn.dataset.m}`); show(); };
+ACT.matdel = async btn => { if (!await sure(btn, "Remove this material?", "Students no longer see it in the class.", "Sure?")) return; await api("DELETE", `/materials/${btn.dataset.m}`); show(); };
 // homework: quiz questions are rows in a table, not one big text box
 const qRow = (q = {}) => `<tr><td class="qn"></td><td><input class="in" data-q="q" value="${esc(q.q || "")}" placeholder="Wann gibt es Frühstück?" aria-label="Question"></td>
   <td><input class="in" data-q="a" value="${esc(q.answer || "")}" placeholder="Von 7 bis 10 Uhr" aria-label="Right answer"></td>
@@ -679,7 +716,7 @@ ACT.newhw = btn => {
   const kind = $("#f_kind"), sync = () => { $("#qWrap").hidden = kind.value !== "quiz"; };
   kind.addEventListener("change", sync); sync();
 };
-ACT.hwdel = async btn => { if (btn.dataset.sure !== "1") { btn.dataset.sure = "1"; btn.textContent = "Click again to delete with all answers"; return; } await api("DELETE", `/assignments/${btn.dataset.a}`); history.back(); };
+ACT.hwdel = async btn => { if (!await sure(btn, "Delete this homework?", "All answers and grades are deleted too.", "Click again to delete with all answers")) return; await api("DELETE", `/assignments/${btn.dataset.a}`); history.back(); };
 ACT.grade = btn => form("Grade", [{ name: "score", label: "Score (%)", type: "number", value: btn.dataset.s, attrs: `min="0" max="100" required` }, { name: "feedback", label: "Feedback", type: "textarea", value: btn.dataset.f }],
   async v => { await api("PUT", `/assignments/${btn.dataset.a}/grade/${btn.dataset.u}`, v); toast("Saved"); show(); });
 ACT.newfee = async () => {
@@ -712,7 +749,7 @@ ACT.feedetail = async btn => {
   form(`${f.title} · ${f.student_name || f.student_username}`, [{ type: "html", html: `${f.note ? `<p class="mu">${esc(f.note)}</p>` : ""}<div>${f.installments.map(i => `<div class="r"><span>${fmtDate(i.due_on)}</span><span>${money(i.paid)} / ${money(i.amount)}</span><span class="mu">${i.paid_on ? `${fmtDate(i.paid_on)} · ${esc(i.method)}` : i.reminded_at ? "reminded " + ago(i.reminded_at) : ""}</span></div>`).join("")}</div>
     <button type="button" class="b d" data-go="delfee" data-f="${f.id}" style="align-self:flex-start">Delete this fee</button>` }], async () => {}, "Close");
 };
-ACT.delfee = async btn => { if (btn.dataset.sure !== "1") { btn.dataset.sure = "1"; btn.textContent = "Click again to delete"; return; } await api("DELETE", `/fees/${btn.dataset.f}`); $("#dlg").close(); show(); };
+ACT.delfee = async btn => { if (!await sure(btn, "Delete this payment?", "It disappears from the student's fees and from the totals.", "Click again to delete")) return; await api("DELETE", `/fees/${btn.dataset.f}`); $("#dlg").close(); show(); };
 ACT["export-fees"] = async () => {
   const { fees } = await api("GET", "/fees"), q = s => `"${String(s ?? "").replace(/"/g, '""')}"`;
   const rows = fees.flatMap(f => f.installments.map(i => [f.student_name || f.student_username, f.student_email, f.title, f.class_name || "", i.due_on, (i.amount / 100).toFixed(2), (i.paid / 100).toFixed(2), i.paid_on, i.method].map(q).join(",")));
@@ -849,6 +886,7 @@ function leaveLive() { if (LV) { LV.closed = true; try { LV.ws.close(); } catch 
 let SEQ = 0, AFTER = null;
 async function show() {
   if (!S.role) return;
+  if (window.Shell && Shell.active) return Shell.refresh();
   const [v, arg] = (location.hash.slice(1) || "").split("/");
   const view = V[v] ? v : NAV[S.role][0][0];
   leaveLive();

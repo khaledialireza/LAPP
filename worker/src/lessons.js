@@ -336,6 +336,13 @@ export async function lessonsApi(req, env, H, p, url, ctx) {
     return H.json({ lessons: rows.map(summary), learners, says, hard });
   }
 
+  /* ---- work running in the background (audio), for the panel's tray ---- */
+  if (p === "/jobs" && M === "GET") {
+    const rows = (await env.DB.prepare("SELECT j.id, j.lesson_id, j.kind, j.status, j.log, j.updated_at, l.title FROM studio_jobs j JOIN lessons l ON l.id = j.lesson_id WHERE l.org_id = ? AND j.updated_at > ? ORDER BY j.id DESC LIMIT 12").bind(sc.org, t - H.DAY).all()).results;
+    // a job silent for 20 minutes has died
+    return H.json({ jobs: rows.map(j => ({ id: j.id, lesson: j.lesson_id, title: j.title, kind: j.kind, log: j.log || "", at: j.updated_at, status: ["queued", "running"].includes(j.status) && j.updated_at < t - 20 * 60e3 ? "failed" : j.status })) });
+  }
+
   /* ---- lessons ---- */
   if (p === "/lessons" && M === "GET") {
     const rows = (await env.DB.prepare("SELECT * FROM lessons WHERE org_id = ? ORDER BY updated_at DESC").bind(sc.org).all()).results;
