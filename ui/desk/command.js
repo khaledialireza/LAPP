@@ -86,7 +86,8 @@
       sec("Suggested now", suggested());
       sec("Recent", recentRows());
       const pins = ((D.DESK.pins || {})[D.CUR] || D.APPS.filter(a => a.ws === D.CUR).slice(0, 4).map(a => a.id)).map(id => D.APPS.find(a => a.id === id)).filter(Boolean);
-      G.push({ title: "Apps", pins: pins.length ? pins : D.APPS.filter(a => a.ws === D.CUR).slice(0, 6), more: "apps" });
+      G.push({ title: D.WS.length > 1 ? "Apps · " + D.wsOf(D.CUR).name : "Apps", pins: pins.length ? pins : D.APPS.filter(a => a.ws === D.CUR).slice(0, 6), more: "apps" });
+      if (D.WS.length > 1) sec("Other workspaces", D.WS.filter(w => w.key !== D.CUR).map(w => ({ icon: w.key === "me" ? "home" : "school", color: w.color, name: w.name, place: D.APPS.filter(a => a.ws === w.key).map(a => a.title).slice(0, 4).join(" · "), run: () => { D.ccClose(); D.switchWs(w.key); D.toast(w.name, { kind: "info" }); } })));
     } else if (S === "apps") {
       D.WS.forEach(w => sec(D.WS.length > 1 ? w.name : "Apps", D.APPS.filter(a => a.ws === w.key && (!q || has(a.title, q))).map(appRow)));
     } else if (S === "files") {

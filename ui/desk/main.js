@@ -61,6 +61,7 @@
     D.DESK = { ...D.deskDefault(), ...(d.desk || {}) }; D.FILES = d.files || [];
     D.CUR = D.DESK.cur || "me";
     D.buildApps();
+    if (!D.DESK.cur && !["manager", "admin", "designer"].includes(D.ME.role) && D.WS.length > 1) D.CUR = D.WS[1].key;
     $("#av").textContent = (D.ME.name || D.ME.username).charAt(0).toUpperCase(); $("#av").style.background = `linear-gradient(135deg,${D.GRAD[D.ME.id % D.GRAD.length]})`;
     D.DESK.icons = (D.DESK.icons || []).filter(c => !c.up && (!c.file || D.FILES.some(f => f.id === c.file)));
     D.BIND = { ...D.DEF, ...(D.DESK.keys || {}) }; D.shareKeys();
