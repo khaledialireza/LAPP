@@ -1,5 +1,17 @@
 # Next work (agreed in chat, build when asked)
 
+## PRIORITY ORDER (proposed, owner to confirm)
+1. Bugs now: windows open too small + mobile layout inside windows; one state-coloured window border.
+2. Everything from the mockups that is missing (docs/missing.md): full Apps list, studio right-click + word card, Lesson app (translations & their settings), Cast/Characters app, Settings app (+ system-wide theme), Guide/ⓘ.
+3. Platform core + admin.khaledi.eu / app.khaledi.eu (same panel, host decides apps & security).
+4. AI that really acts (create user, open calendar…) with confirmation + voice input.
+5. Accounting as a standalone app.
+6. Calendar (+ Google Calendar), messages, mail, friends.
+7. Studio project files saved locally/Drive, publish to us; Google Drive & Keep.
+8. Screens app: classroom board (same laptop / smart TV via code + WebRTC), clinic queue, rate boards.
+9. Desktop extras (groups, Alt+Tab, focus mode…), AI settings v2.
+10. Later: CRM, clinic; held ideas: 2 sentences a day, creator marketplace.
+
 ## Accounting: a standalone, general system (replaces "school finance double-entry")
 - Not only for schools: LAPP's owner uses it for their own finances too.
 - Its own module/app on this platform (own window in /manage), not part of the school pages.
