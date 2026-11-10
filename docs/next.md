@@ -66,3 +66,7 @@
 - Fully server-free discovery isn't possible in a normal browser (no LAN scan). Options for that: QR-only pairing (offline, clunkier) or a native TV app (Android TV) with local discovery — later.
 - Board features: show slide/lesson/line, pen & highlighter, timer, student answers, multiple screens, teacher phone as remote.
 - Reuses today's live class board (Durable Object) as fallback when direct connection fails (TURN-free LAN, server relay fallback).
+- UPDATE (agreed): no native app. Two modes:
+  1. Same laptop on the TV (HDMI/cable or screen share): teacher opens "Board mode" in a second browser window on the TV screen. The two windows talk inside the laptop (BroadcastChannel) — no network, no Wi-Fi needed. Window Management API (where supported) can put it full-screen on the second screen in one click.
+  2. Smart TV: open the board page, enter/scan the code → server approves → WebRTC direct to the TV over the LAN, server only for pairing; relay fallback.
+- Make it a CORE "Screens / Display" app for every business, not just schools: classroom board · clinic queue numbers ("now serving") · exchange-office rate board · company lobby/KPI dashboards. Paired screens are managed per organisation (name, room, what it shows, revoke).
