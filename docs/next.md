@@ -1,4 +1,5 @@
 # Next work (agreed in chat, build when asked)
+Rule: only items the owner approved are recorded as agreed; anything else is marked [PROPOSAL, NOT CONFIRMED].
 
 ## PRIORITY ORDER (proposed, owner to confirm)
 1. Bugs now: windows open too small + mobile layout inside windows; one state-coloured window border.
@@ -24,11 +25,11 @@
   - The icon shows the window's STATE (same colours as the window border): unsaved dot (amber), AI working (gradient ring), audio being made (progress ring), error (red dot), done (green flash). You see what needs you without opening anything.
   - Hover: live preview + quick actions (close, left/right half). Drag to reorder, middle-click to close.
   - Workspace switcher appears only when the person has more than one organisation.
-  - Grouping is kept, but by TASK, not by app category: "task groups" (like saved projects). The person (or the AI, as a suggestion) puts windows that belong to one job together, e.g. "Ein Bier, bitte!" = Script + Voice desk + Video, or "Month-end" = Journal + Bank + Reports.
+  - [PROPOSAL, NOT CONFIRMED] Grouping is kept, but by TASK, not by app category: "task groups" (like saved projects). The person (or the AI, as a suggestion) puts windows that belong to one job together, e.g. "Ein Bier, bitte!" = Script + Voice desk + Video, or "Month-end" = Journal + Bank + Reports.
     - A group is one capsule on the taskbar with its name and colour; click = bring the whole group back in its saved layout (snap positions); minimise/close the group in one go.
     - Saved with the account: reopen a group tomorrow exactly as it was. Drag a window onto a capsule to add it; drag out to remove.
     - Auto-suggest: windows of the same lesson (or same customer/case later) are offered as a group ("Group these 3?"), never forced.
-  - Example "Students of School A and School B at once": normally each school is its own workspace (switch with the switcher). To compare side by side, open School B's Students in the current workspace (or drag its window across): both windows then show the org tag ("Students · School A" / "Students · School B") and the org's colour on the border; on the taskbar it's one Students icon with "2", and its list shows each window with the school name and colour dot.
+  - [PROPOSAL, NOT CONFIRMED] Example "Students of School A and School B at once": normally each school is its own workspace (switch with the switcher). To compare side by side, open School B's Students in the current workspace (or drag its window across): both windows then show the org tag ("Students · School A" / "Students · School B") and the org's colour on the border; on the taskbar it's one Students icon with "2", and its list shows each window with the school name and colour dot.
 - One standard window structure for every app (title bar, menus, toolbar actions, status, body). A change to "windows" applies to all windows.
 - Modular, component-based: a shared window/app component library (title bar, menus, buttons, dialogs, lists, toasts) and each app as its own module that declares its menus/actions/title — not hard-coded in one heavy file. Pages post their menus/actions to the host (postMessage) until they become native modules.
 - Content → becomes a core "Files" app (like Finder/Explorer) for the whole system (agreed proposal):
