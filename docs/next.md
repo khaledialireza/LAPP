@@ -28,6 +28,7 @@
     - A group is one capsule on the taskbar with its name and colour; click = bring the whole group back in its saved layout (snap positions); minimise/close the group in one go.
     - Saved with the account: reopen a group tomorrow exactly as it was. Drag a window onto a capsule to add it; drag out to remove.
     - Auto-suggest: windows of the same lesson (or same customer/case later) are offered as a group ("Group these 3?"), never forced.
+  - Example "Students of School A and School B at once": normally each school is its own workspace (switch with the switcher). To compare side by side, open School B's Students in the current workspace (or drag its window across): both windows then show the org tag ("Students · School A" / "Students · School B") and the org's colour on the border; on the taskbar it's one Students icon with "2", and its list shows each window with the school name and colour dot.
 - One standard window structure for every app (title bar, menus, toolbar actions, status, body). A change to "windows" applies to all windows.
 - Modular, component-based: a shared window/app component library (title bar, menus, buttons, dialogs, lists, toasts) and each app as its own module that declares its menus/actions/title — not hard-coded in one heavy file. Pages post their menus/actions to the host (postMessage) until they become native modules.
 - Content → becomes a core "Files" app (like Finder/Explorer) for the whole system (agreed proposal):
