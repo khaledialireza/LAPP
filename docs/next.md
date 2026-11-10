@@ -16,7 +16,8 @@
 - No in-page top bar inside windows: the window title bar already has the app name. Remove the big page heading/top bar in embed mode.
 - The page's buttons move into the title bar (compact, tidy): e.g. Users → Export · New school · + Add user; Script → EN/FA/RU/UK · ⚙ · Rewrite all · Listen · Approve all; Content → Files/Map/Board · New folder · + New lesson.
 - A menu bar in the title bar, left, right after the title (File / Edit / View / … per app): every option, action and setting of the app lives there; not everything must be on screen.
-- Remove the "place" tag from the title bar entirely (agreed: not useful inside one system). Only when two windows of the same app from different organisations are open at once, add the org name to the title to tell them apart ("Finance · School B").
+- Place tag (agreed, final): no tag normally. Show the organisation's name as a tag ONLY when the same app is open for two organisations at the same time.
+- Taskbar: stop grouping by app category ("LAPP", "Studio · …", "Files") — it's one system. Instead WORKSPACES per organisation (like virtual desktops): e.g. "My work / LAPP", "Sprachschule Berlin", "School B". Each workspace has its own windows, desktop layout and taskbar; a small workspace switcher on the taskbar (and a key) moves between them. Studio windows belong to the workspace whose lesson it is.
 - One standard window structure for every app (title bar, menus, toolbar actions, status, body). A change to "windows" applies to all windows.
 - Modular, component-based: a shared window/app component library (title bar, menus, buttons, dialogs, lists, toasts) and each app as its own module that declares its menus/actions/title — not hard-coded in one heavy file. Pages post their menus/actions to the host (postMessage) until they become native modules.
 - Content → becomes a core "Files" app (like Finder/Explorer) for the whole system (agreed proposal):
