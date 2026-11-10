@@ -18,6 +18,12 @@
 - A menu bar in the title bar, left, right after the title (File / Edit / View / … per app): every option, action and setting of the app lives there; not everything must be on screen.
 - Place tag (agreed, final): no tag normally. Show the organisation's name as a tag ONLY when the same app is open for two organisations at the same time.
 - Taskbar: stop grouping by app category ("LAPP", "Studio · …", "Files") — it's one system. Instead WORKSPACES per organisation (like virtual desktops): e.g. "My work / LAPP", "Sprachschule Berlin", "School B". Each workspace has its own windows, desktop layout and taskbar; a small workspace switcher on the taskbar (and a key) moves between them. Studio windows belong to the workspace whose lesson it is.
+- Taskbar made useful (agreed proposal):
+  - Pinned apps + running windows in ONE row of icons (like a dock): pin your favourite apps; a running app gets a dot under it; the active one a longer bar. Click a pinned app = open it; click a running one = bring/minimise.
+  - Several windows of the same app (e.g. 3 lessons in Script) = one icon with a count; click → a small list with live previews to pick one.
+  - The icon shows the window's STATE (same colours as the window border): unsaved dot (amber), AI working (gradient ring), audio being made (progress ring), error (red dot), done (green flash). You see what needs you without opening anything.
+  - Hover: live preview + quick actions (close, left/right half). Drag to reorder, middle-click to close.
+  - Workspace switcher appears only when the person has more than one organisation.
 - One standard window structure for every app (title bar, menus, toolbar actions, status, body). A change to "windows" applies to all windows.
 - Modular, component-based: a shared window/app component library (title bar, menus, buttons, dialogs, lists, toasts) and each app as its own module that declares its menus/actions/title — not hard-coded in one heavy file. Pages post their menus/actions to the host (postMessage) until they become native modules.
 - Content → becomes a core "Files" app (like Finder/Explorer) for the whole system (agreed proposal):
