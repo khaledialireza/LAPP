@@ -27,7 +27,8 @@
   - Everything the Studio makes is a file in Files: lesson (.lapp), character/identity, voice, audio track, video, slides, grammar sheet, dictionary, homework/practice set… each with its own type, icon, preview and "open with Studio". Publishing marks/copies the file into LAPP; drafts can live on the user's own drive.
 - Command center: cleaner (proposal):
   - No row of 8 tabs. Empty state = only: Suggested (max 2) · Recent (apps, lessons, files mixed, ~6 one-line rows) · a single row of pinned app icons. Hide empty sections ("Nothing new" never shown).
-  - Typing searches everything; prefixes narrow it: ">" commands, "#" lessons/files, "@" people, "?" ask the AI. Small scope chips appear only while typing.
+  - It is the brain of the system: calm, fast, useful. Typing searches everything.
+  - Visual scope, not syntax: 4–5 small icon buttons inside the search bar (All · Apps · Files/Lessons · People · ✦ AI) with tooltips; picking one shows it as a token in the field ("Files ×"). Prefixes (> # @ ?) stay only as a hidden shortcut for power users, never required.
   - AI chat is not a tab: Tab/↵ on "Ask the AI" turns the panel into the chat; Esc goes back.
   - Notifications and running work leave the panel: bell / spinner on the taskbar open their own small popovers.
   - One-line rows (title + muted place on the same line), narrower panel (~560px), smaller paddings.
