@@ -24,6 +24,7 @@
   - Every app reads/writes files through it (open/save dialogs are the same everywhere). Lessons are files of type .lapp: double-click opens the studio.
   - The smart lesson parts (curriculum map, board, AI ideas, level/approval rules, new lesson) move to the Studio as its "Library / Curriculum" view.
   - Generic folder permissions stay in Files; lesson-only rules (level, approved before publish) live in the Studio.
+  - Everything the Studio makes is a file in Files: lesson (.lapp), character/identity, voice, audio track, video, slides, grammar sheet, dictionary, homework/practice set… each with its own type, icon, preview and "open with Studio". Publishing marks/copies the file into LAPP; drafts can live on the user's own drive.
 
 ## Accounting: a standalone, general system (replaces "school finance double-entry")
 - Not only for schools: LAPP's owner uses it for their own finances too.
