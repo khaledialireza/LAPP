@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>LAPP · Manage</title>
+<meta name="robots" content="noindex">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@500;700&display=swap" rel="stylesheet">
+<script src="/ui/panel-i18n.js?v=6"></script>
+<script src="/ui/cursor.js?v=1"></script>
+<style>
+/* One environment for everyone who isn't only a learner: LAPP staff, school admins, teachers, finance.
+   Bottom: the taskbar (menu · open tabs grouped by place · AI · background work · notifications · you).
+   Every page (admin, a school, the studio of a lesson) runs inside as a tab and never opens a new browser tab. */
+:root{--bg:#07070B;--p1:#0F0F16;--p2:#15151F;--p3:#1C1C29;--p4:#26263C;--ln:rgba(255,255,255,.08);--ln2:rgba(255,255,255,.14);--tx:#F4F4F8;--mu:rgba(235,235,245,.6);--mu2:rgba(235,235,245,.38);
+--pk:#FF3D7F;--vi:#8B5CF6;--cy:#22D3EE;--gr:#34D399;--am:#FBBF24;--rd:#F87171;--g:linear-gradient(135deg,#FF3D7F,#8B5CF6 55%,#22D3EE);color-scheme:dark}
+*{box-sizing:border-box;margin:0}[hidden]{display:none!important}
+html,body{height:100%}
+body{background:var(--bg);color:var(--tx);font:14px/1.5 Inter,system-ui,sans-serif;display:grid;grid-template-rows:minmax(0,1fr) auto;grid-template-columns:1fr;overflow:hidden}
+body.pinned{grid-template-columns:310px minmax(0,1fr)}
+html[dir=rtl] body,html[lang=fa] body{font-family:Inter,Vazirmatn,system-ui,sans-serif}
+button,input{font:inherit;color:inherit}button{cursor:pointer;border:0;background:none}a{color:inherit}
+:focus-visible{outline:2px solid var(--cy);outline-offset:2px}
+/* the workspace */
+#ws{position:relative;min-width:0;min-height:0;background:radial-gradient(900px 500px at 100% 0%,rgba(255,61,127,.08),transparent 60%),radial-gradient(800px 500px at 0% 100%,rgba(34,211,238,.06),transparent 60%),var(--bg)}
+body.pinned #ws{grid-column:2}
+#frames iframe{position:absolute;border:0;background:var(--bg);visibility:hidden}
+#frames iframe.on{visibility:visible}
+body.dragging #frames iframe{pointer-events:none}
+.ph{position:absolute;height:30px;display:flex;align-items:center;gap:8px;padding:0 12px;font-size:12px;color:var(--mu);background:var(--p1);border-bottom:1px solid var(--ln);z-index:2}
+.ph.act{color:var(--tx);box-shadow:inset 0 -2px 0 var(--vi)}
+.ph b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ph .sp{flex:1}.ph button{color:var(--mu2);width:22px;height:22px;border-radius:6px}.ph button:hover{background:var(--p3);color:var(--tx)}
+#div{position:absolute;top:0;bottom:0;width:6px;margin-inline-start:-3px;cursor:col-resize;z-index:3;background:var(--ln)}#div:hover{background:rgba(139,92,246,.6)}
+.dropz{position:absolute;z-index:5;border:2px dashed var(--cy);border-radius:14px;background:rgba(34,211,238,.1);display:grid;place-items:center;color:var(--cy);font-weight:700;pointer-events:none}
+.fw{position:absolute;z-index:20;min-width:300px;min-height:180px;resize:both;overflow:hidden;border-radius:14px;border:1px solid rgba(139,92,246,.6);box-shadow:0 30px 80px rgba(0,0,0,.7);background:var(--bg)}
+.fw .fh{height:34px;display:flex;align-items:center;gap:8px;padding:0 10px;background:var(--p2);border-bottom:1px solid var(--ln);font-size:12.5px;font-weight:700;cursor:move;user-select:none;touch-action:none}
+.fw .fh span{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.fw .fh button{width:24px;height:24px;border-radius:6px;color:var(--mu)}.fw .fh button:hover{background:rgba(255,255,255,.1);color:var(--tx)}
+/* nothing open: a launcher */
+#home{position:absolute;inset:0;overflow:auto;padding:28px max(20px,4vw) 40px}
+#home h1{font-size:30px;font-weight:800;margin-bottom:4px}
+#home .lead{color:var(--mu);margin-bottom:18px}
+.launch{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.lc{background:var(--p2);border:1px solid var(--ln);border-radius:18px;padding:14px}
+.lc h3{font-size:13px;display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.lc h3 i{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-style:normal;font-size:13px;color:#fff;flex:none}
+.lc .it{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:10px;width:100%;text-align:start;color:var(--mu);font-size:13px}.lc .it:hover{background:var(--p3);color:var(--tx)}
+.askbox{display:flex;gap:10px;align-items:center;max-width:720px;margin-bottom:22px;padding:10px 14px;border-radius:16px;background:linear-gradient(var(--p2),var(--p2)) padding-box,var(--g) border-box;border:1.5px solid transparent;cursor:text;color:var(--mu)}
+.askbox b{background:var(--g);-webkit-background-clip:text;background-clip:text;color:transparent;font-size:18px}
+/* the taskbar */
+#tb{grid-column:1/-1;height:56px;display:flex;align-items:center;gap:6px;padding:0 10px;padding-bottom:env(safe-area-inset-bottom,0);background:rgba(13,13,20,.92);backdrop-filter:blur(18px);border-top:1px solid var(--ln2);position:relative;z-index:30}
+#tb::before{content:"";position:absolute;inset:-1px 0 auto;height:1px;background:var(--g);opacity:.55}
+.mbtn{width:44px;height:40px;border-radius:13px;background:var(--g);display:grid;place-items:center;font-weight:800;font-size:17px;color:#fff;flex:none;box-shadow:0 8px 22px rgba(139,92,246,.35)}
+.mbtn.on{box-shadow:0 0 0 2px #fff inset,0 8px 22px rgba(139,92,246,.45)}
+#tabs{flex:1;min-width:0;display:flex;align-items:center;gap:4px;overflow-x:auto;scrollbar-width:none;padding:0 4px}
+.grp{display:flex;align-items:center;gap:2px;padding:3px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid var(--ln);flex:none}
+.gl{font:700 10px Inter,system-ui;letter-spacing:.3px;text-transform:uppercase;padding:0 7px 0 5px;color:var(--mu2);white-space:nowrap;max-width:140px;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:5px}
+.gl i{width:8px;height:8px;border-radius:50%;flex:none}
+.tab{height:34px;display:flex;align-items:center;gap:7px;padding:0 6px 0 9px;border-radius:9px;font-size:12.5px;color:var(--mu);max-width:200px;position:relative;user-select:none}
+.tab:hover{background:var(--p3);color:var(--tx)}
+.tab.on{background:var(--p4);color:var(--tx)}
+.tab.on::after{content:"";position:absolute;left:10px;right:10px;bottom:2px;height:2px;border-radius:2px;background:var(--c,var(--vi))}
+.tab.vis:not(.on){color:var(--tx)}
+.tab .t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tab .x{width:18px;height:18px;border-radius:5px;font-size:9px;color:var(--mu2);display:grid;place-items:center;opacity:0}
+.tab:hover .x,.tab.on .x{opacity:1}.tab .x:hover{background:rgba(255,255,255,.12);color:var(--tx)}
+.tab.fl .t::before{content:"⧉ ";color:var(--cy)}
+.tools{display:flex;align-items:center;gap:2px;flex:none}
+.tl{height:40px;min-width:40px;padding:0 10px;border-radius:12px;display:inline-flex;align-items:center;gap:7px;color:var(--mu);font-size:13px;position:relative}
+.tl:hover,.tl.on{background:var(--p3);color:var(--tx)}
+.tl .bd{position:absolute;top:3px;inset-inline-end:3px;min-width:16px;height:16px;border-radius:99px;background:var(--pk);color:#fff;font:800 10px/16px Inter,system-ui;padding:0 4px}
+.ai{background:linear-gradient(var(--p2),var(--p2)) padding-box,var(--g) border-box;border:1.5px solid transparent;color:var(--tx)}
+.ai b{background:var(--g);-webkit-background-clip:text;background-clip:text;color:transparent;font-size:16px}
+.me{display:flex;align-items:center;gap:9px;padding:0 6px 0 4px;height:42px;border-radius:13px}.me:hover{background:var(--p3)}
+.av{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:800;color:#fff;flex:none;position:relative}
+.av::after{content:"";position:absolute;inset-inline-end:-1px;bottom:-1px;width:9px;height:9px;border-radius:50%;background:var(--gr);box-shadow:0 0 0 2px #0D0D14}
+.clock{font-size:11.5px;color:var(--mu);line-height:1.2;text-align:end;font-variant-numeric:tabular-nums}
+/* the menu */
+#menu{position:fixed;inset-inline-start:10px;bottom:66px;z-index:40;width:min(760px,calc(100vw - 20px));height:min(620px,calc(100vh - 86px));display:grid;grid-template-columns:minmax(0,1fr) 250px;border-radius:20px;overflow:hidden;
+  background:rgba(20,20,31,.97);backdrop-filter:blur(26px);border:1px solid var(--ln2);box-shadow:0 30px 90px rgba(0,0,0,.75);animation:up .16s ease-out}
+@keyframes up{from{transform:translateY(10px);opacity:0}to{transform:none;opacity:1}}
+body.pinned #menu{position:relative;inset:auto;width:auto;height:auto;border-radius:0;grid-template-columns:1fr;grid-row:1;grid-column:1;animation:none;box-shadow:none;border-width:0 1px 0 0;background:var(--p1)}
+body.pinned #menu .side2{display:none}
+.mm{display:flex;flex-direction:column;min-height:0}
+.ms{padding:14px 14px 10px;border-bottom:1px solid var(--ln)}
+.ms label{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:14px;background:var(--p3);border:1px solid var(--ln2)}
+.ms input{flex:1;background:none;border:0;outline:none;font-size:15px;min-width:0}
+.ms kbd,.kbd{font:600 10.5px Inter,system-ui;border:1px solid var(--ln2);border-bottom-width:2px;border-radius:5px;padding:0 5px;color:var(--mu)}
+.ml{flex:1;overflow:auto;padding:8px 10px 14px}
+.mg{margin-top:10px}
+.mh{display:flex;align-items:center;gap:8px;padding:6px 8px;font:700 11px Inter,system-ui;color:var(--mu);letter-spacing:.4px;text-transform:uppercase}
+.mh i{width:22px;height:22px;border-radius:7px;display:grid;place-items:center;font-style:normal;color:#fff;font-size:11px;flex:none}
+.mh small{font-weight:500;text-transform:none;letter-spacing:0;color:var(--mu2)}
+.mi{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:10px;width:100%;text-align:start;font-size:13.5px;color:var(--tx)}
+.mi:hover,.mi.sel{background:rgba(139,92,246,.22)}
+.mi .ic{width:26px;text-align:center;flex:none}
+.mi .k{margin-inline-start:auto;font-size:11.5px;color:var(--mu2)}
+.mi.dim{color:var(--mu2)}.mi.dim .k{color:var(--am)}
+.mi.sub{padding-inline-start:30px}
+.cols{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:2px 10px}
+.side2{background:rgba(255,255,255,.025);border-inline-start:1px solid var(--ln);display:flex;flex-direction:column;min-height:0}
+.acct{display:flex;gap:10px;align-items:center;padding:16px 14px;border-bottom:1px solid var(--ln)}
+.acct b{display:block;font-size:14px}.acct small{display:block;color:var(--mu);font-size:11.5px}
+.sl{flex:1;overflow:auto;padding:6px 8px}
+.sbot{padding:8px;border-top:1px solid var(--ln);display:flex;flex-direction:column;gap:2px}
+.out{border:1px solid var(--ln2);border-radius:11px;padding:9px;font-weight:700;text-align:center;margin-top:4px}
+.out:hover{background:var(--p3)}
+.empty{padding:16px;color:var(--mu2);font-size:13px;text-align:center}
+/* the assistant */
+#ai{position:fixed;inset-inline-end:10px;bottom:66px;z-index:40;width:min(400px,calc(100vw - 20px));height:min(560px,calc(100vh - 86px));display:flex;flex-direction:column;border-radius:20px;overflow:hidden;
+  background:rgba(20,20,31,.97);backdrop-filter:blur(26px);border:1.5px solid rgba(139,92,246,.55);box-shadow:0 30px 90px rgba(0,0,0,.75);animation:up .16s ease-out}
+.ah{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--ln);background:linear-gradient(90deg,rgba(255,61,127,.1),rgba(139,92,246,.1))}
+.ah b{font-size:14px}.ah .sp{flex:1}.ah button{width:28px;height:28px;border-radius:8px;color:var(--mu)}.ah button:hover{background:var(--p3);color:var(--tx)}
+.ctx{font-size:11.5px;color:#C4B5FD;background:rgba(139,92,246,.15);border-radius:99px;padding:2px 9px;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.am{flex:1;overflow:auto;padding:12px 14px;display:flex;flex-direction:column;gap:8px;font-size:13.5px}
+.bu{padding:8px 11px;border-radius:14px;max-width:88%;white-space:pre-wrap;overflow-wrap:anywhere}
+.bu.me{align-self:flex-end;background:rgba(139,92,246,.3)}.bu.it{background:var(--p3)}.bu.err{background:rgba(248,113,113,.14);color:#FECACA}
+.sugs{display:flex;flex-wrap:wrap;gap:6px}.sugs button{font-size:12px;padding:5px 10px;border-radius:99px;border:1px solid var(--ln2);color:var(--mu)}.sugs button:hover{color:var(--tx);border-color:rgba(139,92,246,.7)}
+.af{display:flex;gap:8px;padding:10px;border-top:1px solid var(--ln)}
+.af input{flex:1;background:var(--p3);border:1px solid var(--ln2);border-radius:12px;padding:9px 12px;outline:none;min-width:0}
+.af button{background:var(--g);border-radius:12px;padding:0 14px;font-weight:800}
+.dots i{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--mu);margin-inline-end:3px;animation:bl 1s infinite}.dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
+@keyframes bl{50%{opacity:.2}}
+/* small pop-ups above the taskbar */
+.pop{position:fixed;bottom:66px;z-index:45;width:min(360px,calc(100vw - 20px));max-height:60vh;overflow:auto;background:#1D1D2C;border:1px solid var(--ln2);border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.75);padding:10px;display:flex;flex-direction:column;gap:8px;font-size:13px;animation:up .14s ease-out}
+.pop h4{font-size:12.5px;color:var(--mu);display:flex;justify-content:space-between;margin:2px 4px}
+.nt{display:flex;gap:10px;padding:9px;border-radius:12px;background:var(--p3)}.nt .i{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;flex:none}.nt b{display:block}.nt small{color:var(--mu2)}
+.bar{height:5px;border-radius:3px;background:var(--p1);margin-top:5px;overflow:hidden}.bar i{display:block;height:100%;background:var(--g)}
+.cm{position:fixed;z-index:60;min-width:220px;background:#1D1D2C;border:1px solid var(--ln2);border-radius:12px;padding:5px;box-shadow:0 24px 60px rgba(0,0,0,.75);font-size:13px}
+.cm button{display:flex;gap:9px;align-items:center;width:100%;padding:6px 9px;border-radius:7px;text-align:start}.cm button:hover{background:rgba(139,92,246,.25)}.cm .k{margin-inline-start:auto;color:var(--mu2);font-size:11px}.cm hr{border:0;border-top:1px solid var(--ln);margin:4px 2px}
+.toasts{position:fixed;top:12px;inset-inline-end:12px;z-index:80;display:flex;flex-direction:column;gap:8px;width:min(360px,calc(100vw - 24px));pointer-events:none}
+.toast{pointer-events:auto;display:flex;gap:10px;align-items:center;background:#1D1D2C;border:1px solid var(--ln2);border-radius:12px;padding:9px 12px;font-size:13px;box-shadow:0 18px 40px rgba(0,0,0,.6);animation:up .16s ease-out}
+.toast .i{width:24px;height:24px;border-radius:7px;display:grid;place-items:center;flex:none;font-weight:800}
+dialog{margin:auto;background:var(--p2);color:var(--tx);border:1px solid var(--ln2);border-radius:18px;padding:0;width:min(620px,94vw);max-height:80vh}
+dialog::backdrop{background:rgba(0,0,0,.6)}
+.pk{display:flex;flex-direction:column;max-height:80vh}
+.pk header{padding:16px 18px 10px;display:flex;flex-direction:column;gap:10px;border-bottom:1px solid var(--ln)}
+.pk header h3{font-size:17px}
+.pk .in{width:100%;background:var(--p3);border:1px solid var(--ln2);border-radius:11px;padding:9px 12px;outline:none}
+.pk .ls{overflow:auto;padding:8px 10px 12px}
+.pk footer{padding:10px 14px;border-top:1px solid var(--ln);display:flex;gap:8px;justify-content:flex-end}
+.b{height:34px;padding:0 13px;border-radius:10px;border:1px solid var(--ln2);background:var(--p2);font-weight:700;font-size:13px}.b.pr{background:var(--g);border:0}
+@media (prefers-reduced-motion:reduce){#menu,#ai,.pop,.toast{animation:none}.dots i{animation:none}}
+@media (max-width:900px){.clock,.me .nm{display:none}#menu{grid-template-columns:1fr}#menu .side2{display:none}}
+@media (max-width:640px){
+  body.pinned{grid-template-columns:1fr}body.pinned #menu{display:none}
+  #menu,#ai{inset-inline:8px;width:auto;height:calc(100dvh - 76px);bottom:64px}
+  .gl{display:none}.tab{max-width:130px}.tl .lb{display:none}[data-t=split]{display:none}
+}
+</style></head><body>
+<main id="ws" aria-label="Workspace"><div id="home"></div><div id="frames"></div></main>
+<nav id="tb" aria-label="Taskbar">
+  <button class="mbtn" id="mbtn" title="Menu · Ctrl/⌘ K" aria-label="Menu">L</button>
+  <div id="tabs" role="tablist" aria-label="Open pages"></div>
+  <div class="tools">
+    <button class="tl" data-t="split" title="Two pages side by side · Ctrl+Alt+→">⊟</button>
+    <button class="tl ai" data-t="ai" title="Assistant · Ctrl/⌘ J"><b>✦</b><span class="lb">Ask AI</span></button>
+    <button class="tl" data-t="jobs" title="Working in the background">⏳<span class="bd" hidden></span></button>
+    <button class="tl" data-t="bell" title="Notifications">🔔<span class="bd" hidden></span></button>
+    <button class="me" data-t="me" title="You"><span class="av" id="av"></span><span class="clock nm" id="clock"></span></button>
+  </div>
+</nav>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script>
+"use strict";
+const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+const mac = /Mac|iPhone|iPad/.test(navigator.platform), MODK = mac ? "⌘" : "Ctrl ";
+const GRAD = ["#FF6B9A,#8A6CF0", "#F59E0B,#EF4444", "#34D399,#22D3EE", "#22D3EE,#8B5CF6", "#8B5CF6,#FF3D7F", "#FBBF24,#34D399"];
+const LS = { get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
+async function api(m, p, b) {
+  const r = await fetch("/api" + p, { method: m, credentials: "same-origin", headers: { ...(b ? { "Content-Type": "application/json" } : {}), ...(m !== "GET" ? { "X-LAPP": "1" } : {}) }, body: b ? JSON.stringify(b) : undefined });
+  const j = await r.json().catch(() => ({}));
+  if (r.status === 401) { location.href = "/?login=1&next=/manage"; throw new Error("signed out"); }
+  if (!r.ok) throw new Error(j.error || r.statusText);
+  return j;
+}
+let ME = null, ORGS = [], SECTIONS = [], KEY = "";
+
+/* ================= what this person may open ================= */
+const SCHOOL_NAV = {
+  admin: [["overview", "📊", "Overview"], ["classes", "🏫", "Classes"], ["people", "👥", "People"], ["timetable", "📅", "Timetable"], ["homework", "📝", "Homework"], ["lessons", "🗂", "Content"], ["finance", "💶", "Finance"], ["settings", "⚙️", "Settings"]],
+  teacher: [["week", "📅", "My week"], ["classes", "🏫", "My classes"], ["homework", "📝", "Homework"], ["lessons", "🗂", "Content"]],
+  finance: [["finance", "💶", "Finance"], ["people", "🎓", "Students"]]
+};
+const COLORS = ["#8B5CF6", "#22D3EE", "#F59E0B", "#10B981", "#FF3D7F", "#60A5FA"];
+function sections() {
+  const out = [], r = ME.role;
+  if (["manager", "admin"].includes(r)) out.push({ key: "lapp", title: "LAPP", sub: r === "admin" ? "Admin" : "Manager", icon: "L", color: "var(--g)", items: [
+    ["/admin#dash", "📊", "Dashboard"], ["/admin#users", "👥", "Users"], ["/admin#content", "🗂", "Content"], ...(r === "admin" ? [["/admin#ai", "🤖", "AI"]] : [])] });
+  ORGS.filter(o => SCHOOL_NAV[o.role]).forEach((o, i) => out.push({ key: "s:" + o.slug, title: o.name, sub: { admin: "School admin", teacher: "Teacher", finance: "Finance" }[o.role], icon: o.name.charAt(0), color: COLORS[i % COLORS.length],
+    items: SCHOOL_NAV[o.role].map(([k, ic, l]) => [`/s/${o.slug}#${k}`, ic, l]) }));
+  return out;
+}
+const studioScopes = () => [...(["designer", "manager", "admin"].includes(ME.role) ? [{ q: "", name: "LAPP library" }] : []), ...ORGS.filter(o => ["admin", "teacher"].includes(o.role)).map(o => ({ q: o.slug, name: o.name }))];
+// a tab's place: LAPP, a school, or the studio of one lesson
+function groupOf(url, lesson) {
+  const u = new URL(url, location.origin);
+  if (u.pathname.startsWith("/studio")) {
+    const org = u.searchParams.get("org") || "", id = (u.hash.match(/\/(\d+)/) || [])[1];
+    return id ? { key: `st:${org}:${id}`, title: lesson ? lesson.title : "Studio", icon: "🎬", color: "#FF3D7F", studio: { org, id } } : { key: `st:${org}`, title: "Studio" + (org ? " · " + ((ORGS.find(o => o.slug === org) || {}).name || org) : ""), icon: "🎬", color: "#FF3D7F" };
+  }
+  const s = SECTIONS.find(x => x.items.some(i => i[0].split("#")[0] === u.pathname));
+  return s ? { key: s.key, title: s.title, icon: s.icon, color: s.color } : { key: "x", title: "LAPP", icon: "L", color: "#8B5CF6" };
+}
+function itemFor(url) { for (const s of SECTIONS) for (const i of s.items) if (i[0] === url) return i; return null; }
+
+/* ================= tabs, panes, floating pages ================= */
+let TABS = [], ACT = null, SPLIT = false, PANES = [null, null], AP = 0, RATIO = .5, ZF = 20;
+const T = id => TABS.find(t => t.id === id);
+const embed = url => { const u = new URL(url, location.origin); u.searchParams.set("embed", "1"); return u.pathname + u.search + u.hash; };
+const norm = url => { const u = new URL(url, location.origin); u.searchParams.delete("embed"); return u.pathname + u.search + u.hash; };
+function save() { LS.set(KEY, { tabs: TABS.map(t => ({ url: t.url, title: t.title, icon: t.icon, lesson: t.lesson || null })), act: TABS.indexOf(T(ACT)), split: SPLIT, panes: PANES.map(id => TABS.indexOf(T(id))) }); }
+function frameOf(t) {
+  if (!t.fr) { t.fr = document.createElement("iframe"); t.fr.title = t.title; t.fr.src = embed(t.url); $("#frames").append(t.fr); }
+  return t.fr;
+}
+function open(url, o = {}) {
+  url = norm(url);
+  let t = TABS.find(x => x.url === url);
+  if (!t) {
+    const it = itemFor(url);
+    t = { id: "t" + Math.random().toString(36).slice(2, 8), url, title: o.title || (it ? it[2] : "Loading…"), icon: o.icon || (it ? it[1] : "📄"), lesson: o.lesson || null };
+    const at = ACT ? TABS.findIndex(x => groupOf(x.url, x.lesson).key === groupOf(url).key) : -1;
+    // next to its own place (school, lesson…) so groups stay together
+    if (at > -1) { let i = at; while (i + 1 < TABS.length && groupOf(TABS[i + 1].url, TABS[i + 1].lesson).key === groupOf(url).key) i++; TABS.splice(i + 1, 0, t); } else TABS.push(t);
+    recent(t);
+  }
+  if (t.float) { t.float.style.zIndex = ++ZF; ACT = t.id; return draw(); }
+  if (o.pane !== undefined && SPLIT) { PANES[o.pane] = t.id; AP = o.pane; }
+  else if (SPLIT && PANES.includes(t.id)) AP = PANES.indexOf(t.id);
+  else if (SPLIT) PANES[AP] = t.id;
+  ACT = t.id; closeAll(); draw();
+}
+function close(id) {
+  const t = T(id); if (!t) return;
+  const i = TABS.indexOf(t);
+  t.fr?.remove(); t.float?.remove(); TABS = TABS.filter(x => x !== t);
+  const next = TABS.filter(x => !x.float && !PANES.includes(x.id))[0] || TABS[Math.max(0, i - 1)] || null;
+  PANES = PANES.map(p => p === id ? (next && !PANES.includes(next.id) ? next.id : null) : p);
+  if (SPLIT && (!PANES[0] || !PANES[1])) { SPLIT = false; PANES = [PANES[0] || PANES[1], null]; AP = 0; }
+  if (ACT === id) ACT = SPLIT ? PANES[AP] : next ? next.id : null;
+  draw();
+}
+function split(on, id) {
+  SPLIT = on ?? !SPLIT;
+  if (SPLIT) {
+    const a = id && id !== ACT ? ACT : ACT, b = id && id !== ACT ? id : TABS.find(x => x.id !== ACT && !x.float)?.id;
+    if (!a || !b) { SPLIT = false; return toast("Open a second page first", { kind: "info" }); }
+    PANES = [a, b]; AP = 1; ACT = b;
+  } else { PANES = [ACT, null]; AP = 0; }
+  draw();
+}
+function floatTab(id) {
+  const t = T(id || ACT); if (!t || innerWidth < 640) return;
+  if (t.float) { t.float.remove(); t.float = null; ACT = t.id; return draw(); }
+  const w = document.createElement("div"); w.className = "fw"; w.style.cssText = `left:${Math.max(10, innerWidth - 600)}px;top:40px;width:540px;height:420px;z-index:${++ZF}`;
+  w.innerHTML = `<div class="fh"><span>${esc(t.icon)} ${esc(t.title)}</span><button data-fw="back" title="Back into the workspace">⤢</button><button data-fw="x" title="Close">✕</button></div>`;
+  w.dataset.id = t.id; $("#ws").append(w); t.float = w;
+  new ResizeObserver(layout).observe(w);
+  if (PANES.includes(t.id)) { PANES = PANES.map(p => p === t.id ? null : p); if (SPLIT) { SPLIT = false; PANES = [PANES[0] || PANES[1], null]; } }
+  if (ACT === t.id) ACT = TABS.find(x => !x.float)?.id || t.id;
+  draw(); toast(`${t.title} floats above your work`, { kind: "info" });
+}
+function layout() {
+  const ws = $("#ws").getBoundingClientRect(), W = ws.width, H = ws.height;
+  $$(".ph, #div").forEach(x => x.remove());
+  const show = new Map();
+  if (SPLIT) {
+    const x = Math.round(W * RATIO);
+    [[PANES[0], 0, x], [PANES[1], x, W - x]].forEach(([id, l, w], i) => {
+      const t = T(id); if (!t) return;
+      const h = document.createElement("div"); h.className = "ph" + (AP === i ? " act" : ""); h.style.cssText = `left:${l}px;width:${w}px;top:0;${i ? "border-inline-start:1px solid var(--ln)" : ""}`;
+      h.innerHTML = `<span>${esc(t.icon)}</span><b>${esc(t.title)}</b><span class="sp"></span><button data-ph="float" data-id="${t.id}" title="Float">⧉</button><button data-ph="close" data-id="${t.id}" title="Close">✕</button>`;
+      h.dataset.p = i; $("#ws").append(h);
+      show.set(t, { left: l, top: 30, width: w, height: H - 30 });
+    });
+    const d = document.createElement("div"); d.id = "div"; d.style.left = x + "px"; $("#ws").append(d);
+  } else { const t = T(ACT); if (t && !t.float) show.set(t, { left: 0, top: 0, width: W, height: H }); }
+  TABS.filter(t => t.float).forEach(t => { const r = t.float.getBoundingClientRect(); show.set(t, { left: r.left - ws.left, top: r.top - ws.top + 34, width: r.width, height: r.height - 34, z: +t.float.style.zIndex + 1 }); });
+  TABS.forEach(t => {
+    const r = show.get(t); if (!r) { if (t.fr) t.fr.classList.remove("on"); return; }
+    const f = frameOf(t); f.classList.add("on");
+    Object.assign(f.style, { left: r.left + "px", top: r.top + "px", width: r.width + "px", height: r.height + "px", zIndex: r.z || 1 });
+  });
+  $("#home").hidden = SPLIT || !!(T(ACT) && !T(ACT).float);
+}
+function draw() {
+  // taskbar: tabs grouped by place
+  const groups = [];
+  TABS.forEach(t => { const g = groupOf(t.url, t.lesson); let x = groups.find(y => y.key === g.key); if (!x) groups.push(x = { ...g, tabs: [] }); x.tabs.push(t); });
+  $("#tabs").innerHTML = groups.map(g => `<div class="grp" data-g="${esc(g.key)}"><span class="gl" title="${esc(g.title)}"><i style="background:${g.color}"></i>${esc(g.title)}</span>${g.tabs.map(t => `<div class="tab ${t.id === ACT ? "on" : ""} ${PANES.includes(t.id) && SPLIT ? "vis" : ""} ${t.float ? "fl" : ""}" role="tab" aria-selected="${t.id === ACT}" tabindex="0" draggable="true" data-tab="${t.id}" style="--c:${g.color}" title="${esc(t.title)}"><span>${esc(t.icon)}</span><span class="t">${esc(t.title)}</span><button class="x" data-close="${t.id}" aria-label="Close" title="Close · Alt+W">✕</button></div>`).join("")}</div>`).join("");
+  $('[data-t="split"]').classList.toggle("on", SPLIT);
+  const t = T(ACT); document.title = (t ? t.title + " · " : "") + "LAPP";
+  layout(); save();
+  if (!$("#home").hidden) drawHome();
+}
+
+/* ================= nothing open: the launcher ================= */
+function drawHome() {
+  const n = (ME.name || ME.username).split(" ")[0];
+  $("#home").innerHTML = `<h1>Hello ${esc(n)} 👋</h1><p class="lead">Everything you manage, in one place. Open something below, or press <span class="kbd">${MODK}K</span>.</p>
+    <div class="askbox" data-t="ai" role="button" tabindex="0"><b>✦</b><span>Ask the assistant anything about your work…</span><span class="kbd" style="margin-inline-start:auto">${MODK}J</span></div>
+    <div class="launch">${SECTIONS.map(s => `<div class="lc"><h3><i style="background:${s.color}">${esc(s.icon)}</i>${esc(s.title)} <small style="color:var(--mu2);font-weight:500">${esc(s.sub)}</small></h3>${s.items.map(i => `<button class="it" data-open="${esc(i[0])}"><span>${i[1]}</span>${esc(i[2])}</button>`).join("")}</div>`).join("")}
+      ${studioScopes().length ? `<div class="lc"><h3><i style="background:#FF3D7F">🎬</i>Studio <small style="color:var(--mu2);font-weight:500">opens for one lesson</small></h3><button class="it" data-m="pick"><span>📂</span>Choose a lesson…</button>${recentLessons().map(l => `<button class="it" data-open="${esc(l.url)}"><span>✎</span>${esc(l.title)}</button>`).join("")}</div>` : ""}</div>`;
+}
+
+/* ================= the menu ================= */
+const recent = t => { const r = LS.get(KEY + ".recent", []).filter(x => x.url !== t.url); r.unshift({ url: t.url, title: t.title, icon: t.icon }); LS.set(KEY + ".recent", r.slice(0, 10)); };
+const recentLessons = () => LS.get(KEY + ".lessons", []).slice(0, 5);
+const pinned = () => LS.get(KEY + ".pins", []);
+let LESSONS = null;
+async function lessons() {
+  if (LESSONS) return LESSONS;
+  const all = await Promise.all(studioScopes().map(s => api("GET", "/studio/lessons" + (s.q ? "?org=" + s.q : "")).then(r => r.lessons.map(l => ({ ...l, scope: s }))).catch(() => [])));
+  return LESSONS = all.flat();
+}
+const studioUrl = (l, part = "script") => `/studio${l.scope.q ? "?org=" + l.scope.q : ""}#${part}/${l.id}`;
+function openLesson(l, part) { const url = studioUrl(l, part); LS.set(KEY + ".lessons", [{ url: studioUrl(l), title: l.title }, ...recentLessons().filter(x => x.url !== studioUrl(l))].slice(0, 8)); open(url, { title: `${{ script: "Script", voice: "Voice desk", insights: "Insights" }[part] || "Script"} · ${l.title}`, icon: { voice: "〰", insights: "📈" }[part] || "✎", lesson: { id: String(l.id), title: l.title } }); }
+function studioGroup() {
+  // the studio's parts only make sense for a lesson: one block per open lesson, else "choose a lesson"
+  const open = [...new Map(TABS.filter(t => t.lesson).map(t => [groupOf(t.url, t.lesson).key, t])).values()];
+  const parts = [["script", "✎", "Script"], ["voice", "〰", "Voice desk"], ["insights", "📈", "Insights"]];
+  let h = `<div class="mg"><div class="mh"><i style="background:#FF3D7F">🎬</i>Studio <small>· opens for one lesson</small></div>`;
+  if (!open.length) h += parts.map(([k, i, l]) => `<button class="mi dim" data-m="pick" data-part="${k}"><span class="ic">${i}</span>${l}<span class="k">choose a lesson first</span></button>`).join("");
+  open.forEach(t => { const g = groupOf(t.url, t.lesson), u = new URL(t.url, location.origin), base = `/studio${u.search}`;
+    h += `<div class="mi" style="font-weight:700;color:var(--mu)"><span class="ic">📄</span>${esc(t.lesson.title)}</div>` + parts.map(([k, i, l]) => `<button class="mi sub" data-open="${esc(base + "#" + k + "/" + g.studio.id)}" data-lesson="${esc(JSON.stringify(t.lesson))}" data-title="${esc(l + " · " + t.lesson.title)}" data-icon="${i}"><span class="ic">${i}</span>${l}</button>`).join(""); });
+  h += `<button class="mi" data-m="pick"><span class="ic">📂</span>${open.length ? "Another lesson…" : "Choose a lesson…"}</button>`;
+  studioScopes().forEach(s => h += `<button class="mi" data-open="${esc(`/studio${s.q ? "?org=" + s.q : ""}#universe`)}" data-title="Characters${s.q ? " · " + esc(s.name) : ""}" data-icon="🎭"><span class="ic">🎭</span>Characters <span class="k">${esc(s.name)}</span></button>`);
+  return h + `</div>`;
+}
+function menuList(q) {
+  q = (q || "").trim().toLowerCase();
+  if (q) {
+    const hits = [];
+    SECTIONS.forEach(s => s.items.forEach(i => { if ((i[2] + " " + s.title).toLowerCase().includes(q)) hits.push(`<button class="mi" data-open="${esc(i[0])}"><span class="ic">${i[1]}</span>${esc(i[2])}<span class="k">${esc(s.title)}</span></button>`); }));
+    (LESSONS || []).filter(l => l.title.toLowerCase().includes(q)).slice(0, 8).forEach(l => hits.push(`<button class="mi" data-lid="${l.id}" data-scope="${esc(l.scope.q)}"><span class="ic">🎬</span>${esc(l.title)}<span class="k">${esc(l.level)} · ${esc(l.scope.name)}</span></button>`));
+    [["ai", "✦", "Ask the assistant: " + q], ["lang", "🌐", "Language"], ["cursor", "🖱", "Mouse pointer"], ["pin", "📌", "Pin the menu"], ["out", "↩", "Sign out"]].filter(x => x[0] === "ai" || x[2].toLowerCase().includes(q)).forEach(([k, i, l]) => hits.push(`<button class="mi" data-m="${k}" data-q="${esc(q)}"><span class="ic">${i}</span>${esc(l)}</button>`));
+    return hits.join("") || `<div class="empty">Nothing found</div>`;
+  }
+  const pins = pinned();
+  return (pins.length ? `<div class="mg"><div class="mh"><i style="background:var(--am)">📌</i>Pinned</div><div class="cols">${pins.map(p => `<button class="mi" data-open="${esc(p.url)}"><span class="ic">${p.icon}</span>${esc(p.title)}</button>`).join("")}</div></div>` : "")
+    + SECTIONS.map(s => `<div class="mg"><div class="mh"><i style="background:${s.color}">${esc(s.icon)}</i>${esc(s.title)} <small>· ${esc(s.sub)}</small></div><div class="cols">${s.items.map(i => `<button class="mi" data-open="${esc(i[0])}"><span class="ic">${i[1]}</span>${esc(i[2])}</button>`).join("")}</div></div>`).join("")
+    + (studioScopes().length ? studioGroup() : "")
+    + `<div class="mg"><div class="mh"><i style="background:#34D399">🎓</i>Learning</div><a class="mi" href="/" target="_blank" rel="noopener"><span class="ic">🎧</span>The learning site ↗<span class="k">for learners</span></a></div>`;
+}
+function menu(q = "") {
+  if ($("#menu") && !document.body.classList.contains("pinned")) return closeAll();
+  closeAll(true);
+  let m = $("#menu");
+  if (!m) { m = document.createElement("div"); m.id = "menu"; m.setAttribute("role", "dialog"); m.setAttribute("aria-label", "Menu"); document.body.insertBefore(m, $("#ws")); }
+  const R = LS.get(KEY + ".recent", []).filter(r => !TABS.some(t => t.url === r.url)).slice(0, 6);
+  m.innerHTML = `<div class="mm"><div class="ms"><label>🔍<input id="mq" placeholder="Search sections, lessons, actions…" value="${esc(q)}" autocomplete="off" aria-label="Search"><kbd>${MODK}K</kbd></label></div><div class="ml" id="ml">${menuList(q)}</div></div>
+    <div class="side2"><div class="acct"><span class="av" style="background:linear-gradient(135deg,${GRAD[ME.id % GRAD.length]})">${esc((ME.name || ME.username).charAt(0).toUpperCase())}</span><span style="min-width:0"><b>${esc(ME.name || "@" + ME.username)}</b><small>${esc([SECTIONS.some(s => s.key === "lapp") ? "LAPP " + SECTIONS.find(s => s.key === "lapp").sub : ME.role === "designer" ? "LAPP designer" : "", ORGS.filter(o => SCHOOL_NAV[o.role]).length ? ORGS.filter(o => SCHOOL_NAV[o.role]).length + (ORGS.filter(o => SCHOOL_NAV[o.role]).length > 1 ? " schools" : " school") : ""].filter(Boolean).join(" · "))}</small></span></div>
+      <div class="sl"><div class="mh">Recent</div>${R.map(r => `<button class="mi" data-open="${esc(r.url)}"><span class="ic">${r.icon}</span>${esc(r.title)}</button>`).join("") || `<div class="empty">Pages you open show up here</div>`}</div>
+      <div class="sbot"><button class="mi" data-m="lang"><span class="ic">🌐</span>Language</button><button class="mi" data-m="cursor"><span class="ic">🖱</span>Mouse pointer<span class="k">${LS.get("lapp.cursor", "") === "system" ? "standard" : "LAPP"}</span></button>
+        <button class="mi" data-m="pin"><span class="ic">📌</span>${document.body.classList.contains("pinned") ? "Unpin the menu" : "Pin the menu to the side"}</button><button class="mi" data-m="keys"><span class="ic">⌨</span>Keyboard shortcuts</button>
+        <button class="out" data-m="out">↩ Sign out</button></div></div>`;
+  $("#mbtn").classList.add("on");
+  const inp = $("#mq"); inp.focus(); inp.setSelectionRange(q.length, q.length);
+  inp.oninput = () => { $("#ml").innerHTML = menuList(inp.value); if (inp.value.length > 1 && !LESSONS) lessons().then(() => { if ($("#mq")) $("#ml").innerHTML = menuList($("#mq").value); }); };
+  inp.onkeydown = e => {
+    const its = $$("#ml .mi"), i = its.findIndex(x => x.classList.contains("sel"));
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); its.forEach(x => x.classList.remove("sel")); const n = its[(i + (e.key === "ArrowDown" ? 1 : -1) + its.length) % its.length]; n?.classList.add("sel"); n?.scrollIntoView({ block: "nearest" }); }
+    if (e.key === "Enter") { (its[i] || its[0])?.click(); }
+  };
+  if (!LESSONS) lessons().catch(() => {});
+}
+function closeAll(keepMenu) {
+  if (!keepMenu && !document.body.classList.contains("pinned")) { $("#menu")?.remove(); $("#mbtn").classList.remove("on"); }
+  $$(".pop, .cm").forEach(x => x.remove());
+}
+
+/* ================= choose a lesson for the studio ================= */
+async function picker(part = "script") {
+  closeAll();
+  let d = $("#pick"); if (!d) { d = document.createElement("dialog"); d.id = "pick"; document.body.append(d); }
+  d.innerHTML = `<div class="pk"><header><h3>Open a lesson in the studio</h3><input class="in" id="pq" placeholder="🔍 Find a lesson" autocomplete="off" aria-label="Find a lesson"></header><div class="ls" id="pl"><div class="empty">Loading…</div></div>
+    <footer><button class="b" data-pk="new">＋ New lesson</button><span style="flex:1"></span><button class="b" data-pk="x">Cancel</button></footer></div>`;
+  d.showModal();
+  const ls = await lessons(), FL = { de: "🇩🇪", nl: "🇳🇱", pl: "🇵🇱" };
+  const drawL = q => { q = (q || "").toLowerCase(); $("#pl").innerHTML = studioScopes().map(s => { const xs = ls.filter(l => l.scope.q === s.q && (!q || l.title.toLowerCase().includes(q))); return xs.length ? `<div class="mh">${esc(s.name)}</div>` + xs.map(l => `<button class="mi" data-lid="${l.id}" data-scope="${esc(s.q)}" data-part="${part}"><span class="ic">${FL[l.course] || "📄"}</span>${esc(l.title)}<span class="k">${esc(l.level)} · ${esc({ draft: "draft", review: "in work", published: "published" }[l.status])}</span></button>`).join("") : ""; }).join("") || `<div class="empty">No lessons yet. Make one in Content.</div>`; };
+  drawL(); $("#pq").oninput = e => drawL(e.target.value); $("#pq").focus();
+  d.onclick = e => {
+    if (e.target === d || e.target.closest('[data-pk="x"]')) return d.close();
+    if (e.target.closest('[data-pk="new"]')) { d.close(); const s = SECTIONS.find(x => x.key === "lapp") || SECTIONS.find(x => x.items.some(i => i[0].endsWith("#lessons"))); if (s) open(s.items.find(i => /#(content|lessons)$/.test(i[0]))[0]); return; }
+    const b = e.target.closest("[data-lid]"); if (b) { d.close(); openLesson(ls.find(l => String(l.id) === b.dataset.lid && l.scope.q === b.dataset.scope), b.dataset.part); }
+  };
+}
+
+/* ================= the assistant: everywhere, sees the page you are on ================= */
+let CHAT = [];
+function ctxNow() { const t = T(ACT); if (!t) return { title: "the start screen", group: "" }; const g = groupOf(t.url, t.lesson); return { title: t.title, group: g.title, place: new URL(t.url, location.origin).pathname }; }
+function suggestions() {
+  const t = T(ACT), u = t ? t.url : "";
+  if (/\/studio/.test(u)) return ["Make line 4 simpler for A1", "Which words here are above A1?", "Write a short homework for this lesson"];
+  if (/#finance/.test(u)) return ["How do I book a refund?", "What goes into the VAT return?", "How do instalments work here?"];
+  if (/\/admin#users/.test(u)) return ["How do I give someone Plus for a month?", "Where are school accounts?"];
+  if (/#(content|lessons)/.test(u)) return ["Plan 6 A1 lessons about travel", "How do folder rules work?"];
+  if (/\/s\//.test(u)) return ["How do I plan a weekly class?", "How do I add students from a list?"];
+  return ["What can I do here?", "Plan lessons for a trip to Vienna", "How do I make a lesson's audio?"];
+}
+function ai(q) {
+  closeAll();
+  let p = $("#ai");
+  if (p && !q) { p.remove(); $('[data-t="ai"]').classList.remove("on"); return; }
+  if (!p) {
+    p = document.createElement("div"); p.id = "ai"; p.setAttribute("role", "dialog"); p.setAttribute("aria-label", "Assistant"); document.body.append(p);
+    p.innerHTML = `<div class="ah"><b style="background:var(--g);-webkit-background-clip:text;background-clip:text;color:transparent;font-size:18px">✦</b><b>Assistant</b><span class="ctx" id="actx"></span><span class="sp"></span><button data-a="new" title="New conversation">↺</button><button data-a="x" title="Close · Esc">✕</button></div>
+      <div class="am" id="am"></div><form class="af" id="af"><input id="ai-q" placeholder="Ask anything about your work…" autocomplete="off" aria-label="Ask the assistant"><button aria-label="Send">↵</button></form>`;
+    $("#af").onsubmit = e => { e.preventDefault(); send($("#ai-q").value); };
+  }
+  $('[data-t="ai"]').classList.add("on");
+  drawChat(); $("#ai-q").focus();
+  if (q) send(q);
+}
+function drawChat() {
+  const c = ctxNow(); if ($("#actx")) $("#actx").textContent = "sees: " + c.title;
+  $("#am").innerHTML = (CHAT.length ? "" : `<div class="bu it">Hi! I see what you have open (${esc(c.title)}) and can explain, plan and write with you. Changes you still make yourself; I tell you where.</div><div class="sugs">${suggestions().map(s => `<button data-sug="${esc(s)}">${esc(s)}</button>`).join("")}</div>`)
+    + CHAT.map(m => `<div class="bu ${m.me ? "me" : m.err ? "err" : "it"}">${m.wait ? `<span class="dots"><i></i><i></i><i></i></span>` : esc(m.text)}</div>`).join("");
+  $("#am").scrollTop = 1e6;
+}
+async function send(q) {
+  q = (q || "").trim(); if (!q) return;
+  $("#ai-q").value = ""; CHAT.push({ me: 1, text: q }); const w = { wait: 1 }; CHAT.push(w); drawChat();
+  try { const r = await api("POST", "/assist", { q, context: ctxNow(), history: CHAT.filter(m => !m.wait && !m.err).slice(-7, -1) }); Object.assign(w, { wait: 0, text: r.answer }); }
+  catch (e) { Object.assign(w, { wait: 0, err: 1, text: e.message }); }
+  if ($("#am")) drawChat();
+}
+
+/* ================= notifications and background work ================= */
+const NOTES = [];
+const KIND = { ok: ["✓", "rgba(52,211,153,.2)"], info: ["i", "rgba(96,165,250,.2)"], warn: ["!", "rgba(251,191,36,.2)"], err: ["✕", "rgba(248,113,113,.2)"] };
+function toast(text, o = {}) {
+  const [ic, bg] = KIND[o.kind || "ok"], t = document.createElement("div"); t.className = "toast"; t.setAttribute("role", "status");
+  t.innerHTML = `<span class="i" style="background:${bg}">${ic}</span><span>${esc(text)}</span>`; $("#toasts").prepend(t); setTimeout(() => t.remove(), 3600);
+}
+function note(n) { NOTES.unshift({ at: Date.now(), ...n }); const b = $('[data-t="bell"] .bd'); b.hidden = false; b.textContent = NOTES.filter(x => !x.seen).length; }
+const ago = ms => { const m = (Date.now() - ms) / 6e4; return m < 1 ? "now" : m < 60 ? Math.round(m) + " min ago" : Math.round(m / 60) + " h ago"; };
+function pop(btn, html) { closeAll(); const p = document.createElement("div"); p.className = "pop"; p.innerHTML = html; document.body.append(p); const r = btn.getBoundingClientRect(); p.style.left = Math.max(10, Math.min(r.right - p.offsetWidth, innerWidth - p.offsetWidth - 10)) + "px"; return p; }
+function bell(btn) {
+  NOTES.forEach(n => n.seen = true); $('[data-t="bell"] .bd').hidden = true;
+  pop(btn, `<h4><span>Notifications</span></h4>` + (NOTES.length ? NOTES.slice(0, 25).map(n => { const [ic, bg] = KIND[n.kind] || KIND.info; return `<div class="nt"><span class="i" style="background:${bg}">${n.icon || ic}</span><div><b>${esc(n.text)}</b><small>${esc(n.from || "")} · ${ago(n.at)}</small></div></div>`; }).join("") : `<div class="empty">Nothing new. Finished audio, problems and messages show up here.</div>`));
+}
+let JOBS = [], SEEN = {};
+async function pollJobs() {
+  const all = await Promise.all(studioScopes().map(s => api("GET", "/studio/jobs" + (s.q ? "?org=" + s.q : "")).then(r => r.jobs.map(j => ({ ...j, scope: s }))).catch(() => [])));
+  JOBS = all.flat().sort((a, b) => b.at - a.at);
+  JOBS.forEach(j => { const k = j.scope.q + ":" + j.id; if (SEEN[k] && SEEN[k] !== j.status && ["done", "failed"].includes(j.status)) { note({ text: `Audio ${j.status === "done" ? "ready" : "stopped"} · ${j.title}`, kind: j.status === "done" ? "ok" : "err", from: "Studio" }); toast(`Audio ${j.status === "done" ? "ready" : "stopped"} · ${j.title}`, { kind: j.status === "done" ? "ok" : "err" }); } SEEN[k] = j.status; });
+  const run = JOBS.filter(j => ["queued", "running"].includes(j.status)).length, b = $('[data-t="jobs"] .bd'); b.hidden = !run; b.textContent = run;
+  setTimeout(pollJobs, run ? 20000 : 90000);
+}
+function jobs(btn) {
+  const ST = { queued: ["⏳", "waiting", 8], running: ["〰", "running", 55], done: ["✓", "ready", 100], failed: ["✕", "stopped", 100] };
+  pop(btn, `<h4><span>Working in the background</span><span>${JOBS.filter(j => ["queued", "running"].includes(j.status)).length} running</span></h4>` + (JOBS.length ? JOBS.slice(0, 12).map(j => { const s = ST[j.status] || ST.queued; return `<div class="nt"><span class="i" style="background:${j.status === "failed" ? "rgba(248,113,113,.2)" : "rgba(34,211,238,.2)"}">${s[0]}</span><div style="flex:1;min-width:0"><b>${esc(j.title)}</b>Audio · ${s[1]}${["queued", "running"].includes(j.status) ? `<div class="bar"><i style="width:${s[2]}%"></i></div>` : ""}<small>${ago(j.at)} · <button style="color:#C4B5FD" data-open="${esc(`/studio${j.scope.q ? "?org=" + j.scope.q : ""}#voice/${j.lesson}`)}" data-title="Voice desk · ${esc(j.title)}" data-icon="〰" data-lesson="${esc(JSON.stringify({ id: String(j.lesson), title: j.title }))}">Open</button></small></div></div>`; }).join("") : `<div class="empty">Nothing is running. Audio keeps being made here while you do other things.</div>`));
+}
+function ctxMenu(x, y, L) {
+  closeAll(true); const m = document.createElement("div"); m.className = "cm";
+  m.innerHTML = L.map((it, i) => it === "-" ? "<hr>" : `<button data-i="${i}">${it[0]}<span>${esc(it[1])}</span>${it[2] ? `<span class="k">${esc(it[2])}</span>` : ""}</button>`).join("");
+  document.body.append(m); m.style.left = Math.max(8, Math.min(x, innerWidth - m.offsetWidth - 8)) + "px"; m.style.top = Math.max(8, Math.min(y - m.offsetHeight, innerHeight - m.offsetHeight - 8)) + "px";
+  m.onclick = e => { const b = e.target.closest("[data-i]"); if (b) { m.remove(); L[+b.dataset.i][3](); } };
+}
+function keys() {
+  const K = [[MODK + "K", "the menu, with search"], [MODK + "J", "the assistant"], ["Alt+W", "close the page"], ["Alt+1…9", "go to page 1…9"], ["Ctrl+Alt+→", "two pages side by side"], ["Ctrl+Alt+←", "one page"], ["Ctrl+Alt+F", "float the page"], ["Esc", "close the menu or a pop-up"]];
+  let d = $("#keys"); if (!d) { d = document.createElement("dialog"); d.id = "keys"; document.body.append(d); }
+  d.innerHTML = `<div class="pk"><header><h3>Keyboard shortcuts</h3></header><div class="ls" style="display:grid;grid-template-columns:auto 1fr;gap:8px 14px;padding:16px">${K.map(([k, t]) => `<span class="kbd" style="font-size:12px;padding:2px 7px">${esc(k)}</span><span>${esc(t)}</span>`).join("")}</div><footer><button class="b pr" onclick="this.closest('dialog').close()">Close</button></footer></div>`;
+  d.showModal();
+}
+
+/* ================= events ================= */
+function act(k, el, e) {
+  if (k === "split") return split();
+  if (k === "ai") return ai();
+  if (k === "jobs") return jobs(el);
+  if (k === "bell") return bell(el);
+  if (k === "me") return menu();
+}
+document.addEventListener("click", e => {
+  const t = e.target;
+  if (t.closest("#mbtn")) return menu();
+  const c = t.closest("[data-close]"); if (c) { e.stopPropagation(); return close(c.dataset.close); }
+  const tb = t.closest(".tab[data-tab]"); if (tb) { const x = T(tb.dataset.tab); if (x.float) { x.float.style.zIndex = ++ZF; ACT = x.id; return draw(); } return open(x.url); }
+  const o = t.closest("[data-open]"); if (o) { e.preventDefault(); return open(o.dataset.open, { title: o.dataset.title, icon: o.dataset.icon, lesson: o.dataset.lesson ? JSON.parse(o.dataset.lesson) : null }); }
+  const lid = t.closest("#menu [data-lid]"); if (lid) return openLesson(LESSONS.find(l => String(l.id) === lid.dataset.lid && l.scope.q === lid.dataset.scope), "script");
+  const m = t.closest("[data-m]"); if (m) {
+    const k = m.dataset.m;
+    if (k === "pick") return picker(m.dataset.part);
+    if (k === "ai") return ai(m.dataset.q);
+    if (k === "lang") { closeAll(); return PanelI18N.menu($("#mbtn")); }
+    if (k === "cursor") { LS.set("lapp.cursor", LS.get("lapp.cursor", "") === "system" ? "" : "system"); location.reload(); return; }
+    if (k === "pin") { document.body.classList.toggle("pinned"); LS.set(KEY + ".pinned", document.body.classList.contains("pinned")); if (!document.body.classList.contains("pinned")) closeAll(); else menu(); return layout(); }
+    if (k === "keys") { closeAll(); return keys(); }
+    if (k === "out") return api("POST", "/auth/logout").finally(() => location.href = "/");
+  }
+  const tl = t.closest("[data-t]"); if (tl) return act(tl.dataset.t, tl, e);
+  const sg = t.closest("[data-sug]"); if (sg) return send(sg.dataset.sug);
+  const a = t.closest("[data-a]"); if (a) { if (a.dataset.a === "x") return ai(); CHAT = []; return drawChat(); }
+  const ph = t.closest("[data-ph]"); if (ph) return ph.dataset.ph === "close" ? close(ph.dataset.id) : floatTab(ph.dataset.id);
+  const fw = t.closest("[data-fw]"); if (fw) { const id = fw.closest(".fw").dataset.id; return fw.dataset.fw === "x" ? close(id) : floatTab(id); }
+  const phd = t.closest(".ph"); if (phd) { AP = +phd.dataset.p; ACT = PANES[AP]; return draw(); }
+  if (!t.closest("#menu, #ai, .pop, .cm, dialog")) closeAll();
+});
+// our menu on the taskbar tabs
+document.addEventListener("contextmenu", e => {
+  const tb = e.target.closest(".tab[data-tab]");
+  if (tb) { e.preventDefault(); const x = T(tb.dataset.tab), g = groupOf(x.url, x.lesson);
+    return ctxMenu(e.clientX, e.clientY, [["◨", "Next to this page", "Ctrl+Alt+→", () => { if (x.id === ACT) split(true); else { ACT = ACT || x.id; split(true, x.id); } }], ["⧉", x.float ? "Back into the workspace" : "Float", "Ctrl+Alt+F", () => floatTab(x.id)], ["📌", "Pin to the menu", "", () => { LS.set(KEY + ".pins", [{ url: x.url, title: x.title, icon: x.icon }, ...pinned().filter(p => p.url !== x.url)].slice(0, 12)); toast("Pinned to the menu"); }], ["⟳", "Reload", "", () => { if (x.fr) x.fr.src = embed(x.url); }], "-",
+      ["✕", "Close", "Alt+W", () => close(x.id)], ["✕", `Close everything in ${g.title}`, "", () => TABS.filter(y => groupOf(y.url, y.lesson).key === g.key).forEach(y => close(y.id))]]); }
+  if (e.target.closest("#tb, #home, #menu") && !e.target.closest("input")) { e.preventDefault(); ctxMenu(e.clientX, e.clientY, [["🔍", "Menu and search", MODK + "K", () => menu()], ["✦", "Ask the assistant", MODK + "J", () => ai()], ["⊟", SPLIT ? "One page" : "Two pages side by side", "", () => split()], ["⌨", "Keyboard shortcuts", "", keys]]); }
+});
+function onKey(k) {
+  if (k.mod && k.key.toLowerCase() === "k") return menu();
+  if (k.mod && k.key.toLowerCase() === "j") return ai();
+  if (k.alt && !k.mod && k.code === "KeyW") return ACT && close(ACT);
+  if (k.alt && !k.mod && /^Digit[1-9]$/.test(k.code)) { const t = TABS[+k.code.slice(5) - 1]; return t && open(t.url); }
+  if (k.ctrl && k.alt && k.key === "ArrowRight") return split(true);
+  if (k.ctrl && k.alt && k.key === "ArrowLeft") return split(false);
+  if (k.ctrl && k.alt && k.key.toLowerCase() === "f") return floatTab();
+  if (k.key === "Escape") { if ($("#ai")) return ai(); closeAll(); }
+}
+document.addEventListener("keydown", e => {
+  const mod = e.metaKey || e.ctrlKey, k = { key: e.key, code: e.code, mod, alt: e.altKey, ctrl: e.ctrlKey };
+  if ((mod && /^[kj]$/i.test(e.key)) || (e.altKey && !mod && /^(KeyW|Digit[1-9])$/.test(e.code)) || (e.ctrlKey && e.altKey)) e.preventDefault();
+  if (e.key === "Escape" && document.querySelector("dialog[open]")) return;
+  onKey(k);
+});
+// messages from the pages inside
+addEventListener("message", e => {
+  if (e.origin !== location.origin || !e.data || !e.data.lapp) return;
+  const t = TABS.find(x => x.fr && x.fr.contentWindow === e.source), d = e.data;
+  if (d.t === "key") return onKey(d);
+  if (d.t === "open") return open(d.url);
+  if (d.t === "note") { note({ text: d.text, kind: d.kind, from: t ? t.title : "" }); return; }
+  if (d.t === "title" && t) {
+    if (d.title) t.title = d.title; if (d.icon) t.icon = d.icon; if (d.lesson) t.lesson = { id: String(d.lesson.id), title: d.lesson.title };
+    if (d.url) { const u = norm(d.url); if (!TABS.some(x => x !== t && x.url === u)) t.url = u; }
+    t.fr.title = t.title; if (t.float) $(".fh span", t.float).textContent = t.icon + " " + t.title;
+    draw(); if ($("#ai")) drawChat();
+  }
+});
+// drag a tab onto the workspace: the left or right half shows it there; on another tab: reorder
+let drag = null, pd = null;
+document.addEventListener("dragstart", e => { const tb = e.target.closest && e.target.closest(".tab[data-tab]"); if (!tb) return; drag = tb.dataset.tab; document.body.classList.add("dragging"); try { e.dataTransfer.setData("text/plain", drag); } catch {} });
+document.addEventListener("dragend", () => { drag = null; document.body.classList.remove("dragging"); $(".dropz")?.remove(); });
+document.addEventListener("dragover", e => {
+  if (!drag) return;
+  if (e.target.closest(".tab[data-tab]")) { e.preventDefault(); return; }
+  if (!e.target.closest("#ws")) return; e.preventDefault();
+  const R = $("#ws").getBoundingClientRect(), right = e.clientX > R.left + R.width / 2;
+  let z = $(".dropz"); if (!z) { z = document.createElement("div"); z.className = "dropz"; $("#ws").append(z); }
+  Object.assign(z.style, { left: (right ? R.width / 2 + 8 : 8) + "px", top: "8px", width: R.width / 2 - 16 + "px", height: R.height - 16 + "px" }); z.textContent = right ? "Show it on the right" : "Show it on the left"; z.dataset.side = right ? 1 : 0;
+});
+document.addEventListener("drop", e => {
+  if (!drag) return; e.preventDefault(); const id = drag; drag = null; document.body.classList.remove("dragging");
+  const tb = e.target.closest(".tab[data-tab]");
+  if (tb) { const a = T(id), to = TABS.indexOf(T(tb.dataset.tab)); TABS = TABS.filter(x => x !== a); TABS.splice(to, 0, a); $(".dropz")?.remove(); return draw(); }
+  const z = $(".dropz"); const side = z ? +z.dataset.side : 1; z?.remove();
+  if (!e.target.closest("#ws")) return;
+  const other = ACT && ACT !== id ? ACT : TABS.find(x => x.id !== id && !x.float)?.id;
+  if (!other) return open(T(id).url);
+  if (T(id).float) floatTab(id);
+  SPLIT = true; PANES = side ? [other, id] : [id, other]; AP = side; ACT = id; draw();
+});
+// resize the two pages; move floating pages
+document.addEventListener("pointerdown", e => {
+  if (e.target.id === "div") { pd = { div: 1 }; document.body.classList.add("dragging"); e.target.setPointerCapture(e.pointerId); return; }
+  const fh = e.target.closest(".fw .fh"); if (fh && !e.target.closest("button")) { const w = fh.parentElement, r = w.getBoundingClientRect(); w.style.zIndex = ++ZF; ACT = w.dataset.id; pd = { w, dx: e.clientX - r.left, dy: e.clientY - r.top }; document.body.classList.add("dragging"); fh.setPointerCapture(e.pointerId); }
+});
+document.addEventListener("pointermove", e => {
+  if (!pd) return; const R = $("#ws").getBoundingClientRect();
+  if (pd.div) { RATIO = Math.min(.8, Math.max(.2, (e.clientX - R.left) / R.width)); return layout(); }
+  pd.w.style.left = Math.min(Math.max(e.clientX - R.left - pd.dx, 0), R.width - 120) + "px"; pd.w.style.top = Math.min(Math.max(e.clientY - R.top - pd.dy, 0), R.height - 40) + "px"; layout();
+});
+document.addEventListener("pointerup", () => { if (pd) { pd = null; document.body.classList.remove("dragging"); save(); } });
+addEventListener("resize", layout);
+setInterval(() => { const d = new Date(), loc = window.PanelI18N ? PanelI18N.locale : "en-GB"; $("#clock").innerHTML = `${d.toLocaleTimeString(loc, { hour: "2-digit", minute: "2-digit" })}<br>${d.toLocaleDateString(loc, { weekday: "short", day: "numeric", month: "short" })}`; }, 1000);
+addEventListener("panel:lang", () => { TABS.forEach(t => { if (t.fr) t.fr.src = embed(t.url); }); draw(); });
+
+/* ================= start ================= */
+(async () => {
+  const m = await api("GET", "/me");
+  if (!m.user) { location.href = "/?login=1&next=/manage"; return; }
+  ME = m.user; ORGS = m.orgs || []; SECTIONS = sections(); KEY = "lapp.manage." + ME.id;
+  $("#av").textContent = (ME.name || ME.username).charAt(0).toUpperCase(); $("#av").style.background = `linear-gradient(135deg,${GRAD[ME.id % GRAD.length]})`;
+  if (LS.get(KEY + ".pinned", false) && innerWidth > 640) { document.body.classList.add("pinned"); menu(); }
+  // tabs as they were left, then whatever a link asked to open
+  const s = LS.get(KEY, null);
+  if (s && Array.isArray(s.tabs)) {
+    s.tabs.forEach(x => TABS.push({ id: "t" + Math.random().toString(36).slice(2, 8), url: x.url, title: x.title, icon: x.icon, lesson: x.lesson }));
+    ACT = (TABS[s.act] || TABS[0] || {}).id || null;
+    if (s.split && TABS[s.panes[0]] && TABS[s.panes[1]]) { SPLIT = true; PANES = [TABS[s.panes[0]].id, TABS[s.panes[1]].id]; AP = PANES.indexOf(ACT) > -1 ? PANES.indexOf(ACT) : 0; }
+    if (TABS.length > 1) toast(`Welcome back · ${TABS.length} pages are open as you left them`, { kind: "info" });
+  }
+  const want = decodeURIComponent((location.hash.match(/#open=(.+)$/) || [])[1] || "");
+  history.replaceState(null, "", "/manage");
+  if (want && /^\/(admin|studio|s\/)/.test(want)) open(want); else draw();
+  pollJobs();
+})();
+</script>
+</body></html>

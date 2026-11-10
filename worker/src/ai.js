@@ -22,7 +22,7 @@ export const KINDS = {
   anthropic: { name: "Anthropic Claude", key: true, url: "https://api.anthropic.com/v1", models: ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5"] },
   compatible: { name: "Other (OpenAI-compatible)", key: false, url: "http://localhost:11434/v1", models: ["llama3.3", "qwen2.5", "deepseek-chat", "mistral-large-latest"] }
 };
-export const TASKS = { write: "Write a lesson", translate: "Translate", rewrite: "Rewrite a line", check: "Check the level", plan: "Plan a series" };
+export const TASKS = { write: "Write a lesson", translate: "Translate", rewrite: "Rewrite a line", check: "Check the level", plan: "Plan a series", assist: "Assistant in the panel" };
 
 const fail = (m, status = 502, extra) => Object.assign(new Error(m), { status, extra });
 

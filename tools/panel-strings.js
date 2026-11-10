@@ -4,7 +4,7 @@
 // ${…} inside a text becomes {a}, {b}… so the translation can move the values around.
 const fs = require("fs"), path = require("path");
 const ROOT = path.join(__dirname, "..");
-const FILES = ["worker/src/admin.html", "worker/src/studio.html", "worker/src/school.html", "ui/lapp-ui.js", "ui/shell.js", "ui/drive.js"];
+const FILES = ["worker/src/admin.html", "worker/src/studio.html", "worker/src/school.html", "ui/lapp-ui.js", "ui/shell.js", "ui/drive.js", "worker/src/manage.html"];
 const out = new Set();
 
 // a template string with ${…} → text with {a} {b} holes (nested braces are skipped over)

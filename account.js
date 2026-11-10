@@ -46,7 +46,7 @@
   }
   const isAccount = () => (Auth.session || {}).type === "account";
   // after sign-in, go back to the staff pages or a school portal that sent the person here
-  const okNext = n => !!n && ((/^\/admin\/?$/.test(n) && isStaff()) || /^\/studio\/?(\?org=[a-z0-9][a-z0-9-]{1,30})?$/.test(n) || /^\/s\/[a-z0-9][a-z0-9-]{1,30}\/?$/.test(n));
+  const okNext = n => !!n && (/^\/manage\/?$/.test(n) || (/^\/admin\/?$/.test(n) && isStaff()) || /^\/studio\/?(\?org=[a-z0-9][a-z0-9-]{1,30})?$/.test(n) || /^\/s\/[a-z0-9][a-z0-9-]{1,30}\/?$/.test(n));
   let orgs = [];
   const isStaff = () => ["designer", "manager", "admin"].includes((Auth.session || {}).role);
 
@@ -242,9 +242,8 @@
     if (okNext(next)) { location.href = next; return; }
     // staff go to their own workspace, not the learning app
     const role = m.user.role, work = (m.orgs || []).find(o => o.role !== "student");
-    if (role === "admin" || role === "manager") { location.href = "/admin"; return; }
-    if (role === "designer") { location.href = "/studio"; return; }
-    if (work) { location.href = `/s/${work.slug}`; return; }
+    // everyone who isn't only a learner works in the one management environment
+    if (["admin", "manager", "designer"].includes(role) || work) { location.href = "/manage"; return; }
     if (m.user.managed && m.orgs && m.orgs.length) { location.href = `/s/${m.orgs[0].slug}`; return; }
     if (!m.user.verified) { go("verify"); return; }
     finish(fresh);
@@ -442,7 +441,7 @@
     const rows = `<div class="pf-row pf-acct"><span class="pf-acct-ic">${esc(initial(s.name || s.username))}</span><span class="pf-acct-tx"><b><bdi>@${esc(s.username)}</bdi> ${badge()}</b><small><bdi>${esc(s.email)}</bdi> · ${esc(syncTx)}${planTx ? " · " + esc(planTx) : ""}</small></span></div>`
       + (plan.why === "stripe" || plan.status ? row("💳", t("acBilling"), "portal") : "")
       + orgs.map(o => `<a class="pf-row pf-link" href="/s/${esc(o.slug)}"><span>🏫 ${esc(o.name)} <span class="ac-badge free">${esc(o.role)}</span></span><span class="v">›</span></a>`).join("")
-      + (["manager", "admin"].includes(s.role) ? `<a class="pf-row pf-link" href="/admin"><span>🛠 ${esc(t("acAdmin"))}</span><span class="v">›</span></a>` : "")
+      + (["manager", "admin", "designer"].includes(s.role) || orgs.some(o => o.role !== "student") ? `<a class="pf-row pf-link" href="/manage"><span>🛠 ${esc(t("acAdmin"))}</span><span class="v">›</span></a>` : "")
       + (isStaff() ? `<a class="pf-row pf-link" href="/studio"><span>🎬 ${esc(t("acStudio"))}</span><span class="v">›</span></a>` : "")
       + row("🔒", t("acChangePw"), "password")
       + `<button type="button" class="pf-row pf-link danger" data-acct="out"><span>${esc(t("signOut"))}</span></button>`;

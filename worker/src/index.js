@@ -1,7 +1,7 @@
 // LAPP — one Worker for the whole site (lapp.khaledi.eu).
 //
 // The static app (index.html, app.js, content/…) is served from Workers Static Assets.
-// This code runs first only for: /api/*, /admin, /studio, /s/<school>, the lessons' audio.mp3
+// This code runs first only for: /api/*, /manage, /admin, /studio, /s/<school>, the lessons' audio.mp3
 // and the studio's lessons (/content/lessons/s-<id>/…, kept in D1: worker/src/lessons.js)
 // (see run_worker_first in wrangler.toml).
 //
@@ -16,8 +16,9 @@
 // Vars:    APP_URL, EMAIL_FROM, STRIPE_PRICE_MONTHLY, STRIPE_PRICE_YEARLY, REPO, BRANCH, DEV.
 import STUDIO from "./studio.html";
 import { lessonsApi, libApi, eventsApi, servePublished, plusLessons } from "./lessons.js";
-import { adminAi } from "./ai.js";
+import { adminAi, ask as aiAsk } from "./ai.js";
 import ADMIN from "./admin.html";
+import MANAGE from "./manage.html";
 import SCHOOL from "./school.html";
 import { orgApi, orgsList, adminOrgs } from "./school.js";
 export { Room } from "./room.js";
@@ -47,6 +48,14 @@ export default {
     try {
       if (p.startsWith("/api/")) return await api(req, env, url, ctx);
       if (p === "/admin" || p === "/admin/") return await page(req, env, ADMIN, ["manager", "admin"], "/admin");
+      // the one place where everyone who isn't only a learner works: LAPP staff, school admins, teachers, finance
+      if (p === "/manage" || p === "/manage/") {
+        const u = env.DB ? await currentUser(req, env) : null;
+        if (!u) return Response.redirect(`${url.origin}/?login=1&next=/manage`, 302);
+        const work = STAFF.includes(u.role) || await env.DB.prepare("SELECT 1 FROM org_members m JOIN orgs o ON o.id = m.org_id WHERE m.user_id = ? AND m.active = 1 AND m.role IN ('admin','teacher','finance') AND o.disabled = 0").bind(u.id).first();
+        if (!work) return Response.redirect(`${url.origin}/`, 302);
+        return await page(req, env, MANAGE, ROLES, "/manage");
+      }
       // a school's portal: anyone signed in gets the page; the API decides what they may see
       let sm;
       if ((sm = p.match(/^\/s\/([a-z0-9][a-z0-9-]{1,30})\/?$/))) return await page(req, env, SCHOOL, ROLES, `/s/${sm[1]}`);
@@ -315,6 +324,27 @@ async function api(req, env, url, ctx) {
     return json(await me(env, req, u));
   }
 
+  /* ---- the assistant in the management panel: answers with what the person is looking at ---- */
+  if (p === "/assist" && M === "POST") {
+    const u = await need(req, env);
+    const orgs = (await env.DB.prepare("SELECT o.name, m.role FROM org_members m JOIN orgs o ON o.id = m.org_id WHERE m.user_id = ? AND m.active = 1 AND m.role IN ('admin','teacher','finance') AND o.disabled = 0").bind(u.id).all()).results;
+    if (!STAFF.includes(u.role) && !orgs.length) throw fail("the assistant is for staff and school teams", 403);
+    const day = Math.floor(now() / DAY);
+    const n = await env.DB.prepare("INSERT INTO hits (key, n, reset) VALUES (?1, 1, ?2) ON CONFLICT(key) DO UPDATE SET n = n + 1 RETURNING n").bind(`ai:${u.id}:${day}`, (day + 2) * DAY).first();
+    if (n.n > 80) throw fail("the daily AI limit is reached — try again tomorrow", 429);
+    const b = await body(req), s = (v, k) => String(v ?? "").replace(/\s+/g, " ").trim().slice(0, k);
+    const q = s(b.q, 1200); if (!q) throw fail("ask something");
+    const c = b.context || {}, hist = (Array.isArray(b.history) ? b.history : []).slice(-6).map(m => `${m.me ? "Person" : "Assistant"}: ${s(m.text, 600)}`).join("\n");
+    const who = [STAFF.includes(u.role) ? `LAPP ${u.role}` : "", ...orgs.map(o => `${o.role} at ${o.name}`)].filter(Boolean).join(", ");
+    const prompt = `You are the assistant inside LAPP's management panel. LAPP is a speaking-first language-learning platform (German, Dutch, Polish) with a lesson studio, schools, classes, homework and finance.
+The person: ${s(u.name || u.username, 60)} (${who}).
+They are looking at: ${s(c.title, 120)}${c.group ? " in " + s(c.group, 80) : ""}${c.place ? " (" + s(c.place, 160) + ")" : ""}.
+Answer in the language of their question, short and practical. When they want something changed, say where in the panel to do it and what to click; you can't change data yourself yet. Never invent numbers you were not given.
+${hist ? "Conversation so far:\n" + hist + "\n" : ""}Question: ${q}`;
+    const r = await aiAsk(env, "assist", { prompt, schema: { type: "object", required: ["answer"], properties: { answer: { type: "string" } } }, max: 1500 });
+    return json({ answer: s(r.value.answer, 4000), provider: r.provider });
+  }
+
   if (p === "/me" && M === "PATCH") {
     const u = await need(req, env);
     const b = await body(req);
@@ -456,7 +486,7 @@ async function page(req, env, html, roles, path) {
   if (!u) return Response.redirect(`${new URL(req.url).origin}/?login=1&next=${encodeURIComponent(path)}`, 302);
   if (!roles.includes(u.role)) return new Response("Forbidden", { status: 403, headers: { "Content-Type": "text/plain" } });
   return new Response(html, {
-    headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store", "X-Frame-Options": "DENY", "Content-Security-Policy": "frame-ancestors 'none'", ...SECURE }
+    headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store", "X-Frame-Options": "SAMEORIGIN", "Content-Security-Policy": "frame-ancestors 'self'", ...SECURE }
   });
 }
 

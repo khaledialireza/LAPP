@@ -123,6 +123,9 @@
   const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
   const mac = /Mac|iPhone|iPad/.test(navigator.platform);
+  // inside the management environment (/manage) a page shows one view, and the environment does the rest
+  const EMBED = new URLSearchParams(location.search).has("embed") && window.parent !== window;
+  const up = m => { try { parent.postMessage({ lapp: 1, ...m }, location.origin); } catch {} };
   const MOD = mac ? "⌘" : "Ctrl ";
   let O, side, main, bar, panesEl;
   let TABS = [], PANES = [null, null], ACT = 0, SPLIT = false, VIEWS = {}, TITLES = {}, FLOATS = {}, SEQ = {}, Z = 60;
@@ -174,6 +177,7 @@
 
   /* ---------- tabs and panes ---------- */
   function drawTabs() {
+    if (EMBED || !bar) return;
     bar.innerHTML = TABS.map(r => `<div class="sh-tab ${PANES[ACT] === r ? "on" : ""} ${PANES[0] === r && SPLIT ? "p0" : ""} ${SPLIT && PANES[1] === r ? "p1" : ""}" role="tab" aria-selected="${PANES[ACT] === r}" draggable="true" data-tab="${esc(r)}" title="${esc(titleOf(r))}"><span>${FLOATS[r] ? "⧉" : iconOf(r)}</span><span class="t">${esc(titleOf(r))}</span><button class="x" data-close="${esc(r)}" aria-label="Close tab" title="Close · Alt+W">✕</button></div>`).join("")
       + `<button class="sh-tab add" data-sh="new" title="New tab">＋</button>`;
     $('[data-sh="split"]', main).classList.toggle("on", SPLIT);
@@ -218,6 +222,7 @@
   }
   function open(r, o = {}) {
     r = String(r || ""); if (!r) return;
+    if (EMBED) { if (o.tab === "new" && r !== location.hash.slice(1)) up({ t: "open", url: location.pathname + location.search.replace(/[?&]embed=1/, "").replace(/^&/, "?") + "#" + r }); else location.hash = r; return; }
     if (FLOATS[r]) { FLOATS[r].style.zIndex = ++Z; return; }
     const here = o.tab === "here" && PANES[ACT] && !TABS.includes(r);
     if (here) {
@@ -332,6 +337,7 @@
     if (o.action) $(".a", t).onclick = () => { t.remove(); o.run && o.run(); };
     $("#shToasts").prepend(t); setTimeout(() => t.remove(), o.ms || (o.action ? 6000 : 3200));
     NOTES.unshift({ text, kind, at: Date.now() }); NOTES.length = Math.min(NOTES.length, 40);
+    if (EMBED && kind !== "ok") up({ t: "note", text, kind });
     const d = $('[data-sh="bell"] .sh-dot', main); if (d && kind !== "ok") { d.hidden = false; d.textContent = NOTES.filter(n => n.kind !== "ok" && !n.seen).length || ""; }
   }
   function notify(n) { NOTES.unshift({ kind: "info", at: Date.now(), ...n }); const d = $('[data-sh="bell"] .sh-dot', main); d.hidden = false; d.textContent = NOTES.filter(x => !x.seen && x.kind !== "ok").length || ""; }
@@ -509,8 +515,35 @@
   }
 
   /* ---------- start ---------- */
+  function embedInit() {
+    const st = document.createElement("style");
+    st.textContent = CSS + `body.sh-embed{display:block!important;height:100vh;overflow:hidden}body.sh-embed>aside{display:none!important}.sh-embed .sh-main{position:fixed;inset:0;height:100vh}.sh-embed .sh-view{padding:20px 24px 50px}`;
+    document.head.append(st); document.body.classList.add("sh", "sh-embed");
+    main.classList.add("sh-main"); main.innerHTML = "";
+    const box = document.createElement("div"); box.className = "sh-toasts"; box.id = "shToasts"; document.body.append(box);
+    const show = () => { const r = location.hash.slice(1) || O.home || O.nav[0].route; TABS = [r]; PANES = [r, null]; ACT = 0; main.innerHTML = ""; for (const k in VIEWS) delete VIEWS[k]; const el = viewOf(r); main.append(el); el.dataset.painted = 1; paint(r).then(() => up({ t: "title", title: titleOf(r), icon: iconOf(r), url: location.pathname + location.search.replace(/[?&]embed=1/, "").replace(/^&/, "?") + "#" + r })); if (O.onShow) O.onShow(r); };
+    addEventListener("hashchange", show);
+    // keys that belong to the environment
+    document.addEventListener("keydown", e => {
+      const mod = e.metaKey || e.ctrlKey, k = e.key.toLowerCase();
+      if ((mod && (k === "k" || k === "j")) || (e.altKey && !mod && (e.code === "KeyW" || /^Digit[1-9]$/.test(e.code))) || (e.ctrlKey && e.altKey && /Arrow(Left|Right)|^f$/i.test(e.key)) || (e.key === "Escape" && !document.querySelector("dialog[open]"))) { if (e.key !== "Escape") e.preventDefault(); up({ t: "key", key: e.key, code: e.code, mod, alt: e.altKey, ctrl: e.ctrlKey }); }
+    }, true);
+    // the studio and other pages open as tabs of the environment, never as new browser tabs
+    document.addEventListener("click", e => {
+      const a = e.target.closest && e.target.closest("a[href]"); if (!a) return;
+      const u = new URL(a.href, location.href); if (u.origin !== location.origin || !/^\/(studio|admin|s\/)/.test(u.pathname)) return;
+      if (a.target === "_blank" || u.pathname !== location.pathname) { e.preventDefault(); up({ t: "open", url: u.pathname + u.search + u.hash }); }
+    }, true);
+    const wo = window.open.bind(window);
+    window.open = (url, ...rest) => { if (url === "about:blank") return null; const u = new URL(url, location.href); if (u.origin === location.origin && /^\/(studio|admin|s\/)/.test(u.pathname)) { up({ t: "open", url: u.pathname + u.search + u.hash }); return null; } return wo(url, ...rest); };
+    O.signOut = O.signOut || (() => {});
+    show();
+  }
   function init(o) {
     O = o; side = o.side; main = o.main;
+    // opened on its own: the page belongs inside the one management environment
+    if (!EMBED && !o.standalone) { location.replace("/manage#open=" + encodeURIComponent(location.pathname + location.search + location.hash)); return; }
+    if (EMBED) return embedInit();
     frame(); drawSide(); events();
     let s = null; try { s = JSON.parse(localStorage.getItem(O.key) || "null"); } catch {}
     const want = location.hash.slice(1);
@@ -522,8 +555,8 @@
     }
     if (want && ok(want)) open(want); else if (!TABS.length) open(O.home || O.nav[0].route); else sync();
   }
-  function refresh(r) { r = r || PANES[ACT]; return r && VIEWS[r] ? paint(r) : Promise.resolve(); }
-  function title(r, t) { TITLES[r] = t; drawTabs(); const f = FLOATS[r]; if (f) $(".fh span", f).textContent = iconOf(r) + " " + t; }
+  function refresh(r) { if (EMBED) r = PANES[0]; r = r || PANES[ACT]; return r && VIEWS[r] ? paint(r) : Promise.resolve(); }
+  function title(r, t) { TITLES[r] = t; if (EMBED) { up({ t: "title", title: t }); return; } drawTabs(); const f = FLOATS[r]; if (f) $(".fh span", f).textContent = iconOf(r) + " " + t; }
   function badge(id, v) { const el = document.getElementById(id); if (el) el.textContent = v || ""; }
 
   window.Shell = { init, open, close, refresh, split, float, menu, palette, toast, notify, ask, confirm, title, badge, keys,

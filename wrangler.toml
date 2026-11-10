@@ -9,7 +9,7 @@ routes = [{ pattern = "lapp.khaledi.eu", custom_domain = true }]
 [assets]
 directory = "."
 binding = "ASSETS"
-run_worker_first = ["/api/*", "/admin", "/admin/", "/studio", "/studio/", "/s/*", "/content/lessons/*/audio.mp3", "/content/lessons/s-*"]
+run_worker_first = ["/api/*", "/manage", "/manage/", "/admin", "/admin/", "/studio", "/studio/", "/s/*", "/content/lessons/*/audio.mp3", "/content/lessons/s-*"]
 
 [[d1_databases]]
 binding = "DB"
