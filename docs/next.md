@@ -17,3 +17,7 @@
 ## System-wide theme and colours in Settings
 - A theme/colour setting in Settings that changes the whole system: desktop, every window (admin, school, studio) and menus.
 - e.g. dark/light, accent colour, ready-made themes; saved with the account.
+
+## Window frame looks doubled/square
+- Now: a grey border + a separate 1px coloured ring (box-shadow) + a 2px coloured line on top of the title bar → looks like an extra square frame.
+- Fix: one border only. Active window: the border itself takes the place colour (LAPP/school/studio); inactive: soft grey. Drop the extra ring and top line; keep rounded corners.
