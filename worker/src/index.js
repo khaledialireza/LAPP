@@ -20,6 +20,7 @@ import { adminAi, ask as aiAsk } from "./ai.js";
 import ADMIN from "./admin.html";
 import MANAGE from "./manage.html";
 import FILES from "./files.html";
+import SETTINGS from "./settings.html";
 import { deskApi, worksHere } from "./desk.js";
 import SCHOOL from "./school.html";
 import { orgApi, orgsList, adminOrgs } from "./school.js";
@@ -63,6 +64,12 @@ export default {
         if (!u) return Response.redirect(`${url.origin}/?login=1&next=/manage`, 302);
         if (!await worksHere(env, u, STAFF)) return Response.redirect(`${url.origin}/`, 302);
         return await page(req, env, FILES, ROLES, "/files");
+      }
+      if (p === "/settings" || p === "/settings/") {
+        const u = env.DB ? await currentUser(req, env) : null;
+        if (!u) return Response.redirect(`${url.origin}/?login=1&next=/manage`, 302);
+        if (!await worksHere(env, u, STAFF)) return Response.redirect(`${url.origin}/`, 302);
+        return await page(req, env, SETTINGS, ROLES, "/settings");
       }
       // a school's portal: anyone signed in gets the page; the API decides what they may see
       let sm;

@@ -30,6 +30,7 @@
       A.push({ id: "studio:universe", title: "Characters", icon: "cast", url: "/studio#universe", ws: "me", studio: "" });
     }
     A.push({ id: "files", title: "Files", icon: "files", url: "/files", ws: "me" });
+    A.push({ id: "settings", title: "Settings", icon: "settings", url: "/settings", ws: "me" });
     D.ORGS.filter(o => SCHOOL_APPS[o.role]).forEach((o, i) => {
       const ws = "s:" + o.slug, color = COLORS[i % COLORS.length];
       W.push({ key: ws, name: o.name, color, role: o.role });
@@ -53,6 +54,7 @@
     if (p.startsWith("/api/desk/files")) return "file";
     if (p.startsWith("/studio")) { const org = u.searchParams.get("org"); return `studio:${h || "home"}${org ? "@" + org : ""}`; }
     if (p.startsWith("/files")) { const org = u.searchParams.get("org"); return "files" + (org ? "@" + org : ""); }
+    if (p.startsWith("/settings")) return "settings";
     if (p.startsWith("/admin")) return "admin:" + (h || "dash");
     const m = p.match(/^\/s\/([^/]+)/); if (m) return `s:${m[1]}:${h || "overview"}`;
     return p;
@@ -62,10 +64,11 @@
     const m = p.match(/^\/s\/([^/]+)/); if (m) return "s:" + m[1];
     const org = u.searchParams.get("org"); if (org && D.WS.some(w => w.key === "s:" + org)) return "s:" + org;
     if (p.startsWith("/admin") || p.startsWith("/studio") || p.startsWith("/files")) return "me";
+    if (p.startsWith("/settings")) return D.CUR;
     return D.CUR;
   };
   D.appOf = url => { const k = D.appKey(url), base = k.replace(/:(script|voice|insights)(@|$)/, ":home$2"); return D.APPS.find(a => a.id === k) || D.APPS.find(a => D.appKey(a.url) === k) || D.APPS.find(a => D.appKey(a.url) === base) || null; };
-  D.STUDIO_PART = { script: ["pen", "Script"], voice: ["wave", "Voice desk"], insights: ["insights", "Insights"], home: ["video", "Studio"], universe: ["cast", "Characters"] };
+  D.STUDIO_PART = { lesson: ["settings", "Lesson"], script: ["pen", "Script"], voice: ["wave", "Voice desk"], insights: ["insights", "Insights"], home: ["video", "Studio"], universe: ["cast", "Characters"] };
 
   /* ---------- lessons (for the studio) ---------- */
   D.LESSONS = null;
@@ -83,7 +86,7 @@
   D.pollJobs = async () => {
     const all = await Promise.all(D.studioScopes().map(s => D.api("GET", "/studio/jobs" + (s.q ? "?org=" + s.q : "")).then(r => (r.jobs || []).map(j => ({ ...j, scope: s }))).catch(() => [])));
     D.JOBS.length = 0; D.JOBS.push(...all.flat().sort((a, b) => b.at - a.at));
-    D.JOBS.forEach(j => { const k = j.scope.q + ":" + j.id; if (SEEN[k] && SEEN[k] !== j.status && ["done", "failed"].includes(j.status)) { const ok = j.status === "done", txt = `Audio ${ok ? "ready" : "stopped"} · ${j.title}`; D.note({ icon: "wave", text: txt, kind: ok ? "ok" : "err", from: "Studio", url: D.studioUrl({ id: j.lesson, scope: j.scope }, "voice"), lesson: { id: String(j.lesson), title: j.title } }); D.toast(txt, { kind: ok ? "ok" : "err" }); } SEEN[k] = j.status; });
+    D.JOBS.forEach(j => { const k = j.scope.q + ":" + j.id; if (SEEN[k] && SEEN[k] !== j.status && ["done", "failed"].includes(j.status) && D.LS.get("lapp.theme", {}).jobnotes !== false) { const ok = j.status === "done", txt = `Audio ${ok ? "ready" : "stopped"} · ${j.title}`; D.note({ icon: "wave", text: txt, kind: ok ? "ok" : "err", from: "Studio", url: D.studioUrl({ id: j.lesson, scope: j.scope }, "voice"), lesson: { id: String(j.lesson), title: j.title } }); D.toast(txt, { kind: ok ? "ok" : "err" }); } SEEN[k] = j.status; });
     D.emit("jobs");
     setTimeout(D.pollJobs, D.JOBS.some(j => ["queued", "running"].includes(j.status)) ? 20000 : 90000);
   };

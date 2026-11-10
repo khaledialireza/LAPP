@@ -69,7 +69,7 @@ button,input,textarea,select{font:inherit;color:inherit}button{cursor:pointer;bo
 .wacts{display:flex;align-items:center;gap:4px;min-width:0;overflow:hidden;flex:0 1 auto}
 .wa{height:28px;padding:0 10px;border-radius:8px;font-size:12px;font-weight:600;color:var(--tx);display:inline-flex;align-items:center;gap:6px;white-space:nowrap;border:1px solid transparent}
 .wa:hover{background:var(--p3)}.wa.pr{background:var(--g);color:#fff}.wa.pr:hover{filter:brightness(1.1)}.wa.dz{color:var(--rd)}.wa[disabled]{opacity:.4;pointer-events:none}
-.wacts.compact .wa:not(.pr):has(svg) .lb{display:none}.wacts.compact .wa:not(.pr):has(svg){padding:0 7px}
+.wacts.compact .wa:not(.pr):has(svg) .wl{display:none}.wacts.compact .wa:not(.pr):has(svg){padding:0 7px}
 .wseg{display:inline-flex;background:var(--p2);border:1px solid var(--ln);border-radius:9px;padding:2px;gap:1px}
 .wseg .wa{height:24px;padding:0 8px;border-radius:7px;color:var(--mu)}.wseg .wa.on{background:var(--p4);color:var(--tx)}
 .wctl{display:flex;height:100%;flex:none;margin-inline-start:4px}
@@ -209,7 +209,7 @@ body.dragging iframe{pointer-events:none}
 @media (prefers-reduced-motion:reduce){#cc,.sheet,.toast,.pop,.cm,.dots i,.spin,.wnd[data-state=busy],.wnd[data-state=ai]::after{animation:none}.wnd.anim{transition:none}}
 @media (max-width:900px){.clk,.dk .t{display:none}.galg{grid-template-columns:1fr 1fr}}
 @media (max-width:760px){
-  .wnd{left:0!important;top:0!important;width:100%!important;height:100%!important;border-radius:0;min-width:0}.wnd:not(.act){display:none}.rz,.wctl [data-wc=max],.wmenu,.wacts .lb{display:none}
+  .wnd{left:0!important;top:0!important;width:100%!important;height:100%!important;border-radius:0;min-width:0}.wnd:not(.act){display:none}.rz,.wctl [data-wc=max],.wmenu,.wacts .wl{display:none}
   .ico{display:none}
   #desk{overflow:auto;display:flex;flex-direction:column;gap:10px;padding:12px}.wdg{position:static!important;width:auto!important}
   #cc,.sheet{top:8px!important;left:8px!important;right:8px;width:auto;transform:none;height:calc(100% - 76px)}

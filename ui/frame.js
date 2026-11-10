@@ -28,7 +28,7 @@
   }, true);
 
   /* ---------- other apps open as windows of the desktop, never as browser tabs ---------- */
-  const APP = /^\/(studio|admin|files|s\/)/;
+  const APP = /^\/(studio|admin|files|settings|s\/)/;
   document.addEventListener("click", e => {
     const a = e.target.closest && e.target.closest("a[href]"); if (!a || a.closest("[data-cx-keep]")) return;
     const u = new URL(a.href, location.href); if (u.origin !== location.origin || !APP.test(u.pathname)) return;
@@ -69,10 +69,13 @@
       let prev = h.previousElementSibling; if (prev && prev.matches("a.crumb")) { out.back = label(prev); ACTS.push(prev); prev.classList.add("cx-hide"); out.backI = ACTS.length - 1; }
       h.querySelectorAll("button, a.b, a.btn").forEach(b => {
         if (b.closest("[data-cx-keep], .dv-crumb, form, dialog")) return;
-        const txt = label(b), ic = iconOf(txt), grp = b.parentElement !== h && !b.parentElement.matches("h1") ? b.parentElement : null;
+        // the button's own text is its label; a button with only an icon uses its tooltip
+        const own = (b.textContent || "").replace(/\s+/g, " ").trim(), ic = iconOf(own), rest = ic ? own.slice(ic.length).trim() : own;
+        const txt = rest || b.getAttribute("aria-label") || b.title || own;
+        const grp = b.parentElement !== h && !b.parentElement.matches("h1") ? b.parentElement : b.classList.contains("chip") ? h : null;
         ACTS.push(b); b.classList.add("cx-hide");
-        out.actions.push({ i: ACTS.length - 1, label: ic ? txt.slice(ic.length).trim() : txt, icon: ic, primary: b.matches(".pr, .primary, .btn.pr"), danger: b.matches(".d, .danger"),
-          on: b.matches(".on, [aria-pressed=true], [aria-selected=true]"), disabled: !!b.disabled, group: grp ? (grp.dataset.cxg || (grp.dataset.cxg = Math.random().toString(36).slice(2, 7))) : "" });
+        out.actions.push({ i: ACTS.length - 1, label: txt, iconOnly: !rest && !!ic, icon: ic, primary: b.matches(".pr, .primary, .btn.pr"), danger: b.matches(".d, .danger"),
+          on: b.matches(".on, [aria-pressed=true], [aria-selected=true]"), disabled: !!b.disabled, group: grp ? (grp === h ? "chips" : grp.dataset.cxg || (grp.dataset.cxg = Math.random().toString(36).slice(2, 7))) : "" });
       });
       // a header with nothing left on screen goes away
       const left = [...h.children].some(c => !c.classList.contains("cx-hide") && visible(c) && (c.textContent.trim() || c.querySelector("input,select")));

@@ -24,7 +24,7 @@
     w = { id: WID++, url, ws, title: o.title || (app ? app.title : "Loading…"), icon: o.icon || (app ? app.icon : "window"), lesson: o.lesson || null, ...g, min: !!o.min, snap: null, used: Date.now(), state: "", chrome: null };
     const el = document.createElement("section"); el.className = "wnd"; el.dataset.w = w.id;
     el.innerHTML = `<div class="wbar"><button class="wback" data-wc="back" hidden aria-label="Back">${I("back")}</button><span class="wi"></span><span class="tt"></span><span class="otag" hidden></span><nav class="wmenu" aria-label="Menus"></nav><span class="sp"></span><div class="wacts"></div>
-      <div class="wctl"><button class="ai" data-wc="ai" title="Ask the AI about this window">${I("ai", 15)}</button><button data-wc="min" title="Minimise">${I("minus", 15)}</button><button data-wc="max" title="Maximise · rest the pointer here for layouts">${I("square", 13)}</button><button class="cl" data-wc="close" title="Close">${I("x", 15)}</button></div></div>
+      <div class="wctl"><button data-wc="info" title="What is this?">${I("info", 15)}</button><button class="ai" data-wc="ai" title="Ask the AI about this window">${I("ai", 15)}</button><button data-wc="min" title="Minimise">${I("minus", 15)}</button><button data-wc="max" title="Maximise · rest the pointer here for layouts">${I("square", 13)}</button><button class="cl" data-wc="close" title="Close">${I("x", 15)}</button></div></div>
       <div class="wfr"><iframe src="${esc(embed(url))}"></iframe></div>${["n", "s", "e", "w", "ne", "nw", "se", "sw"].map(d => `<i class="rz ${d}" data-rz="${d}"></i>`).join("")}`;
     w.el = el; w.fr = $("iframe", el); WN.push(w); $("#wins").append(el);
     dress(w); place(w);
@@ -54,7 +54,7 @@
     $(".wmenu", w.el).innerHTML = [...(c.menus || []).map((m, i) => `<button data-wm="${i}">${esc(m.label)}</button>`), `<button data-wm="win">Window</button>`].join("");
     const groups = {}, out = [];
     (c.actions || []).forEach(a => { if (a.group) { if (!groups[a.group]) { groups[a.group] = []; out.push({ seg: groups[a.group] }); } groups[a.group].push(a); } else out.push(a); });
-    const btn = a => { const ic = window.Icon && Icon.fromEmoji(a.icon); return `<button class="wa ${a.primary ? "pr" : ""} ${a.danger ? "dz" : ""} ${a.on ? "on" : ""}" data-wa="${a.i}" ${a.disabled ? "disabled" : ""} title="${esc(a.label)}">${ic ? I(ic, 14) : a.icon ? `<span>${esc(a.icon)}</span>` : ""}<span class="lb">${esc(a.label)}</span></button>`; };
+    const btn = a => { const ic = window.Icon && Icon.fromEmoji(a.icon); return `<button class="wa ${a.primary ? "pr" : ""} ${a.danger ? "dz" : ""} ${a.on ? "on" : ""}" data-wa="${a.i}" ${a.disabled ? "disabled" : ""} title="${esc(a.label)}">${ic ? I(ic, 14) : a.icon ? `<span>${esc(a.icon)}</span>` : ""}${a.iconOnly && (ic || a.icon) ? "" : `<span class="wl">${esc(a.label)}</span>`}</button>`; };
     const box = $(".wacts", w.el); box.classList.remove("compact");
     box.innerHTML = out.map(x => x.seg ? `<span class="wseg">${x.seg.map(btn).join("")}</span>` : btn(x)).join("");
     requestAnimationFrame(() => { if (box.scrollWidth > box.clientWidth + 1) box.classList.add("compact"); });
@@ -126,9 +126,11 @@
     if (e.origin !== location.origin || !e.data || !e.data.lapp) return;
     const w = WN.find(x => x.fr.contentWindow === e.source), d = e.data;
     if (d.t === "key") { if (d.combo === "Escape") { D.ccClose && D.ccClose(); return D.closeMenus(); } const a = Object.keys(D.BIND).find(k => D.BIND[k] === d.combo); if (a) { if (w && w.id !== D.ACTW) D.focusWin(w); D.act(a); } return; }
-    if (d.t === "open" && typeof d.url === "string" && /^\/(admin|studio|files|s\/|api\/desk\/files\/\d+$)/.test(d.url)) return D.openWin(d.url, d.title ? { title: String(d.title).slice(0, 120), icon: "file" } : {});
+    if (d.t === "open" && typeof d.url === "string" && /^\/(admin|studio|files|settings|s\/|api\/desk\/files\/\d+$)/.test(d.url)) return D.openWin(d.url, d.title ? { title: String(d.title).slice(0, 120), icon: "file" } : {});
     if (d.t === "note") return D.note({ text: String(d.text || ""), kind: d.kind, from: w ? w.title : "", url: w ? w.url : "", lesson: w ? w.lesson : null });
+    if (d.t === "ask" && typeof d.text === "string") return D.ask(d.text.slice(0, 1200), w);
     if (!w) return;
+    if (d.t === "settings" && /^\/settings/.test(w.url)) return D.settings(String(d.key), d.value);
     if (d.t === "state") return D.setState(w, ["busy", "ai", "dirty", "error", "ok", "rec"].includes(d.state) ? d.state : "");
     if (d.t === "chrome") { w.chrome = { title: String(d.title || ""), back: d.back || "", backI: Number.isInteger(d.backI) ? d.backI : null, actions: Array.isArray(d.actions) ? d.actions.slice(0, 30) : [], menus: Array.isArray(d.menus) ? d.menus.slice(0, 8) : [] }; if (w.title === "Loading…" && w.chrome.title) { w.title = w.chrome.title; } return dress(w); }
     if (d.t === "title") {

@@ -3,9 +3,11 @@
 <meta name="robots" content="noindex">
 <title>LAPP Studio</title>
 <script src="/ui/lapp-ui.js?v=3"></script>
-<script src="/ui/panel-i18n.js?v=7"></script>
+<script src="/ui/panel-i18n.js?v=8"></script>
 <script src="/ui/cursor.js?v=1"></script>
-<script src="/ui/frame.js?v=1"></script>
+<script src="/ui/theme.js?v=1"></script>
+<script src="/ui/frame.js?v=2"></script>
+<script src="/ui/icons.js?v=1"></script>
 <script>
 // the studio lives inside the management environment; opened on its own, it goes there
 const EMBED = new URLSearchParams(location.search).has("embed") && window.parent !== window;
@@ -297,7 +299,7 @@ let SEQ = 0;
 if (window.LAPPFrame) LAPPFrame.menus = () => {
   const v = (location.hash.slice(1) || "home").split("/")[0], id = S.L ? "/" + S.L.id : "";
   const go = (k, l, ic, needs) => ({ label: l, icon: ic, on: v === k, disabled: needs && !S.L, run: () => { location.hash = k + (needs ? id : ""); } });
-  return [{ label: "Go", items: [go("home", "Studio home", "⌘"), go("script", "Script", "✎", 1), go("voice", "Voice desk", "〰", 1), go("insights", "Insights", "📈"), go("universe", "Characters", "🎭")] },
+  return [{ label: "Go", items: [go("home", "Studio home", "⌘"), go("script", "Script", "✎", 1), go("lesson", "Lesson settings", "⚙", 1), go("voice", "Voice desk", "〰", 1), go("insights", "Insights", "📈"), go("universe", "Characters", "🎭")] },
     { label: "View", items: [{ label: "Reload", icon: "⟳", run: () => show() }] }];
 };
 async function show() {
@@ -308,11 +310,11 @@ async function show() {
   try {
     if (id && (!S.L || S.L.id !== Number(id))) await openLesson(Number(id));
     if (seq !== SEQ) return;
-    if ((v === "script" || v === "voice") && !S.L) { location.hash = "home"; toast("Open a lesson first"); return; }
+    if ((v === "script" || v === "voice" || v === "lesson") && !S.L) { location.hash = "home"; toast("Open a lesson first"); return; }
     $$(".ri[data-v=script],.ri[data-v=voice]").forEach(a => { a.classList.toggle("off", !S.L); if (S.L) a.href = `#${a.dataset.v}/${S.L.id}`; });
     await (V[v] || V.home)();
-    const part = { home: "Studio", script: "Script", voice: "Voice desk", universe: "Characters", insights: "Insights" }[v] || "Studio";
-    up({ t: "title", title: S.L && v !== "home" && v !== "universe" ? `${part} · ${S.L.title}` : part, icon: { home: "⌘", script: "✎", voice: "〰", universe: "🎭", insights: "📈" }[v] || "🎬", url: location.pathname + location.search.replace(/[?&]embed=1/, "").replace(/^&/, "?") + location.hash, lesson: S.L ? { id: S.L.id, title: S.L.title } : null });
+    const part = { home: "Studio", script: "Script", voice: "Voice desk", universe: "Characters", insights: "Insights", lesson: "Lesson" }[v] || "Studio";
+    up({ t: "title", title: S.L && v !== "home" && v !== "universe" ? `${part} · ${S.L.title}` : part, icon: { home: "⌘", script: "✎", voice: "〰", universe: "🎭", insights: "📈", lesson: "⚙" }[v] || "🎬", url: location.pathname + location.search.replace(/[?&]embed=1/, "").replace(/^&/, "?") + location.hash, lesson: S.L ? { id: S.L.id, title: S.L.title } : null });
   } catch (e) { $("#view").innerHTML = `<div class="empty"><b>⚠️ ${esc(e.message)}</b></div>`; }
 }
 async function openLesson(id) {
@@ -998,4 +1000,6 @@ function form(title, html, submit, okLabel = "Save") {
   show();
 })();
 </script>
+<script src="/ui/studio-lesson.js?v=1"></script>
+<script src="/ui/studio-menu.js?v=1"></script>
 </body></html>

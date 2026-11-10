@@ -45,6 +45,7 @@
   D.NOTES = []; D.JOBS = [];
   D.KIND = { ok: ["check", "rgba(52,211,153,.2)"], info: ["info", "rgba(96,165,250,.2)"], warn: ["alert", "rgba(251,191,36,.2)"], err: ["x", "rgba(248,113,113,.2)"] };
   D.toast = (text, o = {}) => {
+    if (o.kind !== "err" && !o.action && D.LS.get("lapp.theme", {}).toasts === false) return;
     const [ic, bg] = D.KIND[o.kind || "ok"] || D.KIND.info, t = document.createElement("div"); t.className = "toast"; t.setAttribute("role", o.kind === "err" ? "alert" : "status");
     t.innerHTML = `<span class="i" style="background:${bg}">${D.I(ic, 14)}</span><span>${D.esc(text)}</span>${o.action ? `<button class="a">${D.esc(o.action)}</button>` : ""}`;
     if (o.action) D.$(".a", t).onclick = () => { t.remove(); o.run(); };

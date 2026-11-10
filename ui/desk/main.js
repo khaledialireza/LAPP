@@ -21,12 +21,14 @@
     if (k === "running") return $("#trRun").click();
     if (k === "tidy") { D.closeSheet(); return D.ask("Tidy up my windows: close what I don't use and lay out the rest"); }
     if (k === "keys") return D.keysSheet();
+    if (k === "guide") { D.closeMenus(); return D.guide(); }
+    if (k === "settings") { D.ccClose(); return D.openWin("/settings"); }
     if (k === "widget") return D.gallery();
     if (k === "desk") { D.ccClose(); return D.act("desk"); }
     if (k === "groupby") { const r = $("#tb").getBoundingClientRect(); return D.groupMenu(r.right - 260, r.top - 4); }
     if (k === "lang") { D.ccClose(); return window.PanelI18N && PanelI18N.menu($("#lb")); }
     if (k === "cursor") { D.LS.set("lapp.cursor", D.LS.get("lapp.cursor", "") === "system" ? "" : "system"); return location.reload(); }
-    if (k === "wall") { const L = ["", "dawn", "sea", "plain"]; D.DESK.wall = L[(L.indexOf(D.DESK.wall || "") + 1) % L.length]; D.save(); document.body.dataset.wall = D.DESK.wall; return; }
+    if (k === "wall") { const L = ["", "dawn", "sea", "plain"]; return D.setLook("wall", L[(L.indexOf(D.DESK.wall || "") + 1) % L.length]); }
     if (k === "site") return window.open("/", "_blank", "noopener");
     if (k === "out") return D.api("POST", "/auth/logout").finally(() => location.href = "/");
   };
@@ -63,15 +65,16 @@
     D.DESK.icons = (D.DESK.icons || []).filter(c => !c.up && (!c.file || D.FILES.some(f => f.id === c.file)));
     D.BIND = { ...D.DEF, ...(D.DESK.keys || {}) }; D.shareKeys();
     D.drawDesk();
-    (D.DESK.windows || []).forEach(x => { if (!x || typeof x.url !== "string") return; const w = D.openWin(x.url, { ws: D.WS.some(s => s.key === x.ws) ? x.ws : undefined, title: x.title, icon: x.icon, lesson: x.lesson, geo: { x: x.x, y: x.y, w: x.w, h: x.h }, min: x.min, quiet: 1 }); if (x.snap) { const cur = D.CUR; D.CUR = w.ws; D.snap(w, x.snap); D.CUR = cur; D.place(w); } });
+    (D.LS.get("lapp.theme", {}).restore === false ? [] : D.DESK.windows || []).forEach(x => { if (!x || typeof x.url !== "string") return; const w = D.openWin(x.url, { ws: D.WS.some(s => s.key === x.ws) ? x.ws : undefined, title: x.title, icon: x.icon, lesson: x.lesson, geo: { x: x.x, y: x.y, w: x.w, h: x.h }, min: x.min, quiet: 1 }); if (x.snap) { const cur = D.CUR; D.CUR = w.ws; D.snap(w, x.snap); D.CUR = cur; D.place(w); } });
     const a = (D.DESK.windows || []).findIndex(x => x && x.act && !x.min && (x.ws || "me") === D.CUR);
     D.focusWin(a > -1 && D.WN()[a] ? D.WN()[a] : D.topWin());
     D.emit("ws");
     const want = decodeURIComponent((location.hash.match(/#open=(.+)$/) || [])[1] || "");
     history.replaceState(null, "", "/manage");
-    if (want && /^\/(admin|studio|files|s\/)/.test(want)) D.openWin(want);
+    if (want && /^\/(admin|studio|files|settings|s\/)/.test(want)) D.openWin(want);
     else if (D.WN().length > 1) D.toast(`Welcome back · your windows are where you left them`, { kind: "info" });
     else if (!D.WN().length) D.toast(`Press ${D.nice(D.BIND.cc)} or the L button: search, apps, lessons and the AI`, { kind: "info" });
+    D.emit("ready");
     D.tick(); D.pollJobs(); D.lessons().catch(() => {});
   })();
 })();
