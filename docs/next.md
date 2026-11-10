@@ -18,6 +18,12 @@
 - A menu bar in the title bar, left, right after the title (File / Edit / View / … per app): every option, action and setting of the app lives there; not everything must be on screen.
 - One standard window structure for every app (title bar, menus, toolbar actions, status, body). A change to "windows" applies to all windows.
 - Modular, component-based: a shared window/app component library (title bar, menus, buttons, dialogs, lists, toasts) and each app as its own module that declares its menus/actions/title — not hard-coded in one heavy file. Pages post their menus/actions to the host (postMessage) until they become native modules.
+- Content → becomes a core "Files" app (like Finder/Explorer) for the whole system (agreed proposal):
+  - One file system for every app: folders, list/grid/columns views, preview, search, tags, drag & drop, rename, move, bin, sharing & permissions, recent, favourites.
+  - Storage providers behind it: LAPP storage, the desktop, later Google Drive, OneDrive, Dropbox… shown and managed inside, the same way.
+  - Every app reads/writes files through it (open/save dialogs are the same everywhere). Lessons are files of type .lapp: double-click opens the studio.
+  - The smart lesson parts (curriculum map, board, AI ideas, level/approval rules, new lesson) move to the Studio as its "Library / Curriculum" view.
+  - Generic folder permissions stay in Files; lesson-only rules (level, approved before publish) live in the Studio.
 
 ## Accounting: a standalone, general system (replaces "school finance double-entry")
 - Not only for schools: LAPP's owner uses it for their own finances too.
