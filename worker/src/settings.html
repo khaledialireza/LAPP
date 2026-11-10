@@ -6,11 +6,11 @@
 if (!(new URLSearchParams(location.search).has("embed") && window.parent !== window)) location.replace("/manage#open=" + encodeURIComponent(location.pathname + location.search + location.hash));
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@500;700&display=swap" rel="stylesheet">
-<script src="/ui/panel-i18n.js?v=8"></script>
+<script src="/ui/panel-i18n.js?v=9"></script>
 <script src="/ui/cursor.js?v=2"></script>
 <script src="/ui/icons.js?v=1"></script>
 <script src="/ui/theme.js?v=2"></script>
-<script src="/ui/frame.js?v=2"></script>
+<script src="/ui/frame.js?v=3"></script>
 <style>
 /* Settings: you, the look of the whole system (theme, accent, wallpaper, pointer), the desktop, keys, notifications. */
 :root{--bg:#07070B;--p1:#0F0F16;--p2:#15151F;--p3:#1C1C29;--ln:rgba(255,255,255,.08);--ln2:rgba(255,255,255,.14);--tx:#F4F4F8;--mu:rgba(235,235,245,.6);--mu2:rgba(235,235,245,.38);--vi:#8B5CF6;--g:linear-gradient(135deg,#FF3D7F,#8B5CF6 55%,#22D3EE);color-scheme:dark}
@@ -53,7 +53,9 @@ function draw() {
   const th = LS.get("lapp.theme", {}), T = th.theme || "aurora", A = th.accent || "#8B5CF6";
   const sw = (id, on) => `<button class="sw ${on ? "on" : ""}" data-sw="${id}" role="switch" aria-checked="${!!on}"></button>`;
   let h = "";
-  if (part === "you") h = `<h2>You</h2><div class="sub">Your account. Name and email are changed on your profile.</div><div class="card"><div class="row"><div style="display:flex;gap:14px;align-items:center"><span class="av" style="background:var(--g)">${E((ME.name || ME.username).charAt(0).toUpperCase())}</span><div><b>${E(ME.name || "@" + ME.username)}</b><small>${E(ME.email || "")} · ${E(ME.role)}</small></div></div><a class="b" href="/profile" target="_blank" rel="noopener">Profile ↗</a></div>
+  if (part === "you") h = `<h2>You</h2><div class="sub">Your account. Name and email are changed on your profile.</div><div class="card"><div class="row"><div style="display:flex;gap:14px;align-items:center">${ME.avatar ? `<span class="av" style="background:url('${E(ME.avatar)}') center/cover"></span>` : `<span class="av" style="background:var(--g)">${E((ME.name || ME.username).charAt(0).toUpperCase())}</span>`}<div><b>${E(ME.name || "@" + ME.username)}</b><small>${E(ME.email || "")} · ${E(ME.role)}</small></div></div><a class="b" href="/profile" target="_blank" rel="noopener">Profile ↗</a></div>
+    <div class="row"><div><b>Photo</b><small>shown on the taskbar, the lock screen and to your team</small></div><div style="display:flex;gap:8px"><button class="b" id="photo">${I("image", 14)} ${ME.avatar ? "Change" : "Add a photo"}</button>${ME.avatar ? `<button class="b" id="nophoto">Remove</button>` : ""}<input type="file" id="photoIn" accept="image/*" hidden></div></div>
+    <div class="row"><div><b>Lock the screen</b><small>${E("Ctrl+Alt+L")} · your windows stay as they are</small></div><button class="b" data-tell="lock">${I("lock", 14)} Lock now</button></div>
     <div class="row"><div><b>Language</b><small>the whole system follows it</small></div><button class="b" id="lang">${I("globe", 14)} ${(window.PanelI18N ? PanelI18N.lang : "en").toUpperCase()}</button></div></div>`;
   if (part === "look") h = `<h2>Look & theme</h2><div class="sub">Changes the desktop and every window at once.</div>
     <div class="card"><div class="row" style="display:block"><b>Theme</b><div class="themes">${Object.entries(THEMES).map(([k, t]) => `<button class="th ${T === k ? "on" : ""}" data-theme="${k}"><span class="pv" style="background:${t.vars["--bg"]}"><i style="background:${t.vars["--p2"]};border:1px solid ${t.vars["--ln2"]}"></i><em style="background:${A}"></em></span><b>${E(t.name)}</b></button>`).join("")}</div></div>
@@ -64,7 +66,8 @@ function draw() {
   if (part === "desk") h = `<h2>Desktop</h2><div class="sub">How your windows and the taskbar behave.</div><div class="card">
     <div class="row"><div><b>Group windows on the taskbar</b><small>automatic lets the AI pick the best grouping</small></div><div class="seg">${[["auto", "Automatic"], ["app", "By app"], ["task", "By task"]].map(([k, l]) => `<button data-group="${k}" class="${(th.groupBy || "auto") === k ? "on" : ""}">${l}</button>`).join("")}</div></div>
     <div class="row"><div><b>Widgets</b><small>today, needs you, notes, numbers…</small></div><button class="b" data-tell="widget">${I("puzzle", 14)} Add a widget</button></div>
-    <div class="row"><div><b>Reopen my windows when I come back</b></div>${sw("restore", th.restore !== false)}</div></div>`;
+    <div class="row"><div><b>Reopen my windows when I come back</b></div>${sw("restore", th.restore !== false)}</div>
+    <div class="row"><div><b>Lock after a quiet time</b><small>asks for your password again</small></div><div class="seg">${[[0, "Never"], [5, "5 min"], [15, "15 min"], [30, "30 min"], [60, "1 h"]].map(([k, l]) => `<button data-lockafter="${k}" class="${(+th.lockAfter || 0) === k ? "on" : ""}">${l}</button>`).join("")}</div></div></div>`;
   if (part === "studio") { const M = th.trMode || "a", Lg = th.trLang || "";
     const pv = k => k === "a" ? `<div style="font-size:12px;line-height:1.5"><b>Eine Fahrkarte, bitte.</b><div style="color:var(--mu)"><span style="font-size:9px;border:1px solid var(--ln2);border-radius:5px;padding:0 4px">EN</span> A ticket, please.</div></div>`
       : k === "b" ? `<div style="font-size:12px;line-height:1.5"><b>Eine Fahrkarte, bitte.</b><div style="color:var(--mu)">EN A ticket, please.</div><div style="color:var(--mu2)">▾ FA · RU · UK</div></div>`
@@ -87,6 +90,9 @@ document.addEventListener("click", e => {
   const ac = t.closest("[data-accent]"); if (ac) return tell("accent", ac.dataset.accent);
   const wa = t.closest("[data-wall]"); if (wa) return tell("wall", wa.dataset.wall);
   const ra = t.closest("[data-radius]"); if (ra) return tell("radius", +ra.dataset.radius);
+  const la = t.closest("[data-lockafter]"); if (la) return tell("lockAfter", +la.dataset.lockafter);
+  if (t.closest("#photo")) return $("#photoIn").click();
+  if (t.closest("#nophoto")) return savePhoto("");
   const tm = t.closest("[data-trmode]"); if (tm) return tell("trMode", tm.dataset.trmode);
   const tlg = t.closest("[data-trlang]"); if (tlg) { try { localStorage.removeItem("lapp.studio.tr"); } catch {} return tell("trLang", tlg.dataset.trlang); }
   const gr = t.closest("[data-group]"); if (gr) return tell("groupBy", gr.dataset.group);
@@ -94,6 +100,22 @@ document.addEventListener("click", e => {
   const sw = t.closest("[data-sw]"); if (sw) return tell(sw.dataset.sw, !sw.classList.contains("on"));
   if (t.closest("#lang") && window.PanelI18N) PanelI18N.menu(t.closest("#lang"));
 });
+// the photo is made small here (128 px, webp) before it is saved
+document.addEventListener("change", async e => {
+  if (e.target.id !== "photoIn" || !e.target.files[0]) return;
+  const f = e.target.files[0]; e.target.value = "";
+  if (!/^image\//.test(f.type)) return;
+  const img = await createImageBitmap(f).catch(() => null); if (!img) return;
+  const c = document.createElement("canvas"); c.width = c.height = 128; const s = Math.min(img.width, img.height), x = c.getContext("2d");
+  x.drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, 128, 128);
+  let d = c.toDataURL("image/webp", .85); if (!d.startsWith("data:image/webp")) d = c.toDataURL("image/jpeg", .85);
+  savePhoto(d);
+});
+async function savePhoto(d) {
+  const r = await fetch("/api/me", { method: "PATCH", credentials: "same-origin", headers: { "Content-Type": "application/json", "X-LAPP": "1" }, body: JSON.stringify({ avatar: d }) });
+  const j = await r.json().catch(() => ({})); if (!r.ok) return alert(j.error || "not saved");
+  ME = j.user; draw(); tell("avatar", true);
+}
 addEventListener("storage", e => { if (e.key === "lapp.theme" || e.key === "lapp.cursor") draw(); });
 addEventListener("message", e => { if (e.origin === location.origin && e.data && e.data.lapp && e.data.t === "theme") setTimeout(draw, 30); });
 load();

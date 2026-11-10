@@ -21,6 +21,7 @@
     if (k === "running") return $("#trRun").click();
     if (k === "tidy") { D.closeSheet(); return D.ask("Tidy up my windows: close what I don't use and lay out the rest"); }
     if (k === "keys") return D.keysSheet();
+    if (k === "lock") { D.closeMenus(); return D.lock(); }
     if (k === "guide") { D.closeMenus(); return D.guide(); }
     if (k === "settings") { D.ccClose(); return D.openWin("/settings"); }
     if (k === "widget") return D.gallery();
@@ -52,6 +53,9 @@
   }, true);
   addEventListener("panel:lang", () => { D.WN().forEach(w => w.fr.src = w.fr.src); D.drawDesk(); });
 
+  D.drawMe = () => { const a = $("#av"); if (!a) return; const x = document.createElement("span"); x.innerHTML = D.avatar(30); const n = x.firstChild; n.id = "av"; a.replaceWith(n); };
+  D.on("lessons", () => D.drawTask && D.drawTask());
+
   /* ---------- start ---------- */
   (async () => {
     const m = await D.api("GET", "/me");
@@ -62,7 +66,7 @@
     D.CUR = D.DESK.cur || "me";
     D.buildApps();
     if (!D.DESK.cur && !["manager", "admin", "designer"].includes(D.ME.role) && D.WS.length > 1) D.CUR = D.WS[1].key;
-    $("#av").textContent = (D.ME.name || D.ME.username).charAt(0).toUpperCase(); $("#av").style.background = `linear-gradient(135deg,${D.GRAD[D.ME.id % D.GRAD.length]})`;
+    D.drawMe();
     D.DESK.icons = (D.DESK.icons || []).filter(c => !c.up && (!c.file || D.FILES.some(f => f.id === c.file)));
     D.BIND = { ...D.DEF, ...(D.DESK.keys || {}) }; D.shareKeys();
     D.drawDesk();
@@ -76,6 +80,6 @@
     else if (D.WN().length > 1) D.toast(`Welcome back · your windows are where you left them`, { kind: "info" });
     else if (!D.WN().length) D.toast(`Press ${D.nice(D.BIND.cc)} or the L button: search, apps, lessons and the AI`, { kind: "info" });
     D.emit("ready");
-    D.tick(); D.pollJobs(); D.lessons().catch(() => {});
+    D.tick(); D.pollJobs(); D.lessons().then(() => D.emit("lessons")).catch(() => {});
   })();
 })();

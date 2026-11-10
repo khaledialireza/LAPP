@@ -105,6 +105,8 @@ body.dragging iframe{pointer-events:none}
 .dk.run::after{content:"";position:absolute;left:50%;bottom:3px;width:5px;height:3px;margin-left:-2.5px;border-radius:2px;background:var(--mu2)}
 .dk.on::after{width:18px;margin-left:-9px;background:var(--c,#8B5CF6)}
 .dk .n{position:absolute;top:3px;inset-inline-end:3px;min-width:15px;height:15px;border-radius:99px;background:var(--p4);border:1px solid var(--ln2);color:var(--tx);font:800 9.5px/13px Inter,system-ui;padding:0 3px;text-align:center}
+.dk .wk{position:absolute;top:1px;inset-inline-end:1px;min-width:16px;height:16px;border-radius:99px;background:var(--rd);color:#fff;font:800 9.5px/16px Inter,system-ui;padding:0 4px;text-align:center;box-shadow:0 0 0 2px #0D0D14}
+.dk .n+.wk{inset-inline-end:auto;inset-inline-start:1px}
 .dk .sd{position:absolute;top:5px;inset-inline-start:5px;width:8px;height:8px;border-radius:50%}
 .sd.dirty{background:var(--am)}.sd.error{background:var(--rd)}.sd.ok{background:var(--gr)}.sd.rec{background:var(--pk)}.sd.busy{background:var(--cy);animation:blink 1s infinite}.sd.ai{background:var(--g);animation:blink 1s infinite}
 @keyframes blink{50%{opacity:.3}}

@@ -28,13 +28,23 @@
     wins.filter(w => !inCap.has(w.id)).forEach(w => { const id = winApp(w); if (!apps.has(id)) apps.set(id, { app: D.APPS.find(x => x.id === id) || { id, title: w.title, icon: w.icon, url: w.url }, wins: [], pinned: false }); apps.get(id).wins.push(w); });
     return { apps: [...apps.values()], caps };
   }
+  // waiting work per app: lines to approve (studio), unread notifications that belong to the app
+  function counts() {
+    const n = {};
+    const add = (id, k) => { if (id) n[id] = (n[id] || 0) + k; };
+    (D.LESSONS || []).filter(l => l.status !== "published" && l.lines && l.approved < l.lines).forEach(l => { const at = l.scope.q ? "@" + l.scope.q : ""; add("studio:home" + at, 1); add("studio:library" + at, 1); });
+    D.NOTES.filter(x => !x.read && x.url).forEach(x => { const a = D.appOf(x.url); add(a && a.id, 1); });
+    return n;
+  }
+  D.counts = counts;
   function draw() {
     if (!D.DESK) return;
+    const CN = counts();
     const { apps, caps } = items(), ws = D.wsOf(D.CUR);
     const sw = $("#wsb"); sw.hidden = D.WS.length < 2; sw.innerHTML = `<i style="background:${ws.color}"></i><span>${esc(ws.name)}</span>${I("chevron-down", 14)}`;
     $("#dock").innerHTML = apps.map((it, k) => {
       const on = it.wins.some(w => w.id === D.ACTW && !w.min), st = worst(it.wins), one = it.wins.length === 1 ? it.wins[0] : null;
-      return `<button class="dk ${it.wins.length ? "run" : ""} ${on ? "on" : ""}" data-dk="${esc(it.app.id)}" draggable="true" style="--c:${it.app.color || ws.color}" title="${esc(it.app.title)}">${I(it.app.icon, 19) || D.IE(it.app.icon)}${it.wins.length ? `<span class="t">${esc(one ? one.title : it.app.title)}</span>` : ""}${it.wins.length > 1 ? `<span class="n">${it.wins.length}</span>` : ""}${st ? `<span class="sd ${st}"></span>` : ""}</button>`;
+      return `<button class="dk ${it.wins.length ? "run" : ""} ${on ? "on" : ""}" data-dk="${esc(it.app.id)}" draggable="true" style="--c:${it.app.color || ws.color}" title="${esc(it.app.title)}">${I(it.app.icon, 19) || D.IE(it.app.icon)}${it.wins.length ? `<span class="t">${esc(one ? one.title : it.app.title)}</span>` : ""}${it.wins.length > 1 ? `<span class="n">${it.wins.length}</span>` : ""}${CN[it.app.id] ? `<span class="wk" title="${CN[it.app.id]} waiting">${CN[it.app.id] > 99 ? "99+" : CN[it.app.id]}</span>` : ""}${st ? `<span class="sd ${st}"></span>` : ""}</button>`;
     }).join("") + (caps.length ? `<span class="dsep"></span>` + caps.map(c => `<div class="dk grp" data-cap="${esc(c.id)}" style="--c:${c.color || "#8B5CF6"}" title="${esc(c.name)}"><span class="gn">${esc(c.name)}</span>${c.wins.map(w => `<span class="gi ${w.id === D.ACTW && !w.min ? "on" : ""}" data-gw="${w.id}" title="${esc(w.title)}">${I(w.icon, 15) || D.IE(w.icon)}${w.state ? `<span class="sd ${w.state}" style="top:1px;inset-inline-start:1px;width:6px;height:6px"></span>` : ""}</span>`).join("")}</div>`).join("") : "");
     const run = D.running().length, un = D.NOTES.filter(n => !n.read).length;
     $("#trRun").innerHTML = run ? `<span class="spin"></span><span class="bd">${run}</span>` : I("hourglass", 17);
@@ -72,8 +82,8 @@
   }
   function mePop(anchor) {
     const me = D.ME;
-    D.pop(anchor, `<div class="pi" style="pointer-events:none"><span class="av" style="background:linear-gradient(135deg,${D.GRAD[me.id % D.GRAD.length]})">${esc((me.name || me.username).charAt(0).toUpperCase())}</span><span class="tx"><b>${esc(me.name || "@" + me.username)}</b><small>${esc(D.WS.map(w => w.name).join(" · "))}</small></span></div><h6>Settings</h6>`
-      + [["settings", "Settings", "", "settings"], ["guide", "Guide", "", "guide"], ["globe", "Language", (window.PanelI18N ? PanelI18N.lang : "en").toUpperCase(), "lang"], ["keyboard", "Keyboard shortcuts", "", "keys"], ["pointer", "Mouse pointer", D.LS.get("lapp.cursor", "") === "system" ? "standard" : "LAPP", "cursor"], ["image", "Wallpaper", D.DESK.wall || "aurora", "wall"], ["puzzle", "Add a widget", D.nice(D.BIND.widget), "widget"], ["group", "Group windows", { auto: "automatic", app: "by app", task: "by task" }[D.groupMode()], "groupby"], ["headphones", "The learning site ↗", "", "site"], ["log-out", "Sign out", "", "out"]]
+    D.pop(anchor, `<div class="pi" style="pointer-events:none">${D.avatar(30)}<span class="tx"><b>${esc(me.name || "@" + me.username)}</b><small>${esc(D.WS.map(w => w.name).join(" · "))}</small></span></div><h6>Settings</h6>`
+      + [["lock", "Lock the screen", D.nice(D.BIND.lock), "lock"], ["settings", "Settings", "", "settings"], ["guide", "Guide", "", "guide"], ["globe", "Language", (window.PanelI18N ? PanelI18N.lang : "en").toUpperCase(), "lang"], ["keyboard", "Keyboard shortcuts", "", "keys"], ["pointer", "Mouse pointer", D.LS.get("lapp.cursor", "") === "system" ? "standard" : "LAPP", "cursor"], ["image", "Wallpaper", D.DESK.wall || "aurora", "wall"], ["puzzle", "Add a widget", D.nice(D.BIND.widget), "widget"], ["group", "Group windows", { auto: "automatic", app: "by app", task: "by task" }[D.groupMode()], "groupby"], ["headphones", "The learning site ↗", "", "site"], ["log-out", "Sign out", "", "out"]]
         .map(([ic, l, k, g]) => `<button class="pi" data-go="${g}"><span class="ri">${I(ic, 15)}</span><span class="tx"><b>${esc(l)}</b></span>${k ? `<span class="k">${esc(k)}</span>` : ""}</button>`).join(""));
   }
   D.groupMenu = (x, y) => D.cmenu(x, y, [{ head: "Group windows" }, ["Automatic (AI)", "", () => setMode("auto"), 0, "ai", { on: D.groupMode() === "auto" }], ["By app", "", () => setMode("app"), 0, "grid", { on: D.groupMode() === "app" }], ["By task (my groups)", "", () => setMode("task"), 0, "group", { on: D.groupMode() === "task" }], "-", ["✦ Group my windows with the AI", "", aiGroup, 0, "wand"], ["New task group from the open windows…", "", newTask, 0, "plus"]], { above: true });

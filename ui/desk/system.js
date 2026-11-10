@@ -3,7 +3,7 @@
 "use strict";
 (function () {
   const { $, esc, I } = D;
-  const LOOK_KEYS = ["theme", "accent", "radius", "wall", "groupBy", "restore", "toasts", "jobnotes", "trMode", "trLang"];
+  const LOOK_KEYS = ["theme", "accent", "radius", "wall", "groupBy", "restore", "toasts", "jobnotes", "trMode", "trLang", "lockAfter"];
   D.look = () => { const l = (D.DESK && D.DESK.look) || {}; return { ...l, wall: D.DESK ? D.DESK.wall || "" : "", groupBy: D.DESK ? D.DESK.groupBy || "auto" : "auto" }; };
   D.applyLook = () => {
     const l = D.look();
@@ -20,7 +20,9 @@
   };
   // what the Settings app asks for
   D.settings = (key, value) => {
-    if (["theme", "accent", "radius", "wall", "groupBy", "restore", "toasts", "jobnotes", "trMode", "trLang"].includes(key)) return D.setLook(key, value);
+    if (["theme", "accent", "radius", "wall", "groupBy", "restore", "toasts", "jobnotes", "trMode", "trLang", "lockAfter"].includes(key)) return D.setLook(key, value);
+    if (key === "avatar") return D.api("GET", "/me").then(m => { D.ME = m.user; D.drawMe(); });
+    if (key === "lock") return D.lock();
     if (key === "cursor") { D.LS.set("lapp.cursor", value ? "" : "system"); return D.applyLook(); }
     if (key === "widget") return D.gallery();
     if (key === "keys") return D.keysSheet();

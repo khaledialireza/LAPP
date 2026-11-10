@@ -167,7 +167,7 @@ async function planOf(env, req, u) {
   if (iran) return { tier: "plus", why: "iran" };
   return { tier: "free", why: "", status: s ? s.status : "" };
 }
-const publicUser = u => ({ id: u.id, email: hasEmail(u.email) ? u.email : "", managed: !!u.managed_by, username: u.username, name: u.name, role: u.role, lang: u.lang || "", verified: !!u.verified, since: new Date(u.created_at).toISOString().slice(0, 10) });
+const publicUser = u => ({ id: u.id, email: hasEmail(u.email) ? u.email : "", managed: !!u.managed_by, username: u.username, name: u.name, role: u.role, lang: u.lang || "", avatar: u.avatar || "", verified: !!u.verified, since: new Date(u.created_at).toISOString().slice(0, 10) });
 async function me(env, req, u) {
   const orgs = (await env.DB.prepare("SELECT o.slug, o.name, m.role FROM org_members m JOIN orgs o ON o.id = m.org_id WHERE m.user_id = ? AND m.active = 1 AND o.disabled = 0 ORDER BY o.name").bind(u.id).all()).results;
   return { user: publicUser(u), plan: await planOf(env, req, u), country: country(req), orgs };
@@ -290,6 +290,16 @@ async function api(req, env, url, ctx) {
     return json(await me(env, req, u), 200, { "Set-Cookie": cookie });
   }
 
+  // the work desktop's lock screen: the signed-in person proves it's them again
+  if (p === "/auth/unlock" && M === "POST") {
+    const u = await need(req, env);
+    await limit(env, `unlock:${u.id}`, 8, 15 * 60e3);
+    const pw = String((await body(req)).password || "");
+    if (!u.pw_hash) throw fail("this account has no password — sign out and in again", 400, { code: "nopw" });
+    if (!await checkPassword(u, pw)) throw fail("wrong password", 403, { code: "wrong" });   // 403, not 401: the person is still signed in
+    return json({ ok: true });
+  }
+
   if (p === "/auth/logout" && M === "POST") {
     const token = cookieOf(req);
     if (token) await env.DB.prepare("DELETE FROM sessions WHERE token_hash = ?").bind(await sha(token)).run();
@@ -400,6 +410,12 @@ Windows: ${wins.map(w => `${w.id} = ${w.label}`).join("; ")}`;
     const b = await body(req);
     const sets = [], vals = [];
     if (b.name !== undefined) { sets.push("name = ?"); vals.push(String(b.name).trim().slice(0, 40)); }
+    if (b.avatar !== undefined) {
+      const a = String(b.avatar || "");
+      if (a && !/^data:image\/(webp|jpeg|png);base64,[A-Za-z0-9+/=]+$/.test(a)) throw fail("the photo must be an image", 400);
+      if (a.length > 60_000) throw fail("the photo is too big", 413);
+      sets.push("avatar = ?"); vals.push(a);
+    }
     if (b.lang !== undefined) { const l = String(b.lang); if (!UI_LANGS.includes(l)) throw fail("unknown language", 400); sets.push("lang = ?"); vals.push(l); }
     if (b.username !== undefined && cleanUser(b.username) !== u.username) {
       const un = cleanUser(b.username);

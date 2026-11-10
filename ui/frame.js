@@ -27,6 +27,9 @@
     else if (e.key === "Escape" && !document.querySelector("dialog[open]")) up({ t: "key", combo: "Escape" });
   }, true);
 
+  let aliveT = 0;
+  ["pointerdown", "keydown", "wheel", "pointermove"].forEach(ev => addEventListener(ev, () => { const n = Date.now(); if (n - aliveT > 30000) { aliveT = n; up({ t: "alive" }); } }, { passive: true, capture: true }));
+
   /* ---------- other apps open as windows of the desktop, never as browser tabs ---------- */
   const APP = /^\/(studio|admin|files|settings|s\/)/;
   document.addEventListener("click", e => {

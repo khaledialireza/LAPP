@@ -51,7 +51,7 @@
   function drawChrome(w) {
     const c = w.chrome || { actions: [], menus: [] };
     const back = $(".wback", w.el); back.hidden = c.backI == null; back.title = c.back || "Back";
-    $(".wmenu", w.el).innerHTML = [...(c.menus || []).map((m, i) => `<button data-wm="${i}">${esc(m.label)}</button>`), `<button data-wm="win">Window</button>`].join("");
+    $(".wmenu", w.el).innerHTML = [...(c.menus || []).map((m, i) => `<button data-wm="${i}">${esc(m.label)}</button>`), `<button data-wm="win">Window</button>`, `<button data-wm="help">Help</button>`].join("");
     const groups = {}, out = [];
     (c.actions || []).forEach(a => { if (a.group) { if (!groups[a.group]) { groups[a.group] = []; out.push({ seg: groups[a.group] }); } groups[a.group].push(a); } else out.push(a); });
     const btn = a => { const ic = window.Icon && Icon.fromEmoji(a.icon); return `<button class="wa ${a.primary ? "pr" : ""} ${a.danger ? "dz" : ""} ${a.on ? "on" : ""}" data-wa="${a.i}" ${a.disabled ? "disabled" : ""} title="${esc(a.label)}">${ic ? I(ic, 14) : a.icon ? `<span>${esc(a.icon)}</span>` : ""}${a.iconOnly && (ic || a.icon) ? "" : `<span class="wl">${esc(a.label)}</span>`}</button>`; };
@@ -68,7 +68,7 @@
       { label: "Close", icon: "x", key: D.nice(D.BIND.close), danger: true, run: () => closeWin(w) }];
   }
   function openMenu(w, b) {
-    const i = b.dataset.wm, list = i === "win" ? winMenu(w) : (w.chrome.menus[+i].items || []).map(it => it === "-" ? "-" : { ...it, run: () => post(w, { t: "cmd", kind: "menu", id: it.id }) });
+    const i = b.dataset.wm, list = i === "help" ? [{ label: "About " + w.title, icon: "info", run: () => D.info(w, b) }, { label: "Guide", icon: "guide", run: () => D.guide() }, { label: "Keyboard shortcuts", icon: "keyboard", run: () => D.keysSheet() }, "-", { label: "Ask the AI about it", icon: "ai", run: () => D.ask(`Explain the window “${w.title}” and what I can do there`, w) }] : i === "win" ? winMenu(w) : (w.chrome.menus[+i].items || []).map(it => it === "-" ? "-" : { ...it, run: () => post(w, { t: "cmd", kind: "menu", id: it.id }) });
     const r = b.getBoundingClientRect();
     D.cmenu(r.left, r.bottom + 4, list.map(it => it === "-" ? "-" : [it.label, it.key || "", it.run, it.danger, (window.Icon && (Icon.names.includes(it.icon) ? it.icon : Icon.fromEmoji(it.icon))) || "", { on: it.on, disabled: it.disabled }]));
     b.classList.add("open");
@@ -128,6 +128,7 @@
     if (d.t === "key") { if (d.combo === "Escape") { D.ccClose && D.ccClose(); return D.closeMenus(); } const a = Object.keys(D.BIND).find(k => D.BIND[k] === d.combo); if (a) { if (w && w.id !== D.ACTW) D.focusWin(w); D.act(a); } return; }
     if (d.t === "open" && typeof d.url === "string" && /^\/(admin|studio|files|settings|s\/|api\/desk\/files\/\d+$)/.test(d.url)) return D.openWin(d.url, d.title ? { title: String(d.title).slice(0, 120), icon: "file" } : {});
     if (d.t === "note") return D.note({ text: String(d.text || ""), kind: d.kind, from: w ? w.title : "", url: w ? w.url : "", lesson: w ? w.lesson : null });
+    if (d.t === "alive") return;
     if (d.t === "ask" && typeof d.text === "string") return D.ask(d.text.slice(0, 1200), w);
     if (!w) return;
     if (d.t === "settings" && /^\/settings/.test(w.url)) return D.settings(String(d.key), d.value);
