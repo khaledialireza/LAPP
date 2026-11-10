@@ -10,6 +10,8 @@
     D.LS.set("lapp.theme", Object.fromEntries(LOOK_KEYS.filter(k => l[k] !== undefined).map(k => [k, l[k]])));
     if (window.LAPPTheme) LAPPTheme.apply(l);
     document.body.dataset.wall = l.wall || "";
+    if (window.LAPPCursor) LAPPCursor.refresh();
+    const me = D.WS.find(w => w.key === "me"); if (me) { me.color = l.accent || "#8B5CF6"; D.APPS.forEach(a => { if (a.ws === "me") a.color = me.color; }); D.WN().forEach(D.dress); D.drawTask && D.drawTask(); }
     D.WN().forEach(w => { try { w.fr.contentWindow.postMessage({ lapp: 1, t: "theme" }, location.origin); } catch {} });
   };
   D.setLook = (k, v) => {
@@ -19,7 +21,7 @@
   // what the Settings app asks for
   D.settings = (key, value) => {
     if (["theme", "accent", "radius", "wall", "groupBy", "restore", "toasts", "jobnotes"].includes(key)) return D.setLook(key, value);
-    if (key === "cursor") { D.LS.set("lapp.cursor", value ? "" : "system"); D.toast("The pointer changes when you reload", { kind: "info", action: "Reload", run: () => location.reload() }); return D.applyLook(); }
+    if (key === "cursor") { D.LS.set("lapp.cursor", value ? "" : "system"); return D.applyLook(); }
     if (key === "widget") return D.gallery();
     if (key === "keys") return D.keysSheet();
   };

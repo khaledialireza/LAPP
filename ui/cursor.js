@@ -1,7 +1,6 @@
 /* LAPP's own mouse pointer: an arrow and a hand in LAPP's colours, a cross for drawing and text beam stay standard.
    Turned off with localStorage "lapp.cursor" = "system" (Settings in the management panel). */
 (() => {
-  try { if (localStorage.getItem("lapp.cursor") === "system") return; } catch {}
   if (matchMedia("(pointer: coarse)").matches) return;           // touch screens have no pointer to draw
   const svg = s => `url("data:image/svg+xml,${encodeURIComponent(s)}")`;
   const G = `<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF3D7F"/><stop offset=".55" stop-color="#8B5CF6"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs>`;
@@ -15,4 +14,9 @@ input,textarea,[contenteditable]{cursor:text}
 [draggable=true]:active,.dragging,.dragging *{cursor:${grab} 13 13,grabbing}
 :disabled{cursor:${arrow} 3 2,not-allowed}`;
   (document.head || document.documentElement).append(st);
+  const on = () => { try { st.disabled = localStorage.getItem("lapp.cursor") === "system"; } catch {} };
+  on();
+  addEventListener("storage", e => { if (e.key === "lapp.cursor") on(); });
+  addEventListener("message", e => { if (e.origin === location.origin && e.data && e.data.lapp && e.data.t === "theme") on(); });
+  window.LAPPCursor = { refresh: on };
 })();

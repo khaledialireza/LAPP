@@ -29,7 +29,7 @@ button,input,textarea,select{font:inherit;color:inherit}button{cursor:pointer;bo
 .ico .g em{position:absolute;bottom:2px;inset-inline-end:2px;color:var(--mu)}
 .ico>span{line-height:1.25;max-height:2.5em;overflow:hidden;overflow-wrap:anywhere}
 .ico.up .g{opacity:.5}
-.wdg{position:absolute;z-index:1;background:rgba(18,18,28,.64);backdrop-filter:blur(18px);border:1px solid var(--ln2);border-radius:18px;padding:10px 12px;font-size:12.5px;box-shadow:0 14px 40px rgba(0,0,0,.35)}
+.wdg{position:absolute;z-index:1;background:rgba(18,18,28,.64);backdrop-filter:blur(18px);border:1px solid var(--ln2);border-radius:calc(var(--r) + 6px);padding:10px 12px;font-size:12.5px;box-shadow:0 14px 40px rgba(0,0,0,.35)}
 .wdg .wh{display:flex;align-items:center;gap:6px;margin:-2px -4px 6px;font:700 10.5px Inter,system-ui;letter-spacing:.5px;text-transform:uppercase;color:var(--mu);user-select:none;touch-action:none;cursor:grab}
 .wdg .wh .grip{color:var(--mu2);letter-spacing:-2px}
 .wdg .wh button{width:22px;height:22px;border-radius:6px;color:var(--mu2);opacity:0;display:grid;place-items:center}.wdg .wh button:first-of-type{margin-inline-start:auto}.wdg:hover .wh button,.wdg:focus-within .wh button{opacity:1}
@@ -122,7 +122,7 @@ body.dragging iframe{pointer-events:none}
 .clk{font-size:11.5px;color:var(--mu);line-height:1.2;text-align:end;font-variant-numeric:tabular-nums}
 
 /* popovers (taskbar lists, notifications, running, account) */
-.pop{position:fixed;z-index:650;bottom:62px;width:340px;max-height:min(460px,calc(100vh - 80px));overflow:auto;background:var(--pop);border:1px solid var(--ln2);border-radius:14px;padding:6px;box-shadow:0 24px 60px rgba(0,0,0,.7);animation:pop .14s ease-out;font-size:13px}
+.pop{position:fixed;z-index:650;bottom:62px;width:340px;max-height:min(460px,calc(100vh - 80px));overflow:auto;background:var(--pop);border:1px solid var(--ln2);border-radius:calc(var(--r) + 2px);padding:6px;box-shadow:0 24px 60px rgba(0,0,0,.7);animation:pop .14s ease-out;font-size:13px}
 .pop h6{font:700 10.5px Inter,system-ui;letter-spacing:.5px;text-transform:uppercase;color:var(--mu2);padding:6px 8px 4px;display:flex;align-items:center;gap:8px}
 .pop h6 button{margin-inline-start:auto;text-transform:none;letter-spacing:0;font-weight:600;color:#C4B5FD;font-size:11.5px}
 .pi{display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:9px;width:100%;text-align:start}
@@ -136,7 +136,7 @@ body.dragging iframe{pointer-events:none}
 .bar{height:4px;border-radius:3px;background:var(--p1);margin-top:4px;overflow:hidden}.bar i{display:block;height:100%;background:var(--g)}
 
 /* ---------- the command center ---------- */
-#cc{position:absolute;z-index:600;left:50%;top:9%;transform:translateX(-50%);width:min(580px,calc(100% - 24px));height:min(560px,calc(100% - 90px));display:flex;flex-direction:column;border-radius:20px;overflow:hidden;background:rgba(19,19,30,.97);backdrop-filter:blur(26px);box-shadow:0 0 0 1.5px rgba(139,92,246,.5),0 40px 110px rgba(0,0,0,.8);animation:pop .14s ease-out}
+#cc{position:absolute;z-index:600;left:50%;top:9%;transform:translateX(-50%);width:min(580px,calc(100% - 24px));height:min(560px,calc(100% - 90px));display:flex;flex-direction:column;border-radius:calc(var(--r) + 8px);overflow:hidden;background:rgba(19,19,30,.97);backdrop-filter:blur(26px);box-shadow:0 0 0 1.5px rgba(139,92,246,.5),0 40px 110px rgba(0,0,0,.8);animation:pop .14s ease-out}
 #cc.moved{transform:none}
 .cch{display:flex;align-items:center;justify-content:center;height:14px;cursor:grab;touch-action:none;flex:none}
 .cch i{width:42px;height:4px;border-radius:2px;background:var(--ln2)}.cch:hover i{background:var(--vi)}
@@ -184,7 +184,7 @@ body.dragging iframe{pointer-events:none}
 .empty{padding:14px;color:var(--mu2);font-size:13px;text-align:center}
 
 /* ---------- sheets, menus, toasts ---------- */
-.sheet{position:absolute;z-index:700;left:50%;top:10%;transform:translateX(-50%);width:min(620px,calc(100% - 24px));max-height:80%;overflow:auto;background:rgba(19,19,30,.98);border-radius:20px;border:1px solid var(--ln2);box-shadow:0 40px 110px rgba(0,0,0,.8);padding:16px;animation:pop .14s ease-out}
+.sheet{position:absolute;z-index:700;left:50%;top:10%;transform:translateX(-50%);width:min(620px,calc(100% - 24px));max-height:80%;overflow:auto;background:var(--pop);border-radius:calc(var(--r) + 8px);border:1px solid var(--ln2);box-shadow:0 40px 110px rgba(0,0,0,.8);padding:16px;animation:pop .14s ease-out}
 .sheet h4{margin:0 0 10px;font-size:15px;display:flex;align-items:center;gap:8px}.sheet h4 button{margin-inline-start:auto;color:var(--mu);width:28px;height:28px;border-radius:8px;display:grid;place-items:center}
 .galg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .galg button{padding:12px;border-radius:14px;background:var(--p2);border:1px solid var(--ln);text-align:start;font-size:12px;display:flex;flex-direction:column;gap:4px}
@@ -193,7 +193,7 @@ body.dragging iframe{pointer-events:none}
 .kbr.rec{outline:2px solid var(--cy)}.kbr.clash{outline:2px solid var(--rd)}
 .kcap{direction:ltr;unicode-bidi:isolate;font:600 11.5px ui-monospace,monospace;padding:3px 8px;border-radius:7px;background:var(--p3);border:1px solid var(--ln2);border-bottom-width:2px;min-width:90px;text-align:center}
 .in{width:100%;background:var(--p3);border:1px solid var(--ln2);border-radius:10px;padding:9px 11px;outline:none}
-.cm{position:fixed;z-index:800;min-width:220px;max-height:70vh;overflow:auto;background:var(--pop);border:1px solid var(--ln2);border-radius:12px;padding:5px;box-shadow:0 24px 60px rgba(0,0,0,.75);font-size:13px;animation:pop .1s ease-out}
+.cm{position:fixed;z-index:800;min-width:220px;max-height:70vh;overflow:auto;background:var(--pop);border:1px solid var(--ln2);border-radius:var(--r);padding:5px;box-shadow:0 24px 60px rgba(0,0,0,.75);font-size:13px;animation:pop .1s ease-out}
 .cm button{display:flex;gap:9px;align-items:center;width:100%;padding:6px 9px;border-radius:7px;text-align:start;color:var(--tx)}.cm button:hover,.cm button:focus-visible{background:rgba(139,92,246,.25)}
 .cm button .ic{color:var(--mu)}.cm button.on{font-weight:700}.cm button.on::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--vi);margin-inline-start:auto}
 .cm button[disabled]{opacity:.4;pointer-events:none}

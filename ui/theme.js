@@ -14,7 +14,8 @@
     const t = T[look.theme] || T.aurora, r = document.documentElement;
     if (look.theme && look.theme !== "aurora") { for (const [k, v] of Object.entries(t.vars)) r.style.setProperty(k, v); r.style.colorScheme = t.scheme; }
     else { for (const k of Object.keys(T.aurora.vars)) r.style.removeProperty(k); r.style.removeProperty("color-scheme"); }
-    if (look.accent) { r.style.setProperty("--vi", look.accent); r.style.setProperty("--acc", look.accent); } else { r.style.removeProperty("--vi"); r.style.removeProperty("--acc"); }
+    if (look.accent && look.accent !== "#8B5CF6") { const a = look.accent; r.style.setProperty("--vi", a); r.style.setProperty("--acc", a); r.style.setProperty("--g", `linear-gradient(135deg,color-mix(in srgb,${a} 70%,#FF3D7F),${a} 55%,color-mix(in srgb,${a} 65%,#22D3EE))`); }
+    else { ["--vi", "--acc", "--g"].forEach(k => r.style.removeProperty(k)); }
     if (look.radius) r.style.setProperty("--r", look.radius + "px"); else r.style.removeProperty("--r");
     r.dataset.theme = look.theme || "aurora";
   }

@@ -27,7 +27,7 @@
     if (k === "desk") { D.ccClose(); return D.act("desk"); }
     if (k === "groupby") { const r = $("#tb").getBoundingClientRect(); return D.groupMenu(r.right - 260, r.top - 4); }
     if (k === "lang") { D.ccClose(); return window.PanelI18N && PanelI18N.menu($("#lb")); }
-    if (k === "cursor") { D.LS.set("lapp.cursor", D.LS.get("lapp.cursor", "") === "system" ? "" : "system"); return location.reload(); }
+    if (k === "cursor") { D.LS.set("lapp.cursor", D.LS.get("lapp.cursor", "") === "system" ? "" : "system"); return D.applyLook(); }
     if (k === "wall") { const L = ["", "dawn", "sea", "plain"]; return D.setLook("wall", L[(L.indexOf(D.DESK.wall || "") + 1) % L.length]); }
     if (k === "site") return window.open("/", "_blank", "noopener");
     if (k === "out") return D.api("POST", "/auth/logout").finally(() => location.href = "/");
