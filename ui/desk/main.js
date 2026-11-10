@@ -46,7 +46,7 @@
   });
   // keys: the person's own; pages inside windows pass matching keys up (see /ui/frame.js)
   document.addEventListener("keydown", e => {
-    if (D.REC) { e.preventDefault(); e.stopPropagation(); if (e.key === "Escape") { D.REC = null; return D.keysSheet(); } const c = D.combo(e); if (!c) return; if (!/^(Ctrl|Alt)\+/.test(c) && !/^F\d+$/.test(c)) return D.toast("Use Ctrl or Alt with a key, so typing still works", { kind: "warn" }); D.BIND[D.REC] = c; D.REC = null; D.shareKeys(); D.save(); D.keysSheet(); return D.toast("Shortcut saved: " + D.nice(c)); }
+    if (D.REC) { e.preventDefault(); e.stopPropagation(); if (e.key === "Escape") { D.REC = null; return D.keysSheet(); } const c = D.combo(e); if (!c) return; if (!/^(Cmd|Ctrl|Alt)\+/.test(c) && !/^F\d+$/.test(c)) return D.toast(D.MAC ? "Use ⌘, ⌃ or ⌥ with a key, so typing still works" : "Use Ctrl or Alt with a key, so typing still works", { kind: "warn" }); D.BIND[D.REC] = c; D.REC = null; D.shareKeys(); D.save(); D.keysSheet(); return D.toast("Shortcut saved: " + D.nice(c)); }
     if (e.key === "Escape") { if ($(".cm, .pop")) return D.closeMenus(); if ($("#sheet")) return D.closeSheet(); }
     const c = D.combo(e), a = Object.keys(D.BIND).find(k => D.BIND[k] === c); if (!a) return;
     e.preventDefault(); D.act(a);

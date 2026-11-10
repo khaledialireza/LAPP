@@ -34,9 +34,12 @@
   /* ---------- the person's keys ---------- */
   D.ACTIONS = { cc: "Open the command center", ai: "Ask the AI", tasks: "Open windows (task manager)", close: "Close the window", min: "Minimise the window", max: "Maximise / restore", left: "Snap to the left half", right: "Snap to the right half", next: "Next window", ws: "Next workspace", desk: "Show the desktop", widget: "Add a widget" };
   D.DEF = { cc: "Ctrl+K", ai: "Ctrl+J", tasks: "Alt+T", close: "Alt+W", min: "Alt+M", max: "Ctrl+Alt+ArrowUp", left: "Ctrl+Alt+ArrowLeft", right: "Ctrl+Alt+ArrowRight", next: "Alt+`", ws: "Alt+Q", desk: "Ctrl+Alt+D", widget: "Alt+N" };
+  D.MAC = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+  if (D.MAC) Object.assign(D.DEF, { cc: "Cmd+K", ai: "Cmd+J" });   // ⌘K and ⌘J, as on every Mac app; the rest use ⌃ ⌥ so they never clash with the browser
   D.BIND = { ...D.DEF }; D.REC = null;
-  D.combo = e => { if (["Control", "Alt", "Shift", "Meta"].includes(e.key)) return ""; const k = e.code && /^Key[A-Z]$/.test(e.code) ? e.code.slice(3) : e.code === "Backquote" ? "`" : e.key === " " ? "Space" : e.key.length === 1 ? e.key.toUpperCase() : e.key; return [(e.ctrlKey || e.metaKey) && "Ctrl", e.altKey && "Alt", e.shiftKey && "Shift", k].filter(Boolean).join("+"); };
-  D.nice = c => String(c || "").replace("ArrowLeft", "←").replace("ArrowRight", "→").replace("ArrowUp", "↑").replace("ArrowDown", "↓").replace("Escape", "Esc");
+  // a Mac has ⌘ Command, ⌥ Option and ⌃ Control: Command and Control are different keys there; elsewhere Ctrl (or the Windows key) is one
+  D.combo = e => { if (["Control", "Alt", "Shift", "Meta"].includes(e.key)) return ""; const k = e.code && /^Key[A-Z]$/.test(e.code) ? e.code.slice(3) : e.code === "Backquote" ? "`" : e.key === " " ? "Space" : e.key.length === 1 ? e.key.toUpperCase() : e.key; return (D.MAC ? [e.metaKey && "Cmd", e.ctrlKey && "Ctrl", e.altKey && "Alt", e.shiftKey && "Shift", k] : [(e.ctrlKey || e.metaKey) && "Ctrl", e.altKey && "Alt", e.shiftKey && "Shift", k]).filter(Boolean).join("+"); };
+  D.nice = c => { let t = String(c || "").replace("ArrowLeft", "←").replace("ArrowRight", "→").replace("ArrowUp", "↑").replace("ArrowDown", "↓").replace("Escape", "Esc"); if (D.MAC) t = t.replace(/Cmd\+/g, "⌘").replace(/Ctrl\+/g, "⌃").replace(/Alt\+/g, "⌥").replace(/Shift\+/g, "⇧"); return t; };
   D.shareKeys = () => D.LS.set("lapp.keys", D.BIND);      // the pages inside windows read this and pass the keys up
   D.ACT = {};                                             // action name → function (filled by the modules)
   D.act = a => D.ACT[a] && D.ACT[a]();
