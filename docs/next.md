@@ -30,6 +30,8 @@
   - It is the brain of the system: calm, fast, useful. Typing searches everything.
   - Visual scope, not syntax: 4–5 small icon buttons inside the search bar (All · Apps · Files/Lessons · People · ✦ AI) with tooltips; picking one shows it as a token in the field ("Files ×"). Prefixes (> # @ ?) stay only as a hidden shortcut for power users, never required.
   - AI chat is not a tab: Tab/↵ on "Ask the AI" turns the panel into the chat; Esc goes back.
+  - Fixed panel height (e.g. min(560px, 70vh)) in every mode: the panel never grows with content; the list/chat scrolls inside. Chat mode: messages scroll, the question box is pinned at the bottom like a chat app, newest message in view.
+  - Bugs seen: header shows "LAPP AI · LAPP AI" (provider name repeated); for "calendar" the AI offered Dashboard — it must say the calendar doesn't exist yet (until it does).
   - Notifications and running work leave the panel: bell / spinner on the taskbar open their own small popovers.
   - One-line rows (title + muted place on the same line), narrower panel (~560px), smaller paddings.
   - Lesson rows lose the 3 buttons: ↵ opens the script; → (or hover) opens an action panel (Script, Voice, Insights, pin, share, ask AI) — the same action panel for every item type.
