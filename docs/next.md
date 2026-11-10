@@ -26,3 +26,16 @@
   - AI working in it: moving LAPP gradient; background job (audio): soft pulse;
   - unsaved changes: amber; error: red; just saved / done: short green flash; recording (voice): pink.
   - Pages send their state up with postMessage {lapp:1, t:"state", state:"busy|dirty|error|ok|rec"}.
+
+## Connect Google Drive, Calendar and Keep
+- Each person can connect their own Google account (OAuth, per user, revocable; tokens kept server-side only).
+- Drive: keep files on their own Drive, or work with them inside LAPP (open, preview, attach, put on the desktop) without copying to our storage.
+- Calendar: show/sync their Google Calendar in our calendar (Phase 4) and the Today/Week widgets.
+- Keep: their notes in LAPP (note widget, AI). Note: Google Keep's API is limited (mainly Workspace accounts) — check before promising.
+
+## Studio project file format (save locally, publish to us)
+- A LAPP lesson file (e.g. `.lapp`: one zip with JSON script + scenes + characters + media/audio) that holds a whole studio project.
+- Drafts / half-done edits live on the person's own computer or their own Drive, not on our servers.
+- Only when they PUBLISH does the lesson go to our system. Reason: teachers may make many half-done drafts; storing all of them would need huge space.
+- Studio: Open file / Save / Save as, autosave to the local file (File System Access API where available, else download/upload), open from Drive.
+- Our server keeps published lessons (+ maybe a small recent-draft cache with a limit).
