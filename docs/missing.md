@@ -32,3 +32,12 @@ Source: lapp-desk / lapp-blueprint / studio-v3 mockups and their notes. Done ite
 - AI settings v2: routes (who does what, who takes over), usage & cost (30 days), compare on the same task, house style & privacy.
 - System UI kit.
 - Calendar, Finance (accounting), Messages, Mail, Friends — these are later steps in the priority list (5 and 6).
+
+## Progress (sections of the "forgotten 5", built one by one with the owner's OK)
+- [x] 1 Desktop: lock screen, waiting-work counts, Help menu, profile photo; Mac/Windows keys.
+- [x] 2 Studio script: word card tools, lesson dictionary + target words, Format, voice per line, paste a text.
+- [ ] 3 Lesson app — NEXT (owner approved; wait until tokens reset):
+  goals show target words + grammar; real homework inside the lesson (quiz / spoken / written, deadline "N days after class", generated from the lines);
+  access per lesson stricter than the folder rule; history: log every change (also the assistant's) with restore (needs a lesson_versions table).
+- [ ] 4 Voice desk (engines, designed/cloned voices, tracks, tools, takes, render one line).
+- [ ] 5 Cast (voice per language, AI tag, personality shapes lines).
