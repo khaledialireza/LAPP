@@ -13,3 +13,7 @@
 
 ## Voice input for the AI
 - Talk instead of typing: a mic button in the command center / AI chat, plus a hold-to-talk key.
+
+## System-wide theme and colours in Settings
+- A theme/colour setting in Settings that changes the whole system: desktop, every window (admin, school, studio) and menus.
+- e.g. dark/light, accent colour, ready-made themes; saved with the account.
