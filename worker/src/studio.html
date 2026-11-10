@@ -128,6 +128,11 @@ button.cell:hover{outline:2px solid rgba(255,255,255,.35)}
 .txt .f{font-size:13.5px;color:var(--mu);margin-top:3px;outline:none;min-height:1.3em;border-radius:4px}
 .txt .f:empty::before{content:"＋ translation";color:var(--mu2);font-style:italic}
 .txt .over{color:var(--am);font-size:11px;margin-top:2px}
+/* translations: A one line with a language tag · B all four, folded · C side by side */
+.trl{display:flex;align-items:flex-start;gap:6px;margin-top:3px}.trl .f{margin-top:0;flex:1}
+.ttag{flex:none;font:700 9.5px Inter;letter-spacing:.4px;padding:2px 6px;border-radius:6px;border:1px solid var(--ln2);color:var(--mu);background:var(--p2);margin-top:2px;cursor:pointer}.ttag:hover{color:var(--tx);border-color:var(--vi)}
+.trmore{font-size:11px;color:var(--mu2);margin-top:3px;cursor:pointer;background:none;border:0;padding:0}.trmore:hover{color:var(--tx)}
+.dl.trc .txt{display:grid;grid-template-columns:1fr 1fr;gap:14px}.dl.trc .txt .trl{margin-top:0;border-inline-start:1px solid var(--ln);padding-inline-start:12px}.dl.trc .txt .over,.dl.trc .txt .slot{grid-column:1/-1}
 .ok-b{width:24px;height:24px;border-radius:7px;border:1px solid var(--ln2);display:grid;place-items:center;font-size:12px;color:var(--mu2);margin-top:3px}
 .ok-b.on{background:rgba(52,211,153,.18);border-color:rgba(52,211,153,.5);color:var(--gr)}
 .hw{text-decoration:underline wavy rgba(251,191,36,.9);text-underline-offset:4px}
@@ -321,7 +326,7 @@ async function openLesson(id) {
   await flush();
   const L = await api("GET", `/lessons/${id}`);
   S.L = L; S.sel = -1;
-  S.tr = TRL.includes(window.PanelI18N && PanelI18N.lang) ? PanelI18N.lang : "en";
+  S.tr = (() => { try { const v = localStorage.getItem("lapp.studio.tr") || (JSON.parse(localStorage.getItem("lapp.theme")) || {}).trLang; if (TRL.includes(v)) return v; } catch {} return TRL.includes(window.PanelI18N && PanelI18N.lang) ? PanelI18N.lang : "en"; })();
   dictOf(L.course).then(() => { if (/^#script/.test(location.hash) && $("#doc") && !$(".txt .d:focus")) renderDoc(); });
 }
 const V = {};
@@ -484,7 +489,7 @@ async function writeStream(id, onLines, onStatus) {
 V.script = async () => {
   const L = S.L;
   const missingTr = countMissing();
-  bar(lessonCrumb(), `${TRL.map(l => `<button class="chip ${S.tr === l ? "on" : ""}" data-tr="${l}">${l.toUpperCase()}</button>`).join("")}
+  bar(lessonCrumb(), `
     <span id="saved" class="mu2 sm"></span>
     <button class="btn" data-act="settings" title="Title, level, topic…">⚙</button>
     ${missingTr && rows().length ? `<button class="btn" data-act="translate" ${S.scope.ai ? "" : "disabled"}>🌐 Fill ${missingTr} translations</button>` : ""}
@@ -512,6 +517,16 @@ function hiDe(text, i) {
   const forms = S.dicts[S.L.course], hard = new Set(((S.L.data.check && S.L.data.check.lines || []).find(x => x.i === i) || {}).hard || []);
   return esc(text).replace(/[\p{L}\p{M}'’-]+/gu, w => hard.has(w) ? `<span class="hw" title="above ${S.L.level}">${w}</span>` : !known(w, forms) ? `<span class="nw" title="new word for LAPP">${w}</span>` : w);
 }
+// how translations show under the lines (Settings → Studio): a = one line + tag (default), b = all four folded, c = side by side
+function trMode() { try { return (JSON.parse(localStorage.getItem("lapp.theme")) || {}).trMode || "a"; } catch { return "a"; } }
+S.trOpen = new Set();
+function trLine(ln, i, l) { return `<div class="trl"><button class="ttag" data-ttag="${i}" title="Language · click to change">${l.toUpperCase()}</button><div class="f" contenteditable data-f="${l}" data-i="${i}" dir="${l === "fa" ? "rtl" : "ltr"}">${esc(ln[l] || "")}</div></div>`; }
+function trHtml(ln, i) {
+  const m = trMode();
+  if (m === "b") { const others = TRL.filter(l => l !== S.tr), open = S.trOpen.has(i), miss = others.filter(l => !ln[l]).length;
+    return trLine(ln, i, S.tr) + (open ? others.map(l => trLine(ln, i, l)).join("") + `<button class="trmore" data-trfold="${i}">▴ fold</button>` : `<button class="trmore" data-trfold="${i}">▾ ${others.map(l => l.toUpperCase()).join(" · ")}${miss ? ` · ${miss} missing` : ""}</button>`); }
+  return trLine(ln, i, S.tr);
+}
 function renderDoc() {
   const L = S.L, d = L.data, doc = $("#doc"); if (!doc) return;
   if (!d.scenes.length) {
@@ -521,11 +536,11 @@ function renderDoc() {
     let n = 0;
     doc.innerHTML = d.scenes.map((sc, si) => `<div class="sch" id="sc${si}"><span>${si + 1} ·</span><span class="de" contenteditable data-scene="${si}">${esc(sc.title.de)}</span><span class="mu2">· ${esc(sc.title[S.tr] || "")}</span>
         <span style="flex:1"></span><button class="btn sm" data-addline="${si}">＋ line</button>${d.scenes.length > 1 ? `<button class="btn sm danger" data-delscene="${si}" title="Delete scene">🗑</button>` : ""}</div>` +
-      sc.lines.map(ln => { const i = n++; const wc = words(ln.de).length, over = wc > S.scope.maxWords[L.level]; return `<div class="dl ${S.sel === i ? "sel" : ""}" data-i="${i}">
+      sc.lines.map(ln => { const i = n++; const wc = words(ln.de).length, over = wc > S.scope.maxWords[L.level]; return `<div class="dl ${S.sel === i ? "sel" : ""} ${trMode() === "c" ? "trc" : ""}" data-i="${i}">
         <span class="no">${i + 1}</span>
         <button class="who" data-who="${i}" style="color:${speakerColor(ln.who)}"><i style="background:${speakerColor(ln.who)}"></i><span>${esc(ln.who || "—")}</span></button>
         <div class="txt"><div class="d" contenteditable spellcheck="false" data-f="de" data-i="${i}">${hiDe(ln.de, i)}</div>
-          <div class="f" contenteditable data-f="${S.tr}" data-i="${i}" dir="${S.tr === "fa" ? "rtl" : "ltr"}">${esc(ln[S.tr] || "")}</div>
+          ${trHtml(ln, i)}
           ${over ? `<div class="over">${wc} words — ${L.level} lines have at most ${S.scope.maxWords[L.level]}</div>` : ""}
           <div class="slot" id="slot${i}"></div></div>
         <button class="ok-b ${ln.ok ? "on" : ""}" data-ok="${i}" title="Approve">✓</button></div>`; }).join("")).join("");
@@ -601,7 +616,8 @@ document.addEventListener("keydown", e => {
 document.addEventListener("click", e => {
   if (!S.L || !$("#doc")) return;
   const t = e.target;
-  const tr = t.closest("[data-tr]"); if (tr) { S.tr = tr.dataset.tr; V.script(); return; }
+  const tg = t.closest("[data-ttag]"); if (tg) { S.tr = TRL[(TRL.indexOf(S.tr) + 1) % TRL.length]; try { localStorage.setItem("lapp.studio.tr", S.tr); } catch {} renderDoc(); return; }
+  const tf = t.closest("[data-trfold]"); if (tf) { const i = Number(tf.dataset.trfold); S.trOpen.has(i) ? S.trOpen.delete(i) : S.trOpen.add(i); renderDoc(); return; }
   const dl = t.closest(".dl"); if (dl && !t.closest(".float, .sugg, [data-ok], [data-who]")) selLine(Number(dl.dataset.i));
   const okb = t.closest("[data-ok]"); if (okb) { const r = rows()[okb.dataset.ok]; r.ok = !r.ok; okb.classList.toggle("on", r.ok); changed(); renderSide(); return; }
   const rw = t.closest("[data-rw]"); if (rw) { rewrite(S.sel, rw.dataset.rw); return; }
@@ -1000,6 +1016,6 @@ function form(title, html, submit, okLabel = "Save") {
   show();
 })();
 </script>
-<script src="/ui/studio-lesson.js?v=1"></script>
-<script src="/ui/studio-menu.js?v=1"></script>
+<script src="/ui/studio-lesson.js?v=2"></script>
+<script src="/ui/studio-menu.js?v=2"></script>
 </body></html>

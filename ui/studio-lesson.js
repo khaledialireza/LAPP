@@ -101,7 +101,7 @@
     const ln = t.closest("[data-len]"); if (ln) { m.length = ln.dataset.len; saveMeta(); draw("pace"); return; }
     const pc = t.closest("[data-pace]"); if (pc) { m.pace = +pc.dataset.pace; Object.values(S.L.data.cast).forEach(c => c.speed = m.pace); saveMeta(); draw("pace"); return; }
     const ts = t.closest("[data-trs]"); if (ts) { m.trStyle = ts.dataset.trs; saveMeta(); draw("tr"); return; }
-    const tsh = t.closest("[data-trshow]"); if (tsh) { S.tr = tsh.dataset.trshow; draw("tr"); return; }
+    const tsh = t.closest("[data-trshow]"); if (tsh) { S.tr = tsh.dataset.trshow; try { localStorage.setItem("lapp.studio.tr", S.tr); } catch {} draw("tr"); return; }
     const ac = t.closest("[data-acc]"); if (ac) { try { const r = await api("PUT", `/lessons/${S.L.id}`, { rev: S.L.rev, access: ac.dataset.acc }); S.L.rev = r.rev; S.L.access_own = ac.dataset.acc === "plus" ? "plus" : ""; S.L.access = ac.dataset.acc; toast("Saved"); draw("access"); } catch (x) { toast(x.message); } return; }
   });
   document.addEventListener("change", e => {

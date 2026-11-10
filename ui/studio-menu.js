@@ -98,6 +98,9 @@
   });
   document.addEventListener("click", e => { if (!e.target.closest(".lctx")) close(); });
   addEventListener("scroll", close, true);
+  const relayout = () => { try { const v = (JSON.parse(localStorage.getItem("lapp.theme")) || {}).trLang; if (v && v !== S.tr && !localStorage.getItem("lapp.studio.tr")) S.tr = v; } catch {} if (S.L && $("#doc") && !document.querySelector(".txt [contenteditable]:focus")) renderDoc(); };
+  addEventListener("message", e => { if (e.origin === location.origin && e.data && e.data.lapp && e.data.t === "theme") setTimeout(relayout, 0); });
+  addEventListener("storage", e => { if (e.key === "lapp.theme") relayout(); });
   // the keyboard: the menu for the chosen line
   document.addEventListener("keydown", e => {
     if (e.key === "ContextMenu" || (e.shiftKey && e.key === "F10")) { if (S.L && S.sel >= 0) { const el = $(`.dl[data-i="${S.sel}"]`); if (el) { e.preventDefault(); const r = el.getBoundingClientRect(); open(r.left + 60, r.top + 30, S.sel, ""); } } }
