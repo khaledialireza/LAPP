@@ -56,3 +56,5 @@
 - Admin security: host-only cookie for admin, mandatory 2FA/passkey, Cloudflare Access/IP allowlist, own session, full audit log, never embeddable.
 - Data: one D1 core now; later a database per tenant for isolation. Clinic = health data (GDPR special category) and exchange = financial rules (KYC/AML) → extra compliance before selling.
 - Order proposed: 1) core split (tenants, app catalog, plans) 2) admin.khaledi.eu console 3) school + studio as apps 4) accounting (first general app) 5) CRM 6) clinic last.
+- UPDATE (agreed): admin.khaledi.eu and app.khaledi.eu are the SAME panel (one codebase, the same /manage desktop, windows, command center, AI).
+  The host only changes context and rules: on admin.* the platform-owner apps (tenants, plans, app catalog, servers, users, audit) appear and stricter security applies (2FA, Access/IP, own host-only cookie); on app.* the tenant's apps appear. Not two systems.
