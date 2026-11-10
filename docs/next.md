@@ -1,17 +1,22 @@
 # Next work (agreed in chat, build when asked)
 Rule: only items the owner approved are recorded as agreed; anything else is marked [PROPOSAL, NOT CONFIRMED].
 
-## PRIORITY ORDER (proposed, owner to confirm)
-1. Bugs now: windows open too small + mobile layout inside windows; one state-coloured window border.
-2. Everything from the mockups that is missing (docs/missing.md): full Apps list, studio right-click + word card, Lesson app (translations & their settings), Cast/Characters app, Settings app (+ system-wide theme), Guide/ⓘ.
-3. Platform core + admin.khaledi.eu / app.khaledi.eu (same panel, host decides apps & security).
-4. AI that really acts (create user, open calendar…) with confirmation + voice input.
-5. Accounting as a standalone app.
-6. Calendar (+ Google Calendar), messages, mail, friends.
-7. Studio project files saved locally/Drive, publish to us; Google Drive & Keep.
-8. Screens app: classroom board (same laptop / smart TV via code + WebRTC), clinic queue, rate boards.
-9. Desktop extras (groups, Alt+Tab, focus mode…), AI settings v2.
-10. Later: CRM, clinic; held ideas: 2 sentences a day, creator marketplace.
+## PRIORITY ORDER v2 [PROPOSAL, NOT CONFIRMED]
+Steps 1+2 (approved to build), split into parts in this order:
+ 1a. Foundation: modular window/app components; standard window (title bar = name + menus + app buttons, no inner top bar); device detection → desktop layout inside windows; one state-coloured border; no place tag; own SVG icon layer.
+ 1b. Taskbar: dock (pinned + running), counts, state on icons, live previews, workspaces per organisation, AI-chosen grouping (task groups / work type / file).
+ 1c. Command center: fixed height, visual scope buttons, calm empty state, AI chat inside with the box at the bottom, one action panel; notifications & running as taskbar popovers.
+ 1d. Files app (Content → Files) + the smart lesson parts move to the Studio library.
+ 2.  Everything missing from the mockups (docs/missing.md): all apps, studio right-click + word card, Lesson app with translations & settings, Cast app, Settings app + system theme, Guide/ⓘ.
+Then:
+ 3. Platform core + admin.khaledi.eu / app.khaledi.eu (one panel).
+ 4. AI that really acts + voice input.
+ 5. Accounting (standalone).
+ 6. Calendar (+ Google Calendar), messages, mail, friends.
+ 7. Studio project files on the user's computer/Drive (publish to us); Drive/OneDrive/Keep in Files.
+ 8. Screens app (class board, clinic queue, rate boards).
+ 9. Desktop extras, AI settings v2.
+ 10. Later: CRM, clinic; held: 2 sentences a day, creator marketplace.
 
 ### Added to steps 1+2 (agreed)
 - No in-page top bar inside windows: the window title bar already has the app name. Remove the big page heading/top bar in embed mode.
