@@ -3,7 +3,7 @@
 <meta name="robots" content="noindex">
 <title>LAPP Studio</title>
 <script src="/ui/lapp-ui.js?v=3"></script>
-<script src="/ui/panel-i18n.js?v=6"></script>
+<script src="/ui/panel-i18n.js?v=7"></script>
 <script src="/ui/cursor.js?v=1"></script>
 <script>
 // the studio lives inside the management environment; opened on its own, it goes there
@@ -11,8 +11,11 @@ const EMBED = new URLSearchParams(location.search).has("embed") && window.parent
 if (!EMBED) location.replace("/manage#open=" + encodeURIComponent(location.pathname + location.search + location.hash));
 const up = m => { try { parent.postMessage({ lapp: 1, ...m }, location.origin); } catch {} };
 document.addEventListener("keydown", e => {
-  const mod = e.metaKey || e.ctrlKey, k = e.key.toLowerCase();
-  if ((mod && (k === "k" || k === "j")) || (e.altKey && !mod && (e.code === "KeyW" || /^Digit[1-9]$/.test(e.code))) || (e.ctrlKey && e.altKey && /Arrow(Left|Right)/.test(e.key))) { e.preventDefault(); up({ t: "key", key: e.key, code: e.code, mod, alt: e.altKey, ctrl: e.ctrlKey }); }
+  const KEYS = () => { try { return Object.values(JSON.parse(localStorage.getItem("lapp.keys")) || {}); } catch { return []; } };
+  const k = ["Control", "Alt", "Shift", "Meta"].includes(e.key) ? "" : e.code && /^Key[A-Z]$/.test(e.code) ? e.code.slice(3) : e.code === "Backquote" ? "`" : e.key === " " ? "Space" : e.key.length === 1 ? e.key.toUpperCase() : e.key;
+  const c = k && [(e.ctrlKey || e.metaKey) && "Ctrl", e.altKey && "Alt", e.shiftKey && "Shift", k].filter(Boolean).join("+");
+  if (c && KEYS().includes(c)) { e.preventDefault(); e.stopPropagation(); up({ t: "key", combo: c }); }
+  else if (e.key === "Escape" && !document.querySelector("dialog[open]")) up({ t: "key", combo: "Escape" });
 }, true);
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">

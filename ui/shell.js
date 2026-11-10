@@ -525,8 +525,11 @@
     addEventListener("hashchange", show);
     // keys that belong to the environment
     document.addEventListener("keydown", e => {
-      const mod = e.metaKey || e.ctrlKey, k = e.key.toLowerCase();
-      if ((mod && (k === "k" || k === "j")) || (e.altKey && !mod && (e.code === "KeyW" || /^Digit[1-9]$/.test(e.code))) || (e.ctrlKey && e.altKey && /Arrow(Left|Right)|^f$/i.test(e.key)) || (e.key === "Escape" && !document.querySelector("dialog[open]"))) { if (e.key !== "Escape") e.preventDefault(); up({ t: "key", key: e.key, code: e.code, mod, alt: e.altKey, ctrl: e.ctrlKey }); }
+      const KEYS = () => { try { return Object.values(JSON.parse(localStorage.getItem("lapp.keys")) || {}); } catch { return []; } };
+      const k = ["Control", "Alt", "Shift", "Meta"].includes(e.key) ? "" : e.code && /^Key[A-Z]$/.test(e.code) ? e.code.slice(3) : e.code === "Backquote" ? "`" : e.key === " " ? "Space" : e.key.length === 1 ? e.key.toUpperCase() : e.key;
+      const c = k && [(e.ctrlKey || e.metaKey) && "Ctrl", e.altKey && "Alt", e.shiftKey && "Shift", k].filter(Boolean).join("+");
+      if (c && KEYS().includes(c)) { e.preventDefault(); e.stopPropagation(); up({ t: "key", combo: c }); }
+      else if (e.key === "Escape" && !document.querySelector("dialog[open]")) up({ t: "key", combo: "Escape" });
     }, true);
     // the studio and other pages open as tabs of the environment, never as new browser tabs
     document.addEventListener("click", e => {

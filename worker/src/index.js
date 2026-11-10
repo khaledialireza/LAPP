@@ -19,6 +19,7 @@ import { lessonsApi, libApi, eventsApi, servePublished, plusLessons } from "./le
 import { adminAi, ask as aiAsk } from "./ai.js";
 import ADMIN from "./admin.html";
 import MANAGE from "./manage.html";
+import { deskApi, worksHere } from "./desk.js";
 import SCHOOL from "./school.html";
 import { orgApi, orgsList, adminOrgs } from "./school.js";
 export { Room } from "./room.js";
@@ -52,8 +53,7 @@ export default {
       if (p === "/manage" || p === "/manage/") {
         const u = env.DB ? await currentUser(req, env) : null;
         if (!u) return Response.redirect(`${url.origin}/?login=1&next=/manage`, 302);
-        const work = STAFF.includes(u.role) || await env.DB.prepare("SELECT 1 FROM org_members m JOIN orgs o ON o.id = m.org_id WHERE m.user_id = ? AND m.active = 1 AND m.role IN ('admin','teacher','finance') AND o.disabled = 0").bind(u.id).first();
-        if (!work) return Response.redirect(`${url.origin}/`, 302);
+        if (!await worksHere(env, u, STAFF)) return Response.redirect(`${url.origin}/`, 302);
         return await page(req, env, MANAGE, ROLES, "/manage");
       }
       // a school's portal: anyone signed in gets the page; the API decides what they may see
@@ -324,6 +324,13 @@ async function api(req, env, url, ctx) {
     return json(await me(env, req, u));
   }
 
+  /* ---- the work desktop of /manage ---- */
+  if (p === "/desk" || p.startsWith("/desk/")) {
+    const u = await need(req, env);
+    if (!await worksHere(env, u, STAFF)) throw fail("the desktop is for staff and school teams", 403);
+    return deskApi(req, env, H, p.slice(5), u);
+  }
+
   /* ---- the assistant in the management panel: answers with what the person is looking at ---- */
   if (p === "/assist" && M === "POST") {
     const u = await need(req, env);
@@ -334,15 +341,23 @@ async function api(req, env, url, ctx) {
     if (n.n > 80) throw fail("the daily AI limit is reached — try again tomorrow", 429);
     const b = await body(req), s = (v, k) => String(v ?? "").replace(/\s+/g, " ").trim().slice(0, k);
     const q = s(b.q, 1200); if (!q) throw fail("ask something");
+    const places = (Array.isArray(b.places) ? b.places : []).slice(0, 60).map(x => ({ id: s(x.id, 12), label: s(x.label, 80) })).filter(x => x.id && x.label);
+    const wins = (Array.isArray(b.windows) ? b.windows : []).slice(0, 20).map(x => ({ id: s(x.id, 12), label: s(x.label, 80) })).filter(x => x.id && x.label);
     const c = b.context || {}, hist = (Array.isArray(b.history) ? b.history : []).slice(-6).map(m => `${m.me ? "Person" : "Assistant"}: ${s(m.text, 600)}`).join("\n");
     const who = [STAFF.includes(u.role) ? `LAPP ${u.role}` : "", ...orgs.map(o => `${o.role} at ${o.name}`)].filter(Boolean).join(", ");
     const prompt = `You are the assistant inside LAPP's management panel. LAPP is a speaking-first language-learning platform (German, Dutch, Polish) with a lesson studio, schools, classes, homework and finance.
 The person: ${s(u.name || u.username, 60)} (${who}).
 They are looking at: ${s(c.title, 120)}${c.group ? " in " + s(c.group, 80) : ""}${c.place ? " (" + s(c.place, 160) + ")" : ""}.
-Answer in the language of their question, short and practical. When they want something changed, say where in the panel to do it and what to click; you can't change data yourself yet. Never invent numbers you were not given.
+Answer in the language of their question, short and practical. You can't change data yourself; say where to click. Never invent numbers you were not given.
+You can propose actions on the desktop, which the person confirms: "open" a place (opens it in a window), "left" / "right" / "max" (open a place, or move an open window, to the left half, the right half, or full size), "close" an open window. Use only these ids.
+Places: ${places.map(x => `${x.id} = ${x.label}`).join("; ") || "none"}
+Open windows: ${wins.map(x => `${x.id} = ${x.label}`).join("; ") || "none"}
+Propose actions only when they asked for something to be opened, arranged or closed; otherwise "actions" is [].
 ${hist ? "Conversation so far:\n" + hist + "\n" : ""}Question: ${q}`;
-    const r = await aiAsk(env, "assist", { prompt, schema: { type: "object", required: ["answer"], properties: { answer: { type: "string" } } }, max: 1500 });
-    return json({ answer: s(r.value.answer, 4000), provider: r.provider });
+    const r = await aiAsk(env, "assist", { prompt, schema: { type: "object", required: ["answer"], properties: { answer: { type: "string" }, actions: { type: "array", items: { type: "object", properties: { do: { type: "string" }, id: { type: "string" } } } } } }, max: 1500 });
+    const ok = new Set([...places, ...wins].map(x => x.id));
+    const actions = (Array.isArray(r.value.actions) ? r.value.actions : []).map(a => ({ do: s(a && a.do, 10), id: s(a && a.id, 12) })).filter(a => ["open", "left", "right", "max", "close"].includes(a.do) && ok.has(a.id)).slice(0, 6);
+    return json({ answer: s(r.value.answer, 4000), actions, provider: r.provider });
   }
 
   if (p === "/me" && M === "PATCH") {
