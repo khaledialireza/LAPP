@@ -32,14 +32,14 @@ Rule: only items the owner approved are recorded as agreed; anything else is mar
   - [PROPOSAL, NOT CONFIRMED] Example "Students of School A and School B at once": normally each school is its own workspace (switch with the switcher). To compare side by side, open School B's Students in the current workspace (or drag its window across): both windows then show the org tag ("Students · School A" / "Students · School B") and the org's colour on the border; on the taskbar it's one Students icon with "2", and its list shows each window with the school name and colour dot.
 - One standard window structure for every app (title bar, menus, toolbar actions, status, body). A change to "windows" applies to all windows.
 - Modular, component-based: a shared window/app component library (title bar, menus, buttons, dialogs, lists, toasts) and each app as its own module that declares its menus/actions/title — not hard-coded in one heavy file. Pages post their menus/actions to the host (postMessage) until they become native modules.
-- Content → becomes a core "Files" app (like Finder/Explorer) for the whole system (agreed proposal):
+- [PROPOSAL, NOT CONFIRMED] Content → becomes a core "Files" app (like Finder/Explorer) for the whole system (agreed proposal):
   - One file system for every app: folders, list/grid/columns views, preview, search, tags, drag & drop, rename, move, bin, sharing & permissions, recent, favourites.
   - Storage providers behind it: LAPP storage, the desktop, later Google Drive, OneDrive, Dropbox… shown and managed inside, the same way.
   - Every app reads/writes files through it (open/save dialogs are the same everywhere). Lessons are files of type .lapp: double-click opens the studio.
   - The smart lesson parts (curriculum map, board, AI ideas, level/approval rules, new lesson) move to the Studio as its "Library / Curriculum" view.
   - Generic folder permissions stay in Files; lesson-only rules (level, approved before publish) live in the Studio.
   - Everything the Studio makes is a file in Files: lesson (.lapp), character/identity, voice, audio track, video, slides, grammar sheet, dictionary, homework/practice set… each with its own type, icon, preview and "open with Studio". Publishing marks/copies the file into LAPP; drafts can live on the user's own drive.
-- Command center: cleaner (proposal):
+- [PROPOSAL, NOT CONFIRMED] Command center: cleaner (only the visual scope buttons were approved):
   - No row of 8 tabs. Empty state = only: Suggested (max 2) · Recent (apps, lessons, files mixed, ~6 one-line rows) · a single row of pinned app icons. Hide empty sections ("Nothing new" never shown).
   - It is the brain of the system: calm, fast, useful. Typing searches everything.
   - Visual scope, not syntax: 4–5 small icon buttons inside the search bar (All · Apps · Files/Lessons · People · ✦ AI) with tooltips; picking one shows it as a token in the field ("Files ×"). Prefixes (> # @ ?) stay only as a hidden shortcut for power users, never required.
@@ -73,7 +73,7 @@ Rule: only items the owner approved are recorded as agreed; anything else is mar
 - Now: a grey border + a separate 1px coloured ring (box-shadow) + a 2px coloured line on top of the title bar → looks like an extra square frame.
 - Fix: one border only. Active window: the border itself takes the place colour (LAPP/school/studio); inactive: soft grey. Drop the extra ring and top line; keep rounded corners.
 - Agreed: merge the three into ONE border that changes colour by the moment and the work in the window:
-  - normal: the place colour (LAPP / school / studio), dim when the window isn't active;
+  - [PROPOSAL, NOT CONFIRMED] normal: the place colour (LAPP / school / studio), dim when the window isn't active;
   - AI working in it: moving LAPP gradient; background job (audio): soft pulse;
   - unsaved changes: amber; error: red; just saved / done: short green flash; recording (voice): pink.
   - Pages send their state up with postMessage {lapp:1, t:"state", state:"busy|dirty|error|ok|rec"}.
@@ -85,7 +85,7 @@ Rule: only items the owner approved are recorded as agreed; anything else is mar
 - Keep: their notes in LAPP (note widget, AI). Note: Google Keep's API is limited (mainly Workspace accounts) — check before promising.
 
 ## Studio project file format (save locally, publish to us)
-- A LAPP lesson file (e.g. `.lapp`: one zip with JSON script + scenes + characters + media/audio) that holds a whole studio project.
+- [PROPOSAL, NOT CONFIRMED] A LAPP lesson file (e.g. `.lapp`: one zip with JSON script + scenes + characters + media/audio) that holds a whole studio project.
 - Drafts / half-done edits live on the person's own computer or their own Drive, not on our servers.
 - Only when they PUBLISH does the lesson go to our system. Reason: teachers may make many half-done drafts; storing all of them would need huge space.
 - Studio: Open file / Save / Save as, autosave to the local file (File System Access API where available, else download/upload), open from Drive.
@@ -93,7 +93,7 @@ Rule: only items the owner approved are recorded as agreed; anything else is mar
 
 ## Windows open too small and pages inside look like mobile (bug)
 - Why: pages in a window (iframe) decide their layout by the WINDOW's width, not the screen's. A new window is 66% of the desktop (max 1100px); on a laptop that's ~850–950px, which hits the pages' "small screen" rules (shell ≤1100px, school ≤1000px) → compact/mobile-like layout.
-- Fix:
+- [PROPOSAL, NOT CONFIRMED] Fix:
   - New windows open big: ~90% of the desktop (or maximised when the screen is < 1440px wide; first window always maximised). Remember the last size per app.
   - Inside windows (embed mode) use the desktop layout down to ~700px; only real phones (< 600px) get the mobile layout. Move the pages from screen media queries to container queries / embed-aware breakpoints.
 
@@ -101,28 +101,28 @@ Rule: only items the owner approved are recorded as agreed; anything else is mar
 - The system becomes a business platform; each business type gets its own apps (windows):
   language school (school, calendar, finance) · content creator (studio, media) · exchange office (accounting) · company (CRM) · doctor (practice + patients) · platform owner (packages, servers, users).
 - LAPP (learning) = one product/app set on the platform; lapp.khaledi.eu stays the learner site.
-- Layers: CORE (accounts, tenants/organisations, roles, app catalog, plans & billing, files, AI, notifications, desktop) + APPS (school, studio, accounting, CRM, clinic…). A tenant only sees the apps its plan includes.
-- admin.khaledi.eu = owner console: tenants, plans/packages, app catalog & feature flags, users, servers/usage/costs (AI, storage), billing, logs/audit, support access (logged), system health.
-- Customer workspace: the /manage desktop on its own host (e.g. app.khaledi.eu or <tenant>.khaledi.eu, later custom domains).
-- Admin security: host-only cookie for admin, mandatory 2FA/passkey, Cloudflare Access/IP allowlist, own session, full audit log, never embeddable.
-- Data: one D1 core now; later a database per tenant for isolation. Clinic = health data (GDPR special category) and exchange = financial rules (KYC/AML) → extra compliance before selling.
-- Order proposed: 1) core split (tenants, app catalog, plans) 2) admin.khaledi.eu console 3) school + studio as apps 4) accounting (first general app) 5) CRM 6) clinic last.
+- [PROPOSAL, NOT CONFIRMED] Layers: CORE (accounts, tenants/organisations, roles, app catalog, plans & billing, files, AI, notifications, desktop) + APPS (school, studio, accounting, CRM, clinic…). A tenant only sees the apps its plan includes.
+- [PROPOSAL, NOT CONFIRMED] admin.khaledi.eu = owner console: tenants, plans/packages, app catalog & feature flags, users, servers/usage/costs (AI, storage), billing, logs/audit, support access (logged), system health.
+- [PROPOSAL, NOT CONFIRMED] Customer workspace: the /manage desktop on its own host (e.g. app.khaledi.eu or <tenant>.khaledi.eu, later custom domains).
+- [PROPOSAL, NOT CONFIRMED] Admin security: host-only cookie for admin, mandatory 2FA/passkey, Cloudflare Access/IP allowlist, own session, full audit log, never embeddable.
+- [PROPOSAL, NOT CONFIRMED] Data: one D1 core now; later a database per tenant for isolation. Clinic = health data (GDPR special category) and exchange = financial rules (KYC/AML) → extra compliance before selling.
+- [PROPOSAL, NOT CONFIRMED] Order proposed: 1) core split (tenants, app catalog, plans) 2) admin.khaledi.eu console 3) school + studio as apps 4) accounting (first general app) 5) CRM 6) clinic last.
 - UPDATE (agreed): admin.khaledi.eu and app.khaledi.eu are the SAME panel (one codebase, the same /manage desktop, windows, command center, AI).
   The host only changes context and rules: on admin.* the platform-owner apps (tenants, plans, app catalog, servers, users, audit) appear and stricter security applies (2FA, Access/IP, own host-only cookie); on app.* the tenant's apps appear. Not two systems.
 
 ## Classroom TV board over local Wi-Fi
 - Teacher shows class content on the classroom TV as a digital board they control; control traffic should go over the school Wi-Fi, not our server.
-- Plan: TV opens a LAPP "board" page (smart-TV browser / stick / any PC) and shows a short code (+QR). Teacher types the code in a "Show on screen" window.
+- [PROPOSAL, NOT CONFIRMED] Plan: TV opens a LAPP "board" page (smart-TV browser / stick / any PC) and shows a short code (+QR). Teacher types the code in a "Show on screen" window.
   Pairing (a few KB) goes through our server once; then WebRTC connects the two devices DIRECTLY over the LAN (data channel for board commands/strokes, optional screen/window stream). Keeps working if the internet drops after pairing.
 - Fully server-free discovery isn't possible in a normal browser (no LAN scan). Options for that: QR-only pairing (offline, clunkier) or a native TV app (Android TV) with local discovery — later.
-- Board features: show slide/lesson/line, pen & highlighter, timer, student answers, multiple screens, teacher phone as remote.
+- [PROPOSAL, NOT CONFIRMED] Board features: show slide/lesson/line, pen & highlighter, timer, student answers, multiple screens, teacher phone as remote.
 - Reuses today's live class board (Durable Object) as fallback when direct connection fails (TURN-free LAN, server relay fallback).
 - UPDATE (agreed): no native app. Two modes:
   1. Same laptop on the TV (HDMI/cable or screen share): teacher opens "Board mode" in a second browser window on the TV screen. The two windows talk inside the laptop (BroadcastChannel) — no network, no Wi-Fi needed. Window Management API (where supported) can put it full-screen on the second screen in one click.
   2. Smart TV: open the board page, enter/scan the code → server approves → WebRTC direct to the TV over the LAN, server only for pairing; relay fallback.
-- Make it a CORE "Screens / Display" app for every business, not just schools: classroom board · clinic queue numbers ("now serving") · exchange-office rate board · company lobby/KPI dashboards. Paired screens are managed per organisation (name, room, what it shows, revoke).
+- [PROPOSAL, NOT CONFIRMED] Make it a CORE "Screens / Display" app for every business, not just schools: classroom board · clinic queue numbers ("now serving") · exchange-office rate board · company lobby/KPI dashboards. Paired screens are managed per organisation (name, room, what it shows, revoke).
 
 ## Icons: own SVG set, no emoji/system icons (agreed)
 - Replace emoji/system icons everywhere (taskbar, windows, menus, command center, apps, files, desktop) with one consistent SVG icon set.
-- Candidate: Lucide (ISC licence, ~1500 icons, consistent 24px stroke) — alternatives Phosphor (MIT) or Tabler (MIT). Bundled locally as one SVG sprite (ui/icons.svg) + a small icon() helper/component; no CDN. Keep the licence file.
+- [PROPOSAL, NOT CONFIRMED] Candidate: Lucide (ISC licence, ~1500 icons, consistent 24px stroke) — alternatives Phosphor (MIT) or Tabler (MIT). Bundled locally as one SVG sprite (ui/icons.svg) + a small icon() helper/component; no CDN. Keep the licence file.
 - App icons: the same stroke icons on a coloured LAPP-gradient tile, so apps look like one family. Flags for courses stay as small SVG flags.
