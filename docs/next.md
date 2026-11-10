@@ -105,3 +105,8 @@
   1. Same laptop on the TV (HDMI/cable or screen share): teacher opens "Board mode" in a second browser window on the TV screen. The two windows talk inside the laptop (BroadcastChannel) — no network, no Wi-Fi needed. Window Management API (where supported) can put it full-screen on the second screen in one click.
   2. Smart TV: open the board page, enter/scan the code → server approves → WebRTC direct to the TV over the LAN, server only for pairing; relay fallback.
 - Make it a CORE "Screens / Display" app for every business, not just schools: classroom board · clinic queue numbers ("now serving") · exchange-office rate board · company lobby/KPI dashboards. Paired screens are managed per organisation (name, room, what it shows, revoke).
+
+## Icons: own SVG set, no emoji/system icons (agreed)
+- Replace emoji/system icons everywhere (taskbar, windows, menus, command center, apps, files, desktop) with one consistent SVG icon set.
+- Candidate: Lucide (ISC licence, ~1500 icons, consistent 24px stroke) — alternatives Phosphor (MIT) or Tabler (MIT). Bundled locally as one SVG sprite (ui/icons.svg) + a small icon() helper/component; no CDN. Keep the licence file.
+- App icons: the same stroke icons on a coloured LAPP-gradient tile, so apps look like one family. Flags for courses stay as small SVG flags.
