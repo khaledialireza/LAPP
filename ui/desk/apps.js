@@ -61,7 +61,8 @@
   };
   D.wsFor = url => {
     const u = new URL(url, location.origin), p = u.pathname;
-    const m = p.match(/^\/s\/([^/]+)/); if (m) return "s:" + m[1];
+    // a school the person works in has its own workspace; any other school (e.g. LAPP admins opening one) opens where they are
+    const m = p.match(/^\/s\/([^/]+)/); if (m) return D.WS.some(w => w.key === "s:" + m[1]) ? "s:" + m[1] : D.CUR;
     const org = u.searchParams.get("org"); if (org && D.WS.some(w => w.key === "s:" + org)) return "s:" + org;
     if (p.startsWith("/admin") || p.startsWith("/studio") || p.startsWith("/files")) return "me";
     if (p.startsWith("/settings")) return D.CUR;
