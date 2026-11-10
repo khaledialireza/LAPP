@@ -1,8 +1,9 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<script src="/ui/panel-i18n.js?v=4"></script>
+<script src="/ui/panel-i18n.js?v=5"></script>
 <script src="/ui/lapp-ui.js?v=3"></script>
 <script src="/ui/shell.js?v=1"></script>
+<script src="/ui/drive.js?v=1"></script>
 <title>LAPP Admin</title>
 <meta name="robots" content="noindex">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -138,7 +139,7 @@ const plan = u => u.disabled ? `<span class="pl p-off">Disabled</span>`
 /* ================= views ================= */
 const V = {};
 let STATS = null;
-async function stats() { STATS = await api("GET", "/admin/stats"); $("#nU").textContent = STATS.users.toLocaleString("en"); $("#nC").textContent = (STATS.plus + STATS.trial) || ""; return STATS; }
+async function stats() { STATS = await api("GET", "/admin/stats"); Shell.badge("nU", STATS.users.toLocaleString("en")); return STATS; }
 
 V.dash = async () => {
   const s = await stats();
@@ -146,7 +147,7 @@ V.dash = async () => {
   const bars = Array.from({ length: 30 }, (_, i) => byDay.get(today - 29 + i) || 0);
   return `<div class="top"><h1>Dashboard</h1></div>
   <div class="kp"><div><b>${s.users}</b><span>Users · ${s.verified} verified</span></div><div><b>${s.activeWeek}</b><span>Active this week</span></div><div><b>${s.newWeek}</b><span>New this week</span></div>
-   <div><b>${s.plus}</b><span>Plus subscribers</span></div><div><b>${s.trial}</b><span>In trial</span></div><div><b>${s.iran}</b><span>Iran · free</span></div><div><b>${s.staff}</b><span>Team</span></div></div>
+   <div><b>${s.plus}</b><span>Plus subscribers</span></div><div><b>${s.trial}</b><span>In trial</span></div><div><b>${s.iran}</b><span>Iran · free</span></div><div><b>${s.schools}</b><span>Schools · ${s.seats} people</span></div><div><b>${s.staff}</b><span>Team</span></div></div>
   <div class="two"><div class="card"><h3>Sign-ups · last 30 days</h3><div class="bars">${bars.map(n => `<i style="height:${n / max * 100}%" title="${n}"></i>`).join("")}</div></div>
    <div class="card"><h3>Countries</h3><div class="list">${s.countries.map(c => `<div class="r"><span>${flag(c.country)}</span><b>${c.n}</b></div>`).join("") || `<div class="empty">No users yet</div>`}</div></div></div>
   <div class="card"><h3>Newest users</h3><div class="list">${s.recent.map(u => `<div class="r"><span><b>@${esc(u.username)}</b> <span class="mu">${esc(u.email)}</span></span><span class="mu">${flag(u.country)} · ${ago(u.created_at)}</span></div>`).join("") || `<div class="empty">No users yet</div>`}</div></div>`;
@@ -155,17 +156,31 @@ V.dash = async () => {
 /* ---- users: list + edit drawer ---- */
 let U = { q: "", filter: "all", page: 0, sel: null, rows: [], edit: null };
 V.users = async () => {
-  const [r] = await Promise.all([api("GET", `/admin/users?q=${encodeURIComponent(U.q)}&filter=${U.filter}&page=${U.page}`), STATS ? null : stats()]);
+  const sch = U.filter === "schools", plusF = U.filter === "plus";
+  const [r, orgs, cust] = await Promise.all([
+    sch ? { users: [], more: false } : api("GET", `/admin/users?q=${encodeURIComponent(U.q)}&filter=${U.filter}&page=${U.page}`),
+    (sch || (U.filter === "all" && !U.page)) && isAdmin() ? api("GET", "/admin/orgs").then(x => x.orgs) : [],
+    plusF ? api("GET", "/admin/customers") : null, STATS ? null : stats()]);
   U.rows = r.users;
-  const s = STATS, F = [["all", "All"], ["free", "Free"], ["plus", "Plus"], ["iran", "Iran"], ["staff", "Team"], ["unverified", "Unverified"], ["disabled", "Disabled"]];
-  return `<div class="top"><h1>Users</h1><button class="b" id="export">⬇ Export</button><button class="b pr" id="add">＋ Add user</button></div>
-  <div class="kp"><div><b>${s.users}</b><span>All users</span></div><div><b>${s.plus + s.trial + s.grants}</b><span>Plus</span></div><div><b>${s.iran}</b><span>Iran · free</span></div><div><b>${s.staff}</b><span>Team</span></div></div>
-  <div class="flt"><input class="srch" id="q" placeholder="🔍 Search name, e-mail, username…" value="${esc(U.q)}">${F.map(([k, l]) => `<button class="chip ${U.filter === k ? "on" : ""}" data-f="${k}">${l}</button>`).join("")}</div>
-  <div class="row hd"><span></span><span>User</span><span>Role</span><span>Plan</span><span>Country</span><span>Last seen</span></div>
+  const q = U.q.trim().toLowerCase(), os = orgs.filter(o => !q || (o.name + " " + o.slug).toLowerCase().includes(q));
+  const s = STATS, F = [["all", "All"], ["free", "Free"], ["plus", "Plus"], ["schools", "Schools"], ["staff", "Team"], ["iran", "Iran"], ["unverified", "Unverified"], ["disabled", "Disabled"]];
+  const orgRow = o => `<div class="row ${o.disabled ? "off" : ""}" data-org="${o.id}" title="A school account: its own people are managed by the school">
+    <div class="av" style="background:${esc(o.color)};border-radius:11px">${esc(o.name.charAt(0))}</div><div class="u"><b>${esc(o.name)}</b><small>/s/${esc(o.slug)} · ${esc(o.admin_email || "no admin yet")}</small></div>
+    <div><span class="role r-manager">School</span></div><div><span class="pl p-plus">${o.students} students</span></div><div class="mu">${o.teachers} teachers</div><div class="acts"><a class="b sm" href="/s/${esc(o.slug)}" target="_blank" rel="noopener">Open ↗</a></div></div>`;
+  return `<div class="top"><h1>Users</h1><button class="b" id="export">⬇ Export</button>${isAdmin() ? `<button class="b" id="addSchool">🏫 New school</button>` : ""}<button class="b pr" id="add">＋ Add user</button></div>
+  <div class="kp"><div><b>${s.users}</b><span>Your users</span></div><div><b>${s.plus + s.trial + s.grants}</b><span>Plus · paying or gift</span></div><div><b>${s.schools}</b><span>School accounts · ${s.seats} people</span></div><div><b>${s.staff}</b><span>Team</span></div></div>
+  <div class="flt"><input class="srch" id="q" placeholder="🔍 Name, e-mail, username, school…" value="${esc(U.q)}">${F.filter(([k]) => k !== "schools" || isAdmin()).map(([k, l]) => `<button class="chip ${U.filter === k ? "on" : ""}" data-f="${k}">${l}</button>`).join("")}</div>
+  ${plusF ? `<div class="card"><h3>💳 Subscriptions ${cust.stripe ? `<a class="b sm" style="float:inline-end" href="https://dashboard.stripe.com/" target="_blank" rel="noopener">Stripe ↗</a>` : `<span class="pl p-trial">Stripe is not connected yet</span>`}</h3><div class="list">
+     ${cust.subscriptions.map(x => `<div class="r"><span><b>@${esc(x.username)}</b> <span class="mu">${esc(x.status)} · ${x.interval === "year" ? "yearly" : x.interval === "month" ? "monthly" : "—"}</span></span><span class="mu">${x.cancel_at_end ? "ends" : "renews"} ${day(x.period_end)}</span></div>`).join("") || `<div class="r mu">No subscriptions yet</div>`}
+     ${cust.grants.map(g => `<div class="r"><span><b>🎁 @${esc(g.username)}</b> <span class="mu">gift</span></span><span class="mu">until ${day(g.plus_until)}</span></div>`).join("")}</div></div>` : ""}
+  <div class="row hd"><span></span><span>${sch ? "School" : "User"}</span><span>Type</span><span>Plan</span><span>${sch ? "Teachers" : "Country"}</span><span>${sch ? "" : "Last seen"}</span></div>
+  ${os.map(orgRow).join("")}
   ${U.rows.map(u => `<div class="row ${u.id === U.sel ? "sel" : ""} ${u.disabled ? "off" : ""}" data-u="${u.id}">${avatar(u)}
-    <div class="u"><b>@${esc(u.username)}${u.name ? ` · ${esc(u.name)}` : ""}</b><small>${u.email.startsWith("@") ? "school login" : esc(u.email)}${u.verified ? "" : ` · <span style="color:var(--am)">unverified</span>`}</small></div>
-    <div><span class="role r-${u.role}">${ROLE[u.role]}</span></div><div>${plan(u)}</div><div>${flag(u.country)}</div><div class="mu">${ago(u.last_seen)}</div></div>`).join("") || `<div class="empty">Nobody here</div>`}
-  <div class="acts">${U.page ? `<button class="b" data-pg="-1">‹ Newer</button>` : ""}${r.more ? `<button class="b" data-pg="1">Older ›</button>` : ""}</div>`;
+    <div class="u"><b>@${esc(u.username)}${u.name ? ` · ${esc(u.name)}` : ""}</b><small>${esc(u.email)}${u.verified ? "" : ` · <span style="color:var(--am)">unverified</span>`}</small></div>
+    <div><span class="role r-${u.role}">${ROLE[u.role]}</span></div><div>${plan(u)}</div><div>${flag(u.country)}</div><div class="mu">${ago(u.last_seen)}</div></div>`).join("")}
+  ${!os.length && !U.rows.length ? `<div class="empty">Nobody here</div>` : ""}
+  <div class="acts">${U.page ? `<button class="b" data-pg="-1">‹ Newer</button>` : ""}${r.more ? `<button class="b" data-pg="1">Older ›</button>` : ""}</div>
+  <p class="mu">🔒 Students and teachers a school created themselves belong to that school and are not listed here: only its admins see them. You see the school as one account.</p>`;
 };
 function drawer() {
   let d = $("#drawer");
@@ -207,16 +222,6 @@ async function saveUser() {
 }
 
 /* ---- customers ---- */
-V.customers = async () => {
-  const r = await api("GET", "/admin/customers");
-  const st = s => ({ active: "p-plus", trialing: "p-trial", past_due: "p-off", canceled: "p-free", unpaid: "p-off" })[s] || "p-free";
-  return `<div class="top"><h1>Customers</h1>${r.stripe ? `<a class="b" href="https://dashboard.stripe.com/" target="_blank" rel="noopener">Open Stripe ↗</a>` : `<span class="pl p-trial">Stripe is not connected yet</span>`}</div>
-  <div class="row hd" style="grid-template-columns:1.6fr 1fr 1fr 1.2fr 90px 110px"><span>User</span><span>Status</span><span>Plan</span><span>Renews / ends</span><span>Country</span><span>Updated</span></div>
-  ${r.subscriptions.map(s => `<div class="row" style="grid-template-columns:1.6fr 1fr 1fr 1.2fr 90px 110px;cursor:default"><div class="u"><b>@${esc(s.username)}</b><small>${esc(s.email)}</small></div>
-    <div><span class="pl ${st(s.status)}">${esc(s.status)}</span></div><div>${s.interval === "year" ? "Yearly" : s.interval === "month" ? "Monthly" : "—"}</div>
-    <div>${day(s.period_end)}${s.cancel_at_end ? ` <span class="pl p-off">cancels</span>` : ""}</div><div>${flag(s.country)}</div><div class="mu">${ago(s.updated_at)}</div></div>`).join("") || `<div class="card empty">No subscriptions yet</div>`}
-  <div class="card"><h3>🎁 Plus gifts</h3><div class="list">${r.grants.map(g => `<div class="r"><span><b>@${esc(g.username)}</b> <span class="mu">${esc(g.email)}</span></span><span class="mu">until ${day(g.plus_until)}</span></div>`).join("") || `<div class="empty">None</div>`}</div></div>`;
-};
 
 /* ---- content & access: free or Plus per lesson, by course ---- */
 let LESSONS = null, A = null, COURSES = [];
@@ -231,41 +236,33 @@ async function lessons() {
 /* ---- lessons made in the studio (the LAPP library) ---- */
 const LFLAG = { de: "🇩🇪", nl: "🇳🇱", pl: "🇵🇱" }, LTYPE = { talk: "💬 Conversation", lesson: "🎧 Lesson", story: "📖 Story" };
 const LTOPIC = { daily: "Daily life", travel: "Travel & hotel", food: "Food & shopping", health: "Health & doctor", work: "Work & office", home: "Home & family", city: "City & transport", school: "School & study", story: "Stories", other: "Other" };
-V.lessons = async () => {
-  const { lessons } = await api("GET", "/studio/lessons");
-  $("#nL").textContent = lessons.length || "";
-  const cols = "grid-template-columns:1.6fr 70px 150px 110px 150px 120px 110px";
-  return `<div class="top"><h1>Lessons</h1><button class="b pr" id="addLesson">＋ New lesson</button></div>
-  <p class="mu">Lessons made in the studio. Published ones are in the LAPP library for every learner (or for Plus members only).</p>
-  ${lessons.length ? `<div class="row hd" style="${cols}"><span>Lesson</span><span>Level</span><span>Type</span><span>Status</span><span>Lines</span><span>Audio</span><span>Changed</span></div>
-  ${lessons.map(l => `<a class="row" href="/studio#script/${l.id}" target="_blank" rel="noopener" title="Opens the studio in a new browser tab" style="${cols};text-decoration:none;color:inherit">
-    <div class="u"><b>${LFLAG[l.course] || ""} ${esc(l.title)}</b><small>${esc(LTOPIC[l.topic] || "")}${l.series ? " · 📚 " + esc(l.series) : ""}${l.access === "plus" ? " · ⭐ Plus" : ""}</small></div>
-    <div>${esc(l.level)}</div><div class="mu">${LTYPE[l.type] || l.type}</div><div><span class="st st-${l.status}">${l.status}</span></div>
-    <div class="mu">${l.lines ? `${l.approved}/${l.lines} approved` : "no text yet"}</div><div class="mu">${{ ready: "🎧 ready", old: "🎧 older than text", none: "—" }[l.audio]}</div><div class="mu">${ago(l.updated_at)}</div></a>`).join("")}`
-  : `<div class="card empty">No lessons yet. Make the first one with ＋ New lesson.</div>`}`;
-};
-document.addEventListener("click", e => {
-  if (!e.target.closest("#addLesson")) return;
+let NEWLEVEL = "";
+function openLessonDlg() {
   const o = (el, list, v) => { el.options = list; el.value = v; };
   o($("#lCourse"), [["de", "German", "🇩🇪"], ["nl", "Dutch", "🇳🇱"], ["pl", "Polish", "🇵🇱"]].map(([value, label, icon]) => ({ value, label, icon })), "de");
-  o($("#lLevel"), ["A1", "A2", "B1", "B2", "C1", "C2"].map(x => ({ value: x, label: x })), "A1");
+  o($("#lLevel"), ["A1", "A2", "B1", "B2", "C1", "C2"].map(x => ({ value: x, label: x })), NEWLEVEL || "A1");
   o($("#lType"), Object.entries(LTYPE).map(([value, t]) => ({ value, label: t.slice(3), icon: t.slice(0, 2) })), "talk");
   o($("#lTopic"), Object.entries(LTOPIC).map(([value, label]) => ({ value, label })), "daily");
   $("#lessonDlg").showModal();
-});
+}
+document.addEventListener("click", e => { if (e.target.closest("#addLesson")) { NEWFOLDER = 0; NEWLEVEL = ""; openLessonDlg(); } });
 document.addEventListener("submit", async e => {
   if (e.target.id !== "lessonForm") return;
   if (e.submitter && e.submitter.value === "cancel") return;
   e.preventDefault();
   const w = window.open("about:blank", "_blank");
   try {
-    const l = await api("POST", "/studio/lessons", Object.fromEntries(new FormData(e.target)));
-    $("#lessonDlg").close(); Shell.refresh("lessons");
+    const l = await api("POST", "/studio/lessons", { ...Object.fromEntries(new FormData(e.target)), folder: NEWFOLDER });
+    $("#lessonDlg").close(); Shell.refresh("content"); Drive.reload().catch(() => {});
     const url = `/studio#script/${l.id}`;
     if (w) { w.location = url; toast("Lesson created · the studio opened in a new tab"); }
     else toast("Lesson created", { action: "Open the studio", run: () => window.open(url, "_blank") });
   } catch (x) { if (w) w.close(); toast(x.message, { kind: "err" }); }
 });
+
+/* ---- content: the drive ---- */
+let NEWFOLDER = 0;
+V.content = async () => { await Drive.load(); return Drive.html(); };
 
 /* ---- AI: which models the studio may use ---- */
 const AI_ICON = { workers: "🏠", openai: "🟢", gemini: "🔷", anthropic: "🟠", compatible: "🔌" };
@@ -358,18 +355,6 @@ document.addEventListener("submit", async e => {
 });
 
 /* ---- schools (organizations) ---- */
-V.schools = async () => {
-  if (!isAdmin()) return `<div class="top"><h1>Schools</h1></div><div class="card empty">Only an admin manages schools.</div>`;
-  const { orgs } = await api("GET", "/admin/orgs");
-  $("#nS").textContent = orgs.length || "";
-  return `<div class="top"><h1>Schools</h1><button class="b pr" id="addSchool">＋ New school</button></div>
-  <p class="mu">Each school gets its own portal at <b>${location.origin}/s/&lt;address&gt;</b> with its admins, teachers, finance staff and students. Private learners keep using the main app.</p>
-  <div class="row hd" style="grid-template-columns:44px 1.6fr 1fr 90px 90px 90px 170px"><span></span><span>School</span><span>Admin</span><span>Classes</span><span>Teachers</span><span>Students</span><span></span></div>
-  ${orgs.map(o => `<div class="row ${o.disabled ? "off" : ""}" style="grid-template-columns:44px 1.6fr 1fr 90px 90px 90px 170px;cursor:default">
-    <div class="av" style="background:${esc(o.color)}">${esc(o.name.charAt(0))}</div><div class="u"><b>${esc(o.name)}</b><small>/s/${esc(o.slug)} · since ${day(o.created_at)}</small></div>
-    <div class="mu">${esc(o.admin_email || "—")}</div><div>${o.classes}</div><div>${o.teachers}</div><div>${o.students}</div>
-    <div class="acts"><a class="b sm" href="/s/${esc(o.slug)}" target="_blank">Open</a><button class="b sm" data-org-toggle="${o.id}" data-d="${o.disabled ? 0 : 1}">${o.disabled ? "Enable" : "Disable"}</button><button class="b sm d" data-org-del="${o.id}" data-name="${esc(o.slug)}">🗑</button></div></div>`).join("") || `<div class="card empty">No schools yet. Create one and invite its admin — they add their teachers and students themselves.</div>`}`;
-};
 document.addEventListener("click", async e => {
   try {
     if (e.target.closest("#addSchool")) return $("#orgDlg").showModal();
@@ -401,13 +386,12 @@ async function saveAccess(patch) {
 
 /* ================= the shell: tabs, two pages, ⌘K ================= */
 function show() { Shell.refresh(); }
+function newLesson(folder, rules) { NEWFOLDER = folder || 0; NEWLEVEL = rules && rules.level || ""; openLessonDlg(); }
 const NAV = [
   { route: "dash", label: "Dashboard", icon: "📊", group: "Manage", key: "d" },
   { route: "users", label: "Users", icon: "👥", group: "Manage", badge: "nU", key: "u" },
-  { route: "customers", label: "Customers", icon: "💳", group: "Manage", badge: "nC", key: "c" },
-  { route: "schools", label: "Schools", icon: "🏫", group: "Manage", badge: "nS", key: "s" },
-  { route: "lessons", label: "Lessons", icon: "🗂", group: "Content", badge: "nL", key: "l" },
-  { route: "access", label: "Content & access", icon: "📚", group: "Content", key: "a" },
+  { route: "content", label: "Content", icon: "🗂", group: "Manage", key: "c" },
+  { route: "access", label: "Built-in lessons & access", icon: "📚", hidden: true },
   { route: "ai", label: "AI", icon: "🤖", group: "System", key: "i" }
 ];
 addEventListener("panel:lang", () => show());
@@ -425,6 +409,7 @@ document.addEventListener("click", async e => {
   const f = t.closest("[data-f]"); if (f) { U.filter = f.dataset.f; U.page = 0; U.sel = null; return show(); }
   const pg = t.closest("[data-pg]"); if (pg) { U.page += Number(pg.dataset.pg); return show(); }
   const row = t.closest(".row[data-u]"); if (row) return select(Number(row.dataset.u));
+  const org = t.closest(".row[data-org]"); if (org && !t.closest("a")) return schoolMenu(org);
   if (t.closest("#close")) return select(null);
   const rl = t.closest("[data-role]"); if (rl && !rl.disabled && rl.closest("#drawer")) { U.edit.role = rl.dataset.role; return drawer(); }
   if (t.closest("#active") && !t.closest("#active").disabled) { U.edit.disabled = !U.edit.disabled; return drawer(); }
@@ -445,6 +430,16 @@ document.addEventListener("click", async e => {
     STATS = null; await show(); select(u.id);
   } catch (x) { toast(x.message); }
 });
+
+async function schoolMenu(el) {
+  const { orgs } = await api("GET", "/admin/orgs"), o = orgs.find(x => x.id === +el.dataset.org); if (!o) return;
+  Shell.menu(el, [{ head: o.name },
+    { icon: "↗", label: "Open its panel", run: () => window.open(`/s/${o.slug}`, "_blank") },
+    { icon: o.disabled ? "▶" : "⏸", label: o.disabled ? "Turn the school on" : "Turn the school off", run: async () => { await api("PATCH", `/admin/orgs/${o.id}`, { disabled: !o.disabled }); toast("Saved"); show(); } },
+    "-", { icon: "🗑", label: "Delete the school…", danger: true, run: async () => {
+      if (!await Shell.confirm({ title: `Delete the school ${o.slug}?`, text: "Its classes, lessons, homework and payments are removed. Its people keep their LAPP accounts.", ok: "Delete the school", danger: true, type: o.slug })) return;
+      await api("DELETE", `/admin/orgs/${o.id}`); toast("School deleted"); STATS = null; show(); } }], { search: false });
+}
 
 /* ---- add user ---- */
 let addRole = "user";
@@ -500,6 +495,13 @@ async function exportCsv() {
   const m = await api("GET", "/me");
   if (!m.user) { location.href = "/?login=1&next=/admin"; return; }
   ME = m.user;
+  Drive.setup({
+    api: (p, m = "GET", b) => api(m, "/studio" + p, b), lapp: true,
+    studioUrl: (id, part) => `/studio#${part || "script"}/${id}`,
+    refresh: () => Shell.refresh("content"),
+    newLesson,
+    extraRoot: `<div class="dv-acts"><button class="b sm" onclick="Shell.open('access')">📚 Built-in lessons · Iran · free trial</button></div>`
+  });
   Shell.init({
     side: $("#side"), main: $("#view"), key: "lapp.admin.tabs." + ME.id, name: "LAPP Admin", home: "dash", nav: NAV,
     me: { name: ME.name || "@" + ME.username, sub: ROLE[ME.role] + " · LAPP", initial: (ME.name || ME.username).charAt(0).toUpperCase(), color: `linear-gradient(135deg,${GRAD[ME.id % GRAD.length]})` },
@@ -511,7 +513,7 @@ async function exportCsv() {
       { icon: "🎧", label: "Open the learner app ↗", run: () => window.open("/", "_blank") }],
     commands: () => [
       { icon: "＋", label: "Add a user", run: () => { Shell.open("users"); openAdd(); } },
-      { icon: "🎬", label: "New lesson", run: () => { Shell.open("lessons"); setTimeout(() => $("#addLesson")?.click(), 400); } },
+      { icon: "🎬", label: "New lesson", run: () => newLesson(0, {}) },
       ...(isAdmin() ? [{ icon: "🏫", label: "New school", run: () => $("#orgDlg").showModal() }, { icon: "🤖", label: "Add an AI", run: () => { Shell.open("ai"); setTimeout(() => $("#aiAdd")?.click(), 400); } }] : []),
       { icon: "⬇", label: "Export the user list", run: exportCsv }],
     jobs: async () => (await api("GET", "/studio/jobs")).jobs.map(j => ({ ...j, what: "Audio", href: `/studio#voice/${j.lesson}` })),

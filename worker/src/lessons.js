@@ -67,7 +67,8 @@ function summary(l) {
     id: l.id, title: l.title, course: l.course, type: l.type, level: l.level, topic: l.topic, series: l.series, status: l.status, access: l.access,
     lines: rows.length, approved: rows.filter(r => r.ok).length, scenes: (d.scenes || []).length,
     audio: l.audio_rev ? (l.audio_rev === l.rev ? "ready" : "old") : "none", rev: l.rev,
-    updated_at: l.updated_at, published_at: l.published_at, appId: APP_ID(l.id)
+    updated_at: l.updated_at, published_at: l.published_at, appId: APP_ID(l.id),
+    folder: l.folder_id || 0, own: l.access_own || "", binned: l.binned_at || 0
   };
 }
 
@@ -302,6 +303,41 @@ async function insightsOf(env, appId, lines, since) {
 }
 
 /* ================= the studio API ================= */
+/* ================= the drive: folders, rules, the bin ================= */
+const BIN_DAYS = 30;
+const cleanRules = r => ({ access: r && r.access === "plus" ? "plus" : "", level: r && LEVELS.includes(r.level) ? r.level : "", approved: !!(r && r.approved) });
+async function folderMap(env, org) {
+  const rows = (await env.DB.prepare("SELECT id, parent_id, name, rules FROM folders WHERE org_id = ?").bind(org).all()).results;
+  return new Map(rows.map(f => [f.id, { ...f, rules: cleanRules(JSON.parse(f.rules || "{}")) }]));
+}
+// the rules a folder passes down: Plus anywhere above makes it Plus; the nearest level wins; "approved" anywhere counts
+function rulesOf(F, id) {
+  const out = { access: "", level: "", approved: false, from: {} };
+  for (let i = 0, f = F.get(id); f && i < 40; i++, f = F.get(f.parent_id)) {
+    if (f.rules.access === "plus" && !out.access) { out.access = "plus"; out.from.access = f.name; }
+    if (f.rules.level && !out.level) { out.level = f.rules.level; out.from.level = f.name; }
+    if (f.rules.approved && !out.approved) { out.approved = true; out.from.approved = f.name; }
+  }
+  return out;
+}
+// lessons.access is what learners get: Plus if the lesson or any folder above it says so (stricter, never looser)
+async function settleAccess(env, org, F) {
+  if (org) return;
+  F = F || await folderMap(env, org);
+  const rows = (await env.DB.prepare("SELECT id, folder_id, access, access_own FROM lessons WHERE org_id = 0").all()).results;
+  const st = rows.map(l => [l, l.access_own === "plus" || rulesOf(F, l.folder_id).access === "plus" ? "plus" : "free"]).filter(([l, a]) => l.access !== a)
+    .map(([l, a]) => env.DB.prepare("UPDATE lessons SET access = ? WHERE id = ?").bind(a, l.id));
+  if (st.length) await env.DB.batch(st);
+}
+async function dropLesson(env, id) {
+  await env.DB.batch([
+    env.DB.prepare("DELETE FROM blobs WHERE key LIKE ?").bind(`lesson/${id}/%`),
+    env.DB.prepare("DELETE FROM studio_jobs WHERE lesson_id = ?").bind(id),
+    env.DB.prepare("DELETE FROM materials WHERE kind = 'lesson' AND url = ?").bind(`s-${id}`),
+    env.DB.prepare("DELETE FROM lessons WHERE id = ?").bind(id)
+  ]);
+}
+
 export async function lessonsApi(req, env, H, p, url, ctx) {
   const M = req.method;
   let m;
@@ -320,7 +356,7 @@ export async function lessonsApi(req, env, H, p, url, ctx) {
 
   /* ---- overview: KPIs, the curriculum map, suggestions ---- */
   if (p === "/overview" && M === "GET") {
-    const rows = (await env.DB.prepare("SELECT id, title, course, type, level, topic, status, data, rev, audio_rev, series, access, updated_at, published_at FROM lessons WHERE org_id = ? ORDER BY updated_at DESC").bind(sc.org).all()).results;
+    const rows = (await env.DB.prepare("SELECT id, title, course, type, level, topic, status, data, rev, audio_rev, series, access, updated_at, published_at FROM lessons WHERE org_id = ? AND binned_at = 0 ORDER BY updated_at DESC").bind(sc.org).all()).results;
     const week = t - 7 * H.DAY;
     const appIds = rows.filter(r => r.status === "published").map(r => APP_ID(r.id));
     let learners = 0, says = 0, hard = [];
@@ -343,23 +379,98 @@ export async function lessonsApi(req, env, H, p, url, ctx) {
     return H.json({ jobs: rows.map(j => ({ id: j.id, lesson: j.lesson_id, title: j.title, kind: j.kind, log: j.log || "", at: j.updated_at, status: ["queued", "running"].includes(j.status) && j.updated_at < t - 20 * 60e3 ? "failed" : j.status })) });
   }
 
+  /* ---- the drive: folders and every lesson, with what each folder passes down ---- */
+  if (p === "/drive" && M === "GET") {
+    // the bin empties itself after 30 days
+    const old = (await env.DB.prepare("SELECT id FROM lessons WHERE org_id = ? AND binned_at > 0 AND binned_at < ?").bind(sc.org, t - BIN_DAYS * H.DAY).all()).results;
+    for (const o of old) await dropLesson(env, o.id);
+    const F = await folderMap(env, sc.org);
+    const rows = (await env.DB.prepare("SELECT * FROM lessons WHERE org_id = ? ORDER BY updated_at DESC").bind(sc.org).all()).results;
+    return H.json({ folders: [...F.values()].map(f => ({ id: f.id, parent: f.parent_id, name: f.name, rules: f.rules, inherited: rulesOf(F, f.parent_id) })), lessons: rows.map(summary), binDays: BIN_DAYS });
+  }
+  if (p === "/folders" && M === "POST") {
+    const b = await H.body(req), name = str(b.name, 60);
+    if (!name) throw H.fail("the folder needs a name");
+    const parent = int(b.parent) || 0;
+    if (parent && !(await env.DB.prepare("SELECT 1 FROM folders WHERE id = ? AND org_id = ?").bind(parent, sc.org).first())) throw H.fail("no such folder", 404);
+    if (await env.DB.prepare("SELECT 1 FROM folders WHERE org_id = ? AND parent_id = ? AND name = ? COLLATE NOCASE").bind(sc.org, parent, name).first()) throw H.fail("a folder with this name is already here", 409);
+    const r = await env.DB.prepare("INSERT INTO folders (org_id, parent_id, name, created_by, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?) RETURNING id").bind(sc.org, parent, name, sc.u.id, t, t).first();
+    return H.json({ id: r.id });
+  }
+  if ((m = p.match(/^\/folders\/(\d+)$/)) && (M === "PATCH" || M === "DELETE")) {
+    const id = int(m[1]), F = await folderMap(env, sc.org), f = F.get(id);
+    if (!f) throw H.fail("no such folder", 404);
+    if (M === "DELETE") {
+      // what was inside moves up one level; nothing is lost
+      await env.DB.batch([
+        env.DB.prepare("UPDATE folders SET parent_id = ? WHERE org_id = ? AND parent_id = ?").bind(f.parent_id, sc.org, id),
+        env.DB.prepare("UPDATE lessons SET folder_id = ? WHERE org_id = ? AND folder_id = ?").bind(f.parent_id, sc.org, id),
+        env.DB.prepare("DELETE FROM folders WHERE id = ?").bind(id)]);
+      await settleAccess(env, sc.org);
+      return H.json({ ok: true });
+    }
+    const b = await H.body(req), sets = ["updated_at = ?"], vals = [t];
+    if (b.name !== undefined) {
+      const name = str(b.name, 60); if (!name) throw H.fail("the folder needs a name");
+      if (await env.DB.prepare("SELECT 1 FROM folders WHERE org_id = ? AND parent_id = ? AND name = ? COLLATE NOCASE AND id != ?").bind(sc.org, b.parent !== undefined ? int(b.parent) : f.parent_id, name, id).first()) throw H.fail("a folder with this name is already here", 409);
+      sets.push("name = ?"); vals.push(name);
+    }
+    if (b.parent !== undefined) {
+      const to = int(b.parent) || 0;
+      if (to && !F.get(to)) throw H.fail("no such folder", 404);
+      for (let x = F.get(to), i = 0; x && i < 40; x = F.get(x.parent_id), i++) if (x.id === id) throw H.fail("a folder can't go inside itself");
+      sets.push("parent_id = ?"); vals.push(to);
+    }
+    if (b.rules !== undefined) { if (sc.org) b.rules.access = ""; sets.push("rules = ?"); vals.push(JSON.stringify(cleanRules(b.rules))); }
+    await env.DB.prepare(`UPDATE folders SET ${sets.join(", ")} WHERE id = ?`).bind(...vals, id).run();
+    if (b.parent !== undefined || b.rules !== undefined) await settleAccess(env, sc.org);
+    return H.json({ ok: true });
+  }
+  // move lessons and folders; "to": a folder id, 0 = the top
+  if (p === "/move" && M === "POST") {
+    const b = await H.body(req), to = int(b.to) || 0, F = await folderMap(env, sc.org);
+    if (to && !F.get(to)) throw H.fail("no such folder", 404);
+    const ls = (b.lessons || []).map(int).filter(Boolean).slice(0, 200), fs = (b.folders || []).map(int).filter(Boolean).slice(0, 100);
+    for (const id of fs) for (let x = F.get(to), i = 0; x && i < 40; x = F.get(x.parent_id), i++) if (x.id === id) throw H.fail("a folder can't go inside itself");
+    const st = [
+      ...ls.map(id => env.DB.prepare("UPDATE lessons SET folder_id = ? WHERE id = ? AND org_id = ?").bind(to, id, sc.org)),
+      ...fs.filter(id => F.get(id)).map(id => env.DB.prepare("UPDATE folders SET parent_id = ?, updated_at = ? WHERE id = ?").bind(to, t, id))];
+    if (st.length) await env.DB.batch(st);
+    await settleAccess(env, sc.org);
+    return H.json({ ok: true, rules: rulesOf(F, to) });
+  }
+  // the bin: lessons leave the library at once and come back with "restore"; after 30 days they are gone
+  if (p === "/bin" && M === "POST") {
+    const b = await H.body(req), ls = (b.lessons || []).map(int).filter(Boolean).slice(0, 200);
+    if (!ls.length) throw H.fail("nothing chosen");
+    const q = ls.map(() => "?").join(",");
+    if (b.restore) await env.DB.prepare(`UPDATE lessons SET binned_at = 0, updated_at = ? WHERE org_id = ? AND id IN (${q})`).bind(t, sc.org, ...ls).run();
+    else if (b.forever) { for (const id of ls) if (await env.DB.prepare("SELECT 1 FROM lessons WHERE id = ? AND org_id = ? AND binned_at > 0").bind(id, sc.org).first()) await dropLesson(env, id); }
+    else await env.DB.batch([
+      env.DB.prepare(`UPDATE lessons SET binned_at = ?, status = CASE WHEN status = 'published' THEN 'review' ELSE status END, published = '', updated_at = ? WHERE org_id = ? AND id IN (${q})`).bind(t, t, sc.org, ...ls),
+      env.DB.prepare(`DELETE FROM materials WHERE kind = 'lesson' AND url IN (${q})`).bind(...ls.map(id => `s-${id}`))]);
+    return H.json({ ok: true });
+  }
+
   /* ---- lessons ---- */
   if (p === "/lessons" && M === "GET") {
-    const rows = (await env.DB.prepare("SELECT * FROM lessons WHERE org_id = ? ORDER BY updated_at DESC").bind(sc.org).all()).results;
+    const rows = (await env.DB.prepare("SELECT * FROM lessons WHERE org_id = ? AND binned_at = 0 ORDER BY updated_at DESC").bind(sc.org).all()).results;
     return H.json({ lessons: rows.map(summary) });
   }
   if (p === "/lessons" && M === "POST") {
     const b = await H.body(req);
     const list = Array.isArray(b.lessons) ? b.lessons.slice(0, 12) : [b];
-    const out = [];
+    const out = [], folder = int(b.folder) || 0, F = folder ? await folderMap(env, sc.org) : null;
+    if (folder && !F.get(folder)) throw H.fail("no such folder", 404);
+    const fr = folder ? rulesOf(F, folder) : null;
     for (const x of list) {
       const title = str(x.title, 80);
       if (!title) throw H.fail("the lesson needs a title");
       const course = pick(x.course, Object.keys(COURSES), "de");
       const d = emptyData();
       if (Array.isArray(x.characters)) d.characters = x.characters.map(int).filter(Boolean).slice(0, 6);
-      const r = await env.DB.prepare("INSERT INTO lessons (org_id, created_by, course, type, level, topic, series, title, brief, data, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *")
-        .bind(sc.org, sc.u.id, course, pick(x.type, TYPES, "talk"), pick(x.level, LEVELS, "A1"), pick(x.topic, TOPICS, "other"), str(x.series, 60), title, str(x.brief, 2000), JSON.stringify(d), t, t).first();
+      const r = await env.DB.prepare("INSERT INTO lessons (org_id, created_by, course, type, level, topic, series, title, brief, data, folder_id, access, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *")
+        .bind(sc.org, sc.u.id, course, pick(x.type, TYPES, "talk"), fr && fr.level ? fr.level : pick(x.level, LEVELS, "A1"), pick(x.topic, TOPICS, "other"), str(x.series, 60), title, str(x.brief, 2000), JSON.stringify(d), folder, fr && fr.access === "plus" && !sc.org ? "plus" : "free", t, t).first();
       out.push(summary(r));
     }
     return H.json(Array.isArray(b.lessons) ? { lessons: out } : out[0]);
@@ -379,7 +490,7 @@ export async function lessonsApi(req, env, H, p, url, ctx) {
     if (b.type !== undefined) { sets.push("type = ?"); vals.push(pick(b.type, TYPES, l.type)); }
     if (b.level !== undefined) { sets.push("level = ?"); vals.push(pick(b.level, LEVELS, l.level)); }
     if (b.topic !== undefined) { sets.push("topic = ?"); vals.push(pick(b.topic, TOPICS, l.topic)); }
-    if (b.access !== undefined && !sc.org) { sets.push("access = ?"); vals.push(b.access === "plus" ? "plus" : "free"); }
+    if (b.access !== undefined && !sc.org) { sets.push("access_own = ?"); vals.push(b.access === "plus" ? "plus" : ""); }
     if (b.data !== undefined) {
       const text = JSON.stringify(b.data);
       if (text.length > 600_000) throw H.fail("the script is too long", 413);
@@ -389,16 +500,12 @@ export async function lessonsApi(req, env, H, p, url, ctx) {
     }
     const r = await env.DB.prepare(`UPDATE lessons SET ${sets.join(", ")} WHERE id = ? AND rev = ? RETURNING rev`).bind(...vals, l.id, l.rev).first();
     if (!r) throw H.fail("someone else changed this lesson — reload it", 409, { code: "rev" });
+    if (b.access !== undefined) await settleAccess(env, sc.org);
     return H.json({ rev: r.rev });
   }
   if ((m = p.match(/^\/lessons\/(\d+)$/)) && M === "DELETE") {
     const l = await lessonIn(env, H, sc, int(m[1]));
-    await env.DB.batch([
-      env.DB.prepare("DELETE FROM blobs WHERE key LIKE ?").bind(`lesson/${l.id}/%`),
-      env.DB.prepare("DELETE FROM studio_jobs WHERE lesson_id = ?").bind(l.id),
-      env.DB.prepare("DELETE FROM materials WHERE kind = 'lesson' AND url = ?").bind(`s-${l.id}`),
-      env.DB.prepare("DELETE FROM lessons WHERE id = ?").bind(l.id)
-    ]);
+    await dropLesson(env, l.id);
     return H.json({ ok: true });
   }
 
@@ -528,6 +635,9 @@ Plan 1–8 lessons. "title" in the course language, "brief" in English: the situ
     const l = await lessonIn(env, H, sc, int(m[1]));
     const rows = l.data.scenes.flatMap(s => s.lines);
     if (!rows.length) throw H.fail("write the text first");
+    if (l.binned_at) throw H.fail("this lesson is in the bin — restore it first", 409);
+    const fr = rulesOf(await folderMap(env, sc.org), l.folder_id);
+    if (fr.approved && rows.some(r => !r.ok)) throw H.fail(`the folder “${fr.from.approved}” asks for every line to be approved first (${rows.filter(r => !r.ok).length} left)`, 409, { code: "approve" });
     if (!l.audio_rev) throw H.fail("make the audio first");
     if (l.audio_rev !== l.rev && !(await H.body(req).catch(() => ({}))).force) throw H.fail("the text changed after the audio was made — make the audio again", 409, { code: "stale" });
     const missing = TR.filter(x => rows.some(r => !r[x]) || !(l.data.tr[x] || {}).title);

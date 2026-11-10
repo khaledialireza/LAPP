@@ -552,20 +552,22 @@ async function adminApi(req, env, p, url) {
     const t = now();
     const q = (sql, ...v) => env.DB.prepare(sql).bind(...v).first();
     const [all, verified, week, active, plus, trial, grants, staff] = await Promise.all([
-      q("SELECT COUNT(*) n FROM users"),
-      q("SELECT COUNT(*) n FROM users WHERE verified = 1"),
-      q("SELECT COUNT(*) n FROM users WHERE created_at > ?", t - 7 * DAY),
-      q("SELECT COUNT(*) n FROM users WHERE last_seen > ?", t - 7 * DAY),
+      q("SELECT COUNT(*) n FROM users WHERE managed_by = 0"),
+      q("SELECT COUNT(*) n FROM users WHERE managed_by = 0 AND verified = 1"),
+      q("SELECT COUNT(*) n FROM users WHERE managed_by = 0 AND created_at > ?", t - 7 * DAY),
+      q("SELECT COUNT(*) n FROM users WHERE managed_by = 0 AND last_seen > ?", t - 7 * DAY),
       q("SELECT COUNT(*) n FROM subscriptions WHERE status = 'active'"),
       q("SELECT COUNT(*) n FROM subscriptions WHERE status = 'trialing'"),
-      q("SELECT COUNT(*) n FROM users WHERE plus_until > ?", t),
+      q("SELECT COUNT(*) n FROM users WHERE managed_by = 0 AND plus_until > ?", t),
       q("SELECT COUNT(*) n FROM users WHERE role != 'user'")
     ]);
-    const iran = await q("SELECT COUNT(*) n FROM users WHERE country = 'IR'");
-    const countries = (await env.DB.prepare("SELECT country, COUNT(*) n FROM users GROUP BY country ORDER BY n DESC LIMIT 8").all()).results;
-    const days = (await env.DB.prepare("SELECT (created_at / 86400000) d, COUNT(*) n FROM users WHERE created_at > ? GROUP BY d ORDER BY d").bind(t - 30 * DAY).all()).results;
-    const recent = (await env.DB.prepare("SELECT id, username, email, country, created_at FROM users ORDER BY id DESC LIMIT 6").all()).results;
-    return json({ users: all.n, verified: verified.n, newWeek: week.n, activeWeek: active.n, plus: plus.n, trial: trial.n, grants: grants.n, staff: staff.n, iran: iran.n, countries, days, recent });
+    const iran = await q("SELECT COUNT(*) n FROM users WHERE managed_by = 0 AND country = 'IR'");
+    const schools = await q("SELECT COUNT(*) n FROM orgs");
+    const seats = await q("SELECT COUNT(*) n FROM org_members WHERE active = 1");
+    const countries = (await env.DB.prepare("SELECT country, COUNT(*) n FROM users WHERE managed_by = 0 GROUP BY country ORDER BY n DESC LIMIT 8").all()).results;
+    const days = (await env.DB.prepare("SELECT (created_at / 86400000) d, COUNT(*) n FROM users WHERE managed_by = 0 AND created_at > ? GROUP BY d ORDER BY d").bind(t - 30 * DAY).all()).results;
+    const recent = (await env.DB.prepare("SELECT id, username, email, country, created_at FROM users WHERE managed_by = 0 ORDER BY id DESC LIMIT 6").all()).results;
+    return json({ users: all.n, verified: verified.n, newWeek: week.n, activeWeek: active.n, plus: plus.n, trial: trial.n, grants: grants.n, staff: staff.n, iran: iran.n, schools: schools.n, seats: seats.n, countries, days, recent });
   }
 
   if (p === "/users" && M === "GET") {
@@ -579,7 +581,7 @@ async function adminApi(req, env, p, url) {
     const rows = (await env.DB.prepare(`SELECT u.id, u.email, u.username, u.name, u.role, u.verified, u.disabled, u.plus_until, u.country, u.created_at, u.last_seen,
         s.status sub_status, s.interval sub_interval, s.period_end
       FROM users u LEFT JOIN subscriptions s ON s.user_id = u.id
-      WHERE (u.email LIKE ?1 OR u.username LIKE ?1 OR LOWER(u.name) LIKE ?1) AND ${where}
+      WHERE u.managed_by = 0 AND (u.email LIKE ?1 OR u.username LIKE ?1 OR LOWER(u.name) LIKE ?1) AND ${where}
       ORDER BY u.id DESC LIMIT 51 OFFSET ?3`).bind(q, now(), page * 50).all()).results;
     return json({ users: rows.slice(0, 50), more: rows.length > 50 });
   }
@@ -589,6 +591,7 @@ async function adminApi(req, env, p, url) {
     const b = await body(req);
     const target = await env.DB.prepare("SELECT * FROM users WHERE id = ?").bind(id).first();
     if (!target) throw fail("no such user", 404);
+    if (target.managed_by) throw fail("this account belongs to a school — its school admin manages it", 403);
     // managers look after learners; only admins change roles or touch staff accounts
     if (me.role !== "admin" && (target.role !== "user" || (b.role !== undefined && b.role !== target.role))) throw fail("only an admin can do this", 403);
     if (id === me.id && ((b.role !== undefined && b.role !== target.role) || b.disabled)) throw fail("you can't change your own role or disable yourself", 400);
@@ -646,6 +649,7 @@ async function adminApi(req, env, p, url) {
     const id = Number(m[1]);
     if (me.role !== "admin") throw fail("only an admin can delete accounts", 403);
     if (id === me.id) throw fail("you can't delete yourself");
+    if ((await env.DB.prepare("SELECT managed_by FROM users WHERE id = ?").bind(id).first() || {}).managed_by) throw fail("this account belongs to a school — its school admin manages it", 403);
     const s = await env.DB.prepare("SELECT status FROM subscriptions WHERE user_id = ?").bind(id).first();
     if (s && ["active", "trialing", "past_due"].includes(s.status)) throw fail("this user has a running subscription — cancel it in Stripe first", 409);
     await env.DB.batch(["sessions", "codes", "progress", "subscriptions"].map(t => env.DB.prepare(`DELETE FROM ${t} WHERE user_id = ?`).bind(id))
@@ -655,8 +659,9 @@ async function adminApi(req, env, p, url) {
 
   if ((m = p.match(/^\/users\/(\d+)\/progress$/)) && M === "DELETE") {
     const id = Number(m[1]);
-    const u = await env.DB.prepare("SELECT role FROM users WHERE id = ?").bind(id).first();
+    const u = await env.DB.prepare("SELECT role, managed_by FROM users WHERE id = ?").bind(id).first();
     if (!u) throw fail("no such user", 404);
+    if (u.managed_by) throw fail("this account belongs to a school — its school admin manages it", 403);
     if (me.role !== "admin" && u.role !== "user") throw fail("only an admin can do this", 403);
     // an empty, newer version: their devices clear it on the next start instead of uploading it again
     await env.DB.prepare("UPDATE progress SET data = '{}', version = version + 1, updated_at = ? WHERE user_id = ?").bind(now(), id).run();
@@ -666,6 +671,7 @@ async function adminApi(req, env, p, url) {
   if ((m = p.match(/^\/users\/(\d+)\/reset$/)) && M === "POST") {
     const u = await env.DB.prepare("SELECT * FROM users WHERE id = ?").bind(Number(m[1])).first();
     if (!u) throw fail("no such user", 404);
+    if (u.managed_by) throw fail("this account belongs to a school — its school admin manages it", 403);
     if (me.role !== "admin" && u.role !== "user") throw fail("only an admin can do this", 403);
     const token = await newCode(env, u, "reset");
     const sent = await sendMail(env, u.email, T.reset(`${appUrl(env, req)}/?reset=${token}`));
