@@ -11,16 +11,18 @@
 @keyframes lp{from{opacity:0;transform:translateY(4px)}to{opacity:1}}
 .lctx .q{display:flex;align-items:center;gap:7px;padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.08);color:rgba(235,235,245,.4)}.lctx .q input{flex:1;background:none;border:0;outline:none;color:inherit;font:inherit;color:#F4F4F8}
 .lctx .hd{padding:7px 12px 3px;font:700 10.5px Inter,system-ui;letter-spacing:.5px;text-transform:uppercase;color:rgba(235,235,245,.4)}
-.lctx .ls{padding:4px;max-height:52vh;overflow:auto}
+.lctx .ls{padding:4px}
 .lctx .it{position:relative;display:flex;align-items:center;gap:9px;width:100%;padding:6px 9px;border-radius:8px;text-align:start;color:#F4F4F8;background:none;border:0;font:inherit;cursor:pointer}
 .lctx .it:hover,.lctx .it.hov,.lctx .it:focus-visible{background:rgba(139,92,246,.25)}.lctx .it .ic{color:rgba(235,235,245,.55)}.lctx .it.dz{color:#F87171}
 .lctx .it kbd{margin-inline-start:auto;font:600 10.5px Inter,system-ui;color:rgba(235,235,245,.4);border:0;background:none}
 .lctx .it .ar{margin-inline-start:auto;color:rgba(235,235,245,.4)}
-.lctx .sub{display:none;position:absolute;inset-inline-start:calc(100% - 6px);top:-5px;min-width:210px;background:#1A1A27;border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:4px;box-shadow:0 20px 50px rgba(0,0,0,.7)}
-.lctx .it:hover>.sub,.lctx .it.hov>.sub{display:block}
+.lctx .sub{display:none;position:absolute;inset-inline-start:calc(100% - 6px);top:-5px;min-width:210px;max-height:min(60vh,520px);overflow:auto;background:#1A1A27;border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:4px;box-shadow:0 20px 50px rgba(0,0,0,.7)}
+.lctx .it:hover>.sub,.lctx .it.hov>.sub,.lctx .it:focus-within>.sub{display:block}
 .lctx .ask{display:flex;align-items:center;gap:7px;padding:8px 10px;border-top:1px solid rgba(255,255,255,.08)}.lctx .ask input{flex:1;background:none;border:0;outline:none;font:inherit;color:#F4F4F8}
 .lctx .spark{background:linear-gradient(135deg,#FF3D7F,#8B5CF6 55%,#22D3EE);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800}
 .wcard{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.08)}.wcard .w{font-size:17px;font-weight:800}.wcard .p{font-size:11.5px;color:rgba(235,235,245,.45)}.wcard .m{margin-top:4px}.wcard .g{margin-top:4px;font-size:12px;color:rgba(235,235,245,.6)}
+.wtools{display:flex;align-items:center;gap:2px;margin-top:8px;flex-wrap:wrap}.wtools button{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;background:none;border:0;color:rgba(235,235,245,.7);cursor:pointer;font-size:14px}.wtools button:hover,.wtools button.on{background:rgba(139,92,246,.25);color:#F4F4F8}.wtools .sep{width:1px;height:16px;background:rgba(255,255,255,.12);margin:0 3px}
+.wacts2{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}.wacts2 button{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:8px;border:1px solid rgba(255,255,255,.14);background:none;color:#F4F4F8;font:600 12px Inter;cursor:pointer}.wacts2 button:hover,.wacts2 button.on{border-color:#8B5CF6;background:rgba(139,92,246,.18)}
 .wcard .tag{display:inline-block;margin-top:6px;font-size:11px;padding:1px 8px;border-radius:99px;border:1px solid rgba(255,255,255,.14)}.wcard .tag.nw{color:#22D3EE}.wcard .tag.hw{color:#FBBF24}`;
   document.head.append(st);
 
@@ -43,9 +45,13 @@
     if (!word) return "";
     const lang = ["en", "fa", "ru", "uk"].includes(S.tr) ? S.tr : "en";
     const d = await dictFor(S.L.course, lang), key = d.forms.get(word.toLowerCase()), b = key ? d.base[key] : null, m = key ? d.mean[key] : null;
-    const mean = typeof m === "string" ? m : m && m.m || "", gram = m && typeof m === "object" ? m.g || "" : "";
+    const own = (S.L.data.dict || {})[word.toLowerCase()], ownMean = own && (own[lang] || own.en) || "";
+    const mean = ownMean || (typeof m === "string" ? m : m && m.m || ""), gram = m && typeof m === "object" ? m.g || "" : "";
+    const target = (S.L.data.targets || []).includes(word.toLowerCase()), fx = ((rows()[i] || {}).fx || {})[CUR.k] || {};
+    const tools = `<div class="wtools">${[["b", "bold", "B"], ["i", "italic", "I"], ["u", "format", "U"]].map(([f, ic, t]) => `<button data-fx="${f}" class="${fx[f] ? "on" : ""}" title="${t}">${I(ic, 14)}</button>`).join("")}<span class="sep"></span>${Object.entries(window.STUDIO_COLORS || {}).map(([n, c]) => `<button data-fxc="${n}" title="Colour" style="color:${c}" class="${fx.c === n ? "on" : ""}">●</button>`).join("")}<span class="sep"></span><button data-fxh="amber" title="Highlight" class="${fx.h ? "on" : ""}">${I("highlight", 14)}</button><button data-fxf title="Font">${I("format", 14)}</button><button data-fxx title="Clear format">${I("x", 13)}</button></div>`;
+    const acts = `<div class="wacts2">${own ? `<button data-wd="correct">${I("edit", 13)} Correct</button>` : `<button data-wd="save">${I("dictionary", 13)} Save to the lesson dictionary</button>`}<button data-wd="target" class="${target ? "on" : ""}">${I("star", 13)} ${target ? "Target word ✓" : "Target word"}</button></div>`;
     const hard = (((S.L.data.check && S.L.data.check.lines) || []).find(x => x.i === i) || {}).hard || [];
-    return `<div class="wcard"><div class="w">${E(word)}</div><div class="p">${key ? `LAPP dictionary · ${E(key.split("_")[0])}${b && b.p ? " · " + E(b.p) : ""}` : "not in the LAPP dictionary yet"}</div>${mean ? `<div class="m" dir="auto">${E(mean)}</div>` : ""}${gram ? `<div class="g" dir="auto">${E(gram)}</div>` : ""}${!key ? `<span class="tag nw">new word for LAPP</span>` : ""}${hard.includes(word) ? ` <span class="tag hw">above ${E(S.L.level)}</span>` : ""}</div>`;
+    return `<div class="wcard"><div class="w">${E(word)}</div><div class="p">${own ? "Lesson dictionary" : key ? `LAPP dictionary · ${E(key.split("_")[0])}${b && b.p ? " · " + E(b.p) : ""}` : "not in the LAPP dictionary yet"}</div>${mean ? `<div class="m" dir="auto">${E(mean)}</div>` : ""}${gram ? `<div class="g" dir="auto">${E(gram)}</div>` : ""}${!key && !own ? `<span class="tag nw">new word for LAPP</span>` : ""}${hard.includes(word) ? ` <span class="tag hw">above ${E(S.L.level)}</span>` : ""}${tools}${acts}</div>`;
   }
 
   /* ---------- the line menu ---------- */
@@ -61,7 +67,19 @@
       it("Accent · Austrian", "globe", () => custom(i, "the way people in Austria say it (Austrian German words and phrasing)")), it("Accent · Swiss", "globe", () => custom(i, "the way people in Switzerland say it in Swiss Standard German")), it("Check the level", "approve", () => ACT.check && ACT.check()), it("My own instruction…", "edit", () => rewrite(i, "custom"))]]);
     L.push(["Translate", "translate", [...(ai ? [it("Fill all missing translations", "translate", () => ACT.translate && ACT.translate())] : []), ...["en", "fa", "ru", "uk"].map(l => it("Show " + l.toUpperCase(), "language", () => { S.tr = l; V.script(); }, { on: S.tr === l }))]]);
     L.push(["Person", "person", [...cast.map(n => it(n, "user", () => { r.who = n; changed(); renderDoc(); selLine(i); }, { on: r.who === n })), it("Someone new…", "user-plus", () => pickSpeaker(i)), it("Open the characters", "cast", () => { location.hash = "universe"; })]]);
-    L.push(["Voice", "wave", [...[0.8, 0.9, 1].map(v => it(`Speed ${v}×`, "clock", () => { r.speed = v; changed(); toast(`Line ${i + 1}: speed ${v}×`); }, { on: (r.speed || 0) === v })), it("Open in the voice desk", "wave", () => { location.hash = "voice/" + S.L.id; })]]);
+    const k = word ? CUR.k : -1, tgt = word ? `“${word}”` : "the line", cur = (word ? (r.fx || {})[k] : r.style) || {};
+    const FEELS = [["", "neutral"], ["happy", "happy"], ["excited", "excited"], ["polite", "polite"], ["tired", "tired"], ["sad", "sad"], ["angry", "angry"], ["whisper", "whisper"]];
+    const setV = (f, v, t) => { if (v === "" || v == null) delete r[f]; else r[f] = v; changed(); toast(`Line ${i + 1}: ${t}`); };
+    L.push(["Voice", "wave", [...[0.8, 0.9, 1, 1.1].map(v => it(`Speed ${v}×`, "clock", () => setV("speed", v === 1 ? "" : v, `speed ${v}×`), { on: (r.speed || 1) === v })),
+      ...FEELS.map(([f, l]) => it(`Feeling · ${l}`, "person", () => setV("feel", f, l), { on: (r.feel || "") === f })),
+      ...[0.3, 0.6, 1, 1.5].map(v => it(`Pause after · ${v} s`, "pause", () => setV("pause", v === 0.6 ? "" : v, `pause ${v} s`), { on: (r.pause || 0.6) === v })),
+      ...[-2, -1, 0, 1, 2].map(v => it(`Pitch · ${v > 0 ? "+" : ""}${v}`, "wave", () => setV("pitch", v || "", `pitch ${v > 0 ? "+" : ""}${v}`), { on: (r.pitch || 0) === v })),
+      it("Listen with these settings", "listen", () => preview(r)), it("Open in the voice desk", "wave", () => { location.hash = "voice/" + S.L.id; })]]);
+    L.push(["Format", "format", [it(`Bold · ${tgt}`, "bold", () => applyFx(i, k, { b: !cur.b }), { on: !!cur.b, k: "⌘B" }), it(`Italic · ${tgt}`, "italic", () => applyFx(i, k, { i: !cur.i }), { on: !!cur.i, k: "⌘I" }), it(`Underline · ${tgt}`, "format", () => applyFx(i, k, { u: !cur.u }), { on: !!cur.u }),
+      ...Object.keys(window.STUDIO_COLORS || {}).map(n => it(`Colour · ${n}`, "palette", () => applyFx(i, k, { c: cur.c === n ? "" : n }), { on: cur.c === n })),
+      ...["amber", "green", "cyan", "pink"].map(n => it(`Highlight · ${n}`, "highlight", () => applyFx(i, k, { h: cur.h === n ? "" : n }), { on: cur.h === n })),
+      ...[["", "Inter"], ["serif", "Serif"], ["mono", "Mono"], ["round", "Round"]].map(([f, l]) => it(`Font · ${l}`, "format", () => applyFx(i, k, { f }), { on: (cur.f || "") === f })),
+      it("Clear format", "x", () => clearFx(i, k))]]);
     L.push(["Structure", "structure", [it("New line above", "plus", () => insertLine(i - 1)), it("New line below", "plus", () => insertLine(i)), it("New scene from here", "scene", () => { const [si, li] = locate(i); if (li === 0) return toast("This line already starts a scene"); const rest = scenes[si].lines.splice(li); scenes.splice(si + 1, 0, { title: { de: `Szene ${si + 2}`, en: "", fa: "", ru: "", uk: "" }, lines: rest }); changed(); renderDoc(); }),
       ...(scenes.length > 1 ? scenes.map((s, si) => it(`Move to scene ${si + 1}`, "chevron", () => { const [from, li] = locate(i); if (from === si) return; const [x] = scenes[from].lines.splice(li, 1); scenes[si].lines.push(x); changed(); renderDoc(); }, { disabled: locate(i)[0] === si })) : [])]]);
     L.push(["Delete the line", "trash", null, { danger: true, run: () => delLine(i), k: "Del" }]);
@@ -70,31 +88,60 @@
   function custom(i, how) { const orig = window.prompt; window.prompt = () => how; try { rewrite(i, "custom"); } finally { window.prompt = orig; } }
   function askAi(text) { if (window.LAPPFrame && LAPPFrame.embed) LAPPFrame.up({ t: "ask", text }); else toast(text); }
 
-  async function open(x, y, i, word) {
-    close(); selLine(i);
+  const CUR = { k: -1 }; let OPENS = 0;
+  // the browser's voice with the line's feeling, pitch and speed, before the real audio is made
+  function preview(r) {
+    try { speechSynthesis.cancel(); const FE = { happy: [1.1, 1.06], excited: [1.2, 1.1], sad: [.9, .9], tired: [.92, .86], angry: [1.03, 1.08], polite: [1.02, .96], whisper: [1, .92] }[r.feel] || [1, 1];
+      const c = S.L.data.cast[r.who] || {}, u = new SpeechSynthesisUtterance(r.de); u.lang = SPEECH[S.L.course] || "de-DE"; u.rate = (r.speed || c.speed || .95) * FE[1]; u.pitch = (c.gender === "m" ? .8 : 1.15) * FE[0] * Math.pow(2, (r.pitch || 0) / 12); if (r.feel === "whisper") u.volume = .5; speechSynthesis.speak(u); }
+    catch { toast("This browser cannot speak"); }
+  }
+  async function open(x, y, i, word, k) {
+    close(); selLine(i); CUR.k = word ? (k ?? -1) : -1;
+    const seq = ++OPENS, cardHtml = word ? await card(word, i) : "";
+    if (seq !== OPENS) return;   // a newer right-click won
+    close();
     const L = items(i, word), m = document.createElement("div"); m.className = "lctx"; m.setAttribute("role", "menu");
-    m.innerHTML = `${word ? await card(word, i) : ""}<div class="q">${I("search", 14)}<input placeholder="Search… e.g. “voice”" aria-label="Search actions"></div><div class="hd">Line ${i + 1}${rows()[i].who ? " · " + E(rows()[i].who) : ""}</div><div class="ls">${L.map(([l, ic, sub, o = {}], k) => `<button class="it ${o.danger ? "dz" : ""}" data-g="${k}" data-l="${E(l.toLowerCase())}">${I(ic)}<span>${E(l)}</span>${sub ? `<span class="ar">${I("chevron", 13)}</span><div class="sub">${sub.map((s, j) => `<button class="it" data-s="${k}:${j}" data-l="${E(s.label.toLowerCase())}" ${s.disabled ? "disabled" : ""}>${I(s.icon)}<span>${E(s.label)}</span>${s.on ? `<kbd>●</kbd>` : s.k ? `<kbd>${E(s.k)}</kbd>` : ""}</button>`).join("")}</div>` : `<kbd>${E(o.k || "")}</kbd>`}</button>`).join("")}</div>
+    m.innerHTML = `${cardHtml}<div class="q">${I("search", 14)}<input placeholder="Search… e.g. “voice”" aria-label="Search actions"></div><div class="hd">Line ${i + 1}${rows()[i].who ? " · " + E(rows()[i].who) : ""}</div><div class="ls">${L.map(([l, ic, sub, o = {}], k) => sub
+      // a group is a div (a button can't hold the buttons of its sub-menu)
+      ? `<div class="it" role="menuitem" tabindex="0" aria-haspopup="true" data-g="${k}" data-l="${E(l.toLowerCase())}">${I(ic)}<span>${E(l)}</span><span class="ar">${I("chevron", 13)}</span><div class="sub" role="menu">${sub.map((s, j) => `<button class="it" role="menuitem" data-s="${k}:${j}" data-l="${E(s.label.toLowerCase())}" ${s.disabled ? "disabled" : ""}>${I(s.icon)}<span>${E(s.label)}</span>${s.on ? `<kbd>●</kbd>` : s.k ? `<kbd>${E(s.k)}</kbd>` : ""}</button>`).join("")}</div></div>`
+      : `<button class="it ${o.danger ? "dz" : ""}" role="menuitem" data-g="${k}" data-l="${E(l.toLowerCase())}">${I(ic)}<span>${E(l)}</span><kbd>${E(o.k || "")}</kbd></button>`).join("")}</div>
       ${S.scope && S.scope.ai ? `<div class="ask"><span class="spark">✦</span><input placeholder="Ask the assistant to change this line…" aria-label="Ask the assistant"><kbd style="font-size:10.5px;color:rgba(235,235,245,.4)">↵</kbd></div>` : ""}`;
     document.body.append(m);
     const w = m.offsetWidth, h = m.offsetHeight; m.style.left = Math.max(6, Math.min(x, innerWidth - w - 220)) + "px"; m.style.top = Math.max(6, Math.min(y, innerHeight - h - 6)) + "px";
     const run = el => { if (el.dataset.s) { const [g, j] = el.dataset.s.split(":").map(Number); close(); L[g][2][j].run(); } else if (el.dataset.g && !L[el.dataset.g][2]) { close(); L[el.dataset.g][3].run(); } };
+    m.addEventListener("click", e => {
+      const t = e.target, k = CUR.k, fx = ((rows()[i] || {}).fx || {})[k] || {};
+      const f = t.closest("[data-fx]"); if (f) { e.stopPropagation(); close(); return applyFx(i, k, { [f.dataset.fx]: !fx[f.dataset.fx] }); }
+      const c = t.closest("[data-fxc]"); if (c) { e.stopPropagation(); close(); return applyFx(i, k, { c: fx.c === c.dataset.fxc ? "" : c.dataset.fxc }); }
+      if (t.closest("[data-fxh]")) { e.stopPropagation(); close(); return applyFx(i, k, { h: fx.h ? "" : "amber" }); }
+      if (t.closest("[data-fxf]")) { e.stopPropagation(); close(); const F = ["", "serif", "mono", "round"]; return applyFx(i, k, { f: F[(F.indexOf(fx.f || "") + 1) % F.length] }); }
+      if (t.closest("[data-fxx]")) { e.stopPropagation(); close(); return clearFx(i, k); }
+      const wd = t.closest("[data-wd]"); if (wd) { e.stopPropagation(); close(); if (wd.dataset.wd === "target") return toggleTarget(word); const own = (S.L.data.dict || {})[word.toLowerCase()]; return askMeaning(word, own && (own[S.tr] || own.en)); }
+    });
     m.addEventListener("click", e => { const el = e.target.closest("[data-s], [data-g]"); if (el && !el.disabled) { e.stopPropagation(); if (el.dataset.s || !L[el.dataset.g][2]) run(el); } });
+    // a sub-menu stays inside the window: it moves up when it would run past the bottom
+    m.addEventListener("pointerover", e => { const g = e.target.closest(".ls > .it[aria-haspopup]"); if (!g) return; const sub = $(".sub", g); sub.style.top = "-5px"; requestAnimationFrame(() => { const r = sub.getBoundingClientRect(), over = r.bottom - (innerHeight - 8); if (over > 0) sub.style.top = Math.max(-g.getBoundingClientRect().top + 8, -5 - over) + "px"; }); });
     const q = $(".q input", m);
     q.oninput = () => {
       const s = q.value.trim().toLowerCase();
       $$(".ls > .it", m).forEach(g => { const own = g.dataset.l.includes(s), subs = $$(".sub .it", g); subs.forEach(c => c.hidden = s && !own && !c.dataset.l.includes(s)); const hit = !s || own || subs.some(c => !c.hidden); g.hidden = !hit; g.classList.toggle("hov", !!s && hit && !own && subs.length > 0); });
     };
-    q.onkeydown = e => { if (e.key === "Escape") close(); if (e.key === "Enter") { const first = $$(".ls .it.hov .sub .it:not([hidden]), .ls > .it:not([hidden])", m)[0]; if (first) run(first.dataset.s || first.dataset.g ? first : first); } };
+    q.onkeydown = e => { if (e.key === "Escape") close(); if (e.key === "Enter") { const first = $(".ls .it.hov .sub .it:not([hidden])", m) || $$(".ls > .it:not([hidden])", m).find(g => !L[g.dataset.g][2]) || $(".ls > .it:not([hidden]) .sub .it:not([hidden])", m); if (first) run(first); } };
     const ask = $(".ask input", m);
     if (ask) ask.onkeydown = e => { if (e.key === "Escape") close(); if (e.key === "Enter" && ask.value.trim()) { const v = ask.value.trim(); close(); custom(i, v); } };
     q.focus();
   }
   document.addEventListener("contextmenu", e => {
-    const dl = e.target.closest && e.target.closest(".dl"); if (!dl || !S.L) return;
+    // the line's small toolbar can sit over the words: look through it
+    let tg = e.target;
+    const through = fn => { const fl = $$(".float"); fl.forEach(x => x.style.visibility = "hidden"); try { return fn(); } finally { fl.forEach(x => x.style.visibility = ""); } };
+    if (tg.closest && tg.closest(".float")) tg = through(() => document.elementFromPoint(e.clientX, e.clientY)) || tg;
+    const dl = tg.closest && tg.closest(".dl"); if (!dl || !S.L) return;
     if (e.shiftKey) return;   // Shift + right-click: the browser's own menu (spelling)
     e.preventDefault();
-    const word = e.target.closest(".txt .d") ? wordAt(e.clientX, e.clientY) : "";
-    open(e.clientX, e.clientY, Number(dl.dataset.i), word);
+    if (tg.closest(".float")) return;
+    const word = tg.closest(".txt .d") ? through(() => wordAt(e.clientX, e.clientY)) : "", i = Number(dl.dataset.i);
+    open(e.clientX, e.clientY, i, word, word && window.wordIndexAt ? wordIndexAt(rows()[i].de, word, e.clientX, e.clientY) : -1);
   });
   document.addEventListener("click", e => { if (!e.target.closest(".lctx")) close(); });
   addEventListener("scroll", close, true);

@@ -540,6 +540,28 @@ export async function lessonsApi(req, env, H, p, url, ctx) {
     return new Response(readable, { headers: { "Content-Type": "application/x-ndjson; charset=utf-8", "Cache-Control": "no-store", "X-Accel-Buffering": "no" } });
   }
 
+  /* ---- AI: a pasted text or story → scenes and speakers, the words stay exactly as written ---- */
+  if ((m = p.match(/^\/lessons\/(\d+)\/import$/)) && M === "POST") {
+    const l = await lessonIn(env, H, sc, int(m[1]));
+    await limitAi(env, H, sc);
+    const text = str((await H.body(req)).text, 12000);
+    if (text.length < 10) throw H.fail("paste a text first");
+    const got = await ask(env, H, "write", {
+      max: 6000,
+      schema: { type: "object", required: ["scenes"], properties: { scenes: { type: "array", items: { type: "object", properties: { title: { type: "string" }, lines: { type: "array", items: { type: "object", properties: { who: { type: "string" }, de: { type: "string" } } } } } } }, cast: { type: "array", items: { type: "object", properties: { name: { type: "string" }, gender: { type: "string" } } } } } },
+      prompt: `Split this ${COURSES[l.course].name} text into a dialogue script for a language lesson. DO NOT change, translate, fix or shorten a single word: every line's "de" must be copied exactly from the text, in the original order. Find who says each sentence (use "Narrator" for narration). Start a new scene where the place or time changes, with a short title in the same language. "cast": every speaker with gender "f" or "m" (Narrator: pick one).
+
+Text:
+${text}`
+    });
+    // only lines that really are in the text: the AI may not rewrite anything
+    const flat = s => String(s || "").replace(/\s+/g, " ").trim(), src = flat(text);
+    const scenes = (got.scenes || []).map(s => ({ title: { de: str(s.title, 80) || "Szene", en: "", fa: "", ru: "", uk: "" }, lines: (s.lines || []).map(x => ({ who: str(x.who, 40) || "Narrator", de: flat(x.de).slice(0, 400), en: "", fa: "", ru: "", uk: "", ok: false })).filter(x => x.de && src.includes(x.de)) })).filter(s => s.lines.length);
+    const kept = scenes.reduce((a, s) => a + s.lines.reduce((b, x) => b + x.de.length, 0), 0);
+    if (!scenes.length || kept < src.replace(/\s/g, "").length * 0.6) throw H.fail("the AI couldn't split this text without changing it — try the simple split, or add “Name: …” before each line", 422);
+    return H.json({ scenes, cast: (got.cast || []).map(c => ({ name: str(c.name, 40), gender: c.gender === "m" ? "m" : "f" })).filter(c => c.name) });
+  }
+
   /* ---- AI: fill the missing translations ---- */
   if ((m = p.match(/^\/lessons\/(\d+)\/translate$/)) && M === "POST") {
     const l = await lessonIn(env, H, sc, int(m[1]));

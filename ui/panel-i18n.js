@@ -122,7 +122,7 @@
   const dicts = {};
   async function load(l) {
     if (l === "en") return {};
-    if (!dicts[l]) dicts[l] = fetch(`/content/lang/${l}/panel.json?v=${window.PANEL_V || 9}`).then(r => r.ok ? r.json() : {}).catch(() => ({}));
+    if (!dicts[l]) dicts[l] = fetch(`/content/lang/${l}/panel.json?v=${window.PANEL_V || 10}`).then(r => r.ok ? r.json() : {}).catch(() => ({}));
     return dicts[l];
   }
   async function use(l, save) {

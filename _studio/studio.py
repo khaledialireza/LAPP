@@ -275,20 +275,31 @@ def piper(name):
 _engines = {}
 
 
-def synth(voice, text, speed):
-    """float32 mono samples at RATE for one line"""
+FEEL = {  # how a feeling changes a voice that has no styles of its own: [pitch in semitones, pace]
+    "happy": [1, 1.06], "excited": [1.6, 1.1], "sad": [-1.2, 0.9], "tired": [-0.8, 0.86], "angry": [0.4, 1.08], "polite": [0.3, 0.96], "whisper": [0, 0.92]}
+AZURE_STYLE = {"happy": "cheerful", "excited": "excited", "sad": "sad", "tired": "sad", "angry": "angry", "polite": "friendly", "whisper": "whispering"}
+
+
+def synth(voice, text, speed, pitch=0.0, feel=""):
+    """float32 mono samples at RATE for one line; pitch in semitones"""
     import numpy as np
     kind, name = voice.split(":", 1)
     if kind == "piper":
         eng = _engines.get(voice) or _engines.setdefault(voice, piper(name))
-        a = eng.generate(text, sid=0, speed=speed)
-        return resample(np.array(a.samples, dtype=np.float32), a.sample_rate)
+        f = 2 ** (pitch / 12) if pitch else 1.0
+        a = eng.generate(text, sid=0, speed=speed / f)
+        x = resample(np.array(a.samples, dtype=np.float32), a.sample_rate)
+        if f != 1.0:   # higher or lower without changing the length: made slower above, played faster here
+            n = int(len(x) / f); x = np.interp(np.linspace(0, len(x) - 1, n), np.arange(len(x)), x).astype(np.float32)
+        return x
     if kind == "azure":
         key, region = os.environ.get("AZURE_SPEECH_KEY"), os.environ.get("AZURE_SPEECH_REGION")
         if not key: sys.exit("AZURE_SPEECH_KEY / AZURE_SPEECH_REGION not set")
         rate = f"{round((speed - 1) * 100):+d}%"
         esc = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-        ssml = f'<speak version="1.0" xml:lang="de-DE"><voice name="{name}"><prosody rate="{rate}">{esc}</prosody></voice></speak>'
+        body = f'<prosody rate="{rate}" pitch="{pitch:+.1f}st">{esc}</prosody>'
+        if AZURE_STYLE.get(feel): body = f'<mstts:express-as style="{AZURE_STYLE[feel]}">{body}</mstts:express-as>'
+        ssml = f'<speak version="1.0" xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="de-DE"><voice name="{name}">{body}</voice></speak>'
         req = urllib.request.Request(f"https://{region}.tts.speech.microsoft.com/cognitiveservices/v1", ssml.encode("utf-8"), {
             "Ocp-Apim-Subscription-Key": key, "Content-Type": "application/ssml+xml",
             "X-Microsoft-OutputFormat": "raw-24khz-16bit-mono-pcm", "User-Agent": "lapp-studio"})
@@ -317,11 +328,14 @@ def clip(d, ln):
     import numpy as np
     c = d["cast"][ln["who"]]
     speed = ln.get("speed") or c.get("speed", 0.95)          # a line may have its own speed
-    key = hashlib.sha1(f"{c['voice']}|{speed}|{ln['de']}".encode()).hexdigest()[:16]
+    feel = ln.get("feel") or ""
+    pitch = float(ln.get("pitch") or 0)
+    if feel in FEEL and not c["voice"].startswith("azure:"): pitch += FEEL[feel][0]; speed = speed * FEEL[feel][1]
+    key = hashlib.sha1(f"{c['voice']}|{speed}|{pitch}|{feel}|{ln['de']}".encode()).hexdigest()[:16]
     f = CACHE / f"{key}.npy"
     if f.exists(): return np.load(f)
     CACHE.mkdir(parents=True, exist_ok=True)
-    x = trim(synth(c["voice"], ln["de"], speed))
+    x = trim(synth(c["voice"], ln["de"], speed, pitch, feel))
     np.save(f, x); return x
 
 
