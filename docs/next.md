@@ -25,6 +25,14 @@
   - The smart lesson parts (curriculum map, board, AI ideas, level/approval rules, new lesson) move to the Studio as its "Library / Curriculum" view.
   - Generic folder permissions stay in Files; lesson-only rules (level, approved before publish) live in the Studio.
   - Everything the Studio makes is a file in Files: lesson (.lapp), character/identity, voice, audio track, video, slides, grammar sheet, dictionary, homework/practice set… each with its own type, icon, preview and "open with Studio". Publishing marks/copies the file into LAPP; drafts can live on the user's own drive.
+- Command center: cleaner (proposal):
+  - No row of 8 tabs. Empty state = only: Suggested (max 2) · Recent (apps, lessons, files mixed, ~6 one-line rows) · a single row of pinned app icons. Hide empty sections ("Nothing new" never shown).
+  - Typing searches everything; prefixes narrow it: ">" commands, "#" lessons/files, "@" people, "?" ask the AI. Small scope chips appear only while typing.
+  - AI chat is not a tab: Tab/↵ on "Ask the AI" turns the panel into the chat; Esc goes back.
+  - Notifications and running work leave the panel: bell / spinner on the taskbar open their own small popovers.
+  - One-line rows (title + muted place on the same line), narrower panel (~560px), smaller paddings.
+  - Lesson rows lose the 3 buttons: ↵ opens the script; → (or hover) opens an action panel (Script, Voice, Insights, pin, share, ask AI) — the same action panel for every item type.
+  - Footer: only "↵ open · → actions · Tab ask AI"; settings and shortcuts go to the avatar menu / a small ⚙ in the search bar.
 
 ## Accounting: a standalone, general system (replaces "school finance double-entry")
 - Not only for schools: LAPP's owner uses it for their own finances too.
