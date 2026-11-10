@@ -45,3 +45,14 @@
 - Fix:
   - New windows open big: ~90% of the desktop (or maximised when the screen is < 1440px wide; first window always maximised). Remember the last size per app.
   - Inside windows (embed mode) use the desktop layout down to ~700px; only real phones (< 600px) get the mobile layout. Move the pages from screen media queries to container queries / embed-aware breakpoints.
+
+## Platform vision: standalone admin at admin.khaledi.eu (agreed direction, critical)
+- The system becomes a business platform; each business type gets its own apps (windows):
+  language school (school, calendar, finance) · content creator (studio, media) · exchange office (accounting) · company (CRM) · doctor (practice + patients) · platform owner (packages, servers, users).
+- LAPP (learning) = one product/app set on the platform; lapp.khaledi.eu stays the learner site.
+- Layers: CORE (accounts, tenants/organisations, roles, app catalog, plans & billing, files, AI, notifications, desktop) + APPS (school, studio, accounting, CRM, clinic…). A tenant only sees the apps its plan includes.
+- admin.khaledi.eu = owner console: tenants, plans/packages, app catalog & feature flags, users, servers/usage/costs (AI, storage), billing, logs/audit, support access (logged), system health.
+- Customer workspace: the /manage desktop on its own host (e.g. app.khaledi.eu or <tenant>.khaledi.eu, later custom domains).
+- Admin security: host-only cookie for admin, mandatory 2FA/passkey, Cloudflare Access/IP allowlist, own session, full audit log, never embeddable.
+- Data: one D1 core now; later a database per tenant for isolation. Clinic = health data (GDPR special category) and exchange = financial rules (KYC/AML) → extra compliance before selling.
+- Order proposed: 1) core split (tenants, app catalog, plans) 2) admin.khaledi.eu console 3) school + studio as apps 4) accounting (first general app) 5) CRM 6) clinic last.
