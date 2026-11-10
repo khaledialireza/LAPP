@@ -57,6 +57,14 @@ async function lessonIn(env, H, sc, id) {
   l.data = JSON.parse(l.data || "{}");
   return l;
 }
+// keep the version a change replaces: every AI change, and a hand-made one at most every 10 minutes; 40 per lesson
+async function keepVersion(env, H, sc, l, note, ai) {
+  const last = await env.DB.prepare("SELECT created_at, by_ai FROM lesson_versions WHERE lesson_id = ? ORDER BY id DESC LIMIT 1").bind(l.id).first();
+  if (!ai && last && !last.by_ai && H.now() - last.created_at < 10 * 60e3) return;
+  await env.DB.prepare("INSERT INTO lesson_versions (lesson_id, rev, title, data, note, by_user, by_ai, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
+    .bind(l.id, l.rev, l.title, typeof l.data === "string" ? l.data : JSON.stringify(l.data), str(note, 120), sc.u.id, ai ? 1 : 0, H.now()).run();
+  await env.DB.prepare("DELETE FROM lesson_versions WHERE lesson_id = ? AND id NOT IN (SELECT id FROM lesson_versions WHERE lesson_id = ? ORDER BY id DESC LIMIT 40)").bind(l.id, l.id).run();
+}
 const emptyData = () => ({ cast: {}, scenes: [], phrases: [], tr: Object.fromEntries(TR.map(l => [l, { title: "", summary: "" }])), pause: 0.6, scenePause: 1.4 });
 
 // what the list shows
@@ -497,6 +505,7 @@ export async function lessonsApi(req, env, H, p, url, ctx) {
       if (!b.data || !Array.isArray(b.data.scenes) || typeof b.data.cast !== "object") throw H.fail("bad script");
       sets.push("data = ?"); vals.push(text);
       if (l.status === "draft" && b.data.scenes.length) { sets.push("status = 'review'"); }
+      if (l.data.scenes && l.data.scenes.length) await keepVersion(env, H, sc, l, str(b.note, 120) || "edited", !!b.byAi);
     }
     const r = await env.DB.prepare(`UPDATE lessons SET ${sets.join(", ")} WHERE id = ? AND rev = ? RETURNING rev`).bind(...vals, l.id, l.rev).first();
     if (!r) throw H.fail("someone else changed this lesson — reload it", 409, { code: "rev" });
@@ -527,6 +536,7 @@ export async function lessonsApi(req, env, H, p, url, ctx) {
         });
         const d = merge(l, normalize(src, l), chars);
         if (!d.scenes.length) throw new Error("the AI wrote no lines — try again");
+        if (l.data.scenes && l.data.scenes.length) await keepVersion(env, H, sc, l, "before the AI rewrote the lesson", true);
         await send({ t: "lines", data: d });
         try { await translateAll(env, l, d, (i, n) => send({ t: "status", text: `translating ${i + 1}/${n}` })); }
         catch (e) { await send({ t: "status", text: "translations: " + e.message }); }
@@ -538,6 +548,24 @@ export async function lessonsApi(req, env, H, p, url, ctx) {
     })();
     if (ctx) ctx.waitUntil(work);
     return new Response(readable, { headers: { "Content-Type": "application/x-ndjson; charset=utf-8", "Cache-Control": "no-store", "X-Accel-Buffering": "no" } });
+  }
+
+  /* ---- history: earlier versions of the lesson ---- */
+  if ((m = p.match(/^\/lessons\/(\d+)\/versions$/)) && M === "GET") {
+    const l = await lessonIn(env, H, sc, int(m[1]));
+    const rows = (await env.DB.prepare("SELECT v.id, v.rev, v.title, v.note, v.by_ai, v.created_at, u.name, u.username, LENGTH(v.data) size FROM lesson_versions v LEFT JOIN users u ON u.id = v.by_user WHERE v.lesson_id = ? ORDER BY v.id DESC").bind(l.id).all()).results;
+    return H.json({ versions: rows.map(v => ({ id: v.id, rev: v.rev, title: v.title, note: v.note, ai: !!v.by_ai, at: v.created_at, by: v.name || (v.username ? "@" + v.username : "") })) });
+  }
+  if ((m = p.match(/^\/lessons\/(\d+)\/versions\/(\d+)(\/restore)?$/))) {
+    const l = await lessonIn(env, H, sc, int(m[1]));
+    const v = await env.DB.prepare("SELECT * FROM lesson_versions WHERE id = ? AND lesson_id = ?").bind(int(m[2]), l.id).first();
+    if (!v) throw H.fail("no such version", 404);
+    if (!m[3] && M === "GET") return H.json({ version: { id: v.id, rev: v.rev, title: v.title, note: v.note, at: v.created_at, data: JSON.parse(v.data) } });
+    if (m[3] && M === "POST") {
+      await keepVersion(env, H, sc, { ...l, data: JSON.stringify(l.data) }, "before going back to version " + v.rev, true);
+      const r = await env.DB.prepare("UPDATE lessons SET data = ?, rev = rev + 1, updated_at = ? WHERE id = ? RETURNING rev").bind(v.data, H.now(), l.id).first();
+      return H.json({ data: JSON.parse(v.data), rev: r.rev });
+    }
   }
 
   /* ---- AI: a pasted text or story → scenes and speakers, the words stay exactly as written ---- */
@@ -568,6 +596,7 @@ ${text}`
     await limitAi(env, H, sc);
     const d = l.data;
     let added;
+    await keepVersion(env, H, sc, { ...l, data: JSON.stringify(l.data) }, "before the AI translated", true);
     try { added = await translateAll(env, l, d); } catch (e) { throw H.fail(e.message, e.status || 502, e.extra); }
     const r = await env.DB.prepare("UPDATE lessons SET data = ?, rev = rev + 1, updated_at = ? WHERE id = ? AND rev = ? RETURNING rev").bind(JSON.stringify(d), H.now(), l.id, l.rev).first();
     if (!r) throw H.fail("someone else changed this lesson — reload it", 409, { code: "rev" });
