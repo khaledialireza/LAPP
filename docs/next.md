@@ -21,3 +21,8 @@
 ## Window frame looks doubled/square
 - Now: a grey border + a separate 1px coloured ring (box-shadow) + a 2px coloured line on top of the title bar → looks like an extra square frame.
 - Fix: one border only. Active window: the border itself takes the place colour (LAPP/school/studio); inactive: soft grey. Drop the extra ring and top line; keep rounded corners.
+- Agreed: merge the three into ONE border that changes colour by the moment and the work in the window:
+  - normal: the place colour (LAPP / school / studio), dim when the window isn't active;
+  - AI working in it: moving LAPP gradient; background job (audio): soft pulse;
+  - unsaved changes: amber; error: red; just saved / done: short green flash; recording (voice): pink.
+  - Pages send their state up with postMessage {lapp:1, t:"state", state:"busy|dirty|error|ok|rec"}.
