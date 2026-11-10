@@ -19,6 +19,7 @@ import { lessonsApi, libApi, eventsApi, servePublished, plusLessons } from "./le
 import { adminAi, ask as aiAsk } from "./ai.js";
 import ADMIN from "./admin.html";
 import MANAGE from "./manage.html";
+import FILES from "./files.html";
 import { deskApi, worksHere } from "./desk.js";
 import SCHOOL from "./school.html";
 import { orgApi, orgsList, adminOrgs } from "./school.js";
@@ -55,6 +56,13 @@ export default {
         if (!u) return Response.redirect(`${url.origin}/?login=1&next=/manage`, 302);
         if (!await worksHere(env, u, STAFF)) return Response.redirect(`${url.origin}/`, 302);
         return await page(req, env, MANAGE, ROLES, "/manage");
+      }
+      // Files: every file of the system in one explorer (runs as a window of /manage)
+      if (p === "/files" || p === "/files/") {
+        const u = env.DB ? await currentUser(req, env) : null;
+        if (!u) return Response.redirect(`${url.origin}/?login=1&next=/manage`, 302);
+        if (!await worksHere(env, u, STAFF)) return Response.redirect(`${url.origin}/`, 302);
+        return await page(req, env, FILES, ROLES, "/files");
       }
       // a school's portal: anyone signed in gets the page; the API decides what they may see
       let sm;
@@ -353,11 +361,31 @@ You can propose actions on the desktop, which the person confirms: "open" a plac
 Places: ${places.map(x => `${x.id} = ${x.label}`).join("; ") || "none"}
 Open windows: ${wins.map(x => `${x.id} = ${x.label}`).join("; ") || "none"}
 Propose actions only when they asked for something to be opened, arranged or closed; otherwise "actions" is [].
+If they ask for something that is not in the places (for example a calendar, messages or mail that don't exist yet), say clearly that it isn't in LAPP yet — never offer a different place instead.
 ${hist ? "Conversation so far:\n" + hist + "\n" : ""}Question: ${q}`;
     const r = await aiAsk(env, "assist", { prompt, schema: { type: "object", required: ["answer"], properties: { answer: { type: "string" }, actions: { type: "array", items: { type: "object", properties: { do: { type: "string" }, id: { type: "string" } } } } } }, max: 1500 });
     const ok = new Set([...places, ...wins].map(x => x.id));
     const actions = (Array.isArray(r.value.actions) ? r.value.actions : []).map(a => ({ do: s(a && a.do, 10), id: s(a && a.id, 12) })).filter(a => ["open", "left", "right", "max", "close"].includes(a.do) && ok.has(a.id)).slice(0, 6);
     return json({ answer: s(r.value.answer, 4000), actions, provider: r.provider });
+  }
+
+  /* ---- the AI groups the open windows of the work desktop by task / project ---- */
+  if (p === "/assist/groups" && M === "POST") {
+    const u = await need(req, env);
+    const orgs = (await env.DB.prepare("SELECT 1 FROM org_members m WHERE m.user_id = ? AND m.active = 1 AND m.role IN ('admin','teacher','finance')").bind(u.id).all()).results;
+    if (!STAFF.includes(u.role) && !orgs.length) throw fail("for staff and school teams", 403);
+    const day = Math.floor(now() / DAY);
+    const n = await env.DB.prepare("INSERT INTO hits (key, n, reset) VALUES (?1, 1, ?2) ON CONFLICT(key) DO UPDATE SET n = n + 1 RETURNING n").bind(`ai:${u.id}:${day}`, (day + 2) * DAY).first();
+    if (n.n > 80) throw fail("the daily AI limit is reached — try again tomorrow", 429);
+    const b = await body(req), s = (v, k) => String(v ?? "").replace(/\s+/g, " ").trim().slice(0, k);
+    const wins = (Array.isArray(b.windows) ? b.windows : []).slice(0, 30).map(x => ({ id: s(x.id, 12), label: s(x.label, 100) })).filter(x => x.id && x.label);
+    if (wins.length < 3) return json({ groups: [] });
+    const prompt = `Group these open windows of a work desktop by the task or project they belong to (for example one lesson, one customer, month-end). Give each group a short name (2–4 words) in the language of the window titles. Only groups of 2 or more windows; a window belongs to at most one group; leave unrelated windows out.
+Windows: ${wins.map(w => `${w.id} = ${w.label}`).join("; ")}`;
+    const r = await aiAsk(env, "assist", { prompt, schema: { type: "object", required: ["groups"], properties: { groups: { type: "array", items: { type: "object", properties: { name: { type: "string" }, ids: { type: "array", items: { type: "string" } } } } } } }, max: 800 });
+    const ok = new Set(wins.map(w => w.id)), used = new Set();
+    const groups = (Array.isArray(r.value.groups) ? r.value.groups : []).map(g => ({ name: s(g && g.name, 40), ids: (Array.isArray(g && g.ids) ? g.ids : []).map(x => s(x, 12)).filter(x => ok.has(x) && !used.has(x) && used.add(x)) })).filter(g => g.name && g.ids.length > 1).slice(0, 6);
+    return json({ groups });
   }
 
   if (p === "/me" && M === "PATCH") {

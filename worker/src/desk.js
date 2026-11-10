@@ -14,8 +14,9 @@ export async function deskApi(req, env, H, p, u) {
   let m;
   if (p === "" && M === "GET") {
     const d = await env.DB.prepare("SELECT data FROM desks WHERE user_id = ?").bind(u.id).first();
-    const files = (await env.DB.prepare("SELECT id, name, type, size, created_at FROM user_files WHERE user_id = ? ORDER BY id").bind(u.id).all()).results;
-    return H.json({ desk: d ? JSON.parse(d.data) : null, files });
+    const files = (await env.DB.prepare("SELECT id, name, type, size, created_at, folder, star FROM user_files WHERE user_id = ? ORDER BY id").bind(u.id).all()).results;
+    const folders = (await env.DB.prepare("SELECT id, parent, name, created_at FROM user_folders WHERE user_id = ? ORDER BY name").bind(u.id).all()).results;
+    return H.json({ desk: d ? JSON.parse(d.data) : null, files, folders });
   }
   if (p === "" && M === "PUT") {
     const text = await req.text();
@@ -34,7 +35,9 @@ export async function deskApi(req, env, H, p, u) {
     const used = await env.DB.prepare("SELECT COUNT(*) n, COALESCE(SUM(size), 0) s FROM user_files WHERE user_id = ?").bind(u.id).first();
     if (used.n >= MAX_FILES) throw H.fail(`the desktop holds up to ${MAX_FILES} files — remove some first`, 409);
     if (used.s + buf.length > MAX_TOTAL) throw H.fail("your files would pass 100 MB — remove some first", 409);
-    const f = await env.DB.prepare("INSERT INTO user_files (user_id, name, type, size, created_at) VALUES (?, ?, ?, ?, ?) RETURNING id, name, type, size, created_at").bind(u.id, name, type, buf.length, t).first();
+    let folder = Number(req.headers.get("X-Folder")) || 0;
+    if (folder && !(await env.DB.prepare("SELECT 1 FROM user_folders WHERE id = ? AND user_id = ?").bind(folder, u.id).first())) folder = 0;
+    const f = await env.DB.prepare("INSERT INTO user_files (user_id, name, type, size, created_at, folder) VALUES (?, ?, ?, ?, ?, ?) RETURNING id, name, type, size, created_at, folder, star").bind(u.id, name, type, buf.length, t, folder).first();
     const st = [];
     for (let i = 0, k = 0; i < buf.length; i += PART, k++) st.push(env.DB.prepare("INSERT INTO blobs (key, part, data) VALUES (?, ?, ?)").bind(`ufile/${f.id}`, k, buf.subarray(i, i + PART)));
     await env.DB.batch(st);
@@ -43,6 +46,16 @@ export async function deskApi(req, env, H, p, u) {
   if ((m = p.match(/^\/files\/(\d+)$/))) {
     const f = await env.DB.prepare("SELECT * FROM user_files WHERE id = ? AND user_id = ?").bind(Number(m[1]), u.id).first();
     if (!f) throw H.fail("no such file", 404);
+    if (M === "PATCH") {
+      const b = await H.body(req);
+      const name = b.name != null ? String(b.name).replace(/[\u0000-\u001f\\/]/g, "").trim().slice(0, 120) : f.name;
+      let folder = b.folder != null ? Number(b.folder) || 0 : f.folder;
+      if (folder && !(await env.DB.prepare("SELECT 1 FROM user_folders WHERE id = ? AND user_id = ?").bind(folder, u.id).first())) throw H.fail("no such folder", 404);
+      if (!name) throw H.fail("the file needs a name");
+      const star = b.star != null ? (b.star ? 1 : 0) : f.star;
+      await env.DB.prepare("UPDATE user_files SET name = ?, folder = ?, star = ? WHERE id = ?").bind(name, folder, star, f.id).run();
+      return H.json({ ...f, name, folder, star, data: undefined });
+    }
     if (M === "DELETE") {
       await env.DB.batch([env.DB.prepare("DELETE FROM blobs WHERE key = ?").bind(`ufile/${f.id}`), env.DB.prepare("DELETE FROM user_files WHERE id = ?").bind(f.id)]);
       return H.json({ ok: true });
@@ -55,6 +68,35 @@ export async function deskApi(req, env, H, p, u) {
         "Content-Type": inline ? f.type : "application/octet-stream", "Content-Length": String(f.size), "Cache-Control": "private, max-age=3600",
         "Content-Disposition": `${inline ? "inline" : "attachment"}; filename*=UTF-8''${encodeURIComponent(f.name)}`,
         "X-Content-Type-Options": "nosniff", "Content-Security-Policy": "sandbox; default-src 'none'; img-src 'self'; media-src 'self'; style-src 'unsafe-inline'" } });
+    }
+  }
+  /* ---- folders of the Files app ---- */
+  if (p === "/folders" && M === "POST") {
+    const b = await H.body(req), name = String(b.name || "").replace(/[\u0000-\u001f\\/]/g, "").trim().slice(0, 60), parent = Number(b.parent) || 0;
+    if (!name) throw H.fail("the folder needs a name");
+    if (parent && !(await env.DB.prepare("SELECT 1 FROM user_folders WHERE id = ? AND user_id = ?").bind(parent, u.id).first())) throw H.fail("no such folder", 404);
+    const n = await env.DB.prepare("SELECT COUNT(*) n FROM user_folders WHERE user_id = ?").bind(u.id).first();
+    if (n.n >= 200) throw H.fail("up to 200 folders", 409);
+    return H.json(await env.DB.prepare("INSERT INTO user_folders (user_id, parent, name, created_at) VALUES (?, ?, ?, ?) RETURNING id, parent, name, created_at").bind(u.id, parent, name, t).first());
+  }
+  if ((m = p.match(/^\/folders\/(\d+)$/))) {
+    const id = Number(m[1]), f = await env.DB.prepare("SELECT * FROM user_folders WHERE id = ? AND user_id = ?").bind(id, u.id).first();
+    if (!f) throw H.fail("no such folder", 404);
+    if (M === "PATCH") {
+      const b = await H.body(req), name = b.name != null ? String(b.name).replace(/[\u0000-\u001f\\/]/g, "").trim().slice(0, 60) : f.name;
+      let parent = b.parent != null ? Number(b.parent) || 0 : f.parent;
+      if (!name) throw H.fail("the folder needs a name");
+      // never into itself or one of its own folders
+      const all = (await env.DB.prepare("SELECT id, parent FROM user_folders WHERE user_id = ?").bind(u.id).all()).results, P = new Map(all.map(x => [x.id, x.parent]));
+      if (parent && !P.has(parent)) throw H.fail("no such folder", 404);
+      for (let x = parent, i = 0; x && i < 50; x = P.get(x), i++) if (x === id) throw H.fail("a folder can't go inside itself");
+      await env.DB.prepare("UPDATE user_folders SET name = ?, parent = ? WHERE id = ?").bind(name, parent, id).run();
+      return H.json({ id, parent, name });
+    }
+    if (M === "DELETE") {
+      // what was inside moves up one level
+      await env.DB.batch([env.DB.prepare("UPDATE user_files SET folder = ? WHERE user_id = ? AND folder = ?").bind(f.parent, u.id, id), env.DB.prepare("UPDATE user_folders SET parent = ? WHERE user_id = ? AND parent = ?").bind(f.parent, u.id, id), env.DB.prepare("DELETE FROM user_folders WHERE id = ?").bind(id)]);
+      return H.json({ ok: true });
     }
   }
   throw H.fail("not found", 404);

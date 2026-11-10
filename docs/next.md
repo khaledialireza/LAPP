@@ -1,7 +1,7 @@
 # Next work (agreed in chat, build when asked)
 Rule: only items the owner approved are recorded as agreed; anything else is marked [PROPOSAL, NOT CONFIRMED].
 
-## PRIORITY ORDER v2 [PROPOSAL, NOT CONFIRMED]
+## PRIORITY ORDER v2 (approved; building steps 1+2 now)
 Steps 1+2 (approved to build), split into parts in this order:
  1a. Foundation: modular window/app components; standard window (title bar = name + menus + app buttons, no inner top bar); device detection → desktop layout inside windows; one state-coloured border; no place tag; own SVG icon layer.
  1b. Taskbar: dock (pinned + running), counts, state on icons, live previews, workspaces per organisation, AI-chosen grouping (task groups / work type / file).

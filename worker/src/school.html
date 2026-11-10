@@ -6,8 +6,9 @@
 <script src="/ui/lapp-ui.js?v=3"></script>
 <script src="/ui/panel-i18n.js?v=7"></script>
 <script src="/ui/cursor.js?v=1"></script>
-<script src="/ui/shell.js?v=3"></script>
-<script src="/ui/drive.js?v=2"></script>
+<script src="/ui/frame.js?v=1"></script>
+<script src="/ui/shell.js?v=5"></script>
+<script src="/ui/drive.js?v=3"></script>
 <style>
 /* the school portal — same look as the studio and the admin panel */
 :root{--bg:#07070B;--p1:#0F0F16;--p2:#15151F;--p3:#1C1C29;--ln:rgba(255,255,255,.08);--ln2:rgba(255,255,255,.14);--tx:#F4F4F8;--mu:rgba(235,235,245,.55);--mu2:rgba(235,235,245,.35);
@@ -75,8 +76,8 @@ canvas.board{position:absolute;inset:0;width:100%;height:100%;border-radius:16px
 .sw{width:22px;height:22px;border-radius:50%;border:2px solid transparent;flex:none}.sw.on{border-color:#fff}
 .hand{display:flex;justify-content:space-between;align-items:center;background:rgba(251,191,36,.12);border-radius:10px;padding:6px 10px;font-size:13px}
 :focus-visible{outline:2px solid var(--cy);outline-offset:2px}
-@media (max-width:1000px){.g2,.g3{grid-template-columns:1fr}.week{grid-template-columns:repeat(2,minmax(0,1fr))}.lv{grid-template-columns:1fr;grid-template-rows:56px auto 1fr 62px}.lv-side{border-inline-start:0;border-top:1px solid var(--ln);max-height:34vh}.lv-tools{grid-column:1}.lv-top{grid-column:1}}
-@media (max-width:760px){body{grid-template-columns:1fr}aside{position:sticky;height:auto;flex-direction:row;flex-wrap:nowrap;overflow-x:auto;gap:4px;padding:10px 12px}.lg span,.org,.sp,.me{display:none}.nv{white-space:nowrap}main{padding:16px 16px 60px}.week{grid-template-columns:1fr}.f2{grid-template-columns:1fr}.top h1{font-size:22px}}
+@media (max-width:1000px){html:not(.desk) .g2,html:not(.desk) .g3{grid-template-columns:1fr}html:not(.desk) .week{grid-template-columns:repeat(2,minmax(0,1fr))}html:not(.desk) .lv{grid-template-columns:1fr;grid-template-rows:56px auto 1fr 62px}html:not(.desk) .lv-side{border-inline-start:0;border-top:1px solid var(--ln);max-height:34vh}html:not(.desk) .lv-tools{grid-column:1}html:not(.desk) .lv-top{grid-column:1}}
+@media (max-width:760px){html:not(.desk) body{grid-template-columns:1fr}html:not(.desk) aside{position:sticky;height:auto;flex-direction:row;flex-wrap:nowrap;overflow-x:auto;gap:4px;padding:10px 12px}html:not(.desk) .lg span,html:not(.desk) .org,html:not(.desk) .sp,html:not(.desk) .me{display:none}html:not(.desk) .nv{white-space:nowrap}html:not(.desk) main{padding:16px 16px 60px}html:not(.desk) .week{grid-template-columns:1fr}html:not(.desk) .f2{grid-template-columns:1fr}html:not(.desk) .top h1{font-size:22px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 
 /* ===== students: the LAPP app's look ===== */
@@ -191,8 +192,8 @@ function form(title, fields, submit, okLabel = "Save") {
 
 /* ---------------- navigation by role ---------------- */
 const NAV = {
-  admin: [["overview", "📊 Overview"], ["classes", "🏫 Classes"], ["people", "👥 People"], ["timetable", "📅 Timetable"], ["homework", "📝 Homework"], ["lessons", "🗂 Content"], ["finance", "💶 Finance"], ["settings", "⚙️ Settings"]],
-  teacher: [["week", "📅 My week"], ["classes", "🏫 My classes"], ["homework", "📝 Homework"], ["lessons", "🗂 Content"]],
+  admin: [["overview", "📊 Overview"], ["classes", "🏫 Classes"], ["people", "👥 People"], ["timetable", "📅 Timetable"], ["homework", "📝 Homework"], ["lessons", "📚 Lesson library"], ["finance", "💶 Finance"], ["settings", "⚙️ Settings"]],
+  teacher: [["week", "📅 My week"], ["classes", "🏫 My classes"], ["homework", "📝 Homework"], ["lessons", "📚 Lesson library"]],
   finance: [["finance", "💶 Finance"], ["people", "🎓 Students"]],
   student: [["home", "🏠 Home"], ["calendar", "📅 Calendar"], ["classes", "📚 My classes"], ["homework", "📝 Homework"], ["fees", "💶 Fees"]]
 };

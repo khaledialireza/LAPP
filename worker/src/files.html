@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Files · LAPP</title>
+<meta name="robots" content="noindex">
+<script>
+// Files lives inside the work desktop; opened on its own, it goes there
+if (!(new URLSearchParams(location.search).has("embed") && window.parent !== window)) location.replace("/manage#open=" + encodeURIComponent(location.pathname + location.search + location.hash));
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@500;700&display=swap" rel="stylesheet">
+<script src="/ui/panel-i18n.js?v=7"></script>
+<script src="/ui/cursor.js?v=1"></script>
+<script src="/ui/icons.js?v=1"></script>
+<script src="/ui/frame.js?v=1"></script>
+<style>
+/* Files: every file of the system in one explorer. Sources on the left (recent, starred, my files, the lesson libraries,
+   cloud drives later), the folder in the middle (list or grid), a preview on the right. Lessons are files: they open in the studio. */
+:root{--bg:#07070B;--p1:#0F0F16;--p2:#15151F;--p3:#1C1C29;--p4:#26263C;--ln:rgba(255,255,255,.08);--ln2:rgba(255,255,255,.14);--tx:#F4F4F8;--mu:rgba(235,235,245,.6);--mu2:rgba(235,235,245,.38);--vi:#8B5CF6;--cy:#22D3EE;--gr:#34D399;--am:#FBBF24;--rd:#F87171;--pk:#FF3D7F;--g:linear-gradient(135deg,#FF3D7F,#8B5CF6 55%,#22D3EE);color-scheme:dark}
+*{box-sizing:border-box;margin:0}[hidden]{display:none!important}
+html,body{height:100%}
+body{background:var(--bg);color:var(--tx);font:13.5px/1.45 Inter,Vazirmatn,system-ui,sans-serif;display:grid;grid-template-columns:220px 1fr auto;overflow:hidden}
+button,input{font:inherit;color:inherit}button{cursor:pointer;border:0;background:none}
+:focus-visible{outline:2px solid var(--cy);outline-offset:1px}
+.ic{flex:none;display:block}
+.top{display:flex;align-items:center;gap:8px;padding:10px 14px}.top h1{font-size:18px;margin-inline-end:auto}
+.b{height:30px;padding:0 11px;border-radius:9px;border:1px solid var(--ln2);background:var(--p2);font-weight:700;font-size:12.5px;display:inline-flex;align-items:center;gap:6px}.b.pr{background:var(--g);border:0;color:#fff}
+.seg{display:inline-flex}
+aside{border-inline-end:1px solid var(--ln);background:var(--p1);overflow:auto;padding:10px 8px;display:flex;flex-direction:column;gap:2px}
+.find{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:9px;background:var(--p3);border:1px solid var(--ln);margin-bottom:8px;color:var(--mu2)}
+.find input{flex:1;background:none;border:0;outline:none;min-width:0}
+.sh{font:700 10.5px Inter,system-ui;letter-spacing:.5px;text-transform:uppercase;color:var(--mu2);padding:10px 8px 4px}
+.src{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:8px;width:100%;text-align:start;color:var(--mu);white-space:nowrap;overflow:hidden}
+.src span{overflow:hidden;text-overflow:ellipsis}
+.src:hover{background:var(--p3);color:var(--tx)}.src.on{background:rgba(139,92,246,.2);color:var(--tx)}
+.src.dropok{outline:2px dashed var(--cy)}
+.src[disabled]{opacity:.45;cursor:default}.src small{margin-inline-start:auto;font-size:10.5px;color:var(--mu2)}
+.src .tw{width:14px;display:grid;place-items:center;color:var(--mu2)}
+main{display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.crumbs{display:flex;align-items:center;gap:4px;padding:8px 14px;border-bottom:1px solid var(--ln);color:var(--mu);min-height:40px;flex-wrap:wrap}
+.crumbs button{padding:3px 7px;border-radius:7px}.crumbs button:hover{background:var(--p3);color:var(--tx)}.crumbs b{color:var(--tx);padding:3px 7px}
+.crumbs .cnt{margin-inline-start:auto;font-size:12px;color:var(--mu2)}
+.area{flex:1;overflow:auto;padding:8px 10px 30px;position:relative}
+.area.drag{outline:2px dashed var(--cy);outline-offset:-6px;background:rgba(34,211,238,.04)}
+table{width:100%;border-collapse:collapse}
+th{font:700 10.5px Inter,system-ui;letter-spacing:.4px;text-transform:uppercase;color:var(--mu2);text-align:start;padding:6px 8px;position:sticky;top:-8px;background:var(--bg);cursor:pointer;white-space:nowrap}
+td{padding:5px 8px;border-top:1px solid var(--ln);white-space:nowrap;color:var(--mu)}
+td.nm{color:var(--tx);width:60%;max-width:0;overflow:hidden;text-overflow:ellipsis}
+td.nm span{display:inline-flex;align-items:center;gap:9px;vertical-align:middle}
+tr.it{cursor:default}tr.it:hover td{background:rgba(255,255,255,.03)}tr.it.sel td{background:rgba(139,92,246,.2)}tr.it.dropok td{background:rgba(34,211,238,.15)}
+.gi{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:6px}
+.cell{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 6px;border-radius:12px;text-align:center;font-size:12px;cursor:default;border:1px solid transparent}
+.cell:hover{background:var(--p2)}.cell.sel{background:rgba(139,92,246,.2);border-color:rgba(139,92,246,.5)}.cell.dropok{border-color:var(--cy)}
+.cell .th{width:64px;height:64px;border-radius:14px;display:grid;place-items:center;background:var(--p3);overflow:hidden;color:var(--mu)}
+.cell .th img{width:100%;height:100%;object-fit:cover}
+.cell span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fi{color:var(--mu)}.fi.folder{color:#FBBF24}.fi.lesson{color:#FF6B9A}.fi.image{color:#22D3EE}.fi.music,.fi.video{color:#A78BFA}
+.st{font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:99px;border:1px solid var(--ln2)}
+.st.published{color:var(--gr);border-color:rgba(52,211,153,.4)}.st.review{color:var(--am);border-color:rgba(251,191,36,.4)}
+.empty{padding:50px 20px;text-align:center;color:var(--mu2)}
+.empty b{display:block;color:var(--mu);font-size:15px;margin:10px 0 4px}
+.pv{width:280px;border-inline-start:1px solid var(--ln);background:var(--p1);overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+.pv .big{width:100%;aspect-ratio:4/3;border-radius:12px;background:var(--p3);display:grid;place-items:center;overflow:hidden;color:var(--mu)}
+.pv .big img,.pv .big video{width:100%;height:100%;object-fit:contain}
+.pv h3{font-size:14px;overflow-wrap:anywhere}
+.pv dl{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:12px}.pv dt{color:var(--mu2)}.pv dd{margin:0;overflow-wrap:anywhere}
+.pv .acts{display:flex;flex-wrap:wrap;gap:6px}
+.cm{position:fixed;z-index:50;min-width:200px;background:#1A1A27;border:1px solid var(--ln2);border-radius:12px;padding:5px;box-shadow:0 20px 50px rgba(0,0,0,.7)}
+.cm button{display:flex;align-items:center;gap:9px;width:100%;padding:6px 9px;border-radius:7px;text-align:start}.cm button:hover,.cm button:focus-visible{background:rgba(139,92,246,.25)}.cm .dz{color:var(--rd)}.cm hr{border:0;border-top:1px solid var(--ln);margin:4px}
+dialog{background:#1A1A27;color:var(--tx);border:1px solid var(--ln2);border-radius:16px;padding:16px;width:min(420px,92vw)}dialog::backdrop{background:rgba(0,0,0,.5)}
+dialog h4{margin-bottom:10px}dialog input{width:100%;background:var(--p3);border:1px solid var(--ln2);border-radius:9px;padding:8px 10px;outline:none}
+dialog .row{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+.picker{max-height:260px;overflow:auto;display:flex;flex-direction:column;gap:2px}
+.toast{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);background:#1A1A27;border:1px solid var(--ln2);border-radius:10px;padding:8px 14px;font-size:13px;z-index:60}
+@media (max-width:760px){html:not(.desk) body{grid-template-columns:1fr}html:not(.desk) aside,html:not(.desk) .pv{display:none}}
+</style></head><body>
+<aside aria-label="Places">
+  <label class="find"><span id="fic"></span><input id="q" placeholder="Search files" aria-label="Search files"></label>
+  <div id="srcs"></div>
+</aside>
+<main>
+  <div class="top" data-chrome><h1>Files</h1>
+    <span class="seg"><button id="vList" aria-label="List">☰ List</button><button id="vGrid" aria-label="Grid">▦ Grid</button></span>
+    <button class="b" id="newFolder">📁 New folder</button>
+    <button class="b pr" id="upload">⬆ Upload</button>
+  </div>
+  <div class="crumbs" id="crumbs"></div>
+  <div class="area" id="area" tabindex="0"></div>
+</main>
+<div class="pv" id="pv" hidden></div>
+<input type="file" id="fileIn" multiple hidden>
+<dialog id="dlg"></dialog>
+<script>
+"use strict";
+const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+const I = (n, s = 16) => window.Icon ? Icon(n, s) : "";
+const ORG = new URLSearchParams(location.search).get("org") || "";
+async function api(m, p, b, raw) {
+  const r = await fetch("/api" + p, { method: m, credentials: "same-origin", headers: raw ? { "X-LAPP": "1", ...raw.headers } : { ...(b ? { "Content-Type": "application/json" } : {}), ...(m !== "GET" ? { "X-LAPP": "1" } : {}) }, body: raw ? raw.body : b ? JSON.stringify(b) : undefined });
+  const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error || r.statusText); return j;
+}
+const LS = { get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
+const loc = () => window.PanelI18N ? PanelI18N.locale : "en-GB";
+const size = n => n < 1024 ? n + " B" : n < 1048576 ? Math.round(n / 1024) + " KB" : (n / 1048576).toFixed(1) + " MB";
+const when = t => t ? new Date(t).toLocaleDateString(loc(), { day: "numeric", month: "short", year: "numeric" }) : "";
+const kindOf = (name, type) => /^image\//.test(type) ? "image" : /pdf/.test(type) ? "file-text" : /^audio\//.test(type) ? "music" : /^video\//.test(type) ? "video" : /sheet|excel|csv/i.test(type + name) ? "sheet" : /word|document|text/i.test(type + name) ? "file-text" : "file";
+function toast(t) { const d = document.createElement("div"); d.className = "toast"; d.textContent = t; document.body.append(d); setTimeout(() => d.remove(), 2600); }
+
+/* ---------- state ---------- */
+const S = { me: null, orgs: [], mine: { folders: [], files: [] }, libs: [], src: LS.get("lapp.files.src", "mine"), folder: 0, view: LS.get("lapp.files.view", "list"), sort: LS.get("lapp.files.sort", "name"), q: "", sel: new Set(), last: null, open: LS.get("lapp.files.open", {}) };
+// a source: mine | recent | starred | lib:<q> (a lesson library: "" = LAPP, or a school's slug) | bin:<q>
+const libOf = src => S.libs.find(l => "lib:" + l.q === src || "bin:" + l.q === src);
+async function loadMine() { const d = await api("GET", "/desk"); S.mine = { folders: d.folders || [], files: d.files || [] }; }
+async function loadLib(l) { const d = await api("GET", "/studio/drive" + (l.q ? "?org=" + l.q : "")); l.folders = d.folders.map(f => ({ id: f.id, parent: f.parent, name: f.name })); l.lessons = d.lessons; l.ok = true; }
+async function load() {
+  const m = await api("GET", "/me"); S.me = m.user; S.orgs = m.orgs || [];
+  const scopes = [...(["designer", "manager", "admin"].includes(S.me.role) && !ORG ? [{ q: "", name: "LAPP library" }] : []), ...S.orgs.filter(o => ["admin", "teacher"].includes(o.role) && (!ORG || o.slug === ORG)).map(o => ({ q: o.slug, name: o.name }))];
+  S.libs = scopes.map(s => ({ ...s, folders: [], lessons: [], ok: false }));
+  await Promise.all([loadMine(), ...S.libs.map(l => loadLib(l).catch(() => {}))]);
+  if (!["mine", "recent", "starred"].includes(S.src) && !libOf(S.src)) S.src = "mine";
+  draw();
+}
+
+/* ---------- items of the current place ---------- */
+// item: { k: "folder"|"file"|"lesson", id, name, icon, date, size, raw }
+function items() {
+  const q = S.q.trim().toLowerCase(), it = [];
+  const F = f => ({ k: "folder", id: f.id, name: f.name, icon: "folder", raw: f });
+  const fileIt = f => ({ k: "file", id: f.id, name: f.name, icon: kindOf(f.name, f.type), date: f.created_at, size: f.size, raw: f });
+  const lessonIt = (l, lib) => ({ k: "lesson", id: l.id, name: l.title, icon: "lessonfile", date: l.updated_at, raw: l, lib });
+  if (S.src === "mine") {
+    if (q) S.mine.files.filter(f => f.name.toLowerCase().includes(q)).forEach(f => it.push(fileIt(f)));
+    else { S.mine.folders.filter(f => f.parent === S.folder).forEach(f => it.push(F(f))); S.mine.files.filter(f => (f.folder || 0) === S.folder).forEach(f => it.push(fileIt(f))); }
+  } else if (S.src === "recent") {
+    S.mine.files.forEach(f => it.push(fileIt(f))); S.libs.forEach(l => l.lessons.filter(x => !x.binned).forEach(x => it.push(lessonIt(x, l))));
+    it.sort((a, b) => (b.date || 0) - (a.date || 0)); it.length = Math.min(it.length, 40);
+    if (q) return it.filter(x => x.name.toLowerCase().includes(q));
+    return it;
+  } else if (S.src === "starred") {
+    S.mine.files.filter(f => f.star).forEach(f => it.push(fileIt(f)));
+  } else if (S.src.startsWith("bin:")) {
+    const l = libOf(S.src); l.lessons.filter(x => x.binned).forEach(x => it.push(lessonIt(x, l)));
+  } else {
+    const l = libOf(S.src); if (!l) return it;
+    if (q) l.lessons.filter(x => !x.binned && x.title.toLowerCase().includes(q)).forEach(x => it.push(lessonIt(x, l)));
+    else { l.folders.filter(f => (f.parent || 0) === S.folder).forEach(f => it.push(F(f))); l.lessons.filter(x => !x.binned && (x.folder || 0) === S.folder).forEach(x => it.push(lessonIt(x, l))); }
+  }
+  if (q && S.src !== "recent") return it.filter(x => x.name.toLowerCase().includes(q));
+  const by = { name: (a, b) => a.name.localeCompare(b.name), date: (a, b) => (b.date || 0) - (a.date || 0), size: (a, b) => (b.size || 0) - (a.size || 0) }[S.sort];
+  return it.sort((a, b) => (a.k === "folder") !== (b.k === "folder") ? (a.k === "folder" ? -1 : 1) : by(a, b));
+}
+const key = x => x.k + ":" + x.id;
+const folders = () => S.src === "mine" ? S.mine.folders : (libOf(S.src) || {}).folders || [];
+function path() { const F = new Map(folders().map(f => [f.id, f])), out = []; for (let x = F.get(S.folder), i = 0; x && i < 40; x = F.get(x.parent), i++) out.unshift(x); return out; }
+
+/* ---------- drawing ---------- */
+function draw() { drawSrc(); drawCrumbs(); drawArea(); drawPv(); if (window.LAPPFrame) LAPPFrame.sync(); }
+function drawSrc() {
+  const tree = (list, parent, depth, src) => list.filter(f => (f.parent || 0) === parent).map(f => { const kids = list.some(x => x.parent === f.id), open = S.open[src + ":" + f.id]; return `<button class="src ${S.src === src && S.folder === f.id ? "on" : ""}" data-src="${esc(src)}" data-fold="${f.id}" style="padding-inline-start:${10 + depth * 14}px"><span class="tw" data-tw="${esc(src)}:${f.id}">${kids ? I(open ? "chevron-down" : "chevron", 12) : ""}</span>${I("folder", 15)}<span>${esc(f.name)}</span></button>${kids && open ? tree(list, f.id, depth + 1, src) : ""}`; }).join("");
+  const s = (src, ic, label, extra = "") => `<button class="src ${S.src === src && (S.folder === 0 || !["mine"].includes(src) && !src.startsWith("lib:")) ? "on" : ""}" data-src="${esc(src)}" data-fold="0">${I(ic, 15)}<span>${esc(label)}</span>${extra}</button>`;
+  $("#srcs").innerHTML = s("recent", "recent", "Recent") + s("starred", "star", "Starred")
+    + `<div class="sh">My files</div>` + s("mine", "drive", "My files", `<small>${S.mine.files.length}</small>`) + tree(S.mine.folders, 0, 1, "mine")
+    + S.libs.map(l => `<div class="sh">${esc(l.name)}</div>` + s("lib:" + l.q, "library", "Lessons", `<small>${l.lessons.filter(x => !x.binned).length}</small>`) + tree(l.folders, 0, 1, "lib:" + l.q) + s("bin:" + l.q, "trash", "Bin", `<small>${l.lessons.filter(x => x.binned).length || ""}</small>`)).join("")
+    + `<div class="sh">Cloud</div><button class="src" disabled title="Coming soon">${I("cloud", 15)}<span>Google Drive</span><small>soon</small></button><button class="src" disabled title="Coming soon">${I("cloud", 15)}<span>OneDrive</span><small>soon</small></button>`;
+}
+function srcName() { return S.src === "mine" ? "My files" : S.src === "recent" ? "Recent" : S.src === "starred" ? "Starred" : S.src.startsWith("bin:") ? "Bin · " + libOf(S.src).name : (libOf(S.src) || {}).name || ""; }
+function drawCrumbs() {
+  const p = path(), n = items().length;
+  $("#crumbs").innerHTML = `<button data-crumb="0">${esc(srcName())}</button>` + p.map((f, i) => `<span>${I("chevron", 12)}</span>${i === p.length - 1 ? `<b>${esc(f.name)}</b>` : `<button data-crumb="${f.id}">${esc(f.name)}</button>`}`).join("") + `<span class="cnt">${S.q ? `“${esc(S.q)}” · ` : ""}${n} item${n === 1 ? "" : "s"}${S.sel.size > 1 ? ` · ${S.sel.size} selected` : ""}</span>`;
+}
+function thumb(x, s) { if (x.k === "file" && /^image\//.test(x.raw.type)) return `<img src="/api/desk/files/${x.id}" alt="" loading="lazy">`; return `<span class="fi ${x.k === "folder" ? "folder" : x.k === "lesson" ? "lesson" : x.icon}">${I(x.icon, s)}</span>`; }
+function drawArea() {
+  const L = items(), A = $("#area");
+  if (!L.length) { A.innerHTML = `<div class="empty">${I(S.src === "starred" ? "star" : S.src.startsWith("bin:") ? "trash" : "folder-open", 40)}<b>${S.q ? "Nothing found" : S.src === "starred" ? "No starred files" : S.src.startsWith("bin:") ? "The bin is empty" : "This folder is empty"}</b>${S.src === "mine" && !S.q ? "Drop files here, or use Upload." : S.src.startsWith("lib:") && !S.q ? "Make lessons in the Studio; they show up here." : ""}</div>`; return; }
+  const st = x => x.k === "lesson" ? `<span class="st ${esc(x.raw.status)}">${esc({ draft: "draft", review: "in work", published: "published" }[x.raw.status] || x.raw.status)}</span>` : "";
+  if (S.view === "grid") A.innerHTML = `<div class="gi">${L.map(x => `<div class="cell ${S.sel.has(key(x)) ? "sel" : ""}" data-it="${key(x)}" draggable="true" tabindex="-1"><span class="th">${thumb(x, 30)}</span><span title="${esc(x.name)}">${esc(x.name)}</span>${st(x)}</div>`).join("")}</div>`;
+  else A.innerHTML = `<table><thead><tr><th data-sort="name">Name ${S.sort === "name" ? "↓" : ""}</th><th data-sort="date">Changed ${S.sort === "date" ? "↓" : ""}</th><th data-sort="size">Size ${S.sort === "size" ? "↓" : ""}</th><th>Kind</th></tr></thead><tbody>${L.map(x => `<tr class="it ${S.sel.has(key(x)) ? "sel" : ""}" data-it="${key(x)}" draggable="true"><td class="nm"><span>${thumb(x, 17)}${esc(x.name)} ${st(x)}</span></td><td>${when(x.date)}</td><td>${x.size ? size(x.size) : x.k === "lesson" ? (x.raw.lines || 0) + " lines" : ""}</td><td>${x.k === "folder" ? "Folder" : x.k === "lesson" ? "Lesson · " + esc(x.raw.level || "") : esc((x.raw.type || "").split("/").pop())}</td></tr>`).join("")}</tbody></table>`;
+}
+// selection changes only mark the items (no re-render, so double-click and drag keep working)
+function marks() { $$("[data-it]").forEach(el => el.classList.toggle("sel", S.sel.has(el.dataset.it))); drawPv(); drawCrumbs(); if (window.LAPPFrame) LAPPFrame.sync(); }
+function selected() { const L = items(); return L.filter(x => S.sel.has(key(x))); }
+function drawPv() {
+  const s = selected(), pv = $("#pv");
+  if (s.length !== 1 || s[0].k === "folder") { pv.hidden = true; return; }
+  const x = s[0]; pv.hidden = false;
+  if (x.k === "file") {
+    const f = x.raw, u = `/api/desk/files/${f.id}`;
+    const big = /^image\//.test(f.type) ? `<img src="${u}" alt="">` : /^video\//.test(f.type) ? `<video src="${u}" controls></video>` : /^audio\//.test(f.type) ? `<audio src="${u}" controls style="width:90%"></audio>` : I(x.icon, 48);
+    pv.innerHTML = `<div class="big">${big}</div><h3>${esc(f.name)}</h3><dl><dt>Kind</dt><dd>${esc(f.type)}</dd><dt>Size</dt><dd>${size(f.size)}</dd><dt>Added</dt><dd>${when(f.created_at)}</dd></dl><div class="acts"><button class="b pr" data-do="open">${I("external", 14)} Open</button><button class="b" data-do="download">${I("download", 14)} Download</button><button class="b" data-do="star">${I("star", 14)} ${f.star ? "Unstar" : "Star"}</button></div>`;
+  } else {
+    const l = x.raw;
+    pv.innerHTML = `<div class="big">${I("lessonfile", 48)}</div><h3>${esc(l.title)}</h3><dl><dt>Level</dt><dd>${esc(l.level || "")}</dd><dt>Status</dt><dd>${esc({ draft: "draft", review: "in work", published: "published" }[l.status] || l.status)}</dd><dt>Lines</dt><dd>${l.approved || 0} of ${l.lines || 0} approved</dd><dt>Audio</dt><dd>${esc(l.audio)}</dd><dt>Changed</dt><dd>${when(l.updated_at)}</dd><dt>Library</dt><dd>${esc(x.lib.name)}</dd></dl>
+      <div class="acts">${l.binned ? `<button class="b pr" data-do="restore">${I("undo", 14)} Restore</button>` : `<button class="b pr" data-do="open">${I("pen", 14)} Script</button><button class="b" data-do="voice">${I("wave", 14)} Voice desk</button><button class="b" data-do="insights">${I("insights", 14)} Insights</button>`}</div>`;
+  }
+}
+
+/* ---------- actions ---------- */
+const lesUrl = (x, part = "script") => `/studio${x.lib.q ? "?org=" + x.lib.q : ""}#${part}/${x.id}`;
+function openIt(x, part) {
+  if (!x) return;
+  if (x.k === "folder") { S.folder = x.id; S.sel.clear(); S.q = ""; $("#q").value = ""; return draw(); }
+  if (x.k === "file") return LAPPFrame.up({ t: "open", url: `/api/desk/files/${x.id}`, title: x.name });
+  if (x.raw.binned) return toast("Restore it first");
+  window.open(lesUrl(x, part));
+}
+async function newFolder() {
+  const name = await ask("New folder", "New folder"); if (!name) return;
+  try {
+    if (S.src === "mine") S.mine.folders.push(await api("POST", "/desk/folders", { name, parent: S.folder }));
+    else if (S.src.startsWith("lib:")) { const l = libOf(S.src); await api("POST", "/studio/folders" + (l.q ? "?org=" + l.q : ""), { name, parent: S.folder }); await loadLib(l); }
+    else return toast("Open My files or a library first");
+    draw();
+  } catch (e) { toast(e.message); }
+}
+async function upload(files, folder = S.folder) {
+  if (S.src !== "mine") { S.src = "mine"; folder = 0; S.folder = 0; }
+  for (const f of [...files].slice(0, 20)) {
+    if (f.size > 10e6) { toast(`${f.name}: files can be up to 10 MB`); continue; }
+    try { S.mine.files.push(await api("POST", "/desk/files", null, { headers: { "Content-Type": f.type || "application/octet-stream", "X-Name": encodeURIComponent(f.name), "X-Folder": String(folder) }, body: f })); draw(); }
+    catch (e) { toast(`${f.name}: ${e.message}`); }
+  }
+}
+async function rename(x) {
+  const name = await ask("Rename", x.name); if (!name || name === x.name) return;
+  try {
+    if (x.k === "file") { await api("PATCH", `/desk/files/${x.id}`, { name }); x.raw.name = name; }
+    else if (x.k === "folder" && S.src === "mine") { await api("PATCH", `/desk/folders/${x.id}`, { name }); x.raw.name = name; }
+    else if (x.k === "folder") { const l = libOf(S.src); await api("PATCH", `/studio/folders/${x.id}` + (l.q ? "?org=" + l.q : ""), { name }); await loadLib(l); }
+    else return toast("Rename a lesson in the Studio");
+    draw();
+  } catch (e) { toast(e.message); }
+}
+async function remove(list) {
+  if (!list.length) return;
+  const n = list.length, what = n === 1 ? `“${list[0].name}”` : n + " items";
+  const bin = list.every(x => x.k === "lesson" && !x.raw.binned);
+  if (!await confirmIt(bin ? `Move ${what} to the bin?` : `Delete ${what}?`, bin ? "Lessons stay in the bin for 30 days." : list.some(x => x.k === "folder") ? "What's inside a folder moves up one level." : "This can't be undone.")) return;
+  try {
+    for (const x of list) {
+      if (x.k === "file") { await api("DELETE", `/desk/files/${x.id}`); S.mine.files = S.mine.files.filter(f => f.id !== x.id); }
+      else if (x.k === "folder" && S.src === "mine") await api("DELETE", `/desk/folders/${x.id}`);
+      else if (x.k === "folder") { const l = libOf(S.src); await api("DELETE", `/studio/folders/${x.id}` + (l.q ? "?org=" + l.q : "")); }
+    }
+    const ls = list.filter(x => x.k === "lesson");
+    if (ls.length) { const l = ls[0].lib; await api("POST", "/studio/bin" + (l.q ? "?org=" + l.q : ""), { lessons: ls.map(x => x.id), forever: ls[0].raw.binned ? true : undefined }); }
+    if (list.some(x => x.k === "folder") && S.src === "mine") await loadMine();
+    for (const l of S.libs) if (list.some(x => x.lib === l) || (list.some(x => x.k === "folder") && S.src === "lib:" + l.q)) await loadLib(l);
+    S.sel.clear(); draw();
+  } catch (e) { toast(e.message); }
+}
+async function moveTo(list, to) {
+  try {
+    if (S.src === "mine" || list.every(x => x.k === "file" || (x.k === "folder" && S.mine.folders.includes(x.raw)))) {
+      for (const x of list) { if (x.k === "file") { await api("PATCH", `/desk/files/${x.id}`, { folder: to }); x.raw.folder = to; } else if (x.k === "folder") { if (x.id === to) continue; await api("PATCH", `/desk/folders/${x.id}`, { parent: to }); x.raw.parent = to; } }
+    } else {
+      const l = libOf(S.src) || list[0].lib; await api("POST", "/studio/move" + (l.q ? "?org=" + l.q : ""), { to, lessons: list.filter(x => x.k === "lesson").map(x => x.id), folders: list.filter(x => x.k === "folder" && x.id !== to).map(x => x.id) }); await loadLib(l);
+    }
+    S.sel.clear(); draw(); toast(`Moved ${list.length} item${list.length === 1 ? "" : "s"}`);
+  } catch (e) { toast(e.message); }
+}
+async function star(x) { const v = !x.raw.star; await api("PATCH", `/desk/files/${x.id}`, { star: v }).catch(e => toast(e.message)); x.raw.star = v ? 1 : 0; draw(); }
+function download(x) { const a = document.createElement("a"); a.href = `/api/desk/files/${x.id}`; a.download = x.name; a.click(); }
+
+/* ---------- small dialogs of our own ---------- */
+function ask(title, value) { return new Promise(res => { const d = $("#dlg"); d.innerHTML = `<form method="dialog"><h4>${esc(title)}</h4><input name="v" value="${esc(value)}" maxlength="120" autocomplete="off"><div class="row"><button class="b" value="">Cancel</button><button class="b pr" value="ok">OK</button></div></form>`; d.onclose = () => res(d.returnValue === "ok" ? d.querySelector("input").value.trim() || null : null); d.showModal(); const i = d.querySelector("input"); i.focus(); i.select(); }); }
+function confirmIt(title, text) { return new Promise(res => { const d = $("#dlg"); d.innerHTML = `<form method="dialog"><h4>${esc(title)}</h4><p style="color:var(--mu)">${esc(text)}</p><div class="row"><button class="b" value="">Cancel</button><button class="b pr" value="ok" style="background:var(--rd)">OK</button></div></form>`; d.onclose = () => res(d.returnValue === "ok"); d.showModal(); }); }
+function pickFolder(list) {
+  return new Promise(res => {
+    const fs = folders(), d = $("#dlg"), tree = (p, dep) => fs.filter(f => (f.parent || 0) === p).map(f => `<button type="button" class="src" data-pick="${f.id}" style="padding-inline-start:${10 + dep * 14}px">${I("folder", 15)}<span>${esc(f.name)}</span></button>` + tree(f.id, dep + 1)).join("");
+    d.innerHTML = `<form method="dialog"><h4>Move ${list.length} item${list.length === 1 ? "" : "s"} to…</h4><div class="picker"><button type="button" class="src" data-pick="0">${I("drive", 15)}<span>${esc(srcName())} (top)</span></button>${tree(0, 1)}</div><div class="row"><button class="b" value="">Cancel</button></div></form>`;
+    d.onclick = e => { const b = e.target.closest("[data-pick]"); if (b) { d.onclose = null; d.close(); res(+b.dataset.pick); } };
+    d.onclose = () => res(null); d.showModal();
+  });
+}
+function cmenu(x, y, L) {
+  $$(".cm").forEach(m => m.remove()); const m = document.createElement("div"); m.className = "cm";
+  m.innerHTML = L.map((it, i) => it === "-" ? "<hr>" : `<button data-i="${i}" class="${it[3] ? "dz" : ""}">${I(it[2], 15)}<span>${esc(it[0])}</span></button>`).join("");
+  document.body.append(m); m.style.left = Math.min(x, innerWidth - m.offsetWidth - 6) + "px"; m.style.top = Math.min(y, innerHeight - m.offsetHeight - 6) + "px";
+  m.onclick = e => { const b = e.target.closest("[data-i]"); if (b) { m.remove(); L[+b.dataset.i][1](); } };
+  m.querySelector("button")?.focus();
+}
+
+/* ---------- the window's menus (title bar) ---------- */
+if (window.LAPPFrame) LAPPFrame.menus = () => {
+  const s = selected(), one = s.length === 1 ? s[0] : null;
+  return [
+    { label: "File", items: [{ label: "New folder", icon: "folder-plus", run: newFolder }, { label: "Upload files…", icon: "upload", run: () => $("#fileIn").click() }, "-",
+      { label: "Open", icon: "external", disabled: !one, run: () => openIt(one) }, { label: "Rename…", icon: "rename", disabled: !one || one.k === "lesson", run: () => rename(one) },
+      { label: "Move to…", icon: "folder", disabled: !s.length || S.src === "recent" || S.src === "starred" || S.src.startsWith("bin:"), run: async () => { const to = await pickFolder(s); if (to != null) moveTo(s, to); } },
+      { label: "Download", icon: "download", disabled: !one || one.k !== "file", run: () => download(one) }, "-",
+      { label: "Delete", icon: "trash", danger: true, disabled: !s.length, run: () => remove(s) }] },
+    { label: "View", items: [{ label: "List", icon: "list", on: S.view === "list", run: () => setView("list") }, { label: "Grid", icon: "grid", on: S.view === "grid", run: () => setView("grid") }, "-",
+      { label: "Sort by name", on: S.sort === "name", run: () => setSort("name") }, { label: "Sort by date", on: S.sort === "date", run: () => setSort("date") }, { label: "Sort by size", on: S.sort === "size", run: () => setSort("size") }, "-",
+      { label: "Reload", icon: "reload", run: () => load() }] },
+    { label: "Go", items: [{ label: "Recent", icon: "recent", on: S.src === "recent", run: () => go("recent") }, { label: "Starred", icon: "star", on: S.src === "starred", run: () => go("starred") }, { label: "My files", icon: "drive", on: S.src === "mine", run: () => go("mine") }, ...S.libs.map(l => ({ label: "Lessons · " + l.name, icon: "library", on: S.src === "lib:" + l.q, run: () => go("lib:" + l.q) }))] }
+  ];
+};
+function setView(v) { S.view = v; LS.set("lapp.files.view", v); draw(); }
+function setSort(v) { S.sort = v; LS.set("lapp.files.sort", v); draw(); }
+function go(src, folder = 0) { S.src = src; S.folder = folder; S.sel.clear(); LS.set("lapp.files.src", src); draw(); }
+
+/* ---------- events ---------- */
+$("#fic").innerHTML = I("search", 14);
+$("#vList").onclick = () => setView("list"); $("#vGrid").onclick = () => setView("grid");
+$("#newFolder").onclick = newFolder; $("#upload").onclick = () => $("#fileIn").click();
+$("#fileIn").onchange = e => { upload(e.target.files); e.target.value = ""; };
+$("#q").oninput = e => { S.q = e.target.value; S.sel.clear(); draw(); };
+const syncSeg = () => { $("#vList").classList.toggle("on", S.view === "list"); $("#vGrid").classList.toggle("on", S.view === "grid"); };
+document.addEventListener("click", e => {
+  const t = e.target;
+  if (!t.closest(".cm")) $$(".cm").forEach(m => m.remove());
+  const tw = t.closest("[data-tw]"); if (tw) { e.stopPropagation(); S.open[tw.dataset.tw] = !S.open[tw.dataset.tw]; LS.set("lapp.files.open", S.open); return drawSrc(); }
+  const src = t.closest("[data-src]"); if (src && !src.disabled) return go(src.dataset.src, +src.dataset.fold);
+  const cr = t.closest("[data-crumb]"); if (cr) { S.folder = +cr.dataset.crumb; S.sel.clear(); return draw(); }
+  const so = t.closest("[data-sort]"); if (so) return setSort(so.dataset.sort);
+  const d = t.closest("[data-do]"); if (d) { const x = selected()[0]; const k = d.dataset.do; if (k === "open") openIt(x); if (k === "voice" || k === "insights") openIt(x, k); if (k === "download") download(x); if (k === "star") star(x); if (k === "restore") api("POST", "/studio/bin" + (x.lib.q ? "?org=" + x.lib.q : ""), { lessons: [x.id], restore: true }).then(() => loadLib(x.lib)).then(draw).catch(e2 => toast(e2.message)); return; }
+  const it = t.closest("[data-it]");
+  if (it) {
+    const k = it.dataset.it, L = items();
+    if (e.shiftKey && S.last) { const a = L.findIndex(x => key(x) === S.last), b = L.findIndex(x => key(x) === k); L.slice(Math.min(a, b), Math.max(a, b) + 1).forEach(x => S.sel.add(key(x))); }
+    else if (e.ctrlKey || e.metaKey) S.sel.has(k) ? S.sel.delete(k) : S.sel.add(k);
+    else { S.sel.clear(); S.sel.add(k); }
+    S.last = k; marks(); return;
+  }
+  if (t.closest("#area") && !t.closest("th")) { S.sel.clear(); marks(); }
+});
+document.addEventListener("dblclick", e => { const it = e.target.closest("[data-it]"); if (it) openIt(items().find(x => key(x) === it.dataset.it)); });
+document.addEventListener("contextmenu", e => {
+  const it = e.target.closest("[data-it]"), area = e.target.closest("#area"); if (!it && !area) return;
+  e.preventDefault();
+  if (it && !S.sel.has(it.dataset.it)) { S.sel.clear(); S.sel.add(it.dataset.it); marks(); }
+  const s = selected(), one = s.length === 1 ? s[0] : null;
+  if (!s.length) return cmenu(e.clientX, e.clientY, [["New folder", newFolder, "folder-plus"], ["Upload files…", () => $("#fileIn").click(), "upload"], "-", [S.view === "list" ? "Show as grid" : "Show as list", () => setView(S.view === "list" ? "grid" : "list"), S.view === "list" ? "grid" : "list"]]);
+  const L = [];
+  if (one) L.push(["Open", () => openIt(one), "external"]);
+  if (one && one.k === "lesson" && !one.raw.binned) L.push(["Voice desk", () => openIt(one, "voice"), "wave"], ["Insights", () => openIt(one, "insights"), "insights"]);
+  if (one && one.k === "lesson" && one.raw.binned) L.push(["Restore", () => api("POST", "/studio/bin" + (one.lib.q ? "?org=" + one.lib.q : ""), { lessons: [one.id], restore: true }).then(() => loadLib(one.lib)).then(draw), "undo"]);
+  if (one && one.k === "file") L.push(["Download", () => download(one), "download"], [one.raw.star ? "Unstar" : "Star", () => star(one), "star"]);
+  if (one && one.k !== "lesson") L.push(["Rename…", () => rename(one), "rename"]);
+  if (!["recent", "starred"].includes(S.src) && !S.src.startsWith("bin:")) L.push(["Move to…", async () => { const to = await pickFolder(s); if (to != null) moveTo(s, to); }, "folder"]);
+  L.push("-", [s.every(x => x.k === "lesson" && !x.raw.binned) ? "Move to the bin" : "Delete", () => remove(s), "trash", 1]);
+  cmenu(e.clientX, e.clientY, L);
+});
+document.addEventListener("keydown", e => {
+  if (e.target.closest("input, dialog")) return;
+  const L = items(), s = selected();
+  if (e.key === "Delete" || (e.key === "Backspace" && (e.metaKey || e.ctrlKey))) { e.preventDefault(); return remove(s); }
+  if (e.key === "Enter" && s.length === 1) return openIt(s[0]);
+  if (e.key === "F2" && s.length === 1) { e.preventDefault(); return rename(s[0]); }
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "a") { e.preventDefault(); L.forEach(x => S.sel.add(key(x))); return draw(); }
+  if (e.key === "Backspace" && S.folder) { const p = path(); S.folder = p.length > 1 ? p[p.length - 2].id : 0; S.sel.clear(); return draw(); }
+  if (["ArrowDown", "ArrowUp", "ArrowRight", "ArrowLeft"].includes(e.key) && L.length) {
+    e.preventDefault(); const i = L.findIndex(x => key(x) === S.last), step = S.view === "grid" && /Up|Down/.test(e.key) ? Math.max(1, Math.floor($("#area").clientWidth / 118)) : 1, dir = /Down|Right/.test(e.key) ? 1 : -1;
+    const n = L[Math.max(0, Math.min(L.length - 1, (i < 0 ? 0 : i + dir * step)))]; S.sel.clear(); S.sel.add(key(n)); S.last = key(n); draw(); $(`[data-it="${key(n)}"]`)?.scrollIntoView({ block: "nearest" });
+  }
+});
+// drag and drop: items onto folders (in the list or the side), files from the computer into the open folder
+let drag = null;
+document.addEventListener("dragstart", e => { const it = e.target.closest("[data-it]"); if (!it) return; if (!S.sel.has(it.dataset.it)) { S.sel.clear(); S.sel.add(it.dataset.it); } drag = selected(); try { e.dataTransfer.setData("text/plain", "lapp-files"); } catch {} });
+const dropTarget = e => { const f = e.target.closest('[data-it^="folder:"], .src[data-fold]'); return f; };
+document.addEventListener("dragover", e => {
+  $$(".dropok").forEach(x => x.classList.remove("dropok"));
+  const os = [...(e.dataTransfer ? e.dataTransfer.types : [])].includes("Files");
+  if (os) { e.preventDefault(); $("#area").classList.add("drag"); return; }
+  if (!drag) return; const t = dropTarget(e); if (!t) return;
+  if (t.matches(".src") && !(t.dataset.src === S.src)) return;
+  e.preventDefault(); t.classList.add("dropok");
+});
+document.addEventListener("dragleave", e => { if (!e.relatedTarget) $("#area").classList.remove("drag"); });
+document.addEventListener("drop", e => {
+  $("#area").classList.remove("drag"); $$(".dropok").forEach(x => x.classList.remove("dropok"));
+  if (e.dataTransfer && e.dataTransfer.files.length) { e.preventDefault(); const f = e.target.closest('[data-it^="folder:"]'); return upload(e.dataTransfer.files, f && S.src === "mine" ? +f.dataset.it.split(":")[1] : S.folder); }
+  if (!drag) return; const t = dropTarget(e); if (!t) return; e.preventDefault();
+  const to = t.matches(".src") ? +t.dataset.fold : +t.dataset.it.split(":")[1], list = drag.filter(x => !(x.k === "folder" && x.id === to)); drag = null;
+  if (list.length) moveTo(list, to);
+});
+document.addEventListener("dragend", () => { drag = null; $$(".dropok").forEach(x => x.classList.remove("dropok")); $("#area").classList.remove("drag"); });
+const _draw = draw; draw = () => { syncSeg(); _draw(); };
+load().catch(e => { $("#area").innerHTML = `<div class="empty"><b>${esc(e.message)}</b></div>`; });
+</script>
+</body></html>

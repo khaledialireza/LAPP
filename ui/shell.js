@@ -105,20 +105,20 @@
 .sh-guide{direction:rtl;font-family:Vazirmatn,Inter,system-ui;line-height:2}
 @media (prefers-reduced-motion:reduce){.sh-toast{animation:none}}
 @media (max-width:1100px){
-  body.sh{grid-template-columns:66px 1fr!important}
-  .sh-me>span:not(.sh-av),.sh-me .c,.sh-find span,.sh-find kbd,.sh-side .nv .lb,.sh-side .nv em,.sh-grp,.sh-out span,.sh-side .lg span,.sh-side .org{display:none}
-  .sh-side{padding:12px 8px!important}.sh-side .nv{justify-content:center;padding:9px 0}.sh-me{justify-content:center;padding:6px}.sh-find{justify-content:center}
+  html:not(.desk) body.sh{grid-template-columns:66px 1fr!important}
+  html:not(.desk) .sh-me>span:not(.sh-av),html:not(.desk) .sh-me .c,html:not(.desk) .sh-find span,html:not(.desk) .sh-find kbd,html:not(.desk) .sh-side .nv .lb,html:not(.desk) .sh-side .nv em,html:not(.desk) .sh-grp,html:not(.desk) .sh-out span,html:not(.desk) .sh-side .lg span,html:not(.desk) .sh-side .org{display:none}
+  html:not(.desk) .sh-side{padding:12px 8px!important}html:not(.desk) .sh-side .nv{justify-content:center;padding:9px 0}html:not(.desk) .sh-me{justify-content:center;padding:6px}html:not(.desk) .sh-find{justify-content:center}
 }
 @media (max-width:760px){
-  body.sh{grid-template-columns:1fr!important;grid-template-rows:1fr auto}
-  .sh-main{height:calc(100dvh - 58px)}
-  .sh-side{grid-row:2;flex-direction:row!important;overflow-x:auto;height:auto!important;position:sticky!important;bottom:0;top:auto!important;padding:6px!important;border-inline-end:0!important;border-top:1px solid var(--ln)}
-  .sh-me,.sh-find,.sh-grow,.sh-grp,.sh-side .lg,.sh-side .org{display:none!important}
-  .sh-side .nv{flex:none;width:46px}.sh-out{width:auto;margin:0;padding:8px 12px}
-  .sh-panes.split{grid-template-columns:1fr}.sh-panes.split .sh-div,.sh-panes.split .sh-pane[data-p="1"]{display:none}
-  .sh-view{padding:16px}
-  .sh-float{inset-inline:8px!important;width:auto!important;top:auto!important;bottom:66px}
-  .sh-tools .lb{display:none}
+  html:not(.desk) body.sh{grid-template-columns:1fr!important;grid-template-rows:1fr auto}
+  html:not(.desk) .sh-main{height:calc(100dvh - 58px)}
+  html:not(.desk) .sh-side{grid-row:2;flex-direction:row!important;overflow-x:auto;height:auto!important;position:sticky!important;bottom:0;top:auto!important;padding:6px!important;border-inline-end:0!important;border-top:1px solid var(--ln)}
+  html:not(.desk) .sh-me,html:not(.desk) .sh-find,html:not(.desk) .sh-grow,html:not(.desk) .sh-grp,html:not(.desk) .sh-side .lg,html:not(.desk) .sh-side .org{display:none!important}
+  html:not(.desk) .sh-side .nv{flex:none;width:46px}html:not(.desk) .sh-out{width:auto;margin:0;padding:8px 12px}
+  html:not(.desk) .sh-panes.split{grid-template-columns:1fr}html:not(.desk) .sh-panes.split .sh-div,html:not(.desk) .sh-panes.split .sh-pane[data-p="1"]{display:none}
+  html:not(.desk) .sh-view{padding:16px}
+  html:not(.desk) .sh-float{inset-inline:8px!important;width:auto!important;top:auto!important;bottom:66px}
+  html:not(.desk) .sh-tools .lb{display:none}
 }`;
   const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -517,28 +517,21 @@
   /* ---------- start ---------- */
   function embedInit() {
     const st = document.createElement("style");
-    st.textContent = CSS + `body.sh-embed{display:block!important;height:100vh;overflow:hidden}body.sh-embed>aside{display:none!important}.sh-embed .sh-main{position:fixed;inset:0;height:100vh}.sh-embed .sh-view{padding:20px 24px 50px}`;
+    st.textContent = CSS + `body.sh-embed{display:block!important;height:100vh;overflow:hidden}body.sh-embed>aside{display:none!important}.sh-embed .sh-main{position:fixed;inset:0;height:100vh}.sh-embed .sh-view{padding:16px 22px 50px}`;
     document.head.append(st); document.body.classList.add("sh", "sh-embed");
     main.classList.add("sh-main"); main.innerHTML = "";
     const box = document.createElement("div"); box.className = "sh-toasts"; box.id = "shToasts"; document.body.append(box);
     const show = () => { const r = location.hash.slice(1) || O.home || O.nav[0].route; TABS = [r]; PANES = [r, null]; ACT = 0; main.innerHTML = ""; for (const k in VIEWS) delete VIEWS[k]; const el = viewOf(r); main.append(el); el.dataset.painted = 1; paint(r).then(() => up({ t: "title", title: titleOf(r), icon: iconOf(r), url: location.pathname + location.search.replace(/[?&]embed=1/, "").replace(/^&/, "?") + "#" + r })); if (O.onShow) O.onShow(r); };
     addEventListener("hashchange", show);
-    // keys that belong to the environment
-    document.addEventListener("keydown", e => {
-      const KEYS = () => { try { return Object.values(JSON.parse(localStorage.getItem("lapp.keys")) || {}); } catch { return []; } };
-      const k = ["Control", "Alt", "Shift", "Meta"].includes(e.key) ? "" : e.code && /^Key[A-Z]$/.test(e.code) ? e.code.slice(3) : e.code === "Backquote" ? "`" : e.key === " " ? "Space" : e.key.length === 1 ? e.key.toUpperCase() : e.key;
-      const c = k && [(e.ctrlKey || e.metaKey) && "Ctrl", e.altKey && "Alt", e.shiftKey && "Shift", k].filter(Boolean).join("+");
-      if (c && KEYS().includes(c)) { e.preventDefault(); e.stopPropagation(); up({ t: "key", combo: c }); }
-      else if (e.key === "Escape" && !document.querySelector("dialog[open]")) up({ t: "key", combo: "Escape" });
-    }, true);
-    // the studio and other pages open as tabs of the environment, never as new browser tabs
-    document.addEventListener("click", e => {
-      const a = e.target.closest && e.target.closest("a[href]"); if (!a) return;
-      const u = new URL(a.href, location.href); if (u.origin !== location.origin || !/^\/(studio|admin|s\/)/.test(u.pathname)) return;
-      if (a.target === "_blank" || u.pathname !== location.pathname) { e.preventDefault(); up({ t: "open", url: u.pathname + u.search + u.hash }); }
-    }, true);
-    const wo = window.open.bind(window);
-    window.open = (url, ...rest) => { if (url === "about:blank") return null; const u = new URL(url, location.href); if (u.origin === location.origin && /^\/(studio|admin|s\/)/.test(u.pathname)) { up({ t: "open", url: u.pathname + u.search + u.hash }); return null; } return wo(url, ...rest); };
+    // keys, links to other apps, the title bar and the window's state are handled by /ui/frame.js (one standard for every window)
+    if (window.LAPPFrame) {
+      const prev = LAPPFrame.menus;
+      LAPPFrame.menus = () => {
+        const r = location.hash.slice(1) || O.home || O.nav[0].route, nav = O.nav.filter(n => !n.hidden);
+        return [{ label: "Go", items: nav.map(n => ({ label: n.label, icon: n.icon, on: n.route === r, run: () => { location.hash = n.route; } })) },
+          { label: "View", items: [{ label: "Reload", icon: "⟳", key: "", run: () => refresh() }] }, ...(prev ? prev() || [] : [])];
+      };
+    }
     O.signOut = O.signOut || (() => {});
     show();
   }

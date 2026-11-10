@@ -155,7 +155,7 @@
   }
   function html() {
     const crumbs = inSmart() ? `<b>${smart[S.cur][1]}</b>` : [`<button data-dv-go="0">All content</button>`, ...path(S.cur).map((f, i, a) => i === a.length - 1 ? `<b>${esc(f.name)}</b>` : `<button data-dv-go="${f.id}">${esc(f.name)}</button>`)].join(" › ");
-    return `<div class="dv-top"><h1>Content</h1><div class="dv-crumb">${crumbs}</div>
+    return `<div class="dv-top"><h1>Lesson library</h1><div class="dv-crumb">${crumbs}</div>
         <div class="dv-seg" role="tablist">${[["files", "▦ Files"], ["map", "🗺 Map"], ["board", "▥ Board"]].map(([k, l]) => `<button class="${S.view === k ? "on" : ""}" data-dv-view="${k}">${l}</button>`).join("")}</div>
         <button class="b" data-dv-a="newfolder">📁 New folder</button><button class="b pr" data-dv-a="newlesson">＋ New lesson</button></div>
       <form class="dv-cmd" data-dv-plan><span class="s">✦</span><input name="q" placeholder="Describe lessons to plan, e.g. “6 A1 lessons for a trip to Vienna”" aria-label="Describe lessons for the AI to plan" maxlength="400"><button class="b sm pr" ${S.busy ? "disabled" : ""}>${S.busy ? "Thinking…" : "✦ Suggest"}</button></form>
