@@ -39,3 +39,9 @@
 - Only when they PUBLISH does the lesson go to our system. Reason: teachers may make many half-done drafts; storing all of them would need huge space.
 - Studio: Open file / Save / Save as, autosave to the local file (File System Access API where available, else download/upload), open from Drive.
 - Our server keeps published lessons (+ maybe a small recent-draft cache with a limit).
+
+## Windows open too small and pages inside look like mobile (bug)
+- Why: pages in a window (iframe) decide their layout by the WINDOW's width, not the screen's. A new window is 66% of the desktop (max 1100px); on a laptop that's ~850–950px, which hits the pages' "small screen" rules (shell ≤1100px, school ≤1000px) → compact/mobile-like layout.
+- Fix:
+  - New windows open big: ~90% of the desktop (or maximised when the screen is < 1440px wide; first window always maximised). Remember the last size per app.
+  - Inside windows (embed mode) use the desktop layout down to ~700px; only real phones (< 600px) get the mobile layout. Move the pages from screen media queries to container queries / embed-aware breakpoints.
