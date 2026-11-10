@@ -12,6 +12,13 @@
 9. Desktop extras (groups, Alt+Tab, focus mode…), AI settings v2.
 10. Later: CRM, clinic; held ideas: 2 sentences a day, creator marketplace.
 
+### Added to steps 1+2 (agreed)
+- No in-page top bar inside windows: the window title bar already has the app name. Remove the big page heading/top bar in embed mode.
+- The page's buttons move into the title bar (compact, tidy): e.g. Users → Export · New school · + Add user; Script → EN/FA/RU/UK · ⚙ · Rewrite all · Listen · Approve all; Content → Files/Map/Board · New folder · + New lesson.
+- A menu bar in the title bar, left, right after the title (File / Edit / View / … per app): every option, action and setting of the app lives there; not everything must be on screen.
+- One standard window structure for every app (title bar, menus, toolbar actions, status, body). A change to "windows" applies to all windows.
+- Modular, component-based: a shared window/app component library (title bar, menus, buttons, dialogs, lists, toasts) and each app as its own module that declares its menus/actions/title — not hard-coded in one heavy file. Pages post their menus/actions to the host (postMessage) until they become native modules.
+
 ## Accounting: a standalone, general system (replaces "school finance double-entry")
 - Not only for schools: LAPP's owner uses it for their own finances too.
 - Its own module/app on this platform (own window in /manage), not part of the school pages.
