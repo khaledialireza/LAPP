@@ -60,6 +60,18 @@ Then:
   - Lesson rows lose the 3 buttons: ↵ opens the script; → (or hover) opens an action panel (Script, Voice, Insights, pin, share, ask AI) — the same action panel for every item type.
   - Footer: only "↵ open · → actions · Tab ask AI"; settings and shortcuts go to the avatar menu / a small ⚙ in the search bar.
 
+## Users app: people, roles and permissions only (approved 2026-11-11)
+- Nothing about money in it: plans, subscriptions, invoices and payments live in the finance app.
+- It works by context: in the LAPP workspace it manages the platform; inside an organisation, that organisation's people.
+- Three groups, at most 3 levels, shown as a tree beside the list:
+  1. LAPP team → roles (Admin, Manager, Designer, and new roles you make)
+  2. Individuals → by use (learners now; independent tutors/creators later) + custom groups (e.g. beta testers)
+  3. Organisations → type (language school, company, clinic, …) → each organisation → its roles
+- Roles are not fixed: each organisation type has a template of roles; an organisation can add roles and change what each role may do.
+- Statuses (active, invited, unverified, disabled) are filters, not groups.
+- Technical: org roles are hard-coded today (admin, teacher, finance, student); they need a roles/permissions table.
+- Linked accounts (built): one person signs in to several of their own accounts; windows grouped per account.
+
 ## Accounting: a standalone, general system (replaces "school finance double-entry")
 - Not only for schools: LAPP's owner uses it for their own finances too.
 - Its own module/app on this platform (own window in /manage), not part of the school pages.
