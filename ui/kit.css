@@ -194,4 +194,19 @@ dialog.k-dlg::backdrop{background:rgba(0,0,0,.55);backdrop-filter:blur(3px)}
 /* ---------- avatars ---------- */
 .k-av{display:inline-grid;place-items:center;border-radius:50%;flex:none;color:#fff;font-weight:800;background-size:cover;background-position:center;line-height:1}
 
+/* loading: one look for the whole system (the desktop's glass) and for a window (its own colour) */
+.k-load{display:block;width:150px;height:3px;border-radius:3px;background:var(--ln2);overflow:hidden}
+.k-load i{display:block;height:100%;width:0;border-radius:3px;background:var(--tx);transition:width .35s ease}
+.k-load.creep i{animation:k-creep 6s cubic-bezier(.1,.6,.2,1) forwards}
+@keyframes k-creep{from{width:4%}to{width:88%}}
+.k-boot{position:fixed;inset:0;z-index:5000;display:grid;place-items:center;background:color-mix(in srgb,var(--bg) 45%,transparent);backdrop-filter:blur(28px) saturate(1.2);-webkit-backdrop-filter:blur(28px) saturate(1.2);transition:opacity .6s ease,backdrop-filter .6s ease}
+.k-boot.out{opacity:0;backdrop-filter:blur(0);-webkit-backdrop-filter:blur(0);pointer-events:none}
+.k-boot .c{display:flex;flex-direction:column;align-items:center;gap:22px}
+.k-boot .logo{width:72px;height:72px;border-radius:22px;background:var(--g);display:grid;place-items:center;color:#fff;font:800 32px Inter,system-ui,sans-serif;box-shadow:0 20px 60px rgba(139,92,246,.45)}
+.k-wload{position:absolute;inset:0;z-index:2;display:grid;place-items:center;background:var(--bg);transition:opacity .35s ease}
+.k-wload.out{opacity:0;pointer-events:none}
+.k-wload .c{display:flex;flex-direction:column;align-items:center;gap:14px}
+.k-wload .app{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;color:#fff;background:var(--vi)}
+.k-wload .k-load{width:90px;height:2px}
+@media (prefers-reduced-motion:reduce){.k-boot,.k-wload,.k-load i{transition:opacity .2s linear}.k-load.creep i{animation:none;width:60%}.k-boot.out{backdrop-filter:none;-webkit-backdrop-filter:none}}
 @media (prefers-reduced-motion:reduce){.k-toast,.k-dlg,.k-pop,.k-menu,.spin{animation:none}.k-ribbon{transition:none}}

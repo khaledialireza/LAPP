@@ -57,8 +57,15 @@
   D.on("lessons", () => D.drawTask && D.drawTask());
 
   /* ---------- start ---------- */
+  const BOOT = { p: 0, done: false, t0: Date.now() };
+  const bootTo = p => { if (BOOT.done || p <= BOOT.p) return; BOOT.p = p; const b = $("#bootBar"); if (b) b.style.width = p + "%"; };
+  D.bootEnd = () => { if (BOOT.done) return; BOOT.done = true; const b = $("#boot"); if (!b) return; bootTo(100); BOOT.p = 100;
+    const fast = Date.now() - BOOT.t0 < 300; if (fast) return b.remove(); setTimeout(() => { b.classList.add("out"); setTimeout(() => b.remove(), 700); }, 150); };
+  setTimeout(() => D.bootEnd(), 4000);
   (async () => {
+    bootTo(10);
     const m = await D.api("GET", "/me");
+    bootTo(30);
     if (!m.user) { location.href = "/?login=1&next=/manage"; return; }
     D.ME = m.user; D.ORGS = m.orgs || [];
     const d = await D.api("GET", "/desk").catch(() => ({ desk: null, files: [] }));
@@ -69,7 +76,7 @@
     D.drawMe();
     D.DESK.icons = (D.DESK.icons || []).filter(c => !c.up && (!c.file || D.FILES.some(f => f.id === c.file)));
     D.BIND = { ...D.DEF, ...(D.DESK.keys || {}) }; D.shareKeys();
-    D.drawDesk();
+    D.drawDesk(); bootTo(50);
     (D.LS.get("lapp.theme", {}).restore === false ? [] : D.DESK.windows || []).forEach(x => { if (!x || typeof x.url !== "string") return; const w = D.openWin(x.url, { ws: D.WS.some(s => s.key === x.ws) ? x.ws : undefined, title: x.title, icon: x.icon, lesson: x.lesson, geo: { x: x.x, y: x.y, w: x.w, h: x.h }, min: x.min, quiet: 1 }); if (x.snap) { const cur = D.CUR; D.CUR = w.ws; D.snap(w, x.snap); D.CUR = cur; D.place(w); } });
     const a = (D.DESK.windows || []).findIndex(x => x && x.act && !x.min && (x.ws || "me") === D.CUR);
     D.focusWin(a > -1 && D.WN()[a] ? D.WN()[a] : D.topWin());
@@ -79,7 +86,10 @@
     if (want && /^\/(admin|studio|files|settings|s\/)/.test(want)) D.openWin(want);
     else if (D.WN().length > 1) D.toast(`Welcome back · your windows are where you left them`, { kind: "info" });
     else if (!D.WN().length) D.toast(`Press ${D.nice(D.BIND.cc)} or the L button: search, apps, lessons and the AI`, { kind: "info" });
-    D.emit("ready");
+    D.emit("ready"); bootTo(65);
+    // the glass goes when every window that came back is ready
+    const wait = () => { const ws = D.WN(), n = ws.filter(w => w.ready).length; bootTo(65 + (ws.length ? 35 * n / ws.length : 35)); if (!ws.length || n === ws.length) D.bootEnd(); };
+    D.on("winready", wait); wait();
     D.tick(); D.pollJobs(); D.lessons().then(() => D.emit("lessons")).catch(() => {});
   })();
 })();

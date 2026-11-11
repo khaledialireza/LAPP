@@ -25,8 +25,11 @@
     const el = document.createElement("section"); el.className = "wnd"; el.dataset.w = w.id;
     el.innerHTML = `<div class="wbar"><button class="wback" data-wc="back" hidden aria-label="Back">${I("back")}</button><span class="wi"></span><span class="tt"></span><span class="otag" hidden></span><nav class="wmenu" aria-label="Menus"></nav><span class="sp"></span><div class="wacts"></div>
       <div class="wctl"><button class="ai" data-wc="ai" title="Ask the AI about this window">${I("ai", 15)}</button><button data-wc="min" title="Minimise">${I("minus", 15)}</button><button data-wc="max" title="Maximise · rest the pointer here for layouts">${I("square", 13)}</button><button class="cl" data-wc="close" title="Close">${I("x", 15)}</button></div></div>
-      <div class="wfr"><iframe src="${esc(embed(url))}" allow="microphone; autoplay; clipboard-write"></iframe></div>${["n", "s", "e", "w", "ne", "nw", "se", "sw"].map(d => `<i class="rz ${d === "sw" ? "bl" : d}" data-rz="${d}"></i>`).join("")}`;
+      <div class="wfr"><iframe src="${esc(embed(url))}" allow="microphone; autoplay; clipboard-write"></iframe><div class="k-wload"><div class="c"><span class="app">${I(w.icon, 22) || I("window", 22)}</span><span class="k-load creep"><i></i></span></div></div></div>${["n", "s", "e", "w", "ne", "nw", "se", "sw"].map(d => `<i class="rz ${d === "sw" ? "bl" : d}" data-rz="${d}"></i>`).join("")}`;
     w.el = el; w.fr = $("iframe", el); WN.push(w); $("#wins").append(el);
+    // pages of the system say when they are there (their first title); a file or another page: when it has loaded
+    w.fr.addEventListener("load", () => { if (!/^\/(admin|studio|files|settings|s\/)/.test(w.url)) ready(w); else setTimeout(() => ready(w), 2500); });
+    setTimeout(() => ready(w), 8000);
     dress(w); place(w);
     if (!o.quiet) { D.recent(w); D.focusWin(w); } else { el.style.zIndex = ++Z; D.emit("wins"); }
     D.save();
@@ -122,6 +125,11 @@
   });
   document.addEventListener("dblclick", e => { const bar = e.target.closest && e.target.closest(".wbar"); if (bar && !e.target.closest("button")) toggleMax(W(bar.parentElement.dataset.w)); });
 
+  function ready(w) {
+    if (w.ready) return; w.ready = true;
+    const c = w.el && $(".k-wload", w.el); if (c) { const b = $(".k-load i", c); b.style.animation = "none"; b.style.width = "100%"; setTimeout(() => { c.classList.add("out"); setTimeout(() => c.remove(), 400); }, 120); }
+    D.emit("winready");
+  }
   /* ---------- messages from the pages ---------- */
   addEventListener("message", e => {
     if (e.origin !== location.origin || !e.data || !e.data.lapp) return;
@@ -134,6 +142,7 @@
     if (!w) return;
     if (d.t === "settings" && /^\/settings/.test(w.url)) return D.settings(String(d.key), d.value);
     if (d.t === "state") return D.setState(w, ["busy", "ai", "dirty", "error", "ok", "rec"].includes(d.state) ? d.state : "");
+    if (d.t === "chrome" || d.t === "title") ready(w);
     if (d.t === "chrome") { w.chrome = { title: String(d.title || ""), back: d.back || "", backI: Number.isInteger(d.backI) ? d.backI : null, actions: Array.isArray(d.actions) ? d.actions.slice(0, 30) : [], menus: Array.isArray(d.menus) ? d.menus.slice(0, 8) : [] }; if (w.title === "Loading…" && w.chrome.title) { w.title = w.chrome.title; } return dress(w); }
     if (d.t === "title") {
       if (d.title) w.title = String(d.title); if (d.icon) w.icon = window.Icon && Icon.fromEmoji(d.icon) || String(d.icon); if (d.lesson) w.lesson = { id: String(d.lesson.id), title: String(d.lesson.title) };
