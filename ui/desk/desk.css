@@ -140,7 +140,7 @@ body.dragging iframe{pointer-events:none}
 .rw .ri{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;flex:none;background:var(--p3);color:var(--mu)}
 .rw .ri.c{color:#fff}
 .rw .nm{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
-.rw .pl{color:var(--mu2);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+.rw .rplace{color:var(--mu2);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
 .rw .k{margin-inline-start:auto;font-size:11px;color:var(--mu2);white-space:nowrap}
 .rw .go{margin-inline-start:auto;width:24px;height:24px;border-radius:7px;display:grid;place-items:center;color:var(--mu2);opacity:0}
 .rw:hover .go,.rw.sel .go{opacity:1}.rw .go:hover{background:var(--p4);color:var(--tx)}

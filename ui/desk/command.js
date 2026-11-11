@@ -58,7 +58,7 @@
     acts: [["Open", "external", () => D.openWin(`/api/desk/files/${f.id}`, { title: f.name })], ["Download", "download", () => { const a = document.createElement("a"); a.href = `/api/desk/files/${f.id}`; a.download = f.name; a.click(); }], ["Shortcut on the desktop", "desktop", () => D.addIcon({ n: f.name, i: D.fileIcon(f.name, f.type), file: f.id })]] });
   const COMMANDS = () => [["settings", "Settings", "settings"], ["guide", "Guide", "guide"], ["globe", "Language", "lang"], ["keyboard", "Keyboard shortcuts", "keys"], ["pointer", "Mouse pointer", "cursor"], ["image", "Change the wallpaper", "wall"], ["puzzle", "Add a widget", "widget"], ["group", "Group windows", "groupby"], ["desktop", "Show the desktop", "desk"], ["headphones", "The learning site ↗", "site"], ["log-out", "Sign out", "out"]]
     .map(([ic, l, g]) => ({ icon: ic, name: l, place: "Command", run: () => D.go(g) }));
-  const askRow = q => ({ icon: "ai", color: "#8B5CF6", name: `Ask the AI: “${q}”`, place: "it can open and arrange windows, explain and draft", k: "Tab", run: () => D.ask(q) });
+  const askRow = q => ({ icon: "ai", color: "#8B5CF6", name: `Ask the AI: “${q}”`, k: "Tab", run: () => D.ask(q) });
   const has = (s, q) => String(s || "").toLowerCase().includes(q);
 
   function suggested() {
@@ -108,7 +108,7 @@
       sec("Apps", D.APPS.filter(a => has(a.title, q) || has(D.wsOf(a.ws).name, q)).slice(0, 6).map(appRow));
       sec("Lessons", (D.LESSONS || []).filter(l => has(l.title, q)).slice(0, 5).map(lessonRow));
       sec("Files", (D.FILES || []).filter(f => has(f.name, q)).slice(0, 4).map(fileRow));
-      sec("Commands", COMMANDS().filter(c => has(c.name, q)).slice(0, 4));
+      sec("Commands", COMMANDS().filter(c => has(c.name, q) && !D.APPS.some(a => a.title === c.name)).slice(0, 4));
     }
     CC.rows = []; let html = "";
     G.forEach(g => {
@@ -124,7 +124,7 @@
     mark();
   }
   function rowHtml(r, k) {
-    return `<div class="rw" data-r="${k}" role="option" ${r.drag ? `draggable="true" data-lesson="${esc(r.drag)}"` : ""}><span class="ri ${r.color ? "c" : ""}" style="${r.color ? `background:${r.color}` : ""}">${I(r.icon, 15) || D.IE(r.icon)}</span><span class="nm">${esc(r.name)}</span>${r.place ? `<span class="pl">${esc(r.place)}</span>` : `<span class="pl"></span>`}${r.k ? `<span class="k">${esc(r.k)}</span>` : ""}${r.acts ? `<button class="go" data-go2="${k}" aria-label="Actions" title="Actions (→)">${I("chevron", 15)}</button>` : ""}</div>`;
+    return `<div class="rw" data-r="${k}" role="option" ${r.drag ? `draggable="true" data-lesson="${esc(r.drag)}"` : ""}><span class="ri ${r.color ? "c" : ""}" style="${r.color ? `background:${r.color}` : ""}">${I(r.icon, 15) || D.IE(r.icon)}</span><span class="nm">${esc(r.name)}</span>${r.place ? `<span class="rplace">${esc(r.place)}</span>` : `<span class="rplace"></span>`}${r.k ? `<span class="k">${esc(r.k)}</span>` : ""}${r.acts ? `<button class="go" data-go2="${k}" aria-label="Actions" title="Actions (→)">${I("chevron", 15)}</button>` : ""}</div>`;
   }
   function mark() { $$("#ccb [data-r]").forEach(r => r.classList.toggle("sel", +r.dataset.r === CC.sel)); $(`#ccb [data-r="${CC.sel}"]`)?.scrollIntoView({ block: "nearest" }); }
   function key(e) {
