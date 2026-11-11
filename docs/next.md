@@ -60,6 +60,19 @@ Then:
   - Lesson rows lose the 3 buttons: ↵ opens the script; → (or hover) opens an action panel (Script, Voice, Insights, pin, share, ask AI) — the same action panel for every item type.
   - Footer: only "↵ open · → actions · Tab ask AI"; settings and shortcuts go to the avatar menu / a small ⚙ in the search bar.
 
+## Privacy: nobody sees other people's data, not even the root (approved 2026-11-11)
+- LAPP itself is one organisation like any other; its admins see only their own organisation (the LAPP team).
+- Of every other person or organisation we see only the name and its unique 10-character ID.
+- Support access only with consent: the person gives their ID → support sends a request (e-mail, in-app; SMS when
+  they turned on 2-step sign-in) → they approve → support can see all their data and logs to fix the problem.
+  For an organisation its admin approves. [PROPOSAL, NOT CONFIRMED: access lasts 24 h, can be withdrawn any time,
+  and every support action shows in the person's own history.]
+- Phone number: only for 2-step sign-in, optional, set by the person in their profile.
+- Abuse: we may suspend an account without consent, but still never see its data. We act on alerts built from
+  reports and system signals (e.g. one account signed in from different countries at the same time → VPN or a
+  break-in → alert → suspend).
+- Open: whether the finance app may keep a customer's e-mail for invoices.
+
 ## Users app: people, roles and permissions only (approved 2026-11-11)
 - Nothing about money in it: plans, subscriptions, invoices and payments live in the finance app.
 - It works by context: in the LAPP workspace it manages the platform; inside an organisation, that organisation's people.
