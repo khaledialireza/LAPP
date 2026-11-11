@@ -59,6 +59,7 @@
     box.innerHTML = out.map(x => x.seg ? `<span class="seg">${x.seg.map(btn).join("")}</span>` : btn(x)).join("");
     requestAnimationFrame(() => { if (box.scrollWidth > box.clientWidth + 1) box.classList.add("compact"); });
   }
+  K.ctx(t => { const b = t.closest(".wbar"), el = b && b.closest(".wnd"), w = el && WN.find(x => String(x.id) === el.dataset.w); return w ? [{ head: w.title }, ...winMenu(w)] : null; });
   function winMenu(w) {
     return [{ label: "Reload", icon: "reload", run: () => { w.fr.src = embed(w.url); } }, "-",
       { label: "Left half", icon: "sidebar", key: D.nice(D.BIND.left), run: () => snap(w, "left") }, { label: "Right half", icon: "sidebar", key: D.nice(D.BIND.right), run: () => snap(w, "right") },

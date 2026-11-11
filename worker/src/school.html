@@ -419,7 +419,7 @@ function credentials(list) {
   form(list.length === 1 ? "Login created" : `${list.length} logins created`, [{ type: "html", html: `<p class="mu">Give these to the ${list.length === 1 ? "person" : "people"}. They sign in at <b>${location.origin}/s/${SLUG}</b> with the username and password. The password is shown only now.</p>
     <div class="tbl"><table><tr><th>Name</th><th>Username</th><th>Password</th></tr>${list.map(x => `<tr><td>${esc(x.name || "")}</td><td><b>${esc(x.username)}</b></td><td><code style="font-size:14px">${esc(x.password)}</code></td></tr>`).join("")}</table></div>
     <button type="button" class="b" id="copyCreds" style="align-self:flex-start">Copy all</button>` }], async () => {}, "Done");
-  $("#copyCreds").onclick = () => navigator.clipboard.writeText(text).then(() => toast("Copied"), () => toast("Select the table and copy it"));
+  $("#copyCreds").onclick = () => K.copy(text);
 }
 ACT.invite = async () => {
   const cl = await classes();

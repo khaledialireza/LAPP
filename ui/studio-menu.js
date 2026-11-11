@@ -40,7 +40,7 @@
     const L = [];
     if (word) L.push(["Word", "book", [it(`Listen to “${word}”`, "listen", () => say(word, S.L.course, .8)), it("Make it a key phrase", "star", () => { (S.L.data.phrases = S.L.data.phrases || []).push({ de: word, en: "", fa: "", ru: "", uk: "" }); changed(); renderSide(); toast("Added to the key phrases"); }), it("Ask the AI what it means here", "ai", () => askAi(`What does “${word}” mean in this line of my ${S.L.level} lesson, and is it right for that level? Line: “${r.de}”`))]]);
     L.push(["Edit", "edit", [it("Edit the text", "pen", () => { const el = $(`.txt .d[data-i="${i}"]`); el && el.focus(); }, { k: "↵" }), it(r.ok ? "Not approved" : "Approve", "approve", () => { r.ok = !r.ok; changed(); renderDoc(); selLine(i); }), it("Listen", "listen", () => say(r.de, S.L.course, r.speed || (S.L.data.cast[r.who] || {}).speed || 0.95)),
-      it("Duplicate", "copy", () => { const [si, li] = locate(i); scenes[si].lines.splice(li + 1, 0, { ...r, ok: false }); changed(); renderDoc(); selLine(i + 1); }), it("Copy the text", "copy", () => navigator.clipboard && navigator.clipboard.writeText(r.de).then(() => toast("Copied")))]]);
+      it("Duplicate", "copy", () => { const [si, li] = locate(i); scenes[si].lines.splice(li + 1, 0, { ...r, ok: false }); changed(); renderDoc(); selLine(i + 1); }), it("Copy the text", "copy", () => K.copy(r.de))]]);
     if (ai) L.push(["AI", "ai", [it("Simpler (" + S.L.level + ")", "wand", () => rewrite(i, "simpler")), it("More natural", "wand", () => rewrite(i, "natural")), it("Shorter", "wand", () => rewrite(i, "shorter")), it("More polite", "wand", () => rewrite(i, "formal")), it("More casual", "wand", () => rewrite(i, "casual")), it("Add a question", "plus", () => rewrite(i, "question")),
       it("Accent · Austrian", "globe", () => custom(i, "the way people in Austria say it (Austrian German words and phrasing)")), it("Accent · Swiss", "globe", () => custom(i, "the way people in Switzerland say it in Swiss Standard German")), it("Check the level", "approve", () => ACT.check && ACT.check()), it("My own instruction…", "edit", () => rewrite(i, "custom"))]]);
     L.push(["Translate", "translate", [...(ai ? [it("Fill all missing translations", "translate", () => ACT.translate && ACT.translate())] : []), ...["en", "fa", "ru", "uk"].map(l => it("Show " + l.toUpperCase(), "language", () => { S.tr = l; V.script(); }, { on: S.tr === l }))]]);
@@ -64,7 +64,7 @@
     return L;
   }
   function custom(i, how) { rewrite(i, "custom", how); }
-  function askAi(text) { if (window.LAPPFrame && LAPPFrame.embed) LAPPFrame.up({ t: "ask", text }); else toast(text); }
+  const askAi = K.askAI;
 
   const CUR = { k: -1 }; let OPENS = 0;
   // the browser's voice with the line's feeling, pitch and speed, before the real audio is made
@@ -95,17 +95,14 @@
     });
   }
   document.addEventListener("contextmenu", e => {
-    // the line's small toolbar can sit over the words: look through it
-    let tg = e.target;
-    const through = fn => { const fl = $$(".float"); fl.forEach(x => x.style.visibility = "hidden"); try { return fn(); } finally { fl.forEach(x => x.style.visibility = ""); } };
-    if (tg.closest && tg.closest(".float")) tg = through(() => document.elementFromPoint(e.clientX, e.clientY)) || tg;
-    const dl = tg.closest && tg.closest(".dl"); if (!dl || !S.L) return;
+    const tg = e.target, dl = tg.closest && tg.closest(".dl"); if (!dl || !S.L) return;
     if (e.shiftKey) return;   // Shift + right-click: the browser's own menu (spelling)
     e.preventDefault();
-    if (tg.closest(".float")) return;
-    const word = tg.closest(".txt .d") ? through(() => wordAt(e.clientX, e.clientY)) : "", i = Number(dl.dataset.i);
+    const word = tg.closest(".txt .d") ? wordAt(e.clientX, e.clientY) : "", i = Number(dl.dataset.i);
     open(e.clientX, e.clientY, i, word, word && window.wordIndexAt ? wordIndexAt(rows()[i].de, word, e.clientX, e.clientY) : -1);
   });
+  // the line's whole menu from elsewhere (the ribbon's "More")
+  window.lineMenu = (x, y, i) => open(x, y, i, "");
   const relayout = () => { const v = (K.LS.get("lapp.theme", {}) || {}).trLang; if (v && v !== S.tr && !K.LS.get("lapp.studio.tr")) S.tr = v; if (S.L && $("#doc") && !document.querySelector(".txt [contenteditable]:focus")) renderDoc(); };
   K.onLook(relayout);
   // the keyboard: the menu for the chosen line

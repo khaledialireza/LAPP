@@ -306,6 +306,15 @@
   };
 
   // sign out, everywhere the same
+  // text to the clipboard (with the old way when the browser refuses the new one); says "Copied"
+  K.copy = (text, o = {}) => {
+    const old = () => { const x = document.createElement("textarea"); x.value = text; x.style.cssText = "position:fixed;opacity:0;top:0"; document.body.append(x); x.select(); let ok = false; try { ok = document.execCommand("copy"); } catch {} x.remove(); return ok ? Promise.resolve() : Promise.reject(new Error("no clipboard")); };
+    return (navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(String(text)).catch(old) : old())
+      .then(() => { if (!o.quiet) K.toast("Copied", { kind: "ok" }); return true; }, () => { K.toast("Copying is blocked here — select the text and press " + K.keyLabel(K.MAC ? "Cmd+C" : "Ctrl+C")); return false; });
+  };
+  // a question to the AI of the desktop (from a window: up to the desktop; on the desktop: its own chat)
+  K.askAI = text => { if (window.LAPPFrame && LAPPFrame.embed) LAPPFrame.up({ t: "ask", text: String(text).slice(0, 1200) }); else if (window.D && D.ask) D.ask(text); else K.toast(text); };
+
   K.signOut = () => K.api("POST", "/auth/logout").catch(() => {}).finally(() => { location.href = "/"; });
 
   /* ---------- pages of the work desktop: opened on their own, they go into it ---------- */

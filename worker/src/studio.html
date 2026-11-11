@@ -85,8 +85,6 @@ button.cell:hover{outline:2px solid rgba(255,255,255,.35)}
 .ok-b.on{background:rgba(52,211,153,.18);border-color:rgba(52,211,153,.5);color:var(--gr)}
 .hw{text-decoration:underline wavy rgba(251,191,36,.9);text-underline-offset:4px}
 .nw{background:rgba(34,211,238,.14);border-radius:4px;padding:0 2px;color:#A5F3FC}
-.float{position:absolute;inset-inline-end:34px;top:-18px;display:flex;gap:2px;background:#20202E;border:1px solid var(--ln2);border-radius:12px;padding:4px;box-shadow:0 18px 40px rgba(0,0,0,.6);z-index:5}
-.float button{padding:5px 9px;border-radius:8px;font-size:12px;white-space:nowrap;color:var(--tx)}.float button:hover{background:rgba(139,92,246,.25)}
 .sugg{margin-top:6px;background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.35);border-radius:10px;padding:8px 10px;font-size:12.5px;display:flex;flex-direction:column;gap:6px}
 .sugg .op{display:flex;gap:10px;align-items:center;padding:4px;border-radius:8px}.sugg .op:hover{background:rgba(139,92,246,.12)}
 .sugg .d2{font:500 14px Inter;direction:ltr;text-align:left}
@@ -218,12 +216,12 @@ if (window.LAPPFrame) LAPPFrame.menus = () => {
   const v = (location.hash.slice(1) || "home").split("/")[0], id = S.L ? "/" + S.L.id : "";
   const go = (k, l, ic, needs) => ({ label: l, icon: ic, on: v === k, disabled: needs && !S.L, run: () => { location.hash = k + (needs ? id : ""); } });
   return [{ label: "Go", items: [go("home", "Studio home", "⌘"), go("script", "Script", "✎", 1), go("lesson", "Lesson settings", "⚙", 1), go("voice", "Voice desk", "〰", 1), go("insights", "Insights", "📈"), go("universe", "Characters", "🎭")] },
-    { label: "View", items: [{ label: "Reload", icon: "⟳", run: () => show() }] }];
+    { label: "View", items: [{ label: "Reload", icon: "⟳", run: () => show() }, { label: "Ribbon", icon: "layers", on: K.ribbon.on, run: () => K.ribbon.set(!K.ribbon.on) }] }];
 };
 async function show() {
   const seq = ++SEQ;
   const [v, id] = (location.hash.slice(1) || "home").split("/");
-  stopPlayer();
+  stopPlayer(); K.ribbon.hide();
   try {
     if (id && (!S.L || S.L.id !== Number(id))) await openLesson(Number(id));
     if (seq !== SEQ) return;
@@ -485,13 +483,21 @@ function renderSide() {
 function selLine(i, scroll) {
   S.sel = i;
   $$(".dl").forEach(x => x.classList.toggle("sel", Number(x.dataset.i) === i));
-  $$(".float").forEach(x => x.remove());
-  const el = $(`.dl[data-i="${i}"]`); if (!el) return;
+  const el = $(`.dl[data-i="${i}"]`); if (!el) return K.ribbon.hide();
   if (scroll) el.scrollIntoView({ block: "center", behavior: "smooth" });
-  const f = document.createElement("div"); f.className = "float";
-  f.innerHTML = `${S.scope.ai ? `<button data-rw="simpler">✦ Simpler</button><button data-rw="natural">More natural</button><button data-rw="question">＋ Question</button><button data-rw="shorter">Shorter</button><button data-rw="custom">✎ …</button>` : ""}
-    <button data-speak title="Listen">🔊</button><button data-insert title="Line below">＋</button><button data-del title="Delete line">🗑</button>`;
-  el.append(f);
+  lineRibbon(i, el);
+}
+// the ribbon of the chosen line (the shared ribbon, ui/menu.js): the quick actions; "More" opens the line's whole menu
+function lineRibbon(i, el) {
+  const r = rows()[i]; if (!r) return K.ribbon.hide();
+  const ai = S.scope.ai ? [{ label: "Simpler", icon: "wand", run: () => rewrite(i, "simpler") }, { label: "More natural", run: () => rewrite(i, "natural") }, { label: "Shorter", run: () => rewrite(i, "shorter") },
+    { label: "Add a question", short: "+ Question", run: () => rewrite(i, "question") }, { label: "Ask the AI to change it…", icon: "ai", iconOnly: true, run: () => rewrite(i, "custom") }, "-"] : [];
+  K.ribbon.show([...ai,
+    { label: "Listen", icon: "listen", iconOnly: true, run: () => say(r.de, S.L.course, r.speed || (S.L.data.cast[r.who] || {}).speed || 0.95) },
+    { label: "Line below", icon: "plus", iconOnly: true, run: () => insertLine(i) },
+    { label: "Delete the line", icon: "trash", iconOnly: true, danger: true, run: () => delLine(i) }, "-",
+    { label: "More", icon: "more", iconOnly: true, run: b => { const q = b.getBoundingClientRect(); if (window.lineMenu) lineMenu(q.left, q.top > innerHeight / 2 ? q.top - 8 : q.bottom + 4, i); } }],
+    { title: `Line ${i + 1}${r.who ? " · " + r.who : ""}`, anchor: el });
 }
 // edits in the document
 document.addEventListener("focusin", e => {
@@ -517,12 +523,9 @@ document.addEventListener("click", e => {
   const t = e.target;
   const tg = t.closest("[data-ttag]"); if (tg) { S.tr = TRL[(TRL.indexOf(S.tr) + 1) % TRL.length]; K.LS.set("lapp.studio.tr", S.tr); renderDoc(); return; }
   const tf = t.closest("[data-trfold]"); if (tf) { const i = Number(tf.dataset.trfold); S.trOpen.has(i) ? S.trOpen.delete(i) : S.trOpen.add(i); renderDoc(); return; }
-  const dl = t.closest(".dl"); if (dl && !t.closest(".float, .sugg, [data-ok], [data-who]")) selLine(Number(dl.dataset.i));
+  const dl = t.closest(".dl"); if (dl && !t.closest(".sugg, [data-ok], [data-who]")) selLine(Number(dl.dataset.i));
+  else if (!dl && t.closest("#doc")) K.ribbon.hide();
   const okb = t.closest("[data-ok]"); if (okb) { const r = rows()[okb.dataset.ok]; r.ok = !r.ok; okb.classList.toggle("on", r.ok); changed(); renderSide(); return; }
-  const rw = t.closest("[data-rw]"); if (rw) { rewrite(S.sel, rw.dataset.rw); return; }
-  if (t.closest("[data-speak]")) { const r = rows()[S.sel]; say(r.de, S.L.course, r.speed || (S.L.data.cast[r.who] || {}).speed || 0.95); return; }
-  if (t.closest("[data-insert]")) { insertLine(S.sel); return; }
-  if (t.closest("[data-del]")) { delLine(S.sel); return; }
   const who = t.closest("[data-who]"); if (who) { pickSpeaker(Number(who.dataset.who)); return; }
   const gs = t.closest("[data-goscene]"); if (gs) { $(`#sc${gs.dataset.goscene}`).scrollIntoView({ behavior: "smooth", block: "start" }); return; }
   const al = t.closest("[data-addline]"); if (al) { const si = Number(al.dataset.addline); const end = S.L.data.scenes.slice(0, si + 1).reduce((a, s) => a + s.lines.length, 0); insertLine(end - 1, si); return; }

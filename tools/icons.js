@@ -23,7 +23,8 @@ const MAP = {
   grammar: L("spell-check"), dictionary: L("book-a"), slides: L("presentation"), print: L("printer"), send: L("send"), wand: L("wand-sparkles"), alert: L("triangle-alert"),
   approve: L("badge-check"), listen: L("volume-2"), scene: L("clapperboard"), person: L("user-round"), structure: L("list-tree"), format: L("type"), bold: L("bold"),
   italic: L("italic"), highlight: L("highlighter"), link: L("link"), maximize: L("maximize-2"), restore: L("minimize-2"), sidebar: L("panel-left"), zap: L("zap"),
-  card: L("credit-card"), receipt: L("receipt"), bank: L("landmark"), report: L("file-chart-column"), lessonfile: L("file-audio")
+  card: L("credit-card"), receipt: L("receipt"), bank: L("landmark"), report: L("file-chart-column"), lessonfile: L("file-audio"),
+  cut: L("scissors"), paste: L("clipboard-paste"), "select-all": L("text-select"), grip: L("grip-vertical")
 };
 const out = {};
 for (const [name, [set, icon]] of Object.entries(MAP)) {

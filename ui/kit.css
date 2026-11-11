@@ -169,8 +169,26 @@ dialog.k-dlg::backdrop{background:rgba(0,0,0,.55);backdrop-filter:blur(3px)}
 .k-menu .q{border-bottom:1px solid var(--ln)}.k-menu .ask{border-top:1px solid var(--ln)}
 .k-menu .q input,.k-menu .ask input{flex:1;min-width:0;background:none;border:0;outline:none;font:inherit;color:var(--tx)}
 .k-menu .ask kbd{font-size:10.5px;color:var(--mu2);border:0;background:none}
+.k-menu .ls:empty{display:none}
+/* the system's row of every right-click: cut, copy, paste, select all, ask the AI */
+.k-menu .sys{display:flex;gap:2px;padding:4px;border-bottom:1px solid var(--ln)}
+.k-menu .sys button{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;border-radius:8px;border:0;background:none;color:var(--tx);font:600 10.5px Inter,Vazirmatn,system-ui,sans-serif;cursor:pointer;white-space:nowrap}
+.k-menu .sys button .ic{color:var(--mu)}.k-menu .sys button[data-sys=ai] .ic{color:var(--vi)}
+.k-menu .sys button:hover,.k-menu .sys button:focus-visible{background:rgba(139,92,246,.25);outline:none}
+.k-menu .sys button[disabled]{opacity:.35;pointer-events:none}
+/* the ribbon: the actions of what is selected, in a bar you can move */
+.k-ribbon{position:fixed;z-index:1500;display:flex;align-items:center;gap:2px;padding:4px;border-radius:14px;background:var(--pop);border:1px solid var(--ln2);box-shadow:0 18px 44px rgba(0,0,0,.45);max-width:calc(100vw - 16px);overflow-x:auto;scrollbar-width:none;transition:opacity .15s}
+.k-ribbon.rest{opacity:0;pointer-events:none}
+.k-ribbon .grip{display:grid;place-items:center;width:18px;height:30px;color:var(--mu2);cursor:grab;touch-action:none;flex:none}
+.k-ribbon .rt{font:700 11px Inter,Vazirmatn,system-ui,sans-serif;color:var(--mu2);padding:0 8px 0 2px;white-space:nowrap}
+.k-ribbon button{height:30px;padding:0 9px;border-radius:9px;border:0;background:none;color:var(--tx);display:inline-flex;align-items:center;gap:6px;font:600 12.5px Inter,Vazirmatn,system-ui,sans-serif;white-space:nowrap;cursor:pointer;flex:none}
+.k-ribbon button:hover,.k-ribbon button:focus-visible{background:rgba(139,92,246,.22);outline:none}
+.k-ribbon button .ic{color:var(--mu)}.k-ribbon button.dz,.k-ribbon button.dz .ic{color:var(--rd)}
+.k-ribbon button[disabled]{opacity:.4;pointer-events:none}
+.k-ribbon .gap{width:1px;height:20px;background:var(--ln2);margin:0 4px;flex:none}
+.k-ribbon .x{color:var(--mu2);padding:0 7px}
 
 /* ---------- avatars ---------- */
 .k-av{display:inline-grid;place-items:center;border-radius:50%;flex:none;color:#fff;font-weight:800;background-size:cover;background-position:center;line-height:1}
 
-@media (prefers-reduced-motion:reduce){.k-toast,.k-dlg,.k-pop,.k-menu,.spin{animation:none}}
+@media (prefers-reduced-motion:reduce){.k-toast,.k-dlg,.k-pop,.k-menu,.spin{animation:none}.k-ribbon{transition:none}}

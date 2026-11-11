@@ -107,7 +107,7 @@
     const vb = t.closest("[data-vback]"); if (vb) { if (!await K.confirm({ title: "Go back to this version?", text: "The current text is kept as a version too.", ok: "Go back" })) return; await flush(); try { const r = await api("POST", `/lessons/${S.L.id}/versions/${vb.dataset.vback}/restore`); S.L.data = r.data; S.L.rev = r.rev; toast("Back to the earlier version"); draw("history"); } catch (x) { toast(x.message); } return; }
     if (t.closest("[data-goaladd]")) { m.goals = [...(m.goals || []).filter(Boolean), ""]; draw("goals"); $$("[data-goal]").pop()?.focus(); return; }
     const gd = t.closest("[data-goaldel]"); if (gd) { m.goals = (m.goals || []).filter((_, i) => i !== +gd.dataset.goaldel); saveMeta(); draw("goals"); return; }
-    if (t.closest("[data-goalai]")) { const lines = all().slice(0, 30).map(x => x.de).join(" / "); if (window.LAPPFrame && LAPPFrame.embed) LAPPFrame.up({ t: "ask", text: `Suggest 3 short learning goals (can-do statements, ${S.L.level}) for this lesson “${S.L.title}”: ${lines}` }); return; }
+    if (t.closest("[data-goalai]")) { const lines = all().slice(0, 30).map(x => x.de).join(" / "); K.askAI(`Suggest 3 short learning goals (can-do statements, ${S.L.level}) for this lesson “${S.L.title}”: ${lines}`); return; }
     const ln = t.closest("[data-len]"); if (ln) { m.length = ln.dataset.len; saveMeta(); draw("pace"); return; }
     const pc = t.closest("[data-pace]"); if (pc) { m.pace = +pc.dataset.pace; Object.values(S.L.data.cast).forEach(c => c.speed = m.pace); saveMeta(); draw("pace"); return; }
     const ts = t.closest("[data-trs]"); if (ts) { m.trStyle = ts.dataset.trs; saveMeta(); draw("tr"); return; }
