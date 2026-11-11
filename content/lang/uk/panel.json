@@ -1607,5 +1607,20 @@
  "Numbers": "Числа",
  "Quick": "Швидко",
  "Add to the command center": "Додати до командного центру",
- "Start with Ctrl, Cmd or Alt": "Почніть з Ctrl, Cmd або Alt"
+ "Start with Ctrl, Cmd or Alt": "Почніть з Ctrl, Cmd або Alt",
+ "Accounts": "Акаунти",
+ "Find an account…": "Знайти акаунт…",
+ "Add account": "Додати акаунт",
+ "E-mail or username": "E-mail або ім'я користувача",
+ "Continue": "Продовжити",
+ "Sign in": "Увійти",
+ "Signing in…": "Вхід…",
+ "Signed in": "Вхід виконано",
+ "Signed out": "Вихід виконано",
+ "Sign out of this account": "Вийти з цього акаунта",
+ "Sign out of all": "Вийти з усіх",
+ "Could not sign in": "Не вдалося увійти",
+ "this account is already signed in here": "цей акаунт уже ввійшов тут",
+ "four accounts at most": "не більше чотирьох акаунтів",
+ "this account is signed out": "цей акаунт вийшов"
 }

@@ -14,41 +14,55 @@
 
   D.studioScopes = () => [...(["designer", "manager", "admin"].includes(D.ME.role) ? [{ q: "", name: "LAPP library", ws: "me" }] : []), ...D.ORGS.filter(o => ["admin", "teacher"].includes(o.role)).map(o => ({ q: o.slug, name: o.name, ws: "s:" + o.slug }))];
 
+  // every signed-in account (the main one, slot 0, and linked ones) brings its own workspaces and apps;
+  // a linked account's keys end in "~n" and its addresses carry ?as=n
+  D.ACCTS = [];
+  const withAs = (url, n) => { if (!n) return url; const u = new URL(url, location.origin); u.searchParams.set("as", n); return u.pathname + u.search + u.hash; };
+  D.withAs = withAs;
   D.buildApps = () => {
-    const r = D.ME.role, A = [], W = [];
-    const lapp = ["manager", "admin"].includes(r), designer = r === "designer";
-    W.push({ key: "me", name: lapp ? "LAPP" : "My work", color: "#8B5CF6" });
-    if (lapp) {
-      A.push({ id: "admin:users", title: "Users", icon: "users", url: "/admin#users", ws: "me" });
-      if (r === "admin") A.push({ id: "admin:ai", title: "AI", icon: "bot", url: "/admin#ai", ws: "me" });
-    }
-    // the studio's lesson library (curriculum map, board, AI ideas, folder rules, new lesson)
-    if (lapp) A.push({ id: "studio:library", title: "Lesson library", icon: "library", url: "/admin#content", ws: "me", studio: "" });
-    if (lapp || designer) {
-      A.push({ id: "studio:home", title: "Studio", icon: "video", url: "/studio#home", ws: "me", studio: "" });
-      A.push({ id: "studio:universe", title: "Characters", icon: "cast", url: "/studio#universe", ws: "me", studio: "" });
-    }
-    A.push({ id: "files", title: "Files", icon: "files", url: "/files", ws: "me" });
-    A.push({ id: "settings", title: "Settings", icon: "settings", url: "/settings", ws: "me" });
-    D.ORGS.filter(o => SCHOOL_APPS[o.role]).forEach((o, i) => {
-      const ws = "s:" + o.slug, color = COLORS[i % COLORS.length];
-      W.push({ key: ws, name: o.name, color, role: o.role });
-      SCHOOL_APPS[o.role].forEach(([k, ic, l]) => A.push({ id: `${ws}:${k}`, title: l, icon: ic, url: `/s/${o.slug}#${k}`, ws }));
-      if (["admin", "teacher"].includes(o.role)) {
-        A.push({ id: `studio:library@${o.slug}`, title: "Lesson library", icon: "library", url: `/s/${o.slug}#lessons`, ws, studio: o.slug });
-        A.push({ id: `studio:home@${o.slug}`, title: "Studio", icon: "video", url: `/studio?org=${o.slug}#home`, ws, studio: o.slug });
-        A.push({ id: `studio:universe@${o.slug}`, title: "Characters", icon: "cast", url: `/studio?org=${o.slug}#universe`, ws, studio: o.slug });
+    const A = [], W = [], accts = D.ACCTS.length ? D.ACCTS : [{ slot: 0, user: D.ME, orgs: D.ORGS }];
+    accts.forEach(ac => {
+      const n = ac.slot, sx = n ? "~" + n : "", r = ac.user.role, a0 = A.length, w0 = W.length;
+      const lapp = ["manager", "admin"].includes(r), designer = r === "designer", acct = { slot: n, name: ac.user.name || "@" + ac.user.username };
+      const push = x => A.push({ ...x, id: x.id + sx, url: withAs(x.url, n), as: n });
+      if (!n || lapp || designer) W.push({ key: "me" + sx, name: lapp ? "LAPP" : n ? acct.name : "My work", color: "#8B5CF6", as: n });
+      if (lapp) {
+        push({ id: "admin:users", title: "Users", icon: "users", url: "/admin#users", ws: "me" + sx });
+        if (r === "admin") push({ id: "admin:ai", title: "AI", icon: "bot", url: "/admin#ai", ws: "me" + sx });
+        push({ id: "studio:library", title: "Lesson library", icon: "library", url: "/admin#content", ws: "me" + sx, studio: "" });
       }
-      A.push({ id: `files@${o.slug}`, title: "Files", icon: "files", url: `/files?org=${o.slug}`, ws });
+      if (lapp || designer) {
+        push({ id: "studio:home", title: "Studio", icon: "video", url: "/studio#home", ws: "me" + sx, studio: "" });
+        push({ id: "studio:universe", title: "Characters", icon: "cast", url: "/studio#universe", ws: "me" + sx, studio: "" });
+      }
+      if (!n || lapp || designer) {
+        push({ id: "files", title: "Files", icon: "files", url: "/files", ws: "me" + sx });
+        if (!n) push({ id: "settings", title: "Settings", icon: "settings", url: "/settings", ws: "me" });
+      }
+      (ac.orgs || []).filter(o => SCHOOL_APPS[o.role]).forEach(o => {
+        const ws = "s:" + o.slug + sx, color = COLORS[(W.length - 1 + COLORS.length) % COLORS.length];
+        W.push({ key: ws, name: n ? `${o.name} · ${o.role}` : o.name, color, role: o.role, as: n });
+        SCHOOL_APPS[o.role].forEach(([k, ic, l]) => push({ id: `s:${o.slug}:${k}`, title: l, icon: ic, url: `/s/${o.slug}#${k}`, ws }));
+        if (["admin", "teacher"].includes(o.role)) {
+          push({ id: `studio:library@${o.slug}`, title: "Lesson library", icon: "library", url: `/s/${o.slug}#lessons`, ws, studio: o.slug });
+          push({ id: `studio:home@${o.slug}`, title: "Studio", icon: "video", url: `/studio?org=${o.slug}#home`, ws, studio: o.slug });
+          push({ id: `studio:universe@${o.slug}`, title: "Characters", icon: "cast", url: `/studio?org=${o.slug}#universe`, ws, studio: o.slug });
+        }
+        push({ id: `files@${o.slug}`, title: "Files", icon: "files", url: `/files?org=${o.slug}`, ws });
+      });
+      ac.ws = W.slice(w0).map(w => w.key); ac.apps = A.length - a0;
     });
     A.forEach(a => a.color = (W.find(w => w.key === a.ws) || W[0]).color);
     D.APPS = A; D.WS = W;
     if (!W.some(w => w.key === D.CUR)) D.CUR = W[0].key;
   };
+  D.acctOf = n => D.ACCTS.find(a => a.slot === (n || 0)) || null;
+  D.asOf = url => { try { return +(new URL(url, location.origin).searchParams.get("as") || 0); } catch { return 0; } };
   D.wsOf = key => D.WS.find(w => w.key === key) || D.WS[0];
 
   // which app and workspace a window's address belongs to
-  D.appKey = url => {
+  D.appKey = url => { const n = D.asOf(url); return appKey0(url) + (n ? "~" + n : ""); };
+  const appKey0 = url => {
     const u = new URL(url, location.origin), p = u.pathname, h = u.hash.slice(1).split("/")[0];
     if (p.startsWith("/api/desk/files")) return "file";
     if (p.startsWith("/studio")) { const org = u.searchParams.get("org"); return `studio:${h || "home"}${org ? "@" + org : ""}`; }
@@ -59,6 +73,7 @@
     return p;
   };
   D.wsFor = url => {
+    const n = D.asOf(url); if (n) { const ac = D.acctOf(n), app = D.appOf(url); return app ? app.ws : ac && ac.ws && ac.ws[0] || D.CUR; }
     const u = new URL(url, location.origin), p = u.pathname;
     // a school the person works in has its own workspace; any other school (e.g. LAPP admins opening one) opens where they are
     const m = p.match(/^\/s\/([^/]+)/); if (m) return D.WS.some(w => w.key === "s:" + m[1]) ? "s:" + m[1] : D.CUR;

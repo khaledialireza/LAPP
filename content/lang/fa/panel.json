@@ -1607,5 +1607,20 @@
  "Numbers": "عددها",
  "Quick": "سریع",
  "Add to the command center": "افزودن به مرکز فرمان",
- "Start with Ctrl, Cmd or Alt": "با Ctrl، Cmd یا Alt شروع کنید"
+ "Start with Ctrl, Cmd or Alt": "با Ctrl، Cmd یا Alt شروع کنید",
+ "Accounts": "حساب‌ها",
+ "Find an account…": "یافتن حساب…",
+ "Add account": "افزودن حساب",
+ "E-mail or username": "ایمیل یا نام کاربری",
+ "Continue": "ادامه",
+ "Sign in": "ورود",
+ "Signing in…": "در حال ورود…",
+ "Signed in": "وارد شدید",
+ "Signed out": "خارج شدید",
+ "Sign out of this account": "خروج از این حساب",
+ "Sign out of all": "خروج از همه",
+ "Could not sign in": "ورود انجام نشد",
+ "this account is already signed in here": "این حساب همین‌جا وارد شده است",
+ "four accounts at most": "حداکثر چهار حساب",
+ "this account is signed out": "این حساب خارج شده است"
 }

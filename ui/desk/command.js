@@ -13,7 +13,7 @@
     D.closeMenus(); D.closeSheet && $("#sheet") && D.closeSheet();
     let c = $("#cc");
     if (c && ((scope === "ai") === (CC.mode === "chat")) && scope === CC.scope && !q) return D.ccClose();
-    CC.mode = scope === "ai" ? "chat" : "list"; CC.scope = scope === "ai" ? CC.scope : scope; CC.q = q; CC.sel = 0; CC.item = null; CC.view = ["applist", "widgets", "walls"].includes(scope) ? scope : "home"; if (CC.view !== "home" || scope === "settings") CC.scope = "all";
+    CC.mode = scope === "ai" ? "chat" : "list"; CC.scope = scope === "ai" ? CC.scope : scope; CC.q = q; CC.sel = 0; CC.item = null; CC.view = ["applist", "widgets", "walls", "accounts"].includes(scope) ? scope : "home"; if (CC.view !== "home" || scope === "settings") CC.scope = "all";
     if (!c) {
       c = document.createElement("div"); c.id = "cc"; c.setAttribute("role", "dialog"); c.setAttribute("aria-label", "Command center");
       document.body.append(c); c.classList.toggle("full", PREF().open === "full");
@@ -35,7 +35,7 @@
       draw(); t.focus();
       return;
     }
-    c.innerHTML = `<div class="cch" title="Drag to move"><i></i></div><label class="ccs"><span style="color:var(--vi)">${I("ai", 17)}</span>${TOK[CC.scope] ? `<span class="tok">${esc(TOK[CC.scope])}<button data-cc="untok" aria-label="Search everything">${I("x", 12)}</button></span>` : ""}${CC.view !== "home" ? `<button class="ib" data-cc="home" aria-label="Back">${I("back", 15)}</button>` : ""}<input id="ccq" placeholder="${CC.view === "applist" ? "Find an app…" : "Ask, search, or tell LAPP what to do…"}" autocomplete="off" aria-label="Ask or search"></label>
+    c.innerHTML = `<div class="cch" title="Drag to move"><i></i></div><label class="ccs"><span style="color:var(--vi)">${I("ai", 17)}</span>${TOK[CC.scope] ? `<span class="tok">${esc(TOK[CC.scope])}<button data-cc="untok" aria-label="Search everything">${I("x", 12)}</button></span>` : ""}${CC.view !== "home" ? `<button class="ib" data-cc="home" aria-label="Back">${I("back", 15)}</button>` : ""}<input id="ccq" placeholder="${CC.view === "applist" ? "Find an app…" : CC.view === "accounts" ? "Find an account…" : "Ask, search, or tell LAPP what to do…"}" autocomplete="off" aria-label="Ask or search"></label>
       <div class="ccb" id="ccb"></div>
       <div class="ccfoot">${D.ccFoot()}</div>`;
     const i = $("#ccq"); i.value = CC.q;

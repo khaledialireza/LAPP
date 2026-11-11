@@ -93,10 +93,55 @@
     <button class="ib" data-pw title="Lock · Sign out" aria-label="Lock or sign out">${I("log-out", 17)}</button>`;
   // the views the desktop's right-click opens: all apps, widgets, wallpapers — as tiles, right here
   const WALLS = [["", "Aurora", "radial-gradient(circle at 80% 0,rgba(255,61,127,.45),transparent 60%),radial-gradient(circle at 0 100%,rgba(34,211,238,.3),transparent 60%),#0b0b12"], ["dawn", "Dawn", "radial-gradient(circle at 20% 0,rgba(251,191,36,.5),transparent 60%),radial-gradient(circle at 90% 100%,rgba(255,61,127,.45),transparent 60%),#140b10"], ["sea", "Sea", "radial-gradient(circle at 80% 10%,rgba(34,211,238,.5),transparent 60%),radial-gradient(circle at 10% 100%,rgba(96,165,250,.45),transparent 60%),#06101a"], ["plain", "Plain", "#15151c"]];
+  /* ---------- accounts: the ones signed in here, and adding one with the sign-in panel itself ---------- */
+  const AL = { on: false, step: "id", id: "", err: "", busy: false };
+  const acctName = ac => ac.user.name || "@" + ac.user.username;
+  const acctRole = ac => { const L = [["admin", "manager", "designer"].includes(ac.user.role) ? "LAPP · " + ac.user.role : "", ...(ac.orgs || []).map(o => `${o.name} · ${o.role}`)].filter(Boolean); return L.length > 1 ? `${L[0]} +${L.length - 1}` : L[0] || ""; };
+  function accounts(B, q) {
+    const c = $("#cc"); c.classList.toggle("acclogin", AL.on);
+    if (AL.on) {
+      B.innerHTML = `<form class="acclog" autocomplete="off"><button type="button" class="bk" data-acc="back" aria-label="Back">${I("back", 15)}</button><span class="lg">L</span>
+        ${AL.step === "id" ? `<input id="accId" type="text" placeholder="E-mail or username" value="${esc(AL.id)}" autocomplete="username">`
+          : `<button type="button" class="who" data-acc="change"><span>${esc(AL.id)}</span><small>Change</small></button><input id="accPw" type="password" placeholder="Password" autocomplete="current-password">`}
+        <button class="go" type="submit" ${AL.busy ? "disabled" : ""}>${AL.busy ? "Signing in…" : AL.step === "id" ? "Continue" : "Sign in"}</button><span class="er">${esc(AL.err)}</span></form>`;
+      const f = $(".acclog", B); setTimeout(() => $("#accId,#accPw", f)?.focus(), 30);
+      f.onsubmit = async e => { e.preventDefault(); AL.err = "";
+        if (AL.step === "id") { AL.id = $("#accId").value.trim(); if (!AL.id) return; AL.step = "pw"; return D.ccRedraw(); }
+        const pw = $("#accPw") ? $("#accPw").value : ""; if (!pw) return; AL.busy = true; D.ccRedraw();
+        try { await K.apiAt("/api", { signin: false })("POST", "/auth/login", { email: AL.id, password: pw, link: true }); Object.assign(AL, { on: false, step: "id", id: "", busy: false }); await D.reloadAccounts(); D.toast("Signed in", { kind: "ok" }); }
+        catch (x) { AL.busy = false; AL.err = x.message || "Could not sign in"; }
+        D.ccRedraw(); };
+      f.onclick = e => { const b = e.target.closest("[data-acc]"); if (!b) return; if (b.dataset.acc === "back") Object.assign(AL, { on: false, err: "" }); else Object.assign(AL, { step: "id", err: "" }); D.ccRedraw(); };
+      return;
+    }
+    const cur = (D.wsOf(D.CUR) || {}).as || 0;
+    B.innerHTML = `<div class="accl">${D.ACCTS.filter(ac => !q || (acctName(ac) + " " + acctRole(ac)).toLowerCase().includes(q)).map(ac => { const n = D.WN().filter(w => (w.as || 0) === ac.slot).length;
+      return `<button class="accr ${ac.slot === cur ? "sel" : ""}" data-acct="${ac.slot}">${K.avatar(ac.user, 34)}<span class="t"><b>${esc(acctName(ac))}</b><small>${esc(acctRole(ac))}</small></span><span class="n">${n} window${n === 1 ? "" : "s"}</span>${ac.slot === cur ? `<span class="dot"></span>` : ""}</button>`; }).join("")}
+      ${D.ACCTS.length < 4 ? `<button class="accadd" data-acc="add"><i>${I("plus", 16)}</i>Add account</button>` : ""}</div>`;
+    B.onclick = e => {
+      if (e.target.closest('[data-acc="add"]')) { Object.assign(AL, { on: true, step: "id", id: "", err: "" }); return D.ccRedraw(); }
+      const r = e.target.closest("[data-acct]"); if (!r) return; const ac = D.acctOf(+r.dataset.acct); if (!ac) return;
+      D.ccClose(); D.switchWs(ac.ws[0]); D.toast(acctName(ac), { kind: "info" });
+    };
+    B.oncontextmenu = e => { const r = e.target.closest("[data-acct]"); if (!r) return; e.preventDefault(); const n = +r.dataset.acct;
+      K.menu(e.clientX, e.clientY, [{ label: n ? "Sign out of this account" : "Sign out of all", icon: "log-out", danger: true, run: () => n ? D.signOutAcct(n) : D.go("out") }]); };
+  }
+  D.reloadAccounts = async () => {
+    const r = await D.api("GET", "/auth/linked").catch(() => ({}));
+    D.ACCTS = [{ slot: 0, user: D.ME, orgs: D.ORGS }, ...(r.accounts || [])];
+    D.buildApps(); D.drawMe(); D.drawTask && D.drawTask(); D.emit && D.emit("ws");
+  };
+  D.signOutAcct = async n => {
+    D.WN().filter(w => (w.as || 0) === n).forEach(w => D.closeWin(w));
+    await fetch("/api/auth/logout", { method: "POST", headers: { "X-LAPP": "1", "X-As": String(n) }, credentials: "same-origin" }).catch(() => {});
+    await D.reloadAccounts(); D.ccRedraw(); D.toast("Signed out", { kind: "info" });
+  };
+
   D.ccExtra = (B, v, q) => {
     q = (q || "").trim().toLowerCase();
     if (v === "applist") B.innerHTML = `<div class="alist">${D.APPS.filter(a => !q || (a.title + " " + D.wsOf(a.ws).name).toLowerCase().includes(q)).map(a => `<button class="arow" data-open-app="${esc(a.id)}" draggable="true" data-app="${esc(a.id)}"><span class="g" style="background:${a.color}">${I(a.icon, 15)}</span><span class="t">${esc(a.title)}</span>${a.ws !== D.CUR ? `<small>${esc(D.wsOf(a.ws).name)}</small>` : ""}</button>`).join("")}</div>`;
     if (v === "widgets") B.innerHTML = `<div class="bento">${Object.entries(D.WT).map(([k, w]) => `<button class="cct s21 wd" data-addwid="${k}"><span class="th">${I(w[0], 14)}${esc(w[1])}</span><span class="mu">${esc(w[2])}</span></button>`).join("")}</div>`;
+    if (v === "accounts") return accounts(B, q);
     if (v === "walls") { const cur = D.DESK.wall || ""; B.innerHTML = `<div class="bento">${WALLS.map(([k, l, g]) => `<button class="cct s21 wall ${k === cur ? "on" : ""}" data-wall="${k}" title="${esc(l)}" aria-label="${esc(l)}" style="background:${g}"></button>`).join("")}</div>`; }
   };
 

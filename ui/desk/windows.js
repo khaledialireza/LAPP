@@ -21,11 +21,11 @@
     if (ws !== D.CUR && !o.quiet) D.switchWs(ws);
     const A = AREA(), n = WN.filter(x => x.ws === ws).length, app = D.appOf(url);
     const g = o.geo || { x: Math.round(A.width * (.04 + (n % 6) * .03)), y: Math.round(A.height * (.03 + (n % 6) * .04)), w: Math.round(Math.max(Math.min(A.width * .72, 1240), Math.min(820, A.width - 20))), h: Math.round(A.height * .86) };
-    w = { id: WID++, url, ws, title: o.title || (app ? app.title : "Loading…"), icon: o.icon || (app ? app.icon : "window"), lesson: o.lesson || null, ...g, min: !!o.min, snap: null, used: Date.now(), state: "", chrome: null };
+    w = { id: WID++, url, ws, title: o.title || (app ? app.title : "Loading…"), icon: o.icon || (app ? app.icon : "window"), lesson: o.lesson || null, as: D.asOf(url), ...g, min: !!o.min, snap: null, used: Date.now(), state: "", chrome: null };
     const el = document.createElement("section"); el.className = "wnd"; el.dataset.w = w.id;
     el.innerHTML = `<div class="wbar"><button class="wback" data-wc="back" hidden aria-label="Back">${I("back")}</button><span class="wi"></span><span class="tt"></span><span class="otag" hidden></span><nav class="wmenu" aria-label="Menus"></nav><span class="sp"></span><div class="wacts"></div>
       <div class="wctl"><button data-wc="min" title="Minimise">${I("minus", 15)}</button><button data-wc="max" title="Maximise · rest the pointer here for layouts">${I("square", 13)}</button><button class="cl" data-wc="close" title="Close">${I("x", 15)}</button></div></div>
-      <div class="wfr"><iframe src="${esc(embed(url))}" allow="microphone; autoplay; clipboard-write"></iframe><div class="k-wload"><div class="c"><span class="app">${I(w.icon, 22) || I("window", 22)}</span><span class="k-load creep"><i></i></span></div></div></div>${["n", "s", "e", "w", "ne", "nw", "se", "sw"].map(d => `<i class="rz ${d === "sw" ? "bl" : d}" data-rz="${d}"></i>`).join("")}`;
+      <div class="wfr"><iframe src="${esc(embed(url))}"${D.asOf(url) ? ` name="lapp-as${D.asOf(url)}"` : ""} allow="microphone; autoplay; clipboard-write"></iframe><div class="k-wload"><div class="c"><span class="app">${I(w.icon, 22) || I("window", 22)}</span><span class="k-load creep"><i></i></span></div></div></div>${["n", "s", "e", "w", "ne", "nw", "se", "sw"].map(d => `<i class="rz ${d === "sw" ? "bl" : d}" data-rz="${d}"></i>`).join("")}`;
     w.el = el; w.fr = $("iframe", el); WN.push(w); $("#wins").append(el);
     // pages of the system say when they are there (their first title); a file or another page: when it has loaded
     // a file (no page of ours) is there when it has loaded; our pages say so themselves ("ready", from /ui/frame.js)

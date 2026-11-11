@@ -107,20 +107,31 @@ async function getSetting(env, key, dflt) {
 }
 
 /* ================= sessions ================= */
-function cookieOf(req) {
-  const m = (req.headers.get("Cookie") || "").match(new RegExp(`(?:^|;\\s*)${COOKIE}=([A-Za-z0-9_-]{20,})`));
+// linked accounts: the same browser may also be signed in to up to 3 more of the person's own accounts
+// (each proved with its own password). Slot n lives in its own cookie; a request picks it with "X-As: n".
+const SLOTS = [1, 2, 3];
+const slotOf = req => { const n = +(req.headers.get("X-As") || 0); return SLOTS.includes(n) ? n : 0; };
+const cookieName = n => n ? COOKIE + n : COOKIE;
+function cookieOf(req, slot = slotOf(req)) {
+  const m = (req.headers.get("Cookie") || "").match(new RegExp(`(?:^|;\\s*)${cookieName(slot)}=([A-Za-z0-9_-]{20,})`));
   return m ? m[1] : null;
 }
-const setCookie = (token, days) => `${COOKIE}=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${Math.round(days * 86400)}`;
-async function startSession(env, req, user) {
+const setCookie = (token, days, slot = 0) => `${cookieName(slot)}=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${Math.round(days * 86400)}`;
+async function userOfToken(env, token) {
+  if (!token) return null;
+  const u = await env.DB.prepare("SELECT u.* FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token_hash = ? AND s.expires > ?").bind(await sha(token), now()).first();
+  return u && !u.disabled ? u : null;
+}
+async function startSession(env, req, user, slot = 0) {
   const token = b64url(rand(32));
   await env.DB.prepare("INSERT INTO sessions (token_hash, user_id, created_at, expires, ua) VALUES (?, ?, ?, ?, ?)")
     .bind(await sha(token), user.id, now(), now() + SESSION_DAYS * DAY, (req.headers.get("User-Agent") || "").slice(0, 200)).run();
-  return setCookie(token, SESSION_DAYS);
+  return setCookie(token, SESSION_DAYS, slot);
 }
 async function currentUser(req, env) {
   const token = cookieOf(req);
   if (!token) return null;
+  if (slotOf(req) && !cookieOf(req, 0)) return null;   // a linked account only lives next to a signed-in main one
   const u = await env.DB.prepare("SELECT u.*, s.token_hash FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token_hash = ? AND s.expires > ?")
     .bind(await sha(token), now()).first();
   if (!u || u.disabled) return null;
@@ -274,8 +285,26 @@ async function api(req, env, url, ctx) {
     if (u.disabled) throw fail("this account is disabled", 403, { code: "disabled" });
     await promote(env, u);
     await env.DB.prepare("UPDATE users SET last_seen = ?, country = ? WHERE id = ?").bind(now(), country(req) || u.country, u.id).run();
+    if (b.link) {   // add this account next to the one already signed in here; it never replaces it
+      const main = await userOfToken(env, cookieOf(req, 0));
+      if (!main) throw fail("sign in first", 401, { code: "auth" });
+      const taken = await Promise.all(SLOTS.map(n => userOfToken(env, cookieOf(req, n))));
+      if (main.id === u.id || taken.some(x => x && x.id === u.id)) throw fail("this account is already signed in here", 409, { code: "linked" });
+      const slot = SLOTS.find((n, i) => !taken[i]);
+      if (!slot) throw fail("four accounts at most", 409, { code: "full" });
+      const cookie = await startSession(env, req, u, slot);
+      return json({ ...(await me(env, req, u)), slot }, 200, { "Set-Cookie": cookie });
+    }
     const cookie = await startSession(env, req, u);
     return json(await me(env, req, u), 200, { "Set-Cookie": cookie });
+  }
+
+  // the accounts signed in on this browser besides the main one
+  if (p === "/auth/linked" && M === "GET") {
+    if (!await userOfToken(env, cookieOf(req, 0))) return json({ accounts: [] });
+    const out = [];
+    for (const n of SLOTS) { const u = await userOfToken(env, cookieOf(req, n)); if (u) out.push({ slot: n, ...(await me(env, req, u)) }); }
+    return json({ accounts: out });
   }
 
   // the work desktop's lock screen: the signed-in person proves it's them again
@@ -288,10 +317,11 @@ async function api(req, env, url, ctx) {
     return json({ ok: true });
   }
 
+  // signing out of a linked account (X-As) ends only that one; signing out of the main one ends all of them
   if (p === "/auth/logout" && M === "POST") {
-    const token = cookieOf(req);
-    if (token) await env.DB.prepare("DELETE FROM sessions WHERE token_hash = ?").bind(await sha(token)).run();
-    return json({ ok: true }, 200, { "Set-Cookie": setCookie("x".repeat(20), 0) });
+    const slot = slotOf(req), r = json({ ok: true });
+    for (const n of slot ? [slot] : [0, ...SLOTS]) { const token = cookieOf(req, n); if (!token) continue; await env.DB.prepare("DELETE FROM sessions WHERE token_hash = ?").bind(await sha(token)).run(); r.headers.append("Set-Cookie", setCookie("x".repeat(20), 0, n)); }
+    return r;
   }
 
   if (p === "/auth/forgot" && M === "POST") {
@@ -549,7 +579,7 @@ async function promote(env, u) {
 /* ================= pages for staff ================= */
 // every page of the panels starts with the same head: the shared kit, the language, icons, theme, pointer,
 // the form controls and the window bridge. One asset version (ASSET_V, set by tools/bump.js) for all of them.
-const ASSET_V = "mwchw2m2";
+const ASSET_V = "mwcjjjiv";
 const HEAD = `<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/ui/kit.css?v=${ASSET_V}">

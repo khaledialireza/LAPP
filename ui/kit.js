@@ -88,12 +88,16 @@
   //   o.next: where to come back after signing in (signed out → the sign-in page); o.signin: false → just an error
   //   o.keepalive: true → a PUT still arrives when the page closes (small bodies only)
   K.net = { busy: 0, done: 0 };
+  // a window of a linked account (?as=n, kept in the frame's name across pages) talks to the server as that account
+  K.AS = (() => { try { const n = +(new URLSearchParams(location.search).get("as") || (/^lapp-as(\d)$/.exec(window.name) || [])[1] || 0); if ([1, 2, 3].includes(n)) { window.name = "lapp-as" + n; return n; } } catch {} return 0; })();
+  if (K.AS) { const f0 = window.fetch.bind(window); window.fetch = (u, o = {}) => { const s = typeof u === "string" ? u : u && u.url || ""; if (/^\/api\//.test(s) || s.startsWith(location.origin + "/api/")) { const h = new Headers(o.headers || (typeof u !== "string" && u.headers) || {}); h.set("X-As", K.AS); o = { ...o, headers: h }; } return f0(u, o); }; }
   K.apiAt = (base, o = {}) => async (method, path, body, raw) => { K.net.busy++; try { return await call(base, o, method, path, body, raw); } finally { K.net.busy--; K.net.done++; } };
   const call = async (base, o, method, path, body, raw) => {
     if (typeof o === "string") o = { next: o };
     const headers = raw ? { "X-LAPP": "1", ...(raw.headers || {}) } : { ...(body ? { "Content-Type": "application/json" } : {}), ...(method !== "GET" ? { "X-LAPP": "1" } : {}) };
     const r = await fetch(base + path, { method, credentials: "same-origin", headers, body: raw ? raw.body : body ? JSON.stringify(body) : undefined, keepalive: !!o.keepalive && method === "PUT" });
     const ct = r.headers.get("Content-Type") || "", j = /json/.test(ct) || !ct ? await r.json().catch(() => ({})) : {};
+    if (r.status === 401 && K.AS) throw Object.assign(new Error("this account is signed out"), { status: 401, code: "auth" });
     if (r.status === 401 && o.signin !== false) { location.href = `/?login=1&next=${encodeURIComponent(o.next || (K.embed ? "/manage" : location.pathname))}`; throw new Error("signed out"); }
     if (!r.ok) throw Object.assign(new Error(j.error || r.statusText), j, { status: r.status });
     return j;

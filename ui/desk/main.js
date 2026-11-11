@@ -54,7 +54,11 @@
   }, true);
   addEventListener("panel:lang", () => { D.WN().forEach(w => w.fr.src = w.fr.src); D.drawDesk(); });
 
-  D.drawMe = () => { const a = $("#av"); if (!a) return; const x = document.createElement("span"); x.innerHTML = D.avatar(30); const n = x.firstChild; n.id = "av"; a.replaceWith(n); };
+  // the tray's avatars: one per signed-in account, overlapping; the account you work in now sits on top with a ring
+  D.drawMe = () => { const a = $("#av"); if (!a) return; const cur = (D.wsOf(D.CUR) || {}).as || 0, many = D.ACCTS.length > 1;
+    const list = (D.ACCTS.length ? D.ACCTS : [{ slot: 0, user: D.ME }]).slice().sort((x, y) => (x.slot === cur) - (y.slot === cur));
+    a.innerHTML = list.map(ac => `<span class="avw ${many && ac.slot === cur ? "act" : ""}" title="${D.esc(ac.user.name || "@" + ac.user.username)}">${K.avatar(ac.user, 26)}</span>`).join(""); };
+  D.on("ws", () => D.drawMe());
   D.on("lessons", () => D.drawTask && D.drawTask());
 
   /* ---------- start ---------- */
@@ -69,6 +73,7 @@
     bootTo(30);
     if (!m.user) { location.href = "/?login=1&next=/manage"; return; }
     D.ME = m.user; D.ORGS = m.orgs || [];
+    D.ACCTS = [{ slot: 0, user: D.ME, orgs: D.ORGS }, ...((await D.api("GET", "/auth/linked").catch(() => ({}))).accounts || [])];
     const d = await D.api("GET", "/desk").catch(() => ({ desk: null, files: [] }));
     D.DESK = { ...D.deskDefault(), ...(d.desk || {}) }; D.FILES = d.files || [];
     D.CUR = D.DESK.cur || "me";
@@ -78,7 +83,7 @@
     D.DESK.icons = (D.DESK.icons || []).filter(c => !c.up && (!c.file || D.FILES.some(f => f.id === c.file)));
     D.BIND = { ...D.DEF, ...(D.DESK.keys || {}) }; D.shareKeys();
     D.drawDesk(); bootTo(50);
-    (D.LS.get("lapp.theme", {}).restore === false ? [] : D.DESK.windows || []).forEach(x => { if (!x || typeof x.url !== "string") return; const w = D.openWin(x.url, { ws: D.WS.some(s => s.key === x.ws) ? x.ws : undefined, title: x.title, icon: x.icon, lesson: x.lesson, geo: { x: x.x, y: x.y, w: x.w, h: x.h }, min: x.min, quiet: 1 }); if (x.snap) { const cur = D.CUR; D.CUR = w.ws; D.snap(w, x.snap); D.CUR = cur; D.place(w); } });
+    (D.LS.get("lapp.theme", {}).restore === false ? [] : D.DESK.windows || []).forEach(x => { if (!x || typeof x.url !== "string" || !D.acctOf(D.asOf(x.url))) return; const w = D.openWin(x.url, { ws: D.WS.some(s => s.key === x.ws) ? x.ws : undefined, title: x.title, icon: x.icon, lesson: x.lesson, geo: { x: x.x, y: x.y, w: x.w, h: x.h }, min: x.min, quiet: 1 }); if (x.snap) { const cur = D.CUR; D.CUR = w.ws; D.snap(w, x.snap); D.CUR = cur; D.place(w); } });
     const a = (D.DESK.windows || []).findIndex(x => x && x.act && !x.min && (x.ws || "me") === D.CUR);
     D.focusWin(a > -1 && D.WN()[a] ? D.WN()[a] : D.topWin());
     D.emit("ws");

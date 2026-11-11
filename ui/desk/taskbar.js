@@ -19,6 +19,9 @@
       if (ai.length) ai.forEach(g => out.push({ ...g, kind: "ai" }));
       else { const by = {}; wins.filter(w => w.lesson).forEach(w => (by[w.lesson.id] = by[w.lesson.id] || []).push(w)); Object.values(by).filter(x => x.length > 1).forEach(x => out.push({ id: "l" + x[0].lesson.id, name: x[0].lesson.title, color: "#FF3D7F", wins: x, kind: "project" })); }
     }
+    // other signed-in accounts: their windows sit together in one capsule each, with the account's face on the left
+    if (D.ACCTS.length > 1) { const cur = (D.wsOf(D.CUR) || {}).as || 0;
+      D.ACCTS.filter(ac => ac.slot !== cur).forEach(ac => { const ws = D.WN().filter(w => (w.as || 0) === ac.slot); if (ws.length) out.push({ id: "acct" + ac.slot, name: ac.user.name || "@" + ac.user.username, color: D.wsOf(ac.ws[0]).color, wins: ws, kind: "acct", av: ac.user }); }); }
     return out;
   }
   function items() {
@@ -45,7 +48,7 @@
     $("#dock").innerHTML = apps.map((it, k) => {
       const on = it.wins.some(w => w.id === D.ACTW && !w.min), st = worst(it.wins), one = it.wins.length === 1 ? it.wins[0] : null;
       return `<button class="dk ${it.wins.length ? "run" : ""} ${on ? "on" : ""}" data-dk="${esc(it.app.id)}" draggable="true" style="--c:${it.app.color || ws.color}" title="${esc(it.app.title)}">${I(it.app.icon, 19) || D.IE(it.app.icon)}${it.wins.length ? `<span class="t">${esc(one ? one.title : it.app.title)}</span>` : ""}${it.wins.length > 1 ? `<span class="n">${it.wins.length}</span>` : ""}${CN[it.app.id] ? `<span class="wk" title="${CN[it.app.id]} waiting">${CN[it.app.id] > 99 ? "99+" : CN[it.app.id]}</span>` : ""}${st ? `<span class="sd ${st}"></span>` : ""}</button>`;
-    }).join("") + (caps.length ? `<span class="dsep"></span>` + caps.map(c => `<div class="dk grp" data-cap="${esc(c.id)}" style="--c:${c.color || "#8B5CF6"}" title="${esc(c.name)}"><span class="gn">${esc(c.name)}</span>${c.wins.map(w => `<span class="gi ${w.id === D.ACTW && !w.min ? "on" : ""}" data-gw="${w.id}" title="${esc(w.title)}">${I(w.icon, 15) || D.IE(w.icon)}${w.state ? `<span class="sd ${w.state}" style="top:1px;inset-inline-start:1px;width:6px;height:6px"></span>` : ""}</span>`).join("")}</div>`).join("") : "");
+    }).join("") + (caps.length ? `<span class="dsep"></span>` + caps.map(c => `<div class="dk grp" data-cap="${esc(c.id)}" style="--c:${c.color || "#8B5CF6"}" title="${esc(c.name)}">${c.av ? K.avatar(c.av, 22) : ""}<span class="gn">${esc(c.name)}</span>${c.wins.map(w => `<span class="gi ${w.id === D.ACTW && !w.min ? "on" : ""}" data-gw="${w.id}" title="${esc(w.title)}">${I(w.icon, 15) || D.IE(w.icon)}${w.state ? `<span class="sd ${w.state}" style="top:1px;inset-inline-start:1px;width:6px;height:6px"></span>` : ""}</span>`).join("")}</div>`).join("") : "");
     const run = D.running().length, un = D.NOTES.filter(n => !n.read).length;
     $("#trRun").innerHTML = run ? `<span class="spin"></span><span class="bd">${run}</span>` : I("hourglass", 17);
     $("#trBell").innerHTML = `${I("bell", 17)}${un ? `<span class="bd">${un}</span>` : ""}`;
@@ -61,11 +64,21 @@
   }
   function openApp(it, anchor) {
     if (!it.wins.length) return D.openWin(it.app.url);
-    if (it.wins.length === 1) { const w = it.wins[0]; return w.id === D.ACTW && !w.min ? D.minWin(w) : D.focusWin(w); }
+    if (it.wins.length === 1) { const w = it.wins[0]; if (w.ws !== D.CUR) { D.switchWs(w.ws); return D.focusWin(w); } return w.id === D.ACTW && !w.min ? D.minWin(w) : D.focusWin(w); }
     winList(it.wins, anchor, it.app.title);
   }
 
   /* ---------- workspace switcher ---------- */
+  // the clock: a month at a glance
+  let CALM = 0;
+  function calPop(anchor) {
+    const t = new Date(), base = new Date(t.getFullYear(), t.getMonth() + CALM, 1), first = (base.getDay() + 6) % 7, days = new Date(base.getFullYear(), base.getMonth() + 1, 0).getDate();
+    const cells = []; for (let i = 0; i < first; i++) cells.push(`<span class="d"></span>`);
+    for (let d = 1; d <= days; d++) cells.push(`<span class="d m ${!CALM && d === t.getDate() ? "t" : ""}">${d}</span>`);
+    const wd = [...Array(7)].map((_, i) => new Date(2024, 0, 1 + i).toLocaleDateString(D.loc(), { weekday: "narrow" }));
+    const p = D.pop(anchor, `<div class="calp"><div class="mh"><button data-cal="-1" aria-label="Previous month" style="transform:scaleX(-1)">${I("chevron", 15)}</button><b>${esc(base.toLocaleDateString(D.loc(), { month: "long", year: "numeric" }))}</b><button data-cal="1" aria-label="Next month">${I("chevron", 15)}</button></div><div class="calg">${wd.map(x => `<span class="h">${esc(x)}</span>`).join("")}${cells.join("")}</div></div>`);
+    if (p) p.onclick = e => { const b = e.target.closest("[data-cal]"); if (!b) return; e.stopPropagation(); CALM += +b.dataset.cal; calPop(anchor); };
+  }
   D.ACT.ws = () => { const i = D.WS.findIndex(w => w.key === D.CUR); D.switchWs(D.WS[(i + 1) % D.WS.length].key); D.toast(D.wsOf(D.CUR).name, { kind: "info" }); };
   function wsPop(anchor) {
     D.pop(anchor, `<h6>Workspaces</h6>` + D.WS.map(w => { const n = D.WN().filter(x => x.ws === w.key).length; return `<button class="pi ${w.key === D.CUR ? "sel" : ""}" data-ws="${esc(w.key)}"><span class="ri" style="background:${w.color}33;color:${w.color}">${I(w.key === "me" ? "home" : "school", 15)}</span><span class="tx"><b>${esc(w.name)}</b><small>${n} window${n === 1 ? "" : "s"}</small></span>${w.key === D.CUR ? `<span class="k">${I("check", 14)}</span>` : ""}</button>`; }).join("") + `<div class="pempty" style="padding:6px 8px;text-align:start">${esc(D.nice(D.BIND.ws))} · next workspace</div>`);
@@ -104,9 +117,9 @@
     const t = e.target; if (!t.closest) return;
     if (t.closest("#lb")) return D.ccOpen();
     if (t.closest("#wsb")) return $(".k-pop") ? D.closeMenus() : wsPop($("#wsb"));
-    const tr = t.closest("[data-tr]"); if (tr) { if (tr.classList.contains("open")) return D.closeMenus(); const k = tr.dataset.tr; if (k === "ai") return D.ccOpen("ai"); if (k === "running") return runPop(tr); if (k === "alerts") return bellPop(tr); if (k === "me") return D.ccOpen("all"); }
+    const tr = t.closest("[data-tr]"); if (tr) { if (tr.classList.contains("open")) return D.closeMenus(); const k = tr.dataset.tr; if (k === "ai") return D.ccOpen("ai"); if (k === "running") return runPop(tr); if (k === "alerts") return bellPop(tr); if (k === "me") return D.ccOpen("accounts"); if (k === "clock") return calPop(tr); }
     const dk = t.closest("[data-dk]"); if (dk) { D.closeMenus(); const it = appItem(dk.dataset.dk); return it && openApp(it, dk); }
-    const gw = t.closest("[data-gw]"); if (gw) { const w = D.W(gw.dataset.gw); return w.id === D.ACTW && !w.min ? D.minWin(w) : D.focusWin(w); }
+    const gw = t.closest("[data-gw]"); if (gw) { const w = D.W(gw.dataset.gw); if (w.ws !== D.CUR) { D.switchWs(w.ws); return D.focusWin(w); } return w.id === D.ACTW && !w.min ? D.minWin(w) : D.focusWin(w); }
     const cap = t.closest("[data-cap]"); if (cap) { const c = capOf(cap.dataset.cap); if (c) { c.wins.forEach(w => { w.min = false; D.place(w); }); c.wins.forEach(w => D.focusWin(w)); } return; }
     const pw = t.closest("[data-pw]"); if (pw) { const w = D.W(pw.dataset.pw), q = t.closest("[data-pq]"); if (q) { if (q.dataset.pq === "close") { D.closeWin(w); pw.remove(); if (!$$(".k-pop [data-pw]").length) D.closeMenus(); } else { D.snap(w, q.dataset.pq); D.closeMenus(); } return; } D.closeMenus(); return D.focusWin(w); }
     const wsx = t.closest("[data-ws]"); if (wsx) { D.closeMenus(); return D.switchWs(wsx.dataset.ws); }

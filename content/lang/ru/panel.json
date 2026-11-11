@@ -1607,5 +1607,20 @@
  "Numbers": "Числа",
  "Quick": "Быстро",
  "Add to the command center": "Добавить в командный центр",
- "Start with Ctrl, Cmd or Alt": "Начните с Ctrl, Cmd или Alt"
+ "Start with Ctrl, Cmd or Alt": "Начните с Ctrl, Cmd или Alt",
+ "Accounts": "Аккаунты",
+ "Find an account…": "Найти аккаунт…",
+ "Add account": "Добавить аккаунт",
+ "E-mail or username": "E-mail или имя пользователя",
+ "Continue": "Продолжить",
+ "Sign in": "Войти",
+ "Signing in…": "Вход…",
+ "Signed in": "Вход выполнен",
+ "Signed out": "Выход выполнен",
+ "Sign out of this account": "Выйти из этого аккаунта",
+ "Sign out of all": "Выйти из всех",
+ "Could not sign in": "Не удалось войти",
+ "this account is already signed in here": "этот аккаунт уже вошёл здесь",
+ "four accounts at most": "не больше четырёх аккаунтов",
+ "this account is signed out": "этот аккаунт вышел"
 }
