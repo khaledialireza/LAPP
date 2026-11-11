@@ -8,6 +8,11 @@
   st.textContent = `.k-menu.line{width:300px}.wcard{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.08)}.wcard .w{font-size:17px;font-weight:800}.wcard .p{font-size:11.5px;color:rgba(235,235,245,.45)}.wcard .m{margin-top:4px}.wcard .g{margin-top:4px;font-size:12px;color:rgba(235,235,245,.6)}
 .wtools{display:flex;align-items:center;gap:2px;margin-top:8px;flex-wrap:wrap}.wtools button{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;background:none;border:0;color:rgba(235,235,245,.7);cursor:pointer;font-size:14px}.wtools button:hover,.wtools button.on{background:rgba(139,92,246,.25);color:#F4F4F8}.wtools .sep{width:1px;height:16px;background:rgba(255,255,255,.12);margin:0 3px}
 .wacts2{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}.wacts2 button{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:8px;border:1px solid rgba(255,255,255,.14);background:none;color:#F4F4F8;font:600 12px Inter;cursor:pointer}.wacts2 button:hover,.wacts2 button.on{border-color:#8B5CF6;background:rgba(139,92,246,.18)}
+.k-menu.lsetm{width:300px}.lset{padding:12px;display:flex;flex-direction:column;gap:9px}.lset .chs{display:flex;flex-wrap:wrap;gap:4px}
+.lset .chs button{height:26px;padding:0 9px;border-radius:99px;border:1px solid rgba(255,255,255,.14);background:none;color:inherit;font:600 11.5px Inter,system-ui;cursor:pointer}.lset .chs button.on{background:rgba(139,92,246,.3);border-color:rgba(139,92,246,.7)}
+.lsl{display:grid;grid-template-columns:48px 1fr 40px;align-items:center;gap:8px;font-size:12px}.lsl input{width:100%;accent-color:#8B5CF6}.lsl b{text-align:end}
+.lset .lis{display:inline-flex;align-items:center;gap:6px;width:max-content;height:28px;padding:0 10px;border-radius:9px;border:1px solid rgba(255,255,255,.14);background:none;color:inherit;font:600 12px Inter,system-ui;cursor:pointer}
+.wnums{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;margin-top:8px}.wnums div{background:rgba(255,255,255,.05);border-radius:9px;padding:6px 8px}.wnums b{display:block;font:800 15px Inter,system-ui}.wnums small{font-size:10.5px;opacity:.65}
 .wcard .tag{display:inline-block;margin-top:6px;font-size:11px;padding:1px 8px;border-radius:99px;border:1px solid rgba(255,255,255,.14)}.wcard .tag.nw{color:#22D3EE}.wcard .tag.hw{color:#FBBF24}`;
   document.head.append(st);
 
@@ -22,14 +27,15 @@
   async function card(word, i) {
     if (!word) return "";
     const lang = ["en", "fa", "ru", "uk"].includes(S.tr) ? S.tr : "en";
-    const d = await dictFor(S.L.course, lang), key = d.forms.get(word.toLowerCase()), b = key ? d.base[key] : null, m = key ? d.mean[key] : null;
+    const [d, st] = await Promise.all([dictFor(S.L.course, lang), api("GET", `/lessons/${S.L.id}/word?w=${encodeURIComponent(word)}`).catch(() => null)]), key = d.forms.get(word.toLowerCase()), b = key ? d.base[key] : null, m = key ? d.mean[key] : null;
+    const nums = st ? `<div class="wnums">${[[st.here, "in this lesson"], [st.other, "in other lessons"], [st.first || "—", "first at"], [st.said == null ? "—" : st.said + "%", st.tries ? `said right · ${st.tries} tries` : "said right"]].map(([v, l]) => `<div><b>${E(String(v))}</b><small>${E(l)}</small></div>`).join("")}</div>` : "";
     const own = (S.L.data.dict || {})[word.toLowerCase()], ownMean = own && (own[lang] || own.en) || "";
     const mean = ownMean || (typeof m === "string" ? m : m && m.m || ""), gram = m && typeof m === "object" ? m.g || "" : "";
     const target = (S.L.data.targets || []).includes(word.toLowerCase()), fx = ((rows()[i] || {}).fx || {})[CUR.k] || {};
     const tools = `<div class="wtools">${[["b", "bold", "B"], ["i", "italic", "I"], ["u", "format", "U"]].map(([f, ic, t]) => `<button data-fx="${f}" class="${fx[f] ? "on" : ""}" title="${t}">${I(ic, 14)}</button>`).join("")}<span class="sep"></span>${Object.entries(window.STUDIO_COLORS || {}).map(([n, c]) => `<button data-fxc="${n}" title="Colour" style="color:${c}" class="${fx.c === n ? "on" : ""}">●</button>`).join("")}<span class="sep"></span><button data-fxh="amber" title="Highlight" class="${fx.h ? "on" : ""}">${I("highlight", 14)}</button><button data-fxf title="Font">${I("format", 14)}</button><button data-fxx title="Clear format">${I("x", 13)}</button></div>`;
     const acts = `<div class="wacts2">${own ? `<button data-wd="correct">${I("edit", 13)} Correct</button>` : `<button data-wd="save">${I("dictionary", 13)} Save to the lesson dictionary</button>`}<button data-wd="target" class="${target ? "on" : ""}">${I("star", 13)} ${target ? "Target word ✓" : "Target word"}</button></div>`;
     const hard = (((S.L.data.check && S.L.data.check.lines) || []).find(x => x.i === i) || {}).hard || [];
-    return `<div class="wcard"><div class="w">${E(word)}</div><div class="p">${own ? "Lesson dictionary" : key ? `LAPP dictionary · ${E(key.split("_")[0])}${b && b.p ? " · " + E(b.p) : ""}` : "not in the LAPP dictionary yet"}</div>${mean ? `<div class="m" dir="auto">${E(mean)}</div>` : ""}${gram ? `<div class="g" dir="auto">${E(gram)}</div>` : ""}${!key && !own ? `<span class="tag nw">new word for LAPP</span>` : ""}${hard.includes(word) ? ` <span class="tag hw">above ${E(S.L.level)}</span>` : ""}${tools}${acts}</div>`;
+    return `<div class="wcard"><div class="w">${E(word)}</div><div class="p">${own ? "Lesson dictionary" : key ? `LAPP dictionary · ${E(key.split("_")[0])}${b && b.p ? " · " + E(b.p) : ""}` : "not in the LAPP dictionary yet"}</div>${mean ? `<div class="m" dir="auto">${E(mean)}</div>` : ""}${gram ? `<div class="g" dir="auto">${E(gram)}</div>` : ""}${!key && !own ? `<span class="tag nw">new word for LAPP</span>` : ""}${hard.includes(word) ? ` <span class="tag hw">above ${E(S.L.level)}</span>` : ""}${tools}${acts}${nums}</div>`;
   }
 
   /* ---------- the line menu ---------- */
@@ -60,6 +66,7 @@
       it("Clear format", "x", () => clearFx(i, k))]]);
     L.push(["Structure", "structure", [it("New line above", "plus", () => insertLine(i - 1)), it("New line below", "plus", () => insertLine(i)), it("New scene from here", "scene", () => { const [si, li] = locate(i); if (li === 0) return toast("This line already starts a scene"); const rest = scenes[si].lines.splice(li); scenes.splice(si + 1, 0, { title: { de: `Szene ${si + 2}`, en: "", fa: "", ru: "", uk: "" }, lines: rest }); changed(); renderDoc(); }),
       ...(scenes.length > 1 ? scenes.map((s, si) => it(`Move to scene ${si + 1}`, "chevron", () => { const [from, li] = locate(i); if (from === si) return; const [x] = scenes[from].lines.splice(li, 1); scenes[si].lines.push(x); changed(); renderDoc(); }, { disabled: locate(i)[0] === si })) : [])]]);
+    L.push(["Line settings", "settings", null, { run: () => lineSettings(i) }]);
     L.push(["Delete the line", "trash", null, { danger: true, run: () => delLine(i), k: "Del" }]);
     return L;
   }
@@ -72,7 +79,29 @@
     const FE = { happy: [1.1, 1.06], excited: [1.2, 1.1], sad: [.9, .9], tired: [.92, .86], angry: [1.03, 1.08], polite: [1.02, .96], whisper: [1, .92] }[r.feel] || [1, 1], c = S.L.data.cast[r.who] || {};
     K.speak(r.de, { lang: S.L.course, rate: (r.speed || c.speed || .95) * FE[1], pitch: (c.gender === "m" ? .8 : 1.15) * FE[0] * Math.pow(2, (r.pitch || 0) / 12), volume: r.feel === "whisper" ? .5 : null });
   }
+  let AT = [80, 80];
+  // the line's settings, in place of the menu: speaker, feeling, speed, pitch, pause — they apply at once
+  function lineSettings(i) {
+    const r = rows()[i]; if (!r) return;
+    const c = S.L.data.cast[r.who] || {}, FE = [["", "Neutral"], ["happy", "Happy"], ["excited", "Excited"], ["polite", "Polite"], ["tired", "Tired"], ["sad", "Sad"], ["whisper", "Whisper"]];
+    const sl = (k, l, min, max, st, v, f) => `<label class="lsl"><span>${E(l)}</span><input type="range" data-ls="${k}" min="${min}" max="${max}" step="${st}" value="${v}"><b>${f(v)}</b></label>`;
+    const fmt = { speed: v => v + "×", pitch: v => (v > 0 ? "+" : "") + v, pause: v => v + " s" };
+    const html = `<div class="lset"><b>Line ${i + 1}</b>
+      <div class="chs">${Object.keys(S.L.data.cast || {}).map(w => `<button data-lwho="${E(w)}" class="${r.who === w ? "on" : ""}">${E(w)}</button>`).join("")}</div>
+      <div class="chs">${FE.map(([f, l]) => `<button data-lfeel="${f}" class="${(r.feel || "") === f ? "on" : ""}">${E(l)}</button>`).join("")}</div>
+      ${sl("speed", "Speed", .7, 1.3, .05, r.speed || c.speed || .95, fmt.speed)}${sl("pitch", "Pitch", -4, 4, .5, r.pitch || 0, fmt.pitch)}${sl("pause", "Pause", 0, 3, .1, r.pause ?? S.L.data.pause ?? .6, fmt.pause)}
+      <button class="lis" data-llisten>${I("listen", 14)} Listen</button></div>`;
+    K.menu(AT[0], AT[1], [], { className: "line lsetm", header: html, noSystem: true, ready: m => {
+      m.addEventListener("input", e => { const x = e.target.closest("[data-ls]"); if (!x) return; const k = x.dataset.ls, v = Number(x.value); x.nextElementSibling.textContent = fmt[k](v); r[k] = v; changed(); });
+      m.addEventListener("click", e => {
+        const w = e.target.closest("[data-lwho]"); if (w) { e.stopPropagation(); r.who = w.dataset.lwho; changed(); renderDoc(); return lineSettings(i); }
+        const f = e.target.closest("[data-lfeel]"); if (f) { e.stopPropagation(); if (f.dataset.lfeel) r.feel = f.dataset.lfeel; else delete r.feel; changed(); return lineSettings(i); }
+        if (e.target.closest("[data-llisten]")) { e.stopPropagation(); preview(r); }
+      });
+    } });
+  }
   async function open(x, y, i, word, k) {
+    AT = [x, y];
     close(); selLine(i); CUR.k = word ? (k ?? -1) : -1;
     const seq = ++OPENS;
     if (seq !== OPENS) return;

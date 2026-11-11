@@ -44,3 +44,9 @@ Source: lapp-desk / lapp-blueprint / studio-v3 mockups and their notes. Done ite
   voice library: designed voices from a description (AI, or key words) and cloned voices with written consent + 10 s recording;
   right-click on line clips, sound clips, tracks and speakers; a Voice menu in the window.
 - [ ] 5 Cast (voice per language, AI tag, personality shapes lines).
+
+## Command center (built after the mockups were approved)
+- [x] Loading: frosted glass for the desktop, each window its own cover.
+- [x] Command center arranged by the AI (or rules), one field, settings and widgets inside, footer of buttons; Dashboard app removed.
+- [x] Command center part in the Settings app.
+- [x] Right-click: one field (search, Enter asks the AI), Line settings drawer; small line bar above the line; word card on its own with numbers.

@@ -633,6 +633,31 @@ Plan 1–8 lessons. "title" in the course language, "brief" in English: the situ
     return H.json({ ok: true });
   }
 
+  /* ---- a word's numbers, for the word card: where it is used and how learners say it ---- */
+  if ((m = p.match(/^\/lessons\/(\d+)\/word$/)) && M === "GET") {
+    const l = await lessonIn(env, H, sc, int(m[1])), w = str(url.searchParams.get("w"), 40).toLowerCase();
+    if (!w || /\s/.test(w)) throw H.fail("one word");
+    const re = new RegExp(`(?<![\\p{L}\\p{M}])${w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?![\\p{L}\\p{M}])`, "iu");
+    const all = (await env.DB.prepare("SELECT id, level, data FROM lessons WHERE org_id = ? AND course = ? ORDER BY updated_at DESC LIMIT 400").bind(sc.org, l.course).all()).results;
+    const LV = ["A1", "A2", "B1", "B2", "C1", "C2"]; let here = 0, lessons = 0, first = "";
+    const hits = [];
+    for (const x of all) {
+      const lines = (JSON.parse(x.data || "{}").scenes || []).flatMap(s => s.lines || []), idx = lines.map((ln, i) => re.test(String(ln.de || "")) ? i : -1).filter(i => i >= 0);
+      if (!idx.length) continue;
+      lessons++; if (x.id === l.id) here = idx.length;
+      if (LV.includes(x.level) && (!first || LV.indexOf(x.level) < LV.indexOf(first))) first = x.level;
+      if (hits.length < 20) hits.push([APP_ID(x.id), idx]);
+    }
+    let said = null, tries = 0;
+    if (hits.length) {
+      const rs = (await env.DB.prepare(`SELECT lesson, line, AVG(value) avg, COUNT(*) n FROM lesson_events WHERE kind = 'say' AND line >= 0 AND lesson IN (${hits.map(() => "?").join(",")}) GROUP BY lesson, line`).bind(...hits.map(h => h[0])).all()).results;
+      let sum = 0;
+      for (const r of rs) { const h = hits.find(x => x[0] === r.lesson); if (h && h[1].includes(r.line)) { sum += r.avg * r.n; tries += r.n; } }
+      if (tries) said = Math.round(sum / tries * 100);
+    }
+    return H.json({ here, other: Math.max(0, lessons - (here ? 1 : 0)), first, said, tries });
+  }
+
   /* ---- insights ---- */
   if ((m = p.match(/^\/lessons\/(\d+)\/insights$/)) && M === "GET") {
     const l = await lessonIn(env, H, sc, int(m[1]));
