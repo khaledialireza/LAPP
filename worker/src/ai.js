@@ -14,6 +14,7 @@
 //
 // Every task asks for JSON: the prompt carries an example of the shape, the answer is read
 // leniently (code fences, text around it) and checked; one retry if it isn't usable.
+import { str } from "./util.js";
 
 export const KINDS = {
   workers: { name: "LAPP AI (built in)", key: false, url: "", models: ["@cf/meta/llama-3.3-70b-instruct-fp8-fast", "@cf/google/gemma-3-12b-it", "@cf/mistralai/mistral-small-3.1-24b-instruct", "@cf/qwen/qwq-32b", "@cf/meta/llama-4-scout-17b-16e-instruct"] },
@@ -169,7 +170,6 @@ export async function test(env, p) {
 export async function adminAi(req, env, H, p) {
   const M = req.method;
   await H.need(req, env, ["admin"]);
-  const str = (v, n) => String(v ?? "").trim().slice(0, n);
   const view = x => ({ id: x.id, name: x.name, kind: x.kind, model: x.model, base_url: x.base_url, enabled: !!x.enabled, hasKey: !!x.api_key, keyEnd: x.api_key ? x.api_key.slice(-4) : "", uses: x.uses, used_at: x.used_at });
   let m;
   if (p === "" && M === "GET") {

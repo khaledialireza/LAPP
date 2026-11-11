@@ -3,9 +3,7 @@
 // Data, kept in the lesson: line.fx {wordIndex: {b,i,u,c,h,f}} · line.style {b,i,u,c,h,f} · data.dict {word: {en,fa,ru,uk,note}} · data.targets [word]
 (function () {
   "use strict";
-  const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
-  const E = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
-  const I = (n, s = 15) => window.Icon ? Icon(n, s) : "";
+  const { $, $$, esc: E } = K, I = (n, s = 15) => K.I(n, s);
   const st = document.createElement("style");
   st.textContent = `.fx-b{font-weight:800}.fx-i{font-style:italic}.fx-u{text-decoration:underline;text-underline-offset:3px}
 .fx-f-serif{font-family:Georgia,"Times New Roman",serif}.fx-f-mono{font-family:ui-monospace,Menlo,monospace}.fx-f-round{font-family:"Comic Sans MS","Chalkboard SE",Inter,sans-serif}

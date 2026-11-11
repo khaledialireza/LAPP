@@ -11,6 +11,7 @@
 // by default LAPP's own, an open-source model on our Cloudflare account). The voice is made
 // with Piper in .github/workflows/studio-voice.yml (_studio/job.py), so it costs nothing.
 import * as AI from "./ai.js";
+import { str, int, aiLimit, revConflict, blobPut, blobGet } from "./util.js";
 
 export const TR = ["en", "fa", "ru", "uk"];                       // translation languages
 const LANG_NAME = { en: "English", fa: "Persian", ru: "Russian", uk: "Ukrainian" };
@@ -26,11 +27,8 @@ export const TOPICS = ["daily", "travel", "food", "health", "work", "home", "cit
 const NARRATOR = /^(erzähler|erzählerin|verteller|vertelster|narrator|narratorka|narrador)$/i;
 const MAX_WORDS = { A1: 10, A2: 14, B1: 20, B2: 26, C1: 32, C2: 40 };
 const STAFF = ["designer", "manager", "admin"];
-const BLOB_PART = 1_500_000;                                   // bytes per D1 row
 export const APP_ID = id => 100000 + id;                        // the id the app uses (static lessons stay below)
 
-const str = (v, n) => String(v ?? "").trim().slice(0, n);
-const int = v => Number.parseInt(v, 10) || 0;
 const pick = (v, list, d) => list.includes(v) ? v : d;
 const enc = new TextEncoder();
 const sha = async s => btoa(String.fromCharCode(...new Uint8Array(await crypto.subtle.digest("SHA-256", enc.encode(s)))));
@@ -201,7 +199,7 @@ async function jobApi(req, env, H, id, rest) {
     try { timings = JSON.parse(new URL(req.url).searchParams.get("timings") || "[]"); } catch {}
     const key = `lesson/${l.id}/${job.rev}`;
     const st = [env.DB.prepare("DELETE FROM blobs WHERE key LIKE ?").bind(`lesson/${l.id}/%`)];
-    for (let i = 0, p = 0; i < buf.length; i += BLOB_PART, p++) st.push(env.DB.prepare("INSERT INTO blobs (key, part, data) VALUES (?, ?, ?)").bind(key, p, buf.subarray(i, i + BLOB_PART)));
+    st.push(...blobPut(env, key, buf));
     // the published lesson keeps playing its own audio, so only drafts lose the old one
     if (l.status === "published") st.shift();
     st.push(env.DB.prepare("UPDATE lessons SET audio_rev = ?, audio_size = ?, timings = ?, status = CASE WHEN status = 'draft' THEN 'review' ELSE status END WHERE id = ?").bind(job.rev, buf.length, JSON.stringify(timings), l.id));
@@ -214,10 +212,9 @@ async function jobApi(req, env, H, id, rest) {
 
 /* ================= audio from D1, with byte ranges ================= */
 async function blobResponse(req, env, key, size, extra = {}) {
-  const parts = (await env.DB.prepare("SELECT part, data FROM blobs WHERE key = ? ORDER BY part").bind(key).all()).results;
-  if (!parts.length) return new Response("no audio yet", { status: 404 });
-  const all = new Uint8Array(size || parts.reduce((n, p) => n + new Uint8Array(p.data).length, 0));
-  let o = 0; for (const p of parts) { const b = new Uint8Array(p.data); all.set(b, o); o += b.length; }
+  const all = await blobGet(env, key, size);
+  if (!all) return new Response("no audio yet", { status: 404 });
+  const o = all.length;
   const h = { "Content-Type": "audio/mpeg", "Accept-Ranges": "bytes", "Cache-Control": "private, max-age=3600", ...extra };
   const m = /^bytes=(\d*)-(\d*)$/.exec(req.headers.get("Range") || "");
   if (m) {
@@ -491,7 +488,7 @@ export async function lessonsApi(req, env, H, p, url, ctx) {
   if ((m = p.match(/^\/lessons\/(\d+)$/)) && M === "PUT") {
     const l = await lessonIn(env, H, sc, int(m[1]));
     const b = await H.body(req);
-    if (b.rev !== l.rev) throw H.fail("someone else changed this lesson — reload it", 409, { code: "rev" });
+    if (b.rev !== l.rev) throw revConflict(H);
     const sets = ["rev = rev + 1", "updated_at = ?"], vals = [t];
     for (const [k, n] of [["title", 80], ["brief", 2000], ["series", 60]]) if (b[k] !== undefined) { sets.push(`${k} = ?`); vals.push(str(b[k], n)); }
     if (b.course !== undefined) { sets.push("course = ?"); vals.push(pick(b.course, Object.keys(COURSES), l.course)); }
@@ -508,7 +505,7 @@ export async function lessonsApi(req, env, H, p, url, ctx) {
       if (l.data.scenes && l.data.scenes.length) await keepVersion(env, H, sc, l, str(b.note, 120) || "edited", !!b.byAi);
     }
     const r = await env.DB.prepare(`UPDATE lessons SET ${sets.join(", ")} WHERE id = ? AND rev = ? RETURNING rev`).bind(...vals, l.id, l.rev).first();
-    if (!r) throw H.fail("someone else changed this lesson — reload it", 409, { code: "rev" });
+    if (!r) throw revConflict(H);
     if (b.access !== undefined) await settleAccess(env, sc.org);
     return H.json({ rev: r.rev });
   }
@@ -521,7 +518,7 @@ export async function lessonsApi(req, env, H, p, url, ctx) {
   /* ---- AI: write the whole script (streamed, so the person watches it being written) ---- */
   if ((m = p.match(/^\/lessons\/(\d+)\/write$/)) && M === "POST") {
     const l = await lessonIn(env, H, sc, int(m[1]));
-    await limitAi(env, H, sc);
+    await aiLimit(env, H, sc.u.id);
     await AI.providerFor(env, "write").catch(e => { throw H.fail(e.message, e.status || 503, e.extra); });
     const ids = l.data.characters || [];
     const chars = ids.length ? (await env.DB.prepare(`SELECT * FROM characters WHERE org_id = ? AND id IN (${ids.map(() => "?").join(",")})`).bind(sc.org, ...ids).all()).results : [];
@@ -571,7 +568,7 @@ export async function lessonsApi(req, env, H, p, url, ctx) {
   /* ---- AI: a pasted text or story → scenes and speakers, the words stay exactly as written ---- */
   if ((m = p.match(/^\/lessons\/(\d+)\/import$/)) && M === "POST") {
     const l = await lessonIn(env, H, sc, int(m[1]));
-    await limitAi(env, H, sc);
+    await aiLimit(env, H, sc.u.id);
     const text = str((await H.body(req)).text, 12000);
     if (text.length < 10) throw H.fail("paste a text first");
     const got = await ask(env, H, "write", {
@@ -593,20 +590,20 @@ ${text}`
   /* ---- AI: fill the missing translations ---- */
   if ((m = p.match(/^\/lessons\/(\d+)\/translate$/)) && M === "POST") {
     const l = await lessonIn(env, H, sc, int(m[1]));
-    await limitAi(env, H, sc);
+    await aiLimit(env, H, sc.u.id);
     const d = l.data;
     let added;
     await keepVersion(env, H, sc, { ...l, data: JSON.stringify(l.data) }, "before the AI translated", true);
     try { added = await translateAll(env, l, d); } catch (e) { throw H.fail(e.message, e.status || 502, e.extra); }
     const r = await env.DB.prepare("UPDATE lessons SET data = ?, rev = rev + 1, updated_at = ? WHERE id = ? AND rev = ? RETURNING rev").bind(JSON.stringify(d), H.now(), l.id, l.rev).first();
-    if (!r) throw H.fail("someone else changed this lesson — reload it", 409, { code: "rev" });
+    if (!r) throw revConflict(H);
     return H.json({ data: d, rev: r.rev, added });
   }
 
   /* ---- AI: other versions of one line (simpler, more natural, …) ---- */
   if ((m = p.match(/^\/lessons\/(\d+)\/rewrite$/)) && M === "POST") {
     const l = await lessonIn(env, H, sc, int(m[1]));
-    await limitAi(env, H, sc);
+    await aiLimit(env, H, sc.u.id);
     const b = await H.body(req);
     const rows = l.data.scenes.flatMap(s => s.lines), i = int(b.line);
     const ln = rows[i]; if (!ln) throw H.fail("no such line");
@@ -630,7 +627,7 @@ ${text}`
   /* ---- AI: how hard is each line ---- */
   if ((m = p.match(/^\/lessons\/(\d+)\/check$/)) && M === "POST") {
     const l = await lessonIn(env, H, sc, int(m[1]));
-    await limitAi(env, H, sc);
+    await aiLimit(env, H, sc.u.id);
     const rows = l.data.scenes.flatMap(s => s.lines);
     if (!rows.length) throw H.fail("write the text first");
     const got = await ask(env, H, "check", {
@@ -644,13 +641,13 @@ ${text}`
     const check = { rev: l.rev, at: H.now(), lines: got.lines || [], grammar: got.grammar || [], note: got.note || "" };
     l.data.check = check;
     const r = await env.DB.prepare("UPDATE lessons SET data = ?, rev = rev + 1 WHERE id = ? AND rev = ? RETURNING rev").bind(JSON.stringify(l.data), l.id, l.rev).first();
-    if (!r) throw H.fail("someone else changed this lesson — reload it", 409, { code: "rev" });
+    if (!r) throw revConflict(H);
     return H.json({ check, rev: r.rev });
   }
 
   /* ---- AI: plan a series from one sentence ---- */
   if (p === "/plan" && M === "POST") {
-    await limitAi(env, H, sc);
+    await aiLimit(env, H, sc.u.id);
     const b = await H.body(req);
     const want = str(b.prompt, 1000); if (!want) throw H.fail("say what you want");
     const existing = (await env.DB.prepare("SELECT title, level, topic, course FROM lessons WHERE org_id = ? ORDER BY id DESC LIMIT 60").bind(sc.org).all()).results;
@@ -741,13 +738,6 @@ Plan 1–8 lessons. "title" in the course language, "brief" in English: the situ
   }
 
   throw H.fail("not found", 404);
-}
-
-// at most 80 AI requests a day per person
-async function limitAi(env, H, sc) {
-  const day = Math.floor(H.now() / H.DAY);
-  const r = await env.DB.prepare("INSERT INTO hits (key, n, reset) VALUES (?1, 1, ?2) ON CONFLICT(key) DO UPDATE SET n = n + 1 RETURNING n").bind(`ai:${sc.u.id}:${day}`, (day + 2) * H.DAY).first();
-  if (r.n > 80) throw H.fail("the daily AI limit is reached — try again tomorrow", 429);
 }
 
 // what a model wrote, made complete: strings where objects are missing, every language present

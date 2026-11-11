@@ -25,7 +25,7 @@
     const el = document.createElement("section"); el.className = "wnd"; el.dataset.w = w.id;
     el.innerHTML = `<div class="wbar"><button class="wback" data-wc="back" hidden aria-label="Back">${I("back")}</button><span class="wi"></span><span class="tt"></span><span class="otag" hidden></span><nav class="wmenu" aria-label="Menus"></nav><span class="sp"></span><div class="wacts"></div>
       <div class="wctl"><button class="ai" data-wc="ai" title="Ask the AI about this window">${I("ai", 15)}</button><button data-wc="min" title="Minimise">${I("minus", 15)}</button><button data-wc="max" title="Maximise · rest the pointer here for layouts">${I("square", 13)}</button><button class="cl" data-wc="close" title="Close">${I("x", 15)}</button></div></div>
-      <div class="wfr"><iframe src="${esc(embed(url))}"></iframe></div>${["n", "s", "e", "w", "ne", "nw", "se", "sw"].map(d => `<i class="rz ${d}" data-rz="${d}"></i>`).join("")}`;
+      <div class="wfr"><iframe src="${esc(embed(url))}"></iframe></div>${["n", "s", "e", "w", "ne", "nw", "se", "sw"].map(d => `<i class="rz ${d === "sw" ? "bl" : d}" data-rz="${d}"></i>`).join("")}`;
     w.el = el; w.fr = $("iframe", el); WN.push(w); $("#wins").append(el);
     dress(w); place(w);
     if (!o.quiet) { D.recent(w); D.focusWin(w); } else { el.style.zIndex = ++Z; D.emit("wins"); }
@@ -56,7 +56,7 @@
     (c.actions || []).forEach(a => { if (a.group) { if (!groups[a.group]) { groups[a.group] = []; out.push({ seg: groups[a.group] }); } groups[a.group].push(a); } else out.push(a); });
     const btn = a => { const ic = window.Icon && Icon.fromEmoji(a.icon); return `<button class="wa ${a.primary ? "pr" : ""} ${a.danger ? "dz" : ""} ${a.on ? "on" : ""}" data-wa="${a.i}" ${a.disabled ? "disabled" : ""} title="${esc(a.label)}">${ic ? I(ic, 14) : a.icon ? `<span>${esc(a.icon)}</span>` : ""}${a.iconOnly && (ic || a.icon) ? "" : `<span class="wl">${esc(a.label)}</span>`}</button>`; };
     const box = $(".wacts", w.el); box.classList.remove("compact");
-    box.innerHTML = out.map(x => x.seg ? `<span class="wseg">${x.seg.map(btn).join("")}</span>` : btn(x)).join("");
+    box.innerHTML = out.map(x => x.seg ? `<span class="seg">${x.seg.map(btn).join("")}</span>` : btn(x)).join("");
     requestAnimationFrame(() => { if (box.scrollWidth > box.clientWidth + 1) box.classList.add("compact"); });
   }
   function winMenu(w) {
@@ -69,9 +69,9 @@
   }
   function openMenu(w, b) {
     const i = b.dataset.wm, list = i === "help" ? [{ label: "About " + w.title, icon: "info", run: () => D.info(w, b) }, { label: "Guide", icon: "guide", run: () => D.guide() }, { label: "Keyboard shortcuts", icon: "keyboard", run: () => D.keysSheet() }, "-", { label: "Ask the AI about it", icon: "ai", run: () => D.ask(`Explain the window “${w.title}” and what I can do there`, w) }] : i === "win" ? winMenu(w) : (w.chrome.menus[+i].items || []).map(it => it === "-" ? "-" : { ...it, run: () => post(w, { t: "cmd", kind: "menu", id: it.id }) });
-    const r = b.getBoundingClientRect();
-    D.cmenu(r.left, r.bottom + 4, list.map(it => it === "-" ? "-" : [it.label, it.key || "", it.run, it.danger, (window.Icon && (Icon.names.includes(it.icon) ? it.icon : Icon.fromEmoji(it.icon))) || "", { on: it.on, disabled: it.disabled }]));
-    b.classList.add("open");
+    // a page may still name its icons with an emoji: they become ours
+    const icons = it => it === "-" || !it || it.head ? it : { ...it, icon: window.Icon && it.icon ? (Icon.names.includes(it.icon) ? it.icon : Icon.fromEmoji(it.icon)) || "" : it.icon, sub: it.sub && it.sub.map(icons) };
+    K.menuAt(b, list.map(icons));
   }
 
   function place(w) { Object.assign(w.el.style, { left: w.x + "px", top: w.y + "px", width: w.w + "px", height: w.h + "px" }); w.el.classList.toggle("min", !!w.min); w.el.classList.toggle("full", w.snap === "max"); w.el.classList.toggle("ows", w.ws !== D.CUR); }
@@ -159,38 +159,36 @@
   });
   document.addEventListener("click", e => { const sk = e.target.closest && e.target.closest("[data-snapk]"); if (sk) { snap(W(sk.dataset.w), sk.dataset.snapk); D.closeMenus(); } });
 
-  /* ---------- moving and resizing ---------- */
-  let mv = null;
+  /* ---------- moving and resizing (the shared K.drag) ---------- */
   document.addEventListener("pointerdown", e => {
     const t = e.target; if (e.button || !t.closest) return;
-    const rz = t.closest("[data-rz]"); if (rz) { const w = W(rz.closest(".wnd").dataset.w); D.focusWin(w); if (w.snap) { w.snap = null; w.el.classList.remove("full"); } mv = { k: "r", w, d: rz.dataset.rz, sx: e.clientX, sy: e.clientY, o: { x: w.x, y: w.y, w: w.w, h: w.h } }; document.body.classList.add("dragging"); e.preventDefault(); return; }
-    const wb = t.closest(".wbar"); if (wb && !t.closest("button") && innerWidth > 760) { const w = W(wb.parentElement.dataset.w); D.focusWin(w); const r = w.el.getBoundingClientRect(); mv = { k: "w", w, dx: e.clientX - r.left, dy: e.clientY - r.top, sx: e.clientX, sy: e.clientY }; document.body.classList.add("dragging"); e.preventDefault(); return; }
+    const rz = t.closest("[data-rz]");
+    if (rz) {
+      const w = W(rz.closest(".wnd").dataset.w), d = rz.dataset.rz; D.focusWin(w); if (w.snap) { w.snap = null; w.el.classList.remove("full"); }
+      const o = { x: w.x, y: w.y, w: w.w, h: w.h }; e.preventDefault();
+      return K.drag(e, { move: (dx, dy) => {
+        const A = AREA(), mw = Math.min(640, A.width), mh = 240;
+        if (d.includes("e")) w.w = Math.max(mw, o.w + dx);
+        if (d.includes("s")) w.h = Math.max(mh, o.h + dy);
+        if (d.includes("w")) { w.w = Math.max(mw, o.w - dx); w.x = o.x + o.w - w.w; }
+        if (d.includes("n")) { w.h = Math.max(mh, o.h - dy); w.y = Math.max(0, o.y + o.h - w.h); }
+        place(w); drawChrome(w);
+      }, end: () => D.save() });
+    }
+    const wb = t.closest(".wbar");
+    if (wb && !t.closest("button") && innerWidth > 760) {
+      const w = W(wb.parentElement.dataset.w); D.focusWin(w);
+      const r = w.el.getBoundingClientRect(); let ox = e.clientX - r.left; const oy = e.clientY - r.top; let edge = null; e.preventDefault();
+      return K.drag(e, { move: (dx, dy, ev) => {
+        const A = AREA();
+        // a snapped window comes loose once it is pulled a little, at its old size
+        if (w.snap) { if (Math.abs(dx) + Math.abs(dy) < 8) return; const p = w.prev || { w: w.w * .7, h: w.h * .8 }; w.snap = null; w.w = p.w; w.h = p.h; ox = Math.min(ox, w.w / 2); w.el.classList.remove("full"); }
+        w.x = Math.round(ev.clientX - A.left - ox); w.y = Math.max(0, Math.round(ev.clientY - A.top - oy)); place(w);
+        const px = ev.clientX - A.left, py = ev.clientY - A.top, g = $("#ghost");
+        edge = py < 4 ? "max" : px < 8 ? (py < A.height * .2 ? "tl" : py > A.height * .8 ? "bl" : "left") : px > A.width - 8 ? (py < A.height * .2 ? "tr" : py > A.height * .8 ? "br" : "right") : null;
+        g.hidden = !edge; if (edge) { const [a, b, c, h] = SNAP[edge]; Object.assign(g.style, { left: a * A.width + 6 + "px", top: b * A.height + 6 + "px", width: c * A.width - 12 + "px", height: h * A.height - 12 + "px", zIndex: Z + 1 }); }
+      }, end: () => { if (edge) snap(w, edge); $("#ghost").hidden = true; D.save(); } });
+    }
     const wn = t.closest(".wnd"); if (wn) { const w = W(wn.dataset.w); if (w.id !== D.ACTW) D.focusWin(w); }
-  });
-  document.addEventListener("pointermove", e => {
-    if (!mv) return;
-    const A = AREA(), w = mv.w;
-    if (mv.k === "w") {
-      if (w.snap) { if (Math.abs(e.clientX - mv.sx) + Math.abs(e.clientY - mv.sy) < 8) return; const p = w.prev || { w: w.w * .7, h: w.h * .8 }; w.snap = null; w.w = p.w; w.h = p.h; mv.dx = Math.min(mv.dx, w.w / 2); w.el.classList.remove("full"); }
-      w.x = Math.round(e.clientX - A.left - mv.dx); w.y = Math.max(0, Math.round(e.clientY - A.top - mv.dy)); place(w);
-      const px = e.clientX - A.left, py = e.clientY - A.top, g = $("#ghost");
-      mv.snap = py < 4 ? "max" : px < 8 ? (py < A.height * .2 ? "tl" : py > A.height * .8 ? "bl" : "left") : px > A.width - 8 ? (py < A.height * .2 ? "tr" : py > A.height * .8 ? "br" : "right") : null;
-      g.hidden = !mv.snap; if (mv.snap) { const [a, b, c, d] = SNAP[mv.snap]; Object.assign(g.style, { left: a * A.width + 6 + "px", top: b * A.height + 6 + "px", width: c * A.width - 12 + "px", height: d * A.height - 12 + "px", zIndex: Z + 1 }); }
-      return;
-    }
-    if (mv.k === "r") {
-      const o = mv.o, dx = e.clientX - mv.sx, dy = e.clientY - mv.sy, d = mv.d, mw = Math.min(640, A.width), mh = 240;
-      if (d.includes("e")) w.w = Math.max(mw, o.w + dx);
-      if (d.includes("s")) w.h = Math.max(mh, o.h + dy);
-      if (d.includes("w")) { w.w = Math.max(mw, o.w - dx); w.x = o.x + o.w - w.w; }
-      if (d.includes("n")) { w.h = Math.max(mh, o.h - dy); w.y = Math.max(0, o.y + o.h - w.h); }
-      place(w); drawChrome(w);
-    }
-  });
-  document.addEventListener("pointerup", () => {
-    if (!mv) return;
-    document.body.classList.remove("dragging");
-    if (mv.k === "w") { if (mv.snap) snap(mv.w, mv.snap); $("#ghost").hidden = true; }
-    D.save(); mv = null;
   });
 })();

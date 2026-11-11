@@ -22,6 +22,7 @@ import MANAGE from "./manage.html";
 import FILES from "./files.html";
 import SETTINGS from "./settings.html";
 import { deskApi, worksHere } from "./desk.js";
+import { aiLimit } from "./util.js";
 import SCHOOL from "./school.html";
 import { orgApi, orgsList, adminOrgs } from "./school.js";
 export { Room } from "./room.js";
@@ -52,25 +53,9 @@ export default {
       if (p.startsWith("/api/")) return await api(req, env, url, ctx);
       if (p === "/admin" || p === "/admin/") return await page(req, env, ADMIN, ["manager", "admin"], "/admin");
       // the one place where everyone who isn't only a learner works: LAPP staff, school admins, teachers, finance
-      if (p === "/manage" || p === "/manage/") {
-        const u = env.DB ? await currentUser(req, env) : null;
-        if (!u) return Response.redirect(`${url.origin}/?login=1&next=/manage`, 302);
-        if (!await worksHere(env, u, STAFF)) return Response.redirect(`${url.origin}/`, 302);
-        return await page(req, env, MANAGE, ROLES, "/manage");
-      }
-      // Files: every file of the system in one explorer (runs as a window of /manage)
-      if (p === "/files" || p === "/files/") {
-        const u = env.DB ? await currentUser(req, env) : null;
-        if (!u) return Response.redirect(`${url.origin}/?login=1&next=/manage`, 302);
-        if (!await worksHere(env, u, STAFF)) return Response.redirect(`${url.origin}/`, 302);
-        return await page(req, env, FILES, ROLES, "/files");
-      }
-      if (p === "/settings" || p === "/settings/") {
-        const u = env.DB ? await currentUser(req, env) : null;
-        if (!u) return Response.redirect(`${url.origin}/?login=1&next=/manage`, 302);
-        if (!await worksHere(env, u, STAFF)) return Response.redirect(`${url.origin}/`, 302);
-        return await page(req, env, SETTINGS, ROLES, "/settings");
-      }
+      // the work desktop and the apps that only live in its windows (Files, Settings)
+      const desk = DESK_PAGES[p.replace(/\/$/, "")];
+      if (desk) return await deskPage(req, env, url, desk);
       // a school's portal: anyone signed in gets the page; the API decides what they may see
       let sm;
       if ((sm = p.match(/^\/s\/([a-z0-9][a-z0-9-]{1,30})\/?$/))) return await page(req, env, SCHOOL, ROLES, `/s/${sm[1]}`);
@@ -173,6 +158,15 @@ async function me(env, req, u) {
   return { user: publicUser(u), plan: await planOf(env, req, u), country: country(req), orgs };
 }
 // what school.js needs from here
+// the work desktop and the apps that only live in its windows; only people who work in /manage may open them
+const DESK_PAGES = { "/manage": [MANAGE, "/manage"], "/files": [FILES, "/files"], "/settings": [SETTINGS, "/settings"] };
+async function deskPage(req, env, url, [html, path]) {
+  const u = env.DB ? await currentUser(req, env) : null;
+  if (!u) return Response.redirect(`${url.origin}/?login=1&next=/manage`, 302);
+  if (!await worksHere(env, u, STAFF)) return Response.redirect(`${url.origin}/`, 302);
+  return await page(req, env, html, ROLES, path);
+}
+
 const H = {
   json, fail, body, need: (req, env, roles) => need(req, env, roles), sendMail, newCode, hashPassword, rand, b64url,
   appUrl, cleanEmail, cleanUser, EMAIL, USERNAME, RESERVED, now, DAY, hasEmail
@@ -361,9 +355,7 @@ async function api(req, env, url, ctx) {
     const u = await need(req, env);
     const orgs = (await env.DB.prepare("SELECT o.name, m.role FROM org_members m JOIN orgs o ON o.id = m.org_id WHERE m.user_id = ? AND m.active = 1 AND m.role IN ('admin','teacher','finance') AND o.disabled = 0").bind(u.id).all()).results;
     if (!STAFF.includes(u.role) && !orgs.length) throw fail("the assistant is for staff and school teams", 403);
-    const day = Math.floor(now() / DAY);
-    const n = await env.DB.prepare("INSERT INTO hits (key, n, reset) VALUES (?1, 1, ?2) ON CONFLICT(key) DO UPDATE SET n = n + 1 RETURNING n").bind(`ai:${u.id}:${day}`, (day + 2) * DAY).first();
-    if (n.n > 80) throw fail("the daily AI limit is reached — try again tomorrow", 429);
+    await aiLimit(env, H, u.id);
     const b = await body(req), s = (v, k) => String(v ?? "").replace(/\s+/g, " ").trim().slice(0, k);
     const q = s(b.q, 1200); if (!q) throw fail("ask something");
     const places = (Array.isArray(b.places) ? b.places : []).slice(0, 60).map(x => ({ id: s(x.id, 12), label: s(x.label, 80) })).filter(x => x.id && x.label);
@@ -391,9 +383,7 @@ ${hist ? "Conversation so far:\n" + hist + "\n" : ""}Question: ${q}`;
     const u = await need(req, env);
     const orgs = (await env.DB.prepare("SELECT 1 FROM org_members m WHERE m.user_id = ? AND m.active = 1 AND m.role IN ('admin','teacher','finance')").bind(u.id).all()).results;
     if (!STAFF.includes(u.role) && !orgs.length) throw fail("for staff and school teams", 403);
-    const day = Math.floor(now() / DAY);
-    const n = await env.DB.prepare("INSERT INTO hits (key, n, reset) VALUES (?1, 1, ?2) ON CONFLICT(key) DO UPDATE SET n = n + 1 RETURNING n").bind(`ai:${u.id}:${day}`, (day + 2) * DAY).first();
-    if (n.n > 80) throw fail("the daily AI limit is reached — try again tomorrow", 429);
+    await aiLimit(env, H, u.id);
     const b = await body(req), s = (v, k) => String(v ?? "").replace(/\s+/g, " ").trim().slice(0, k);
     const wins = (Array.isArray(b.windows) ? b.windows : []).slice(0, 30).map(x => ({ id: s(x.id, 12), label: s(x.label, 100) })).filter(x => x.id && x.label);
     if (wins.length < 3) return json({ groups: [] });

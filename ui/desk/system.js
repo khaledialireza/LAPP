@@ -48,12 +48,9 @@
   };
   const helpOf = url => { const k = D.appKey(url).replace(/@.*/, ""); return HELP[k] || HELP[k.replace(/^s:[^:]+:/, "")] || ""; };
   D.info = (w, anchor) => {
-    const r = anchor.getBoundingClientRect(), p = document.createElement("div"); D.closeMenus();
-    p.className = "pop"; p.style.bottom = "auto"; p.style.top = r.bottom + 6 + "px"; p.style.left = Math.max(8, Math.min(r.left - 150, innerWidth - 350)) + "px";
-    p.innerHTML = `<h6>${I("info", 13)} ${esc(w.title)}</h6><div style="padding:2px 8px 8px;line-height:1.55">${esc(helpOf(w.url) || "This window belongs to " + D.wsOf(w.ws).name + ".")}</div>
+    D.closeMenus(); K.pop(anchor, `<h6>${I("info", 13)} ${esc(w.title)}</h6><div style="padding:2px 8px 8px;line-height:1.55">${esc(helpOf(w.url) || "This window belongs to " + D.wsOf(w.ws).name + ".")}</div>
       <button class="pi" data-go="guide"><span class="ri">${I("guide", 15)}</span><span class="tx"><b>Open the Guide</b><small>every app, the desktop and the keys</small></span></button>
-      <button class="pi" data-infoask="${w.id}"><span class="ri">${I("ai", 15)}</span><span class="tx"><b>Ask the AI about it</b></span></button>`;
-    document.body.append(p);
+      <button class="pi" data-infoask="${w.id}"><span class="ri">${I("ai", 15)}</span><span class="tx"><b>Ask the AI about it</b></span></button>`, { above: false });
   };
   D.guide = () => {
     D.sheet(`<h4>${I("guide")} Guide<button data-sx aria-label="Close">${I("x")}</button></h4>

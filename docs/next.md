@@ -2,7 +2,7 @@
 Rule: only items the owner approved are recorded as agreed; anything else is marked [PROPOSAL, NOT CONFIRMED].
 
 ## PRIORITY ORDER v2 (approved; building steps 1+2 now)
-NEXT, before anything else (approved): make the whole system modular — every part that exists twice becomes one shared component (full list and plan: docs/components.md: ui/kit.js, ui/menu.js, ui/kit.css, worker/src/util.js; every page switches to them and its own copies are deleted). Rule from now on: anything new is built as a shared component first.
+DONE (approved): the whole system is modular — every part that exists twice becomes one shared component (full list and plan: docs/components.md: ui/kit.js, ui/menu.js, ui/kit.css, worker/src/util.js; every page switches to them and its own copies are deleted). Rule from now on: anything new is built as a shared component first.
 Then: the forgotten sections 4 (voice desk) and 5 (cast), see docs/missing.md.
 
 Steps 1+2 (approved to build), split into parts in this order:

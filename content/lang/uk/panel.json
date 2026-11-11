@@ -1395,5 +1395,17 @@
  "Version now": "Поточна версія",
  "before the AI rewrote the lesson": "до того як ШІ переписав урок",
  "before the AI translated": "до перекладу ШІ",
- "edited": "змінено"
+ "edited": "змінено",
+ "Go back": "Повернутися",
+ "Go back to this version?": "Повернутися до цієї версії?",
+ "Locked": "Заблоковано",
+ "Open the script": "Відкрити сценарій",
+ "Publish anyway?": "Все одно опублікувати?",
+ "The AI writes a new text and replaces the current one.": "ШІ напише новий текст і замінить поточний.",
+ "The current text is kept as a version too.": "Поточний текст теж збережеться як версія.",
+ "The text changed after the audio was made, so the audio doesn't match it.": "Текст змінився після створення аудіо, тож аудіо йому не відповідає.",
+ "Translations are missing": "Бракує перекладів",
+ "Write a new text?": "Написати новий текст?",
+ "e.g. make it a question": "наприклад, зроби запитання",
+ "{a} Unlock": "{a} Розблокувати"
 }

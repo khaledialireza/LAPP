@@ -4,14 +4,14 @@
 (function () {
   const { $, esc, I } = D;
   const st = document.createElement("style");
-  st.textContent = `#lock{position:fixed;inset:0;z-index:2000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:rgba(8,8,14,.72);backdrop-filter:blur(30px) saturate(1.2);animation:pop .2s ease-out;color:var(--tx)}
+  st.textContent = `#lock{position:fixed;inset:0;z-index:2000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:rgba(8,8,14,.72);backdrop-filter:blur(30px) saturate(1.2);animation:k-pop .2s ease-out;color:var(--tx)}
 #lock .lt{font:800 72px/1 Inter,system-ui;letter-spacing:-2px;font-variant-numeric:tabular-nums}#lock .ld{color:var(--mu);margin-bottom:22px}
 #lock .lav{width:84px;height:84px;border-radius:50%;display:grid;place-items:center;font-size:34px;font-weight:800;color:#fff;background-size:cover;background-position:center;box-shadow:0 0 0 3px rgba(255,255,255,.15)}
 #lock form{display:flex;gap:8px;align-items:center}#lock input{width:240px;background:rgba(255,255,255,.08);border:1px solid var(--ln2);border-radius:12px;padding:10px 14px;outline:none;font:inherit;color:inherit}
 #lock input:focus{border-color:var(--vi)}#lock .le{color:var(--rd);min-height:20px;font-size:13px}#lock .lo{color:var(--mu);font-size:12.5px;text-decoration:underline;background:none;border:0;cursor:pointer}
-body.locked #wins,body.locked #desk,body.locked #tb,body.locked #cc,body.locked .sheet,body.locked .pop,body.locked .toasts{visibility:hidden}`;
+body.locked #wins,body.locked #desk,body.locked #tb,body.locked #cc,body.locked .sheet,body.locked .k-pop,body.locked .k-menu,body.locked .k-toasts{visibility:hidden}`;
   document.head.append(st);
-  D.avatar = (size = 30) => { const m = D.ME, a = m && m.avatar; return a ? `<span class="av" style="width:${size}px;height:${size}px;background:url('${esc(a)}') center/cover"></span>` : `<span class="av" style="width:${size}px;height:${size}px;font-size:${Math.round(size * .43)}px;background:linear-gradient(135deg,${D.GRAD[m.id % D.GRAD.length]})">${esc((m.name || m.username).charAt(0).toUpperCase())}</span>`; };
+  D.avatar = (size = 30) => K.avatar(D.ME, size);
 
   D.lock = () => {
     if ($("#lock")) return;
@@ -19,7 +19,7 @@ body.locked #wins,body.locked #desk,body.locked #tb,body.locked #cc,body.locked 
     try { sessionStorage.setItem("lapp.locked", "1"); } catch {}
     document.body.classList.add("locked");
     const m = D.ME, l = document.createElement("div"); l.id = "lock"; l.setAttribute("role", "dialog"); l.setAttribute("aria-label", "Locked");
-    l.innerHTML = `<div class="lt" id="lkT"></div><div class="ld" id="lkD"></div>${D.avatar(84).replace('class="av"', 'class="lav"')}<b style="font-size:17px">${esc(m.name || "@" + m.username)}</b>
+    l.innerHTML = `<div class="lt" id="lkT"></div><div class="ld" id="lkD"></div>${K.avatar(D.ME, 84, "lav")}<b style="font-size:17px">${esc(m.name || "@" + m.username)}</b>
       <form id="lkF"><input type="password" id="lkP" placeholder="Password" autocomplete="current-password" aria-label="Password"><button class="b pr" style="height:40px">${I("lock", 15)} Unlock</button></form><div class="le" id="lkE"></div>
       <button class="lo" id="lkO">Sign out</button>`;
     document.body.append(l);

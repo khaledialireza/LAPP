@@ -3,8 +3,7 @@
 // Each course keeps its own progress (COURSE.prefix in content.js); changing it restarts the app.
 // A course without lessons yet is listed as "soon" and can't be chosen.
 (() => {
-  const $ = s => document.querySelector(s);
-  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+  const { $, esc } = K;
   const t = (k, v) => I18N.t(k, v);
   const prefixOf = c => c.code === COURSES[0].code ? "lapp:" : `lapp:${c.code}:`;
   const words = c => { try { return (JSON.parse(localStorage.getItem(prefixOf(c) + "known")) || []).length; } catch { return 0; } };

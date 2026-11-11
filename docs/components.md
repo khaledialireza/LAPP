@@ -1,52 +1,54 @@
-# Duplicates to unify into shared, modular components (audit of the whole system)
-Rule (owner): anything that exists at least twice must be one shared component.
-Found by checking ui/*.js, ui/desk/*.js, worker/src/*.html, app.js, account.js and the worker's .js files.
+# Shared, modular components (the rule and where each one lives)
+Rule (owner): anything that exists at least twice must be one shared component. A page may place it, never copy or redefine it.
+New things are built as a shared component first.
 
-## Front end — behaviour (one file each in ui/, loaded by every page)
-| # | Thing | Copies now in |
-|---|---|---|
-| 1 | Context menu (search, sub-menus, keys, icons, "ask the assistant", header slot like the word card) | desk/core.js · files.html · studio-menu.js |
-| 2 | Dialogs: confirm / ask a name / form | shell.js · desk/core.js · files.html · admin · school · studio (form) · drive.js |
-| 3 | Toasts | shell.js · desk/core.js · admin · school · studio · files · app.js · account.js |
-| 4 | API call (fetch + X-LAPP + errors + 401) | desk/core.js · admin · school · studio · files · account.js |
-| 5 | Small helpers $, $$, esc, LS (localStorage) | 8–13 files |
-| 6 | Time and date: "5 min ago", times, dates, money | shell · desk · admin · school · files · lapp-ui · app · account |
-| 7 | File helpers: kind→icon, size, upload with drag & drop | desk/desktop.js · files.html |
-| 8 | Speak a line (browser voice with speed/pitch/feeling) | studio.html · studio-menu.js · app.js |
-| 9 | Drag to move / resize | windows · command center · desktop · shell · school |
-| 10 | "Opened alone → go to /manage" | studio · files · settings · shell.js |
-| 11 | Popovers (above a button) | desk/core.js (pop) · taskbar previews · shell |
-| 12 | Avatar (photo or initial) | desk/lock.js · admin · settings · manage |
+## Where they are
+| File | What |
+|---|---|
+| `ui/kit.js` (`window.K`) | helpers `$ $$ esc LS loc I IE`, keys (`MAC`, `keyLabel`), dates (`ago time date dateTime`), `money`, `size`, `fileIcon`, `lessonState`, API (`api`, `apiAt(base, {next, signin, keepalive})`), `toast`, dialogs (`dialog ask confirm form`), `pop`, `avatar`, `speak`, `drag`, `upload`, `inDesk` |
+| `ui/menu.js` (`K.menu`, `K.menuAt`) | the one menu: right-click, title-bar menus, taskbar, Files, Studio lines (search, sub-menus, keys, header slot, "ask the assistant") |
+| `ui/kit.css` | tokens (also `--ui-*` for l-select), `.b/.btn`, `.in`, `.k-search`, `.sw` switch, `.seg`, `.chip`, `.pl` pills, `.card`, `.opt` rows, `.kp` stat tiles, `.top` heading row, `.empty`, `.spin`, `.bar`, `.k-bars` chart, `.kbd`, `[data-tip]`, `.cols2/.cols3`, `.pi` list rows, toasts, dialogs, popovers, menu, avatar |
+| `ui/lapp-ui.js` | `l-select`, `l-date` (every select and date field; `<option selected>` works too) |
+| `ui/shell.js` | the page router for /admin and /s/… inside a window (old tab/split code removed); its toast/ask/confirm/menu are the kit's |
+| `worker/src/util.js` | `str int cleanName aiLimit revConflict blobPut blobGet` |
 
-## Front end — look (one stylesheet ui/kit.css + the theme tokens)
-| # | Thing | Copies now in |
-|---|---|---|
-| 13 | Colour tokens (:root --bg, --p1 …) | desk.css · admin · school · studio · files · settings · shell |
-| 14 | Buttons (.b / .btn, primary, danger, small) | admin · school · studio · files · settings · desk.css |
-| 15 | Switch (on/off) | admin · school · settings |
-| 16 | Segmented control (List/Grid, A/B/C…) | admin · files · settings · studio-lesson · desk (title bar) |
-| 17 | Chips / tags / status badges | admin · school · studio · files |
-| 18 | Cards / sections / rows (key → value) | admin · school · settings · studio-lesson |
-| 19 | Empty states | admin · school · studio · files · desk |
-| 20 | Search field | shell · studio-menu · files · command center |
-| 21 | Spinner, progress bar | studio · school · studio-lesson · desk |
-| 22 | Key caps (kbd) | shell · studio-menu · desk |
-| 23 | Select (l-select) and inputs | lapp-ui.js (exists) — used by some pages, plain <select> in others |
-| 24 | Pop-in animation, tooltips | desk.css · studio-menu · studio (data-tip) |
+## The audit (all done)
+| # | Thing | Was copied in | Now |
+|---|---|---|---|
+| 1 | Context menu | desk core · files · studio-menu · shell | `K.menu` |
+| 2 | Dialogs confirm / ask / form | shell · desk · files · admin · school · studio · drive · browser `confirm()/prompt()` in studio | `K.dialog/ask/confirm/form` (admin's typed delete uses `K.confirm({type})`) |
+| 3 | Toasts | shell · desk · admin · school · studio · files · app.js · account.js | `K.toast` (learner app: `{plain}` in its own skin in style.css) |
+| 4 | API call | desk · admin · school · studio · files · settings · account.js | `K.api` / `K.apiAt` |
+| 5 | `$ $$ esc LS` | 13 files | `K` |
+| 6 | Time, date, money | desk · admin · school · files · lapp-ui | `K.ago/time/date/money/loc` |
+| 7 | File kind, size, upload | desktop · files | `K.fileIcon/size/upload` |
+| 8 | Speak (browser voice) | studio ×3 · studio-menu · app.js | `K.speak` |
+| 9 | Drag to move / resize | windows · command center · desktop | `K.drag` |
+| 10 | Opened alone → /manage | studio · files · settings · shell | `K.inDesk` |
+| 11 | Popovers | desk · shell · system (info) | `K.pop` |
+| 12 | Avatar | lock · taskbar · admin · settings | `K.avatar` |
+| 13 | Colour tokens | desk.css · admin · school · studio · files · settings | kit.css `:root` |
+| 14 | Buttons | 6 places, 4 heights | `.b/.btn` (one height 32, `.sm` 28) |
+| 15 | Switch | admin · settings (school's colour dots are now `.swatch`) | `.sw` (desk resize corner renamed `.rz.bl`) |
+| 16 | Segmented control | admin · settings · files · studio-lesson (`.seg2`) · desk title bar (`.wseg`) · drive (`.dv-seg`) | `.seg` (`.fill`, `.sm`) |
+| 17 | Chips, pills, status badges | admin `.pl/.p-*` · school `.pl/*-p` · studio/files/admin `.st` | `.chip`, `.pl` + tones, `K.lessonState` |
+| 18 | Cards and rows | admin · school · settings (`.row`) | `.card`, `.card.rows` + `.opt` |
+| 19 | Empty states | admin · school · studio · files · desk | `.empty` (`.tight`) |
+| 20 | Search field | admin `.srch` · files `.find` · menus | `.k-search` (menus use the menu's own) |
+| 21 | Spinner, progress bar | studio · school · desk | `.spin`, `.bar` |
+| 22 | Key caps | desk · studio-menu | `.kbd`, menu `kbd` |
+| 23 | Selects | plain `<select>` in admin (AI), drive (rules), studio-lesson (due) | `l-select` |
+| 24 | Pop animation, tooltips | desk · studio · studio-menu | `k-pop`, `[data-tip]` (`data-tip-side="end"`) |
+| 25 | str / int | lessons · school · ai | `util.js` |
+| 26 | Daily AI limit | index ×2 · lessons | `aiLimit` |
+| 27 | Work-desktop pages | index ×3 | `deskPage` + `DESK_PAGES` (index.js) |
+| 28 | Name clean-up | desk ×4 | `cleanName` |
+| 29 | Blob parts | desk · lessons | `blobPut / blobGet` |
+| 30 | "Someone else changed this" | lessons ×4 | `revConflict` |
+| 31 | Stat tiles | admin · school · studio (`.kpis/.kp`) | `.kp` |
+| 32 | Bar chart | admin `.bars` · studio `.spark2` | `.k-bars` |
+| 33 | Page heading row | admin · school | `.top` |
+| 34 | Dialog spacing | admin · school (flex gap) · studio (margins) | one rhythm in kit.css |
+| 35 | Window "Actions" | admin/school ⌘K commands (dead inside windows) | `commands` → the title bar's Actions menu |
 
-## Server
-| # | Thing | Copies now in |
-|---|---|---|
-| 25 | str / int clean-up helpers | lessons.js · school.js (+ inline in index.js, desk.js) |
-| 26 | Daily AI limit | index.js (assist, assist/groups) · lessons.js (limitAi) |
-| 27 | "Pages of the work desktop" (/manage, /files, /settings: signed in + works here) | index.js ×3 |
-| 28 | Name clean-up (files, folders) | desk.js ×4 |
-| 29 | Blob storage in parts (save / read / delete) | desk.js · lessons.js · school.js |
-| 30 | "Someone else changed this" (rev check) | lessons.js ×4 |
-
-## Plan
-1. ui/kit.js — helpers (5), API (4), toasts (3), dialogs (2), time/date/money (6), popover (11), avatar (12), speak (8), drag (9), standalone redirect (10), file helpers (7).
-2. ui/menu.js — the one context menu (1).
-3. ui/kit.css — tokens from theme.js + buttons, switch, segmented, chips, cards, empty, search, spinner, progress, kbd, animations, tooltips (13–24).
-4. Every page and the desktop use them; their own copies are deleted.
-5. worker/src/util.js — 25–30 for the server.
+Tests: scratchpad k1–k5 (desktop, admin, school, files, settings, drag, server) plus the studio tests — all pass.

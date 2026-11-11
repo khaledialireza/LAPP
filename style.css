@@ -194,8 +194,12 @@ main { position: relative; overflow: hidden; }
 .nav button:hover { color: var(--text); }
 .dock .right { display: flex; justify-content: flex-end; align-items: center; gap: 16px; }
 
-.toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: var(--bar); padding: 10px 16px; border-radius: 10px; font-size: 13px; opacity: 0; transition: opacity .3s; pointer-events: none; }
-.toast.on { opacity: 1; }
+/* toasts (K.toast from ui/kit.js) in the app's own look */
+.k-toasts { position: fixed; left: 50%; bottom: calc(110px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 400; display: flex; flex-direction: column; align-items: center; gap: 8px; width: max-content; max-width: calc(100% - 32px); pointer-events: none; }
+.ac-open .k-toasts { bottom: auto; top: calc(20px + env(safe-area-inset-top)); }
+.k-toast { background: rgba(30,30,30,.92); color: #fff; padding: 11px 16px; border-radius: 14px; font-size: 14px; font-weight: 600; text-align: center; animation: k-toast-in .25s ease-out; pointer-events: auto; }
+.k-toast .a { margin-inline-start: 10px; background: none; border: 0; color: inherit; font: inherit; text-decoration: underline; cursor: pointer; }
+@keyframes k-toast-in { from { opacity: 0; transform: translateY(20px); } }
 
 /* ---------- Responsive ---------- */
 @media (max-width: 900px), (max-height: 520px) {
@@ -836,7 +840,7 @@ body { font-family: -apple-system, "SF Pro Text", "SF Pro Display", system-ui, "
 .dl.cur { box-shadow: 0 0 0 2px var(--accent-2); }
 .line.now { background: var(--tile-2); box-shadow: inset 3px 0 0 var(--accent); }
 .progress { background: var(--tile-2); }
-.toast { background: var(--tile); color: var(--text); box-shadow: var(--shadow); }
+.k-toast { background: var(--tile); color: var(--text); box-shadow: var(--shadow); }
 
 /* phones: full screen, edge to edge, safe areas */
 @media (max-width: 900px), (max-height: 520px) {
@@ -2086,10 +2090,6 @@ body.ac-open { overflow: hidden; }
 .pf-note[hidden] { display: none; }
 .save-banner .sb-go { align-self: flex-start; margin-top: 6px; padding: 8px 14px; border-radius: 12px; font-weight: 700; color: #fff; background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
 .lib-it .st.lock { background: none; font-size: 16px; }
-.ac-toast { position: fixed; left: 50%; bottom: calc(110px + env(safe-area-inset-bottom)); transform: translate(-50%, 20px); opacity: 0; pointer-events: none; z-index: 400;
-  background: rgba(30,30,30,.92); color: #fff; padding: 11px 16px; border-radius: 14px; font-size: 14px; font-weight: 600; transition: .25s; max-width: calc(100% - 32px); text-align: center; }
-.ac-toast.on { opacity: 1; transform: translate(-50%, 0); }
-.ac-open .ac-toast { bottom: auto; top: calc(20px + env(safe-area-inset-top)); }
 
 /* sign-in, e-mail step: only the logo, the e-mail, one button and a guest link; languages as
    links at the bottom. Phone: alone on a white page. Wide screens: the same, beside the brand panel */

@@ -1,7 +1,7 @@
 // Grammar for the word sheet: conjugation, declension, comparison and rule notes.
 // Irregular verbs come from content/lang/de/verbs.json; regular forms are built by rule here.
 (() => {
-  const H = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  const H = K.esc;
   const de = s => `<bdi class="gde">${H(s)}</bdi>`;
   const PERS = ["ich", "du", "er/sie/es", "wir", "ihr", "sie/Sie"];
   const REFL = ["mich", "dich", "sich", "uns", "euch", "sich"];

@@ -41,13 +41,13 @@
     const rec = t.closest("[data-rec]"); if (rec) { D.REC = D.REC === rec.dataset.rec ? null : rec.dataset.rec; return D.keysSheet(); }
     if (t.closest("[data-keyreset]")) { D.BIND = { ...D.DEF }; D.shareKeys(); D.save(); D.keysSheet(); return D.toast("Shortcuts are back to the defaults"); }
     const pw = t.closest(".sheet [data-pw]"); if (pw) { const w = D.W(pw.dataset.pw), q = t.closest("[data-pq]"); if (q) { q.dataset.pq === "close" ? (D.closeWin(w), pw.remove()) : D.snap(w, q.dataset.pq); return; } D.closeSheet(); return D.focusWin(w); }
-    if (!t.closest("#cc, .cm, .sheet, .snapfly, #tb, .pop, .wmenu")) { D.closeMenus(); D.ccClose(); }
-    else if (!t.closest(".cm, .pop, .wmenu, #tb")) D.closeMenus();
+    if (!t.closest("#cc, .k-menu, .sheet, .snapfly, #tb, .k-pop, .wmenu, dialog")) { D.closeMenus(); D.ccClose(); }
+    else if (!t.closest(".k-menu, .k-pop, .wmenu, #tb, dialog")) D.closeMenus();
   });
   // keys: the person's own; pages inside windows pass matching keys up (see /ui/frame.js)
   document.addEventListener("keydown", e => {
     if (D.REC) { e.preventDefault(); e.stopPropagation(); if (e.key === "Escape") { D.REC = null; return D.keysSheet(); } const c = D.combo(e); if (!c) return; if (!/^(Cmd|Ctrl|Alt)\+/.test(c) && !/^F\d+$/.test(c)) return D.toast(D.MAC ? "Use ⌘, ⌃ or ⌥ with a key, so typing still works" : "Use Ctrl or Alt with a key, so typing still works", { kind: "warn" }); D.BIND[D.REC] = c; D.REC = null; D.shareKeys(); D.save(); D.keysSheet(); return D.toast("Shortcut saved: " + D.nice(c)); }
-    if (e.key === "Escape") { if ($(".cm, .pop")) return D.closeMenus(); if ($("#sheet")) return D.closeSheet(); }
+    if (e.key === "Escape") { if ($(".k-menu, .k-pop")) return D.closeMenus(); if ($("#sheet")) return D.closeSheet(); }
     const c = D.combo(e), a = Object.keys(D.BIND).find(k => D.BIND[k] === c); if (!a) return;
     e.preventDefault(); D.act(a);
   }, true);

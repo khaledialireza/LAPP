@@ -1395,5 +1395,17 @@
  "Version now": "Текущая версия",
  "before the AI rewrote the lesson": "до того как ИИ переписал урок",
  "before the AI translated": "до перевода ИИ",
- "edited": "изменено"
+ "edited": "изменено",
+ "Go back": "Вернуться",
+ "Go back to this version?": "Вернуться к этой версии?",
+ "Locked": "Заблокировано",
+ "Open the script": "Открыть сценарий",
+ "Publish anyway?": "Всё равно опубликовать?",
+ "The AI writes a new text and replaces the current one.": "ИИ напишет новый текст и заменит текущий.",
+ "The current text is kept as a version too.": "Текущий текст тоже сохранится как версия.",
+ "The text changed after the audio was made, so the audio doesn't match it.": "Текст изменился после создания аудио, поэтому аудио ему не соответствует.",
+ "Translations are missing": "Не хватает переводов",
+ "Write a new text?": "Написать новый текст?",
+ "e.g. make it a question": "например, сделай вопрос",
+ "{a} Unlock": "{a} Разблокировать"
 }

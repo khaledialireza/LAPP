@@ -2,7 +2,7 @@
 "use strict";
 (function () {
   const { $, $$, esc, I } = D;
-  D.fileIcon = (name, type) => /^image\//.test(type) ? "image" : /pdf/.test(type) ? "file-text" : /^audio\//.test(type) ? "music" : /^video\//.test(type) ? "video" : /sheet|excel|csv/i.test(type + name) ? "sheet" : /word|document|text|\.docx?$/i.test(type + name) ? "file-text" : "clip";
+  D.fileIcon = K.fileIcon;
 
   async function events(days) {
     const sc = D.ORGS.filter(o => ["admin", "teacher"].includes(o.role)); if (!sc.length) return null;
@@ -42,18 +42,11 @@
   D.addWidget = t => { const A = $("#desk").getBoundingClientRect(); D.DESK.widgets.push({ id: Date.now(), t, x: Math.max(0, Math.round(A.width / 2 - 140)), y: 40, w: 280 }); D.save(); D.drawDesk(); D.closeSheet(); D.toast("Widget added · drag it by ⋮⋮"); };
   D.gallery = () => { const s = D.sheet(`<h4>${I("puzzle")} Add a widget<button data-sx aria-label="Close">${I("x")}</button></h4><div class="galg">${Object.entries(WT).map(([k, [i, t, d]]) => `<button data-add="${k}"><b>${I(i, 15)} ${esc(t)}</b><span class="mu">${esc(d)}</span></button>`).join("")}</div><p class="mu sm" style="margin-top:10px">Drag widgets by ⋮⋮. Your desktop is saved with your account.</p>`); $("[data-add]", s).focus(); };
   D.ACT.widget = D.gallery;
-  D.upload = async files => {
-    for (const f of [...files].slice(0, 12)) {
-      if (f.size > 10e6) { D.toast(`${f.name}: files can be up to 10 MB`, { kind: "err" }); continue; }
-      const ic = D.addIcon({ n: f.name, i: D.fileIcon(f.name, f.type), up: 1 });
-      try {
-        const r = await D.api("POST", "/desk/files", null, { headers: { "Content-Type": f.type || "application/octet-stream", "X-Name": encodeURIComponent(f.name) }, body: f });
-        Object.assign(ic, { file: r.id, type: r.type, up: 0, thumb: /^image\//.test(r.type) ? `/api/desk/files/${r.id}` : "" }); D.FILES.push(r);
-        D.toast(`${f.name} is on your desktop`);
-      } catch (e) { D.DESK.icons = D.DESK.icons.filter(x => x !== ic); D.toast(`${f.name}: ${e.message}`, { kind: "err" }); }
-      D.save(); D.drawDesk();
-    }
-  };
+  // files from the computer become icons on the desktop (the shared K.upload)
+  D.upload = files => K.upload(files, { max: 12,
+    before: f => D.addIcon({ n: f.name, i: D.fileIcon(f.name, f.type), up: 1 }),
+    each: (r, f, ic) => { Object.assign(ic, { file: r.id, type: r.type, up: 0, thumb: /^image\//.test(r.type) ? `/api/desk/files/${r.id}` : "" }); D.FILES.push(r); D.toast(`${f.name} is on your desktop`); D.save(); D.drawDesk(); },
+    failed: (f, x, ic) => { D.DESK.icons = D.DESK.icons.filter(z => z !== ic); D.save(); D.drawDesk(); } });
   D.openIcon = c => {
     if (c.url) return D.openWin(c.url, { title: c.n, icon: c.i, lesson: c.lesson });
     if (c.file) return D.openWin(`/api/desk/files/${c.file}`, { title: c.n, icon: c.i });
@@ -73,29 +66,28 @@
   document.addEventListener("dblclick", e => { const ic = e.target.closest && e.target.closest(".ico"); if (ic) { const c = D.DESK.icons.find(x => String(x.id) === ic.dataset.ico); if (c) D.openIcon(c); } });
   document.addEventListener("keydown", e => { if (e.key === "Enter" && e.target.classList && e.target.classList.contains("ico")) { const c = D.DESK.icons.find(x => String(x.id) === e.target.dataset.ico); if (c) D.openIcon(c); } });
   document.addEventListener("contextmenu", e => {
-    const t = e.target; if (!t.closest || t.closest("input, textarea, #tb, #cc, .wnd, .sheet, .pop, .cm")) return;
+    const t = e.target; if (!t.closest || t.closest("input, textarea, #tb, #cc, .wnd, .sheet, .k-pop, .k-menu, dialog")) return;
     e.preventDefault();
     const ic = t.closest(".ico"), wd = t.closest(".wdg"), x = e.clientX, y = e.clientY;
     if (ic) { const c = D.DESK.icons.find(z => String(z.id) === ic.dataset.ico); if (!c) return; return D.cmenu(x, y, [["Open", "↵", () => D.openIcon(c), 0, "external"], ...(c.file ? [["Download", "", () => { const a = document.createElement("a"); a.href = `/api/desk/files/${c.file}`; a.download = c.n; a.click(); }, 0, "download"]] : []), ["Rename…", "", async () => { const n = await D.askName("Rename", c.n); if (n) { c.n = n; D.save(); D.drawDesk(); } }, 0, "rename"], "-", [c.file ? "Delete the file" : "Remove from the desktop", "", async () => { if (c.file) await D.api("DELETE", `/desk/files/${c.file}`).catch(() => {}); D.DESK.icons = D.DESK.icons.filter(z => z !== c); D.save(); D.drawDesk(); }, 1, "trash"]]); }
     if (wd) { const w = D.DESK.widgets.find(z => String(z.id) === wd.dataset.wdg); return D.cmenu(x, y, [["Wider / narrower", "", () => { w.w = w.w > 320 ? 280 : 420; D.save(); D.drawDesk(); }, 0, "columns"], ["Refresh", "", D.drawDesk, 0, "reload"], "-", ["Remove the widget", "", () => { D.DESK.widgets = D.DESK.widgets.filter(z => z !== w); D.save(); D.drawDesk(); }, 1, "trash"]]); }
     D.cmenu(x, y, [["Add a widget…", D.nice(D.BIND.widget), D.gallery, 0, "puzzle"], ["New note", "", () => D.addWidget("note"), 0, "note"], ["Put files here…", "", () => { const i = document.createElement("input"); i.type = "file"; i.multiple = true; i.onchange = () => D.upload(i.files); i.click(); }, 0, "upload"], "-", ["Change the wallpaper", "", () => D.go("wall"), 0, "image"], ["Line up the icons", "", () => { const h = Math.max(1, Math.floor(($("#desk").clientHeight - 20) / 100)); D.DESK.icons.forEach((c, i) => { c.x = 16 + Math.floor(i / h) * 96; c.y = 16 + (i % h) * 100; }); D.save(); D.drawDesk(); }, 0, "grid"], ["Command center", D.nice(D.BIND.cc), () => D.ccOpen(), 0, "search"]]);
   });
-  let mv = null;
+  // widgets move by their header, icons by themselves (after a few pixels, so a click stays a click)
   document.addEventListener("pointerdown", e => {
     const t = e.target; if (e.button || !t.closest) return;
-    const wh = t.closest(".wdg .wh"); if (wh && !t.closest("button")) { const el = wh.parentElement, r = el.getBoundingClientRect(); mv = { k: "g", el, id: el.dataset.wdg, dx: e.clientX - r.left, dy: e.clientY - r.top }; document.body.classList.add("dragging"); e.preventDefault(); return; }
-    const ic = t.closest(".ico"); if (ic) { const r = ic.getBoundingClientRect(); mv = { k: "i", el: ic, id: ic.dataset.ico, dx: e.clientX - r.left, dy: e.clientY - r.top, n: 0 }; }
-  });
-  document.addEventListener("pointermove", e => {
-    if (!mv) return; const x = e.clientX - mv.dx, y = e.clientY - mv.dy;
-    if (mv.k === "i") { if (++mv.n < 3) return; document.body.classList.add("dragging"); mv.el.style.left = Math.max(0, x) + "px"; mv.el.style.top = Math.max(0, y) + "px"; return; }
-    mv.el.style.left = Math.max(0, Math.min(x, innerWidth - 120)) + "px"; mv.el.style.top = Math.max(0, Math.min(y, innerHeight - 80)) + "px";
-  });
-  document.addEventListener("pointerup", () => {
-    if (!mv) return; document.body.classList.remove("dragging");
-    if (mv.k === "g") { const w = D.DESK.widgets.find(z => String(z.id) === mv.id); if (w) { w.x = Math.round(parseFloat(mv.el.style.left) / 8) * 8; w.y = Math.round(parseFloat(mv.el.style.top) / 8) * 8; mv.el.style.left = w.x + "px"; mv.el.style.top = w.y + "px"; D.save(); } }
-    if (mv.k === "i" && mv.n >= 3) { const c = D.DESK.icons.find(z => String(z.id) === mv.id); if (c) { c.x = Math.max(16, Math.round((parseFloat(mv.el.style.left) - 16) / 96) * 96 + 16); c.y = Math.max(16, Math.round((parseFloat(mv.el.style.top) - 16) / 100) * 100 + 16); D.save(); D.drawDesk(); } }
-    mv = null;
+    const wh = t.closest(".wdg .wh");
+    if (wh && !t.closest("button")) {
+      const el = wh.parentElement, r = el.getBoundingClientRect(); e.preventDefault();
+      return K.drag(e, { move: (dx, dy) => { el.style.left = Math.max(0, Math.min(r.left + dx, innerWidth - 120)) + "px"; el.style.top = Math.max(0, Math.min(r.top + dy, innerHeight - 80)) + "px"; },
+        end: () => { const w = D.DESK.widgets.find(z => String(z.id) === el.dataset.wdg); if (w) { w.x = Math.round(parseFloat(el.style.left) / 8) * 8; w.y = Math.round(parseFloat(el.style.top) / 8) * 8; el.style.left = w.x + "px"; el.style.top = w.y + "px"; D.save(); } } });
+    }
+    const ic = t.closest(".ico");
+    if (ic) {
+      const r = ic.getBoundingClientRect();
+      K.drag(e, { threshold: 3, move: (dx, dy) => { ic.style.left = Math.max(0, r.left + dx) + "px"; ic.style.top = Math.max(0, r.top + dy) + "px"; },
+        end: (ev, moved) => { if (!moved) return; const c = D.DESK.icons.find(z => String(z.id) === ic.dataset.ico); if (c) { c.x = Math.max(16, Math.round((parseFloat(ic.style.left) - 16) / 96) * 96 + 16); c.y = Math.max(16, Math.round((parseFloat(ic.style.top) - 16) / 100) * 100 + 16); D.save(); D.drawDesk(); } } });
+    }
   });
   // files from the computer, and lessons from the command center, onto the desktop
   let dragLesson = null;

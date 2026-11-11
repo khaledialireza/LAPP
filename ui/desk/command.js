@@ -94,11 +94,11 @@
       const ls = (D.LESSONS || []).filter(l => !q || has(l.title, q)).sort((a, b) => b.updated_at - a.updated_at).slice(0, q ? 20 : 8).map(lessonRow);
       const fs = (D.FILES || []).filter(f => !q || has(f.name, q)).slice(0, q ? 12 : 4).map(fileRow);
       sec("Lessons", ls); sec("Files", fs);
-      if (!D.LESSONS) G.push({ title: "", html: `<div class="empty">Loading…</div>` });
+      if (!D.LESSONS) G.push({ title: "", html: `<div class="empty tight">Loading…</div>` });
       G.push({ title: "", rows: [{ icon: "files", name: "Open Files", place: "all your files and folders", run: () => { D.ccClose(); D.openWin(D.APPS.find(a => a.id.startsWith("files") && a.ws === D.CUR)?.url || "/files"); } }] });
     } else if (S === "people") {
-      if (q.length < 2) G.push({ title: "", html: `<div class="empty">Type a name or an email</div>` });
-      else { if (CC.peopleQ !== q) findPeople(q); sec("People", (CC.people || []).map(p => ({ icon: "user", name: p.name || "@" + p.username, place: [p.email, p.where].filter(Boolean).join(" · "), run: () => { D.ccClose(); D.openWin(p.url); } }))); if (!CC.people) G.push({ title: "", html: `<div class="empty">Searching…</div>` }); else if (!CC.people.length) G.push({ title: "", html: `<div class="empty">Nobody found</div>` }); }
+      if (q.length < 2) G.push({ title: "", html: `<div class="empty tight">Type a name or an email</div>` });
+      else { if (CC.peopleQ !== q) findPeople(q); sec("People", (CC.people || []).map(p => ({ icon: "user", name: p.name || "@" + p.username, place: [p.email, p.where].filter(Boolean).join(" · "), run: () => { D.ccClose(); D.openWin(p.url); } }))); if (!CC.people) G.push({ title: "", html: `<div class="empty tight">Searching…</div>` }); else if (!CC.people.length) G.push({ title: "", html: `<div class="empty tight">Nobody found</div>` }); }
     } else {
       sec("", [askRow(CC.q.trim())]);
       sec("Open windows", D.WN().filter(w => has(w.title, q)).slice(0, 5).map(winRow));
@@ -115,7 +115,7 @@
       else html += g.rows.map(r => rowHtml(r, CC.rows.push(r) - 1)).join("");
       html += `</div>`;
     });
-    B.innerHTML = html || `<div class="empty">Nothing found. Press Tab to ask the AI.</div>`;
+    B.innerHTML = html || `<div class="empty tight">Nothing found. Press Tab to ask the AI.</div>`;
     // typing: ↵ opens the best match; the AI is one Tab away (its row stays on top)
     if (S === "all" && q && !CC.moved) CC.sel = CC.rows.length > 1 ? 1 : 0;
     mark();
@@ -191,10 +191,12 @@
     const pl = t.closest("[data-plan]"); if (pl) { const m = CHAT[+pl.dataset.plan]; m.done = 1; m.plan.forEach(p => p.run()); return draw(); }
   });
   // the panel moves by its handle and remembers where it was
-  let mv = null;
-  document.addEventListener("pointerdown", e => { const h = e.target.closest && e.target.closest(".cch"); if (!h) return; const c = $("#cc"), r = c.getBoundingClientRect(); mv = { c, dx: e.clientX - r.left, dy: e.clientY - r.top }; document.body.classList.add("dragging"); e.preventDefault(); });
-  document.addEventListener("pointermove", e => { if (!mv) return; mv.c.classList.add("moved"); mv.c.style.left = Math.max(0, Math.min(e.clientX - mv.dx, innerWidth - 120)) + "px"; mv.c.style.top = Math.max(0, Math.min(e.clientY - mv.dy, innerHeight - 80)) + "px"; });
-  document.addEventListener("pointerup", () => { if (!mv) return; document.body.classList.remove("dragging"); const r = mv.c.getBoundingClientRect(); D.DESK.ccpos = { x: Math.round(r.left), y: Math.round(r.top) }; D.save(); mv = null; });
+  document.addEventListener("pointerdown", e => {
+    const h = e.target.closest && e.target.closest(".cch"); if (!h) return;
+    const c = $("#cc"), r = c.getBoundingClientRect(); e.preventDefault();
+    K.drag(e, { move: (dx, dy) => { c.classList.add("moved"); c.style.left = Math.max(0, Math.min(r.left + dx, innerWidth - 120)) + "px"; c.style.top = Math.max(0, Math.min(r.top + dy, innerHeight - 80)) + "px"; },
+      end: () => { const b = c.getBoundingClientRect(); D.DESK.ccpos = { x: Math.round(b.left), y: Math.round(b.top) }; D.save(); } });
+  });
   D.on("notes", () => $("#cc") && CC.mode === "list" && !CC.q && draw());
   D.on("jobs", () => $("#cc") && CC.mode === "list" && !CC.q && draw());
 })();

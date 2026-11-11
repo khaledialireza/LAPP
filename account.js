@@ -7,8 +7,7 @@
 (() => {
   const API = "/api";
   const SKIP = /^lapp:(session|sync|cfg)$/;           // never synced
-  const $ = s => document.querySelector(s);
-  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+  const { $, esc } = K;
   const t = (k, v) => window.I18N ? I18N.t(k, v) : k;
   const ls = { get(k) { try { return localStorage.getItem(k); } catch { return null; } }, keys() { try { return Object.keys(localStorage); } catch { return []; } } };
   const rawSet = Storage.prototype.setItem, rawRemove = Storage.prototype.removeItem;
@@ -20,16 +19,8 @@
   const listeners = new Set();
   const emit = () => listeners.forEach(f => { try { f(); } catch (e) { console.error(e); } });
 
-  async function call(method, path, body) {
-    const r = await fetch(API + path, {
-      method, credentials: "same-origin",
-      headers: { ...(body ? { "Content-Type": "application/json" } : {}), ...(method !== "GET" ? { "X-LAPP": "1" } : {}) },
-      body: body ? JSON.stringify(body) : undefined, keepalive: method === "PUT"
-    });
-    const j = await r.json().catch(() => ({}));
-    if (!r.ok) throw Object.assign(new Error(j.error || r.statusText), { status: r.status, code: j.code });
-    return j;
-  }
+  // the server: the shared kit's api; a signed-out person stays here as a guest
+  const call = K.apiAt(API, { signin: false, keepalive: true });
   const timeout = (p, ms) => Promise.race([p, new Promise((_, no) => setTimeout(() => no(new Error("timeout")), ms))]);
 
   /* ---------- the session in this browser ---------- */
@@ -122,12 +113,7 @@
   const billing = () => !!(cfg && cfg.billing);
 
   /* ---------- small UI helpers ---------- */
-  let toastT = 0;
-  function toast(msg) {
-    let el = $("#acToast");
-    if (!el) { el = document.createElement("div"); el.id = "acToast"; el.className = "ac-toast"; document.body.append(el); }
-    el.textContent = msg; el.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove("on"), 3200);
-  }
+  const toast = msg => K.toast(msg, { plain: true, kind: "info", ms: 3200 });
   const strength = pw => { let s = 0; if (pw.length >= 8) s++; if (pw.length >= 12) s++; if (/[a-z]/.test(pw) && /[A-Z]/.test(pw)) s++; if (/\d/.test(pw)) s++; if (/[^A-Za-z0-9]/.test(pw)) s++; return pw.length < 8 ? Math.min(1, s) : Math.min(4, s); };
   const initial = n => (n || "?").trim().charAt(0).toUpperCase();
   const errText = e => ({

@@ -1,26 +1,11 @@
 // LAPP Studio · the right-click menu of a line and the word card.
-// Short, grouped, with sub-menus, a search and "ask the assistant" — our own menu, never the browser's.
+// Short, grouped, with sub-menus, a search and "ask the assistant" — it is the shared menu (K.menu, ui/menu.js) with a word card on top.
 // Loaded after the studio's script; it uses the studio's own helpers (S, rows, say, rewrite, insertLine…).
 (function () {
   "use strict";
-  const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
-  const E = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
-  const I = (n, s = 15) => window.Icon ? Icon(n, s) : "";
+  const { $, $$, esc: E } = K, I = (n, s = 15) => K.I(n, s);
   const st = document.createElement("style");
-  st.textContent = `.lctx{position:fixed;z-index:90;width:300px;background:#1A1A27;border:1px solid rgba(255,255,255,.14);border-radius:14px;box-shadow:0 24px 60px rgba(0,0,0,.7);font-size:13px;overflow:visible;animation:lp .1s ease-out}
-@keyframes lp{from{opacity:0;transform:translateY(4px)}to{opacity:1}}
-.lctx .q{display:flex;align-items:center;gap:7px;padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.08);color:rgba(235,235,245,.4)}.lctx .q input{flex:1;background:none;border:0;outline:none;color:inherit;font:inherit;color:#F4F4F8}
-.lctx .hd{padding:7px 12px 3px;font:700 10.5px Inter,system-ui;letter-spacing:.5px;text-transform:uppercase;color:rgba(235,235,245,.4)}
-.lctx .ls{padding:4px}
-.lctx .it{position:relative;display:flex;align-items:center;gap:9px;width:100%;padding:6px 9px;border-radius:8px;text-align:start;color:#F4F4F8;background:none;border:0;font:inherit;cursor:pointer}
-.lctx .it:hover,.lctx .it.hov,.lctx .it:focus-visible{background:rgba(139,92,246,.25)}.lctx .it .ic{color:rgba(235,235,245,.55)}.lctx .it.dz{color:#F87171}
-.lctx .it kbd{margin-inline-start:auto;font:600 10.5px Inter,system-ui;color:rgba(235,235,245,.4);border:0;background:none}
-.lctx .it .ar{margin-inline-start:auto;color:rgba(235,235,245,.4)}
-.lctx .sub{display:none;position:absolute;inset-inline-start:calc(100% - 6px);top:-5px;min-width:210px;max-height:min(60vh,520px);overflow:auto;background:#1A1A27;border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:4px;box-shadow:0 20px 50px rgba(0,0,0,.7)}
-.lctx .it:hover>.sub,.lctx .it.hov>.sub,.lctx .it:focus-within>.sub{display:block}
-.lctx .ask{display:flex;align-items:center;gap:7px;padding:8px 10px;border-top:1px solid rgba(255,255,255,.08)}.lctx .ask input{flex:1;background:none;border:0;outline:none;font:inherit;color:#F4F4F8}
-.lctx .spark{background:linear-gradient(135deg,#FF3D7F,#8B5CF6 55%,#22D3EE);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800}
-.wcard{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.08)}.wcard .w{font-size:17px;font-weight:800}.wcard .p{font-size:11.5px;color:rgba(235,235,245,.45)}.wcard .m{margin-top:4px}.wcard .g{margin-top:4px;font-size:12px;color:rgba(235,235,245,.6)}
+  st.textContent = `.k-menu.line{width:300px}.wcard{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.08)}.wcard .w{font-size:17px;font-weight:800}.wcard .p{font-size:11.5px;color:rgba(235,235,245,.45)}.wcard .m{margin-top:4px}.wcard .g{margin-top:4px;font-size:12px;color:rgba(235,235,245,.6)}
 .wtools{display:flex;align-items:center;gap:2px;margin-top:8px;flex-wrap:wrap}.wtools button{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;background:none;border:0;color:rgba(235,235,245,.7);cursor:pointer;font-size:14px}.wtools button:hover,.wtools button.on{background:rgba(139,92,246,.25);color:#F4F4F8}.wtools .sep{width:1px;height:16px;background:rgba(255,255,255,.12);margin:0 3px}
 .wacts2{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}.wacts2 button{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:8px;border:1px solid rgba(255,255,255,.14);background:none;color:#F4F4F8;font:600 12px Inter;cursor:pointer}.wacts2 button:hover,.wacts2 button.on{border-color:#8B5CF6;background:rgba(139,92,246,.18)}
 .wcard .tag{display:inline-block;margin-top:6px;font-size:11px;padding:1px 8px;border-radius:99px;border:1px solid rgba(255,255,255,.14)}.wcard .tag.nw{color:#22D3EE}.wcard .tag.hw{color:#FBBF24}`;
@@ -55,7 +40,7 @@
   }
 
   /* ---------- the line menu ---------- */
-  const close = () => $$(".lctx").forEach(x => x.remove());
+  const close = () => K.closeMenu();
   function items(i, word) {
     const r = rows()[i], ai = S.scope && S.scope.ai, cast = Object.keys(S.L.data.cast || {}), scenes = S.L.data.scenes;
     const it = (label, icon, run, o = {}) => ({ label, icon, run, ...o });
@@ -85,51 +70,36 @@
     L.push(["Delete the line", "trash", null, { danger: true, run: () => delLine(i), k: "Del" }]);
     return L;
   }
-  function custom(i, how) { const orig = window.prompt; window.prompt = () => how; try { rewrite(i, "custom"); } finally { window.prompt = orig; } }
+  function custom(i, how) { rewrite(i, "custom", how); }
   function askAi(text) { if (window.LAPPFrame && LAPPFrame.embed) LAPPFrame.up({ t: "ask", text }); else toast(text); }
 
   const CUR = { k: -1 }; let OPENS = 0;
   // the browser's voice with the line's feeling, pitch and speed, before the real audio is made
   function preview(r) {
-    try { speechSynthesis.cancel(); const FE = { happy: [1.1, 1.06], excited: [1.2, 1.1], sad: [.9, .9], tired: [.92, .86], angry: [1.03, 1.08], polite: [1.02, .96], whisper: [1, .92] }[r.feel] || [1, 1];
-      const c = S.L.data.cast[r.who] || {}, u = new SpeechSynthesisUtterance(r.de); u.lang = SPEECH[S.L.course] || "de-DE"; u.rate = (r.speed || c.speed || .95) * FE[1]; u.pitch = (c.gender === "m" ? .8 : 1.15) * FE[0] * Math.pow(2, (r.pitch || 0) / 12); if (r.feel === "whisper") u.volume = .5; speechSynthesis.speak(u); }
-    catch { toast("This browser cannot speak"); }
+    const FE = { happy: [1.1, 1.06], excited: [1.2, 1.1], sad: [.9, .9], tired: [.92, .86], angry: [1.03, 1.08], polite: [1.02, .96], whisper: [1, .92] }[r.feel] || [1, 1], c = S.L.data.cast[r.who] || {};
+    K.speak(r.de, { lang: S.L.course, rate: (r.speed || c.speed || .95) * FE[1], pitch: (c.gender === "m" ? .8 : 1.15) * FE[0] * Math.pow(2, (r.pitch || 0) / 12), volume: r.feel === "whisper" ? .5 : null });
   }
   async function open(x, y, i, word, k) {
     close(); selLine(i); CUR.k = word ? (k ?? -1) : -1;
     const seq = ++OPENS, cardHtml = word ? await card(word, i) : "";
     if (seq !== OPENS) return;   // a newer right-click won
     close();
-    const L = items(i, word), m = document.createElement("div"); m.className = "lctx"; m.setAttribute("role", "menu");
-    m.innerHTML = `${cardHtml}<div class="q">${I("search", 14)}<input placeholder="Search… e.g. “voice”" aria-label="Search actions"></div><div class="hd">Line ${i + 1}${rows()[i].who ? " · " + E(rows()[i].who) : ""}</div><div class="ls">${L.map(([l, ic, sub, o = {}], k) => sub
-      // a group is a div (a button can't hold the buttons of its sub-menu)
-      ? `<div class="it" role="menuitem" tabindex="0" aria-haspopup="true" data-g="${k}" data-l="${E(l.toLowerCase())}">${I(ic)}<span>${E(l)}</span><span class="ar">${I("chevron", 13)}</span><div class="sub" role="menu">${sub.map((s, j) => `<button class="it" role="menuitem" data-s="${k}:${j}" data-l="${E(s.label.toLowerCase())}" ${s.disabled ? "disabled" : ""}>${I(s.icon)}<span>${E(s.label)}</span>${s.on ? `<kbd>●</kbd>` : s.k ? `<kbd>${E(s.k)}</kbd>` : ""}</button>`).join("")}</div></div>`
-      : `<button class="it ${o.danger ? "dz" : ""}" role="menuitem" data-g="${k}" data-l="${E(l.toLowerCase())}">${I(ic)}<span>${E(l)}</span><kbd>${E(o.k || "")}</kbd></button>`).join("")}</div>
-      ${S.scope && S.scope.ai ? `<div class="ask"><span class="spark">✦</span><input placeholder="Ask the assistant to change this line…" aria-label="Ask the assistant"><kbd style="font-size:10.5px;color:rgba(235,235,245,.4)">↵</kbd></div>` : ""}`;
-    document.body.append(m);
-    const w = m.offsetWidth, h = m.offsetHeight; m.style.left = Math.max(6, Math.min(x, innerWidth - w - 220)) + "px"; m.style.top = Math.max(6, Math.min(y, innerHeight - h - 6)) + "px";
-    const run = el => { if (el.dataset.s) { const [g, j] = el.dataset.s.split(":").map(Number); close(); L[g][2][j].run(); } else if (el.dataset.g && !L[el.dataset.g][2]) { close(); L[el.dataset.g][3].run(); } };
-    m.addEventListener("click", e => {
-      const t = e.target, k = CUR.k, fx = ((rows()[i] || {}).fx || {})[k] || {};
-      const f = t.closest("[data-fx]"); if (f) { e.stopPropagation(); close(); return applyFx(i, k, { [f.dataset.fx]: !fx[f.dataset.fx] }); }
-      const c = t.closest("[data-fxc]"); if (c) { e.stopPropagation(); close(); return applyFx(i, k, { c: fx.c === c.dataset.fxc ? "" : c.dataset.fxc }); }
-      if (t.closest("[data-fxh]")) { e.stopPropagation(); close(); return applyFx(i, k, { h: fx.h ? "" : "amber" }); }
-      if (t.closest("[data-fxf]")) { e.stopPropagation(); close(); const F = ["", "serif", "mono", "round"]; return applyFx(i, k, { f: F[(F.indexOf(fx.f || "") + 1) % F.length] }); }
-      if (t.closest("[data-fxx]")) { e.stopPropagation(); close(); return clearFx(i, k); }
-      const wd = t.closest("[data-wd]"); if (wd) { e.stopPropagation(); close(); if (wd.dataset.wd === "target") return toggleTarget(word); const own = (S.L.data.dict || {})[word.toLowerCase()]; return askMeaning(word, own && (own[S.tr] || own.en)); }
+    const toItem = it => ({ label: it.label, icon: it.icon, run: it.run, on: it.on, disabled: it.disabled, key: it.k });
+    const L = items(i, word).map(([label, icon, sub, o = {}]) => sub ? { label, icon, sub: sub.map(toItem) } : { label, icon, danger: o.danger, key: o.k, run: o.run });
+    K.menu(x, y, L, {
+      className: "line wide", header: cardHtml, search: "Search… e.g. “voice”", title: `Line ${i + 1}${rows()[i].who ? " · " + rows()[i].who : ""}`,
+      ask: S.scope && S.scope.ai ? { placeholder: "Ask the assistant to change this line…", run: v => custom(i, v) } : null,
+      // the word card's tools
+      ready: m => m.addEventListener("click", e => {
+        const t = e.target, k = CUR.k, fx = ((rows()[i] || {}).fx || {})[k] || {};
+        const f = t.closest("[data-fx]"); if (f) { e.stopPropagation(); close(); return applyFx(i, k, { [f.dataset.fx]: !fx[f.dataset.fx] }); }
+        const c = t.closest("[data-fxc]"); if (c) { e.stopPropagation(); close(); return applyFx(i, k, { c: fx.c === c.dataset.fxc ? "" : c.dataset.fxc }); }
+        if (t.closest("[data-fxh]")) { e.stopPropagation(); close(); return applyFx(i, k, { h: fx.h ? "" : "amber" }); }
+        if (t.closest("[data-fxf]")) { e.stopPropagation(); close(); const F = ["", "serif", "mono", "round"]; return applyFx(i, k, { f: F[(F.indexOf(fx.f || "") + 1) % F.length] }); }
+        if (t.closest("[data-fxx]")) { e.stopPropagation(); close(); return clearFx(i, k); }
+        const wd = t.closest("[data-wd]"); if (wd) { e.stopPropagation(); close(); if (wd.dataset.wd === "target") return toggleTarget(word); const own = (S.L.data.dict || {})[word.toLowerCase()]; return askMeaning(word, own && (own[S.tr] || own.en)); }
+      })
     });
-    m.addEventListener("click", e => { const el = e.target.closest("[data-s], [data-g]"); if (el && !el.disabled) { e.stopPropagation(); if (el.dataset.s || !L[el.dataset.g][2]) run(el); } });
-    // a sub-menu stays inside the window: it moves up when it would run past the bottom
-    m.addEventListener("pointerover", e => { const g = e.target.closest(".ls > .it[aria-haspopup]"); if (!g) return; const sub = $(".sub", g); sub.style.top = "-5px"; requestAnimationFrame(() => { const r = sub.getBoundingClientRect(), over = r.bottom - (innerHeight - 8); if (over > 0) sub.style.top = Math.max(-g.getBoundingClientRect().top + 8, -5 - over) + "px"; }); });
-    const q = $(".q input", m);
-    q.oninput = () => {
-      const s = q.value.trim().toLowerCase();
-      $$(".ls > .it", m).forEach(g => { const own = g.dataset.l.includes(s), subs = $$(".sub .it", g); subs.forEach(c => c.hidden = s && !own && !c.dataset.l.includes(s)); const hit = !s || own || subs.some(c => !c.hidden); g.hidden = !hit; g.classList.toggle("hov", !!s && hit && !own && subs.length > 0); });
-    };
-    q.onkeydown = e => { if (e.key === "Escape") close(); if (e.key === "Enter") { const first = $(".ls .it.hov .sub .it:not([hidden])", m) || $$(".ls > .it:not([hidden])", m).find(g => !L[g.dataset.g][2]) || $(".ls > .it:not([hidden]) .sub .it:not([hidden])", m); if (first) run(first); } };
-    const ask = $(".ask input", m);
-    if (ask) ask.onkeydown = e => { if (e.key === "Escape") close(); if (e.key === "Enter" && ask.value.trim()) { const v = ask.value.trim(); close(); custom(i, v); } };
-    q.focus();
   }
   document.addEventListener("contextmenu", e => {
     // the line's small toolbar can sit over the words: look through it
@@ -143,15 +113,12 @@
     const word = tg.closest(".txt .d") ? through(() => wordAt(e.clientX, e.clientY)) : "", i = Number(dl.dataset.i);
     open(e.clientX, e.clientY, i, word, word && window.wordIndexAt ? wordIndexAt(rows()[i].de, word, e.clientX, e.clientY) : -1);
   });
-  document.addEventListener("click", e => { if (!e.target.closest(".lctx")) close(); });
-  addEventListener("scroll", close, true);
   const relayout = () => { try { const v = (JSON.parse(localStorage.getItem("lapp.theme")) || {}).trLang; if (v && v !== S.tr && !localStorage.getItem("lapp.studio.tr")) S.tr = v; } catch {} if (S.L && $("#doc") && !document.querySelector(".txt [contenteditable]:focus")) renderDoc(); };
   addEventListener("message", e => { if (e.origin === location.origin && e.data && e.data.lapp && e.data.t === "theme") setTimeout(relayout, 0); });
   addEventListener("storage", e => { if (e.key === "lapp.theme") relayout(); });
   // the keyboard: the menu for the chosen line
   document.addEventListener("keydown", e => {
     if (e.key === "ContextMenu" || (e.shiftKey && e.key === "F10")) { if (S.L && S.sel >= 0) { const el = $(`.dl[data-i="${S.sel}"]`); if (el) { e.preventDefault(); const r = el.getBoundingClientRect(); open(r.left + 60, r.top + 30, S.sel, ""); } } }
-    if (e.key === "Escape") close();
   });
   // a hint the first time
   if (!localStorage.getItem("lapp.studio.ctxhint")) setTimeout(() => { if (S.L && $("#doc") && typeof toast === "function") { toast("Tip: right-click a line or a word for every action"); try { localStorage.setItem("lapp.studio.ctxhint", "1"); } catch {} } }, 4000);

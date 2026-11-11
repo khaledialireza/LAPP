@@ -3,18 +3,20 @@
 <title>LAPP School</title>
 <meta name="robots" content="noindex">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@500;700&display=swap" rel="stylesheet">
-<script src="/ui/lapp-ui.js?v=3"></script>
-<script src="/ui/panel-i18n.js?v=11"></script>
+<link rel="stylesheet" href="/ui/kit.css?v=1">
+<script src="/ui/kit.js?v=1"></script>
+<script src="/ui/menu.js?v=1"></script>
+<script src="/ui/lapp-ui.js?v=5"></script>
+<script src="/ui/panel-i18n.js?v=12"></script>
 <script src="/ui/cursor.js?v=2"></script>
 <script src="/ui/theme.js?v=2"></script>
 <script src="/ui/frame.js?v=4"></script>
-<script src="/ui/shell.js?v=5"></script>
-<script src="/ui/drive.js?v=3"></script>
+<script src="/ui/shell.js?v=6"></script>
+<script src="/ui/drive.js?v=5"></script>
 <style>
 /* the school portal — same look as the studio and the admin panel */
-:root{--bg:#07070B;--p1:#0F0F16;--p2:#15151F;--p3:#1C1C29;--ln:rgba(255,255,255,.08);--ln2:rgba(255,255,255,.14);--tx:#F4F4F8;--mu:rgba(235,235,245,.55);--mu2:rgba(235,235,245,.35);
---pk:#FF3D7F;--vi:#8B5CF6;--cy:#22D3EE;--gr:#34D399;--am:#FBBF24;--rd:#F87171;--g:linear-gradient(135deg,#FF3D7F,#8B5CF6 55%,#22D3EE);--org:#8B5CF6;color-scheme:dark;
---ui-surface:var(--p2);--ui-surface-2:var(--p3);--ui-line:var(--ln2);--ui-text:var(--tx);--ui-muted:var(--mu);--ui-accent:var(--vi);--ui-radius:10px}
+:root{--org:#8B5CF6;
+}
 *{box-sizing:border-box;margin:0}[hidden]{display:none!important}
 body{background:var(--bg);color:var(--tx);font:14px/1.5 Inter,system-ui,sans-serif;min-height:100vh;display:grid;grid-template-columns:240px 1fr}
 button,input,select,textarea{font:inherit;color:inherit}button{cursor:pointer;border:0;background:none}a{color:inherit}
@@ -25,34 +27,28 @@ aside{background:var(--p1);border-inline-end:1px solid var(--ln);padding:16px;di
 .nv.on{background:var(--p3);color:var(--tx);border-color:var(--ln2)}.nv em{font-style:normal;font-size:11px;background:rgba(255,255,255,.08);padding:0 7px;border-radius:6px}
 .sp{flex:1}.me{border-top:1px solid var(--ln);padding-top:12px;font-size:12px;color:var(--mu);display:flex;flex-direction:column;gap:8px}
 main{padding:22px 26px 80px;display:flex;flex-direction:column;gap:14px;min-width:0;max-width:1300px}
-.top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.top h1{font-size:26px;font-weight:800;margin-inline-end:auto;text-wrap:balance}
+
 .crumb{font-size:12.5px;color:var(--mu);text-decoration:none}.crumb:hover{color:var(--tx)}
-.b{height:36px;padding:0 14px;border-radius:10px;border:1px solid var(--ln2);background:var(--p2);font-weight:700;font-size:13px;display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;text-decoration:none;color:var(--tx)}
-.b:hover{background:var(--p3)}.b.pr{background:var(--g);border:0}.b.d{color:var(--rd);border-color:rgba(248,113,113,.4);background:rgba(248,113,113,.08)}.b.ok{background:rgba(52,211,153,.16);color:var(--gr);border-color:rgba(52,211,153,.4)}.b.sm{height:30px;padding:0 10px;font-size:12.5px}.b:disabled{opacity:.4;cursor:default}
-.kp{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}.kp div{background:var(--p2);border:1px solid var(--ln);border-radius:14px;padding:12px 14px}.kp b{font-size:22px;font-weight:800;display:block;font-variant-numeric:tabular-nums}.kp span{font-size:12px;color:var(--mu)}
-.card{background:var(--p2);border:1px solid var(--ln);border-radius:16px;padding:16px;min-width:0}.card h3{font-size:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.b.ok{background:rgba(52,211,153,.16);color:var(--gr);border-color:rgba(52,211,153,.4)}.b.sm{height:30px;padding:0 10px;font-size:12.5px}.b:disabled{opacity:.4;cursor:default}
+
+.card h3{font-size:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:8px}
 .g2{display:grid;grid-template-columns:1.4fr 1fr;gap:14px}.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .r{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--ln)}.r:last-child{border:0}.r>span:first-child{min-width:0}
 .mu{color:var(--mu);font-size:12.5px}.c{text-align:center}
-.pl{font-size:11px;font-weight:800;padding:2px 9px;border-radius:99px;display:inline-block;white-space:nowrap}.ok-p{background:rgba(52,211,153,.16);color:var(--gr)}.wa-p{background:rgba(251,191,36,.16);color:var(--am)}.bad-p{background:rgba(248,113,113,.14);color:var(--rd)}.vi-p{background:rgba(139,92,246,.22);color:#C4B5FD}.cy-p{background:rgba(34,211,238,.16);color:var(--cy)}.no-p{background:rgba(255,255,255,.07);color:var(--mu)}
+
 .live-dot{background:var(--rd);color:#fff;font-weight:800;font-size:11px;padding:2px 8px;border-radius:6px}
-.tabs{display:flex;gap:6px;flex-wrap:wrap}.chip{padding:6px 12px;border-radius:99px;background:var(--p3);border:1px solid var(--ln);font-size:12.5px;color:var(--mu)}.chip.on{color:var(--tx);border-color:rgba(139,92,246,.7);background:rgba(139,92,246,.16)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
 .tbl{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:13px}th{text-align:start;color:var(--mu2);font-weight:600;font-size:12px;padding:8px 10px;border-bottom:1px solid var(--ln)}td{padding:9px 10px;border-bottom:1px solid var(--ln);vertical-align:middle}tr:last-child td{border:0}
 td.num,th.num{text-align:end;font-variant-numeric:tabular-nums}
-.empty{padding:28px;text-align:center;color:var(--mu)}
-.in{width:100%;background:var(--p3);border:1px solid var(--ln2);border-radius:10px;padding:9px 11px;outline:none}.in:focus{border-color:rgba(139,92,246,.7)}textarea.in{min-height:90px;resize:vertical}
-.f label{display:block;font-size:12px;color:var(--mu);margin-bottom:4px}
 .week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}.day{background:var(--p2);border:1px solid var(--ln);border-radius:14px;padding:10px;min-height:150px;display:flex;flex-direction:column;gap:6px}.day.today{border-color:rgba(139,92,246,.6)}
 .day h4{font-size:12px;color:var(--mu);display:flex;justify-content:space-between}.day h4 b{color:var(--tx);font-size:15px}
 .ev{border-radius:9px;padding:6px 8px;font-size:12px;background:rgba(139,92,246,.18);border-inline-start:3px solid var(--vi);text-decoration:none;display:block}.ev.live{background:rgba(248,113,113,.18);border-left-color:var(--rd)}.ev.done{opacity:.55}.ev.cancelled{text-decoration:line-through;opacity:.45}
 .ev b{display:block;font-size:12px}.ev small{color:var(--mu);font-size:11px}
 .hero{border-radius:20px;padding:18px;background:linear-gradient(135deg,var(--org),#22D3EE);display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}.hero b{font-size:20px;display:block}
 .hero .b{background:#fff;color:#111;border:0}
-.bar{height:6px;border-radius:3px;background:var(--p3);overflow:hidden}.bar i{display:block;height:100%;background:var(--gr)}
-.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--p3);border:1px solid var(--ln2);border-radius:12px;padding:10px 16px;z-index:50;opacity:0;transition:.2s;pointer-events:none;max-width:90vw}.toast.on{opacity:1}
-dialog{margin:auto;background:var(--p2);color:var(--tx);border:1px solid var(--ln2);border-radius:18px;padding:22px;width:min(520px,94vw);max-height:90vh}dialog::backdrop{background:rgba(0,0,0,.6)}
-dialog form{display:flex;flex-direction:column;gap:12px}dialog.wide{width:min(860px,96vw)}
-.qtbl td{padding:4px}.qtbl td.qn{color:var(--mu);width:28px;text-align:center}.qtbl .in{padding:7px 9px;min-width:120px}.qtbl th{white-space:nowrap}dialog h3{font-size:18px}.f2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.bar>i{background:var(--gr)}
+dialog.k-dlg.wide{width:min(860px,96vw)}
+.qtbl td{padding:4px}.qtbl td.qn{color:var(--mu);width:28px;text-align:center}.qtbl .in{padding:7px 9px;min-width:120px}.qtbl th{white-space:nowrap}
 .checks{display:flex;flex-direction:column;gap:4px;max-height:240px;overflow:auto;border:1px solid var(--ln);border-radius:10px;padding:8px}.checks label{display:flex;gap:8px;align-items:center;font-size:13px}
 .q{border:1px solid var(--ln);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px}.q label.opt{display:flex;gap:8px;align-items:center;padding:7px 10px;border:1px solid var(--ln2);border-radius:9px;cursor:pointer}.q .right{border-color:var(--gr);background:rgba(52,211,153,.1)}.q .wrong{border-color:var(--rd);background:rgba(248,113,113,.08)}
 .mat{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--ln)}.mat:last-child{border:0}.mat .ic{width:38px;height:38px;border-radius:10px;background:var(--p3);display:grid;place-items:center;font-size:18px;flex:none}.mat .tx{flex:1;min-width:0}.mat .tx p{color:var(--mu);font-size:13px;white-space:pre-wrap;margin-top:3px}
@@ -74,7 +70,7 @@ canvas.board{position:absolute;inset:0;width:100%;height:100%;border-radius:16px
 .chat{flex:1;overflow:auto;display:flex;flex-direction:column;gap:6px;font-size:13px;min-height:0}.chat div b{font-size:12px;color:var(--cy)}.chat div.t b{color:#C4B5FD}
 .lv-tools{grid-column:1/3;display:flex;gap:6px;align-items:center;justify-content:center;border-top:1px solid var(--ln);background:var(--p1);padding:0 10px;overflow-x:auto}
 .tl{min-width:42px;height:42px;border-radius:12px;background:var(--p3);display:grid;place-items:center;font-size:17px;padding:0 8px;flex:none}.tl.on{background:rgba(139,92,246,.4)}.tl.red{background:rgba(248,113,113,.25)}
-.sw{width:22px;height:22px;border-radius:50%;border:2px solid transparent;flex:none}.sw.on{border-color:#fff}
+.swatch{width:22px;height:22px;border-radius:50%;border:2px solid transparent;flex:none}.swatch.on{border-color:#fff}
 .hand{display:flex;justify-content:space-between;align-items:center;background:rgba(251,191,36,.12);border-radius:10px;padding:6px 10px;font-size:13px}
 :focus-visible{outline:2px solid var(--cy);outline-offset:2px}
 @media (max-width:1000px){html:not(.desk) .g2,html:not(.desk) .g3{grid-template-columns:1fr}html:not(.desk) .week{grid-template-columns:repeat(2,minmax(0,1fr))}html:not(.desk) .lv{grid-template-columns:1fr;grid-template-rows:56px auto 1fr 62px}html:not(.desk) .lv-side{border-inline-start:0;border-top:1px solid var(--ln);max-height:34vh}html:not(.desk) .lv-tools{grid-column:1}html:not(.desk) .lv-top{grid-column:1}}
@@ -96,7 +92,7 @@ body.student .st-me{width:36px;height:36px;border-radius:50%;background:var(--g)
 body.student main{max-width:760px;margin:0 auto;padding:6px 16px calc(120px + env(safe-area-inset-bottom));gap:16px}
 body.student .top h1{font-size:30px;letter-spacing:-.4px}
 body.student .card{border:0;border-radius:22px;padding:16px 18px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
-body.student .kp div{border:0;border-radius:18px}
+body.student .kp>div{border:0;border-radius:18px}
 body.student .b{background:var(--p3);border:0;color:var(--tx)}body.student .b.pr{background:var(--g);color:#fff}
 body.student .chip{background:var(--p2);border:0}body.student .chip.on{background:var(--tx);color:var(--bg)}
 body.student .r{border-color:var(--ln)}
@@ -122,19 +118,16 @@ body.student.live main{max-width:none;padding:0}body.student.live aside,body.stu
 </style></head><body>
 <aside id="side"></aside>
 <main id="view"><div class="empty">Loading…</div></main>
-<div class="toast" id="toast"></div>
-<dialog id="dlg"><form method="dialog" id="dlgForm"></form></dialog>
 
 <script>
 "use strict";
 const SLUG = location.pathname.split("/")[2];
-const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
-const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+const { $, $$, esc } = K;
 const DAYMS = 864e5;
-const fmtDay = ms => new Date(ms).toLocaleDateString((window.PanelI18N ? PanelI18N.locale : "en-GB"), { weekday: "short", day: "numeric", month: "short" });
-const fmtTime = ms => new Date(ms).toLocaleTimeString((window.PanelI18N ? PanelI18N.locale : "en-GB"), { hour: "2-digit", minute: "2-digit" });
-const fmtDate = s => s ? new Date(s + "T12:00:00").toLocaleDateString((window.PanelI18N ? PanelI18N.locale : "en-GB"), { day: "numeric", month: "short", year: "numeric" }) : "—";
-const ago = ms => { if (!ms) return "—"; const m = (Date.now() - ms) / 6e4; return m < 2 ? "now" : m < 60 ? Math.round(m) + " min ago" : m < 1440 ? Math.round(m / 60) + " h ago" : Math.round(m / 1440) + " days ago"; };
+const fmtDay = ms => K.date(ms, { weekday: "short", day: "numeric", month: "short" });
+const fmtTime = ms => K.time(ms);
+const fmtDate = s => K.date(s) || "—";
+const ago = ms => K.ago(ms);
 const COURSE = { de: "German", nl: "Dutch", pl: "Polish" };
 const FLAG = { de: "🇩🇪", nl: "🇳🇱", pl: "🇵🇱" };
 const courseOpts = () => Object.entries(COURSE).map(([k, l]) => [k, l, { icon: FLAG[k], sub: { de: "Deutsch", nl: "Nederlands", pl: "Polski" }[k] }]);
@@ -142,54 +135,17 @@ const ROLE_ICON = { admin: "🛠", teacher: "👩‍🏫", finance: "💶", stud
 const roleOpts = () => Object.entries(ROLE).map(([k, l]) => [k, l, { icon: ROLE_ICON[k] }]);
 const personOpt = m => [m.id, nameOf(m), { icon: (nameOf(m) || "?").charAt(0).toUpperCase(), sub: m.email || "@" + m.username }];
 const ROLE = { admin: "School admin", teacher: "Teacher", finance: "Finance", student: "Student" };
-let S = { org: null, role: null, me: null, counts: null }, toastT;
-function toast(t, o) { if (window.Shell && Shell.active) return Shell.toast(t, o); const e = $("#toast"); e.textContent = t; e.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(() => e.classList.remove("on"), 2800); }
+let S = { org: null, role: null, me: null, counts: null };
+const toast = (t, o) => K.toast(t, o);
 // "are you sure?": our dialog in the panel, two clicks elsewhere
-async function sure(btn, title, text, again) {
-  if (window.Shell && Shell.active) { if ($("#dlg").open) $("#dlg").close(); return Shell.confirm({ title, text, ok: "Delete", danger: true }); }
-  if (btn.dataset.sure !== "1") { btn.dataset.sure = "1"; btn.textContent = again; return false; }
-  return true;
-}
-async function api(method, path, body, raw) {
-  const r = await fetch(`/api/org/${SLUG}${path}`, { method, credentials: "same-origin",
-    headers: { ...(raw ? raw.headers : body ? { "Content-Type": "application/json" } : {}), ...(method !== "GET" ? { "X-LAPP": "1" } : {}) },
-    body: raw ? raw.body : body ? JSON.stringify(body) : undefined });
-  const j = await r.json().catch(() => ({}));
-  if (r.status === 401) { location.href = `/?login=1&next=/s/${SLUG}`; throw new Error("signed out"); }
-  if (!r.ok) throw new Error(j.error || r.statusText);
-  return j;
-}
-const money = c => new Intl.NumberFormat((window.PanelI18N ? PanelI18N.locale : "en-GB"), { style: "currency", currency: S.org.currency || "EUR" }).format((c || 0) / 100);
+async function sure(btn, title, text) { K.closeDialogs(); return K.confirm({ title, text, ok: "Delete", danger: true }); }
+const api = K.apiAt(`/api/org/${SLUG}`);
+const money = c => K.money(c, S.org.currency || "EUR");
 const can = (...roles) => roles.includes(S.role);
 
-/* ---------------- a small form dialog: fields → values ---------------- */
-function form(title, fields, submit, okLabel = "Save") {
-  const d = $("#dlg"), f = $("#dlgForm");
-  d.classList.remove("wide");
-  f.innerHTML = `<h3>${esc(title)}</h3>` + fields.map(x => {
-    const id = "f_" + x.name;
-    if (x.type === "html") return x.html;
-    if (x.type === "select" || x.type === "multi") return `<div class="f"><label for="${id}">${esc(x.label)}</label><l-select id="${id}" name="${x.name}" ${x.type === "multi" ? "multiple" : ""} ${x.search ? "search" : ""} placeholder="${esc(x.ph || (x.type === "multi" ? "Choose…" : "Choose one"))}" ${x.required ? "required" : ""}></l-select></div>`;
-    if (x.type === "date" || x.type === "datetime-local") return `<div class="f"><label for="${id}">${esc(x.label)}</label><l-date id="${id}" name="${x.name}" type="${x.type === "date" ? "date" : "datetime"}" value="${esc(x.value || "")}" ${x.required ? "required" : ""}></l-date></div>`;
-    if (x.type === "checks") return `<div class="f"><label>${esc(x.label)}</label><div class="checks">${x.options.map(([v, l]) => `<label><input type="checkbox" name="${x.name}" value="${esc(v)}" ${(x.value || []).map(String).includes(String(v)) ? "checked" : ""}> ${esc(l)}</label>`).join("") || `<span class="mu">Nothing to choose yet</span>`}</div></div>`;
-    if (x.type === "textarea") return `<div class="f"><label for="${id}">${esc(x.label)}</label><textarea class="in" id="${id}" name="${x.name}" placeholder="${esc(x.ph || "")}">${esc(x.value || "")}</textarea></div>`;
-    return `<div class="f"><label for="${id}">${esc(x.label)}</label><input class="in" id="${id}" name="${x.name}" type="${x.type || "text"}" value="${esc(x.value ?? "")}" placeholder="${esc(x.ph || "")}" ${x.required ? "required" : ""} ${x.attrs || ""}></div>`;
-  }).join("") + `<div class="f err mu" id="dlgErr" style="color:var(--rd)"></div><div style="display:flex;gap:8px;justify-content:flex-end"><button class="b" value="cancel" formnovalidate>Cancel</button><button class="b pr" value="ok">${esc(okLabel)}</button></div>`;
-  // the controls get their options (with pictures, fonts, second lines) after they exist
-  for (const x of fields) if (x.type === "select" || x.type === "multi") {
-    const el = f.querySelector(`#f_${x.name}`);
-    el.options = x.options.map(o => Array.isArray(o) ? { value: String(o[0]), label: String(o[1]), ...(o[2] || {}) } : o);
-    el.value = x.type === "multi" ? (x.value || []).map(String) : (x.value ?? (x.options[0] ? (Array.isArray(x.options[0]) ? x.options[0][0] : x.options[0].value) : ""));
-  }
-  f.onsubmit = async e => {
-    if (e.submitter && e.submitter.value === "cancel") return;
-    e.preventDefault();
-    const v = {}; const fd = new FormData(f);
-    for (const x of fields) if (x.name) v[x.name] = x.type === "checks" || x.type === "multi" ? fd.getAll(x.name) : (fd.get(x.name) ?? "");
-    try { await submit(v, f); d.close(); } catch (err) { $("#dlgErr").textContent = err.message; }
-  };
-  d.showModal();
-}
+/* ---------------- the form dialog: the shared one (K.form, fields → values) ---------------- */
+const form = (title, fields, submit, okLabel = "Save") => K.form(title, fields, submit, okLabel);
+const formErr = t => { const e = $("dialog.k-dlg .err"); if (e) e.textContent = t; };
 
 /* ---------------- navigation by role ---------------- */
 const NAV = {
@@ -235,17 +191,13 @@ function startShell(nav) {
   Shell.init({
     side: $("#side"), main: $("#view"), key: `lapp.school.${SLUG}.${S.me.id}`, name: S.org.name, home: nav[0][0], nav: NAVS,
     brand: `<div class="lg" style="margin-bottom:10px"><i style="background:${esc(S.org.color)}">${esc(S.org.name.charAt(0))}</i><span>${esc(S.org.name)}</span></div>`,
-    me: { name: S.me.name || "@" + S.me.username, sub: ROLE[S.role], initial: (S.me.name || S.me.username).charAt(0).toUpperCase(), color: `linear-gradient(135deg,${esc(S.org.color)},#22D3EE)` },
     title: r => { const [v, a] = r.split("/"); if (v === "class" && CLASSES) { const c = CLASSES.find(x => String(x.id) === a); return c ? c.name : "Class"; } return null; },
     render: async r => { const [v, arg] = r.split("/"); AFTER = null; return await (V[v] || V[nav[0][0]])(arg); },
     after: () => { if (AFTER) { const f = AFTER; AFTER = null; f(); } },
     onShow: r => { if (!String(r || "").startsWith("live/")) leaveLive(); },
-    menu: () => [{ icon: "🌐", label: "Language", run: () => PanelI18N.menu(document.querySelector(".sh-me")) }, { icon: "🎧", label: "Open the learner app ↗", run: () => window.open("/", "_blank") }],
     commands: () => [
       ...(can("admin") ? [{ icon: "🏫", label: "New class", run: () => ACT.newclass() }] : []),
       ...(can("admin", "teacher") ? [{ icon: "🎬", label: "New lesson", run: () => ACT.newlesson && ACT.newlesson() }] : [])],
-    jobs: can("admin", "teacher") ? async () => (await studio("/jobs")).jobs.map(j => ({ ...j, what: "Audio", href: `/studio?org=${SLUG}#voice/${j.lesson}` })) : null,
-    signOut: async () => { await fetch("/api/auth/logout", { method: "POST", headers: { "X-LAPP": "1" } }); location.href = "/"; }
   });
 }
 
@@ -269,7 +221,7 @@ V.overview = async () => {
   return `<div class="top"><h1>Overview</h1><button class="b" data-go="import">⬆ Import people (CSV)</button><button class="b pr" data-go="invite">＋ Add a person</button></div>
   <div class="kp"><div><b>${c.students}</b><span>Students</span></div><div><b>${cl.filter(k => !k.archived).length}</b><span>Classes</span></div><div><b>${c.teachers}</b><span>Teachers</span></div><div><b>${c.staff}</b><span>Admins & finance</span></div>${fees ? `<div><b>${money(fees.summary.open)}</b><span>Open fees · ${money(fees.summary.overdue)} overdue</span></div>` : ""}</div>
   <div class="g2"><div class="card"><h3>Classes <a class="b sm" href="#classes">All classes</a></h3>${cl.filter(k => !k.archived).slice(0, 8).map(k => `<div class="r"><span><a href="#class/${k.id}"><b>${esc(k.name)}</b></a> <span class="mu">${COURSE[k.course]} ${esc(k.level)} · ${esc(k.place)}</span></span>
-    <span class="mu">${k.teacher_name || k.teacher_username ? "👤 " + esc(k.teacher_name || k.teacher_username) : `<span class="pl bad-p">No teacher</span>`} · ${k.students} students</span>${k.live_event ? `<a class="pl bad-p" href="#live/${k.live_event}">LIVE</a>` : `<span class="pl ok-p">${k.next_at ? fmtDay(k.next_at) : "no lessons planned"}</span>`}</div>`).join("") || `<div class="empty">No classes yet. <button class="b sm" data-go="newclass">Create the first class</button></div>`}</div>
+    <span class="mu">${k.teacher_name || k.teacher_username ? "👤 " + esc(k.teacher_name || k.teacher_username) : `<span class="pl bad">No teacher</span>`} · ${k.students} students</span>${k.live_event ? `<a class="pl bad" href="#live/${k.live_event}">LIVE</a>` : `<span class="pl ok">${k.next_at ? fmtDay(k.next_at) : "no lessons planned"}</span>`}</div>`).join("") || `<div class="empty">No classes yet. <button class="b sm" data-go="newclass">Create the first class</button></div>`}</div>
   <div class="card"><h3>Today</h3>${today.map(e => `<div class="r"><span>${e.status === "live" ? `<span class="live-dot">LIVE</span> ` : ""}<b>${esc(e.class_name)}</b> <span class="mu">${fmtTime(e.starts_at)}–${fmtTime(e.ends_at)}</span></span>${liveBtn(e) || `<span class="mu">${e.status}</span>`}</div>`).join("") || `<div class="r mu">No lessons today</div>`}
     <div class="r"><span>📝 Homework due this week</span><span class="mu">${due.length}</span></div>${fees ? `<div class="r"><span>💶 Overdue payments</span><a class="mu" href="#finance">${fees.fees.filter(f => f.overdue > 0).length} students</a></div>` : ""}</div></div>`;
 };
@@ -281,11 +233,11 @@ V.classes = async () => {
   <div class="g3">${cl.map(k => `<a class="card" href="#class/${k.id}" style="text-decoration:none;display:flex;flex-direction:column;gap:6px;${k.archived ? "opacity:.5" : ""}">
     <span class="mu">${COURSE[k.course]} · ${esc(k.level)} · ${esc(k.place)}</span><b style="font-size:17px">${esc(k.name)}</b>
     <span class="mu">${k.teacher_name || k.teacher_username ? "👤 " + esc(k.teacher_name || k.teacher_username) : "No teacher yet"} · ${k.students} students</span>
-    <span>${k.live_event ? `<span class="live-dot">LIVE NOW</span>` : k.next_at ? `<span class="pl cy-p">Next: ${fmtDay(k.next_at)} ${fmtTime(k.next_at)}</span>` : `<span class="pl no-p">No lessons planned</span>`}${k.archived ? ` <span class="pl no-p">archived</span>` : ""}</span></a>`).join("") || `<div class="card empty">No classes yet</div>`}</div>`;
+    <span>${k.live_event ? `<span class="live-dot">LIVE NOW</span>` : k.next_at ? `<span class="pl cy">Next: ${fmtDay(k.next_at)} ${fmtTime(k.next_at)}</span>` : `<span class="pl ">No lessons planned</span>`}${k.archived ? ` <span class="pl ">archived</span>` : ""}</span></a>`).join("") || `<div class="card empty">No classes yet</div>`}</div>`;
 };
 // the school's own lessons, made in the studio (only its students see them)
-const studio = (p, m = "GET", b) => fetch(`/api/studio${p}${p.includes("?") ? "&" : "?"}org=${SLUG}`, { method: m, credentials: "same-origin", headers: { "Content-Type": "application/json", ...(m !== "GET" ? { "X-LAPP": "1" } : {}) }, body: b ? JSON.stringify(b) : undefined })
-  .then(async r => { const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error || r.statusText); return j; });
+const studioApi = K.apiAt("/api/studio");
+const studio = (p, m = "GET", b) => studioApi(m, `${p}${p.includes("?") ? "&" : "?"}org=${SLUG}`, b);
 const LTYPE = { talk: ["💬", "Conversation"], lesson: ["🎧", "Lesson"], story: ["📖", "Story"] };
 const LTOPIC = { daily: "Daily life", travel: "Travel & hotel", food: "Food & shopping", health: "Health & doctor", work: "Work & office", home: "Home & family", city: "City & transport", school: "School & study", story: "Stories", other: "Other" };
 V.lessons = async () => {
@@ -294,22 +246,21 @@ V.lessons = async () => {
     await Drive.load(); return Drive.html();
   }
   const { lessons } = await studio("/lessons");
-  const st = { draft: ["no-p", "draft"], review: ["wa-p", "in work"], published: ["ok-p", "published"] };
   return `<div class="top"><h1>Lessons</h1><button class="b pr" data-go="newlesson">＋ New lesson</button></div>
   <p class="mu">Your school's own audio lessons. Make one, then the studio opens: write it (with AI or by hand), make the audio, publish. Published lessons can be added to a class as material — only your students see them.</p>
   ${lessons.length ? `<div class="g3">${lessons.map(l => `<a class="card" href="/studio?org=${SLUG}#script/${l.id}" target="_blank" rel="noopener" title="Opens the studio in a new browser tab" style="text-decoration:none;display:flex;flex-direction:column;gap:6px">
     <span class="mu">${FLAG[l.course] || ""} ${COURSE[l.course] || ""} · ${esc(l.level)} · ${LTYPE[l.type][0]} ${esc(LTOPIC[l.topic] || "")}</span><b style="font-size:17px">${esc(l.title)}</b>
     <span class="mu">${l.lines ? `${l.approved}/${l.lines} lines approved` : "no text yet"} · ${{ ready: "🎧 audio", old: "🎧 audio older than text", none: "no audio" }[l.audio]}</span>
-    <span><span class="pl ${st[l.status][0]}">${st[l.status][1]}</span></span></a>`).join("")}</div>`
+    <span>${K.lessonState(l.status)}</span></a>`).join("")}</div>`
     : `<div class="card empty">No lessons yet. Make the first one with ＋ New lesson.</div>`}`;
 };
 function newLessonForm(folder = 0, rules = {}) {
   form("New lesson", [
     { name: "title", label: "Title (in the course language)", required: true, ph: "Am Bahnhof" },
-    { type: "html", html: `<div class="f2">` },
+    { type: "html", html: `<div class="cols2">` },
     { name: "course", label: "Language", type: "select", options: courseOpts(), value: S.org.course || "de" },
     { name: "level", label: "Level", type: "select", options: ["A1", "A2", "B1", "B2", "C1", "C2"].map(x => [x, x]), value: rules.level || "A1" },
-    { type: "html", html: `</div><div class="f2">` },
+    { type: "html", html: `</div><div class="cols2">` },
     { name: "type", label: "Type", type: "select", options: Object.entries(LTYPE).map(([k, [i, l]]) => [k, l, { icon: i }]) },
     { name: "topic", label: "Topic", type: "select", options: Object.entries(LTOPIC).map(([k, l]) => [k, l]) },
     { type: "html", html: `</div>` },
@@ -337,7 +288,7 @@ V.class = async id => {
   if (CT === "homework") body = `<div class="card"><h3>Homework ${canTeach ? `<button class="b sm pr" data-go="newhw" data-k="${k.id}">＋ New homework</button>` : ""}</h3>${hwRows(hw.assignments)}</div>`;
   if (CT === "lessons") body = `<div class="card"><h3>Lessons ${canTeach ? `<button class="b sm pr" data-go="newevents" data-k="${k.id}">＋ Plan lessons</button>` : ""}</h3>
     ${ev.map(e => `<div class="r"><span><b>${fmtDay(e.starts_at)}</b> <span class="mu">${fmtTime(e.starts_at)}–${fmtTime(e.ends_at)}${e.title ? " · " + esc(e.title) : ""}</span></span><span style="display:flex;gap:6px;align-items:center">
-      <span class="pl ${e.status === "live" ? "bad-p" : e.status === "done" ? "ok-p" : e.status === "cancelled" ? "no-p" : "cy-p"}">${e.status}</span>
+      <span class="pl ${e.status === "live" ? "bad" : e.status === "done" ? "ok" : e.status === "cancelled" ? "" : "cy"}">${e.status}</span>
       ${canTeach && e.status !== "cancelled" ? `<button class="b sm" data-go="attend" data-e="${e.id}">✅ Attendance</button>${e.status === "planned" ? `<button class="b sm pr" data-go="startlive" data-e="${e.id}">▶ Start</button><button class="b sm" data-go="cancelev" data-e="${e.id}">Cancel</button>` : liveBtn(e)}` : liveBtn(e)}</span></div>`).join("") || `<div class="empty">No lessons planned</div>`}</div>`;
   if (CT === "students") body = `<div class="card"><h3>Students ${can("admin") ? `<button class="b sm" data-go="classstudents" data-k="${k.id}">Choose students</button>` : ""}</h3>${st.map(s => `<div class="r"><span><b>${esc(nameOf(s))}</b> <span class="mu">@${esc(s.username)}</span></span></div>`).join("") || `<div class="empty">No students in this class yet</div>`}</div>`;
   return `<a class="crumb" href="#classes">← Classes</a><div class="top"><h1>${esc(k.name)}</h1>
@@ -349,7 +300,7 @@ V.class = async id => {
 const ICON = { text: "📄", link: "🔗", file: "📎", lesson: "🎧" };
 function matUrl(m) { return m.kind === "file" ? `/api/org/${SLUG}/files/${m.file_id}` : m.kind === "lesson" ? `/#lesson` : m.url; }
 function matRow(m, teach) {
-  return `<div class="mat"><span class="ic">${ICON[m.kind]}</span><div class="tx"><b>${esc(m.title)}</b> ${m.shared ? "" : `<span class="pl wa-p">only you</span>`}
+  return `<div class="mat"><span class="ic">${ICON[m.kind]}</span><div class="tx"><b>${esc(m.title)}</b> ${m.shared ? "" : `<span class="pl warn">only you</span>`}
     ${m.kind === "text" ? `<p>${esc(m.body.slice(0, 600))}</p>` : m.kind === "link" ? `<p><a href="${esc(m.url)}" target="_blank" rel="noopener">${esc(m.url)}</a></p>` : m.kind === "file" ? `<p><a href="${matUrl(m)}" target="_blank">${esc(m.file_name || "file")}</a> · ${Math.round((m.file_size || 0) / 1024)} KB</p>` : `<p>From the LAPP library · ${esc(m.url)}</p>`}</div>
     ${teach ? `<span style="display:flex;gap:6px"><button class="b sm" data-go="matshare" data-m="${m.id}" data-s="${m.shared ? 0 : 1}">${m.shared ? "Hide" : "Share"}</button><button class="b sm d" data-go="matdel" data-m="${m.id}">Delete</button></span>` : ""}</div>`;
 }
@@ -357,8 +308,8 @@ function hwRows(list) {
   if (!list.length) return `<div class="empty">No homework yet</div>`;
   return list.map(a => `<div class="r"><span><a href="#hw/${a.id}"><b>${esc(a.title)}</b></a> <span class="mu">${esc(a.class_name)} · ${{ quiz: "auto-graded quiz", write: "writing", speak: "speaking" }[a.kind]}</span></span>
     <span style="display:flex;gap:8px;align-items:center">${a.due_at ? `<span class="mu">due ${fmtDay(a.due_at)}</span>` : ""}
-    ${can("student") ? (a.my_at ? `<span class="pl ${a.my_score == null ? "cy-p" : a.my_score >= 60 ? "ok-p" : "wa-p"}">${a.my_score == null ? "handed in" : a.my_score + "%"}</span>` : `<span class="pl ${a.due_at && a.due_at < Date.now() ? "bad-p" : "wa-p"}">${a.due_at && a.due_at < Date.now() ? "late" : "to do"}</span>`)
-      : `<span class="pl no-p">${a.submitted}/${a.students} handed in</span>${a.avg != null ? `<span class="pl ok-p">avg ${a.avg}%</span>` : ""}`}</span></div>`).join("");
+    ${can("student") ? (a.my_at ? `<span class="pl ${a.my_score == null ? "cy" : a.my_score >= 60 ? "ok" : "warn"}">${a.my_score == null ? "handed in" : a.my_score + "%"}</span>` : `<span class="pl ${a.due_at && a.due_at < Date.now() ? "bad" : "warn"}">${a.due_at && a.due_at < Date.now() ? "late" : "to do"}</span>`)
+      : `<span class="pl ">${a.submitted}/${a.students} handed in</span>${a.avg != null ? `<span class="pl ok">avg ${a.avg}%</span>` : ""}`}</span></div>`).join("");
 }
 
 /* ---- homework ---- */
@@ -376,14 +327,14 @@ V.hw = async id => {
   let body;
   if (canTeach) {
     body = `<div class="card"><h3>Results <span class="mu">${submissions.filter(s => s.submitted_at).length}/${submissions.length} handed in</span></h3><div class="tbl"><table><tr><th>Student</th><th>Handed in</th><th class="num">Score</th><th>Answer</th><th></th></tr>
-      ${submissions.map(s => `<tr><td>${esc(nameOf(s))}</td><td class="mu">${s.submitted_at ? ago(s.submitted_at) : "—"}</td><td class="num">${s.score == null ? (s.submitted_at ? `<span class="pl cy-p">to grade</span>` : "—") : s.score + "%"}</td>
+      ${submissions.map(s => `<tr><td>${esc(nameOf(s))}</td><td class="mu">${s.submitted_at ? ago(s.submitted_at) : "—"}</td><td class="num">${s.score == null ? (s.submitted_at ? `<span class="pl cy">to grade</span>` : "—") : s.score + "%"}</td>
         <td class="mu" style="max-width:340px">${s.answers && a.kind !== "quiz" ? esc(Object.values(JSON.parse(s.answers || "{}")).join(" ").slice(0, 200)) : ""}${s.file_id ? ` <a href="/api/org/${SLUG}/files/${s.file_id}" target="_blank">▶ recording</a>` : ""}${s.feedback ? `<br>💬 ${esc(s.feedback)}` : ""}</td>
         <td>${s.submitted_at ? `<button class="b sm" data-go="grade" data-a="${a.id}" data-u="${s.id}" data-s="${s.score ?? ""}" data-f="${esc(s.feedback || "")}">Grade</button>` : ""}</td></tr>`).join("")}</table></div></div>
-      ${items.length ? `<div class="card"><h3>Questions</h3>${items.map((it, i) => `<div class="r"><span>${i + 1}. ${esc(it.q)}</span><span class="pl ok-p">${esc(it.answer)}</span></div>`).join("")}</div>` : ""}`;
+      ${items.length ? `<div class="card"><h3>Questions</h3>${items.map((it, i) => `<div class="r"><span>${i + 1}. ${esc(it.q)}</span><span class="pl ok">${esc(it.answer)}</span></div>`).join("")}</div>` : ""}`;
   } else {
     const ans = mine ? JSON.parse(mine.answers || "{}") : {};
     const done = !!mine;
-    body = `<div class="card"><h3>${done ? `Handed in ${ago(mine.submitted_at)} ${mine.score != null ? `<span class="pl ${mine.score >= 60 ? "ok-p" : "wa-p"}">${mine.score}%</span>` : `<span class="pl cy-p">waiting for your teacher</span>`}` : "Your answer"}</h3>
+    body = `<div class="card"><h3>${done ? `Handed in ${ago(mine.submitted_at)} ${mine.score != null ? `<span class="pl ${mine.score >= 60 ? "ok" : "warn"}">${mine.score}%</span>` : `<span class="pl cy">waiting for your teacher</span>`}` : "Your answer"}</h3>
       ${mine && mine.feedback ? `<p style="margin-bottom:10px">💬 ${esc(mine.feedback)}</p>` : ""}
       <form id="hwForm" style="display:flex;flex-direction:column;gap:10px">
       ${a.kind === "quiz" ? items.map((it, i) => `<div class="q"><b>${i + 1}. ${esc(it.q)}</b>${it.options && it.options.length ? it.options.map(o => {
@@ -434,7 +385,7 @@ async function weekView(title, mine) {
   const todayKey = new Date().toDateString();
   return `<div class="top"><h1>${title}</h1><button class="b" data-week="-1">‹</button><button class="b" data-week="0">This week</button><button class="b" data-week="1">›</button>${can("admin", "teacher") ? `<button class="b pr" data-go="newevents">＋ Plan lessons</button>` : ""}</div>
   <div class="week">${Array.from({ length: 7 }, (_, i) => { const day = from + i * DAYMS, list = ev.filter(e => e.starts_at >= day && e.starts_at < day + DAYMS);
-    return `<div class="day ${new Date(day).toDateString() === todayKey ? "today" : ""}"><h4><span>${new Date(day).toLocaleDateString((window.PanelI18N ? PanelI18N.locale : "en-GB"), { weekday: "short" })}</span><b>${new Date(day).getDate()}</b></h4>
+    return `<div class="day ${new Date(day).toDateString() === todayKey ? "today" : ""}"><h4><span>${new Date(day).toLocaleDateString(K.loc(), { weekday: "short" })}</span><b>${new Date(day).getDate()}</b></h4>
       <div class="evs">${!list.length && can("student") ? `<span class="mu" style="padding-top:8px">No lessons</span>` : ""}${list.map(e => `<a class="ev ${e.status}" href="${e.status === "live" ? "#live/" + e.id : "#class/" + e.class_id}"><small>${fmtTime(e.starts_at)}–${fmtTime(e.ends_at)}${e.status === "live" ? " · LIVE" : ""}</small><b>${esc(e.class_name)}</b><small>${esc(e.title || e.place)}${!mine && (e.teacher_name || e.teacher_username) ? " · " + esc(e.teacher_name || e.teacher_username) : ""}</small></a>`).join("")}</div></div>`; }).join("")}</div>`;
 }
 V.timetable = () => weekView("Timetable");
@@ -446,7 +397,7 @@ const hello = () => { const h = new Date().getHours(); return h < 12 ? "Good mor
 const HW_ICON = { quiz: "✅", write: "✍️", speak: "🎤" };
 function hwTiles(list) {
   return list.map(a => `<a class="hw" href="#hw/${a.id}"><span class="ic">${HW_ICON[a.kind]}</span><span class="tx"><b>${esc(a.title)}</b><small>${esc(a.class_name)}${a.due_at ? " · due " + fmtDay(a.due_at) : ""}</small></span>
-    ${a.my_at ? `<span class="pl ${a.my_score == null ? "cy-p" : a.my_score >= 60 ? "ok-p" : "wa-p"}">${a.my_score == null ? "handed in" : a.my_score + "%"}</span>` : `<span class="pl ${a.due_at && a.due_at < Date.now() ? "bad-p" : "wa-p"}">${a.due_at && a.due_at < Date.now() ? "late" : "to do"}</span>`}</a>`).join("");
+    ${a.my_at ? `<span class="pl ${a.my_score == null ? "cy" : a.my_score >= 60 ? "ok" : "warn"}">${a.my_score == null ? "handed in" : a.my_score + "%"}</span>` : `<span class="pl ${a.due_at && a.due_at < Date.now() ? "bad" : "warn"}">${a.due_at && a.due_at < Date.now() ? "late" : "to do"}</span>`}</a>`).join("");
 }
 V.home = async () => {
   const now = Date.now(), [ev, hw, prog, fees] = await Promise.all([events(now - DAYMS, now + 14 * DAYMS), api("GET", "/assignments"), api("GET", "/me"), api("GET", "/fees")]);
@@ -454,7 +405,7 @@ V.home = async () => {
   const todo = hw.assignments.filter(a => !a.my_at);
   const nextPay = fees.fees.flatMap(f => f.installments.filter(i => i.paid < i.amount)).sort((a, b) => a.due_on.localeCompare(b.due_on))[0];
   const upcoming = ev.filter(e => e.status === "planned" && e.starts_at > now).slice(0, 3);
-  return `<div class="top"><div><h1>${hello()}, ${esc((S.me.name || S.me.username).split(" ")[0])}</h1><span class="mu">${new Date().toLocaleDateString((window.PanelI18N ? PanelI18N.locale : "en-GB"), { weekday: "long", day: "numeric", month: "long" })}</span></div></div>
+  return `<div class="top"><div><h1>${hello()}, ${esc((S.me.name || S.me.username).split(" ")[0])}</h1><span class="mu">${new Date().toLocaleDateString(K.loc(), { weekday: "long", day: "numeric", month: "long" })}</span></div></div>
   ${live ? `<div class="hero"><span><span class="tag">● Class is live</span><b>${esc(live.class_name)}</b><span>${live.teacher_name ? "with " + esc(live.teacher_name) + " · " : ""}started ${fmtTime(live.starts_at)}</span></span><a class="b" href="#live/${live.id}">Join class</a></div>`
     : next ? `<div class="hero"><span><span class="tag">Next lesson</span><b>${esc(next.class_name)}</b><span>${fmtDay(next.starts_at)} · ${fmtTime(next.starts_at)}–${fmtTime(next.ends_at)} · ${esc(next.place)}</span></span><a class="b" href="#calendar">Calendar</a></div>`
     : `<div class="hero"><span><span class="tag">${esc(S.org.name)}</span><b>No lessons planned</b><span>Your teacher will add them soon.</span></span><a class="b" href="/">Practise in the app</a></div>`}
@@ -469,7 +420,7 @@ V.fees = async () => {
   const { fees } = await api("GET", "/fees?mine=1");
   const t = new Date().toISOString().slice(0, 10);
   return `<div class="top"><h1>Fees</h1></div>${fees.map(f => `<div class="card"><h3>${esc(f.title)} <span class="mu">${money(f.paid)} of ${money(f.total)} paid</span></h3>
-    ${f.installments.map(i => `<div class="r"><span>${fmtDate(i.due_on)}</span><b>${money(i.amount)}</b><span class="pl ${i.paid >= i.amount ? "ok-p" : i.due_on < t ? "bad-p" : "wa-p"}">${i.paid >= i.amount ? "paid " + fmtDate(i.paid_on) : i.due_on < t ? "overdue" : "open"}</span></div>`).join("")}</div>`).join("")
+    ${f.installments.map(i => `<div class="r"><span>${fmtDate(i.due_on)}</span><b>${money(i.amount)}</b><span class="pl ${i.paid >= i.amount ? "ok" : i.due_on < t ? "bad" : "warn"}">${i.paid >= i.amount ? "paid " + fmtDate(i.paid_on) : i.due_on < t ? "overdue" : "open"}</span></div>`).join("")}</div>`).join("")
     || `<div class="card empty">No fees</div>`}<p class="mu">Payments are made to your school. Ask the office if something looks wrong.</p>`;
 };
 
@@ -486,7 +437,7 @@ V.finance = async () => {
   <div class="card tbl"><table><tr><th>Student</th><th>Fee</th><th class="num">Total</th><th class="num">Paid</th><th class="num">Open</th><th>Next due</th><th>Status</th><th></th></tr>
   ${list.map(f => `<tr><td><b>${esc(f.student_name || f.student_username)}</b><br><span class="mu">${esc(f.student_email)}</span></td><td>${esc(f.title)}${f.class_name ? `<br><span class="mu">${esc(f.class_name)}</span>` : ""}${f.installments.length > 1 ? `<br><span class="mu">${f.installments.length} installments</span>` : ""}</td>
     <td class="num">${money(f.total)}</td><td class="num">${money(f.paid)}</td><td class="num">${money(f.open)}</td><td>${f.next_due ? fmtDate(f.next_due) : "—"}</td>
-    <td><span class="pl ${f.open <= 0 ? "ok-p" : f.overdue > 0 ? "bad-p" : "wa-p"}">${f.open <= 0 ? "Paid" : f.overdue > 0 ? f.late_days + " days late" : "On time"}</span></td>
+    <td><span class="pl ${f.open <= 0 ? "ok" : f.overdue > 0 ? "bad" : "warn"}">${f.open <= 0 ? "Paid" : f.overdue > 0 ? f.late_days + " days late" : "On time"}</span></td>
     <td style="white-space:nowrap">${f.open > 0 ? `<button class="b sm ok" data-go="pay" data-f="${f.id}">Record payment</button> <button class="b sm" data-go="remind" data-f="${f.id}">🔔</button>` : ""} <button class="b sm" data-go="feedetail" data-f="${f.id}">⋯</button></td></tr>`).join("") || `<tr><td colspan="8" class="empty">No fees here</td></tr>`}</table></div>`;
 };
 let FEES = null;
@@ -500,7 +451,7 @@ V.people = async () => {
   return `<div class="top"><h1>${can("finance") ? "Students" : "People"}</h1>${can("admin") ? `<button class="b" data-go="import">⬆ Import CSV</button><button class="b pr" data-go="invite">＋ Add a person</button>` : ""}</div>
   <div class="tabs">${tabs.map(([k, l]) => `<button class="chip ${PF === k ? "on" : ""}" data-pf="${k}">${l} (${all.filter(m => m.role === k).length})</button>`).join("")}</div>
   <div class="card tbl"><table><tr><th>Name</th><th>E-mail</th><th>${PF === "teacher" ? "Teaches" : "Classes"}</th><th>Last seen</th><th></th></tr>
-  ${list.map(m => `<tr style="${m.active ? "" : "opacity:.5"}"><td><b>${esc(nameOf(m))}</b> <span class="mu">@${esc(m.username)}</span>${m.active ? "" : ` <span class="pl no-p">inactive</span>`}${m.verified || !m.email ? "" : ` <span class="pl wa-p">invited</span>`}</td><td>${m.email ? esc(m.email) : `<span class="mu">School login</span>`}</td>
+  ${list.map(m => `<tr style="${m.active ? "" : "opacity:.5"}"><td><b>${esc(nameOf(m))}</b> <span class="mu">@${esc(m.username)}</span>${m.active ? "" : ` <span class="pl ">inactive</span>`}${m.verified || !m.email ? "" : ` <span class="pl warn">invited</span>`}</td><td>${m.email ? esc(m.email) : `<span class="mu">School login</span>`}</td>
     <td class="mu">${esc((PF === "teacher" ? m.teaches : m.classes) || "—")}</td><td class="mu">${ago(m.last_seen)}</td>
     <td>${can("admin") && m.id !== S.me.id ? `<button class="b sm" data-go="person" data-u="${m.id}">Edit</button>` : ""}</td></tr>`).join("") || `<tr><td colspan="5" class="empty">Nobody yet</td></tr>`}</table></div>`;
 };
@@ -508,7 +459,7 @@ V.people = async () => {
 /* ---- settings ---- */
 V.settings = async () => `<div class="top"><h1>Settings</h1></div><div class="card" style="max-width:560px"><form id="setForm" style="display:flex;flex-direction:column;gap:12px">
   <div class="f"><label for="s_name">School name</label><input class="in" id="s_name" name="name" value="${esc(S.org.name)}"></div>
-  <div class="f2"><div class="f"><label for="s_color">Colour</label><input class="in" id="s_color" name="color" type="color" value="${esc(S.org.color)}" style="height:42px;padding:4px"></div>
+  <div class="cols2"><div class="f"><label for="s_color">Colour</label><input class="in" id="s_color" name="color" type="color" value="${esc(S.org.color)}" style="height:42px;padding:4px"></div>
   <div class="f"><label for="s_cur">Currency</label><l-select id="s_cur" name="currency" value="${esc(S.org.currency)}">${[["EUR", "Euro", "€"], ["PLN", "Polish złoty", "zł"], ["CHF", "Swiss franc", "Fr"], ["GBP", "British pound", "£"], ["USD", "US dollar", "$"]].map(([c, n, i]) => `<option value="${c}" data-sub="${n}" data-icon="${i}">${c}</option>`).join("")}</l-select></div></div>
   <p class="mu">Your school's address: <b>${location.origin}/s/${SLUG}</b> — share it with teachers and students.</p>
   <button class="b pr" style="align-self:flex-start">Save</button></form></div>`;
@@ -540,7 +491,7 @@ ACT.invite = async () => {
   const cl = await classes();
   const pw = newPassword();
   form("Add a person", [
-    { type: "html", html: `<p class="mu">The school gives each person a username and a password. No e-mail is needed.</p><div class="f2">` },
+    { type: "html", html: `<p class="mu">The school gives each person a username and a password. No e-mail is needed.</p><div class="cols2">` },
     { name: "name", label: "Name", required: true, ph: "Sara Müller" },
     { name: "role", label: "Role", type: "select", options: roleOpts(), value: "student" },
     { name: "username", label: "Username", required: true, ph: "sara.mueller", attrs: `pattern="[a-zA-Z0-9_.]{3,20}" autocomplete="off"` },
@@ -582,7 +533,7 @@ ACT.person = async btn => {
     { name: "role", label: "Role", type: "select", options: roleOpts(), value: m.role },
     { name: "active", label: "Status", type: "select", options: [["1", "Active", { icon: "🟢" }], ["0", "Inactive", { icon: "⏸", sub: "can't open the school" }]], value: m.active ? "1" : "0" },
     ...(m.managed ? [
-      { type: "html", html: `<div class="f2">` }, { name: "username", label: "Username", value: m.username, attrs: `pattern="[a-zA-Z0-9_.]{3,20}"` },
+      { type: "html", html: `<div class="cols2">` }, { name: "username", label: "Username", value: m.username, attrs: `pattern="[a-zA-Z0-9_.]{3,20}"` },
       { name: "password", label: "New password (empty = keep)", attrs: `minlength="8" autocomplete="off"`, ph: "leave empty" }, { type: "html", html: `</div>` },
       { type: "html", html: `<button type="button" class="b sm" id="genPw" style="align-self:flex-start">Make a new password</button>` }
     ] : [{ type: "html", html: `<p class="mu">${esc(m.email)} · this person signed up themselves and manages their own password.</p>` }]),
@@ -598,7 +549,7 @@ async function classForm(k) {
   const t = await teachers();
   form(k ? "Edit class" : "New class", [
     { name: "name", label: "Name", value: k ? k.name : "", required: true, ph: "A1 · Morning" },
-    { type: "html", html: `<div class="f2">` },
+    { type: "html", html: `<div class="cols2">` },
     { name: "course", label: "Language", type: "select", options: courseOpts(), value: k ? k.course : "de" },
     { name: "level", label: "Level", type: "select", options: [["A1", "A1", { sub: "Beginner" }], ["A2", "A2", { sub: "Elementary" }], ["B1", "B1", { sub: "Intermediate" }], ["B2", "B2", { sub: "Upper intermediate" }], ["C1", "C1", { sub: "Advanced" }], ["C2", "C2", { sub: "Mastery" }]], value: k ? k.level : "A1" },
     { name: "teacherId", label: "Teacher", type: "select", search: true, options: [["", "No teacher yet", { icon: "—" }], ...t.map(personOpt)], value: k ? k.teacher_id || "" : "" },
@@ -616,7 +567,7 @@ ACT.newclass = () => classForm(null);
 ACT.editclass = async btn => classForm((await api("GET", `/classes/${btn.dataset.k}`)).class);
 ACT.delclass = async btn => {
   if (!await sure(btn, "Delete this class?", "Its lessons, material and homework are deleted too. Students keep their accounts.", "Click again: delete the class, its lessons, material and homework")) return;
-  await api("DELETE", `/classes/${btn.dataset.k}`); $("#dlg").close(); CLASSES = null; location.hash = "classes"; toast("Class deleted");
+  await api("DELETE", `/classes/${btn.dataset.k}`); K.closeDialogs(); CLASSES = null; location.hash = "classes"; toast("Class deleted");
 };
 ACT.classstudents = async btn => {
   const [st, { students: cur }] = await Promise.all([students(), api("GET", `/classes/${btn.dataset.k}`)]);
@@ -629,7 +580,7 @@ ACT.newevents = async btn => {
   const local = new Date(d.getTime() - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 16);
   form("Plan lessons", [
     { name: "classId", label: "Class", type: "select", options: cl.map(k => [k.id, k.name, { icon: FLAG[k.course], sub: `${COURSE[k.course]} ${k.level}` }]), value: btn.dataset.k || (cl[0] && cl[0].id) },
-    { type: "html", html: `<div class="f2">` }, { name: "start", label: "First lesson", type: "datetime-local", value: local, required: true },
+    { type: "html", html: `<div class="cols2">` }, { name: "start", label: "First lesson", type: "datetime-local", value: local, required: true },
     { name: "minutes", label: "Length (minutes)", type: "number", value: 90, attrs: `min="15" max="600"` }, { type: "html", html: `</div>` },
     { name: "weekdays", label: "Repeat on (empty = once a week on the same day)", type: "multi", ph: "Same day each week", options: [["1", "Monday"], ["2", "Tuesday"], ["3", "Wednesday"], ["4", "Thursday"], ["5", "Friday"], ["6", "Saturday"], ["0", "Sunday"]] },
     { name: "weeks", label: "For how many weeks", type: "number", value: 1, attrs: `min="1" max="60"` },
@@ -673,7 +624,7 @@ ACT["mat-lesson"] = async btn => {
     ...(lib.lessons || []).map(l => ({ ...l, title: (l.school ? "🏫 " : "") + l.title }))];
   form("Add a lesson (LAPP library or your school's own)", [{ name: "dir", label: `${c.name} lessons`, type: "select", search: true, options: ls.map(l => [l.dir, l.title, { icon: { talk: "💬", story: "📖" }[l.type] || "🎧", sub: `${l.level} · ${l.type || "lesson"}` }]) }],
     async v => { const l = ls.find(x => x.dir === v.dir); await api("POST", "/materials", { classId: btn.dataset.k, kind: "lesson", title: l.title, url: l.dir }); show(); });
-  if (!ls.length) $("#dlgErr").textContent = "This language has no library lessons yet.";
+  if (!ls.length) formErr("This language has no library lessons yet.");
 };
 ACT.matshare = async btn => { await api("PATCH", `/materials/${btn.dataset.m}`, { shared: btn.dataset.s === "1" }); show(); };
 ACT.matdel = async btn => { if (!await sure(btn, "Remove this material?", "Students no longer see it in the class.", "Sure?")) return; await api("DELETE", `/materials/${btn.dataset.m}`); show(); };
@@ -700,7 +651,7 @@ ACT.newhw = btn => {
   const local = new Date(d.getTime() - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 16);
   form("New homework", [
     { name: "title", label: "Title", required: true, ph: "Fill the gaps — Im Hotel" },
-    { type: "html", html: `<div class="f2">` },
+    { type: "html", html: `<div class="cols2">` },
     { name: "kind", label: "Type", type: "select", options: [["quiz", "Quiz", { icon: "✅", sub: "graded automatically" }], ["write", "Writing", { icon: "✍️", sub: "you grade it" }], ["speak", "Speaking", { icon: "🎤", sub: "students record, you grade" }]] },
     { name: "due", label: "Due", type: "datetime-local", value: local },
     { type: "html", html: `</div>` },
@@ -716,7 +667,7 @@ ACT.newhw = btn => {
     await api("POST", "/assignments", { classId: btn.dataset.k, title: v.title, kind: v.kind, instructions: v.instructions, items, dueAt: v.due ? new Date(v.due).getTime() : 0 });
     toast("Homework set"); show();
   }, "Set homework");
-  $("#dlg").classList.add("wide");
+  $("dialog.k-dlg").classList.add("wide");
   numberRows();
   $("#qAdd").onclick = () => { $("#qBody").insertAdjacentHTML("beforeend", qRow()); numberRows(); $("#qBody tr:last-child input").focus(); };
   $("#qBody").addEventListener("click", e => { const x = e.target.closest("[data-qdel]"); if (x && $$("#qBody tr").length > 1) { x.closest("tr").remove(); numberRows(); } });
@@ -735,18 +686,18 @@ ACT.newfee = async () => {
     { name: "studentId", label: "Student", type: "select", search: true, options: st.map(personOpt) },
     { name: "classId", label: "Class (optional)", type: "select", options: [["", "No class", { icon: "—" }], ...cl.map(k => [k.id, k.name, { icon: FLAG[k.course] }])] },
     { name: "title", label: "What for", value: "Course fee" },
-    { type: "html", html: `<div class="f2">` }, { name: "total", label: `Amount (${S.org.currency})`, type: "number", attrs: `min="1" step="0.01" required` },
+    { type: "html", html: `<div class="cols2">` }, { name: "total", label: `Amount (${S.org.currency})`, type: "number", attrs: `min="1" step="0.01" required` },
     { name: "installments", label: "Installments", type: "number", value: 1, attrs: `min="1" max="24"` }, { type: "html", html: `</div>` },
     { name: "firstDue", label: "First payment due", type: "date", value: t }, { name: "note", label: "Note (e.g. job centre voucher)" }
   ], async v => { await api("POST", "/fees", v); toast("Fee created"); show(); }, "Create");
-  if (!st.length) $("#dlgErr").textContent = "Add students first.";
+  if (!st.length) formErr("Add students first.");
 };
 async function feeById(id) { return (await api("GET", "/fees")).fees.find(f => f.id === Number(id)); }
 ACT.pay = async btn => {
   const f = await feeById(btn.dataset.f), open = f.installments.filter(i => i.paid < i.amount);
   form(`Record payment · ${f.student_name || f.student_username}`, [
     { name: "inst", label: "Installment", type: "select", options: open.map(i => [i.id, fmtDate(i.due_on), { icon: "🧾", sub: `${money(i.amount - i.paid)} open` }]) },
-    { type: "html", html: `<div class="f2">` }, { name: "amount", label: `Amount (${S.org.currency}, empty = all of it)`, type: "number", attrs: `min="0" step="0.01"` },
+    { type: "html", html: `<div class="cols2">` }, { name: "amount", label: `Amount (${S.org.currency}, empty = all of it)`, type: "number", attrs: `min="0" step="0.01"` },
     { name: "method", label: "Paid by", type: "select", options: [["bank", "Bank transfer", { icon: "🏦" }], ["cash", "Cash", { icon: "💶" }], ["card", "Card", { icon: "💳" }], ["voucher", "Voucher", { icon: "🎟" }], ["other", "Other", { icon: "•" }]] }, { type: "html", html: `</div>` },
     { name: "date", label: "Date", type: "date", value: new Date().toISOString().slice(0, 10) }
   ], async v => { await api("POST", `/installments/${v.inst}/pay`, { amount: v.amount === "" ? undefined : v.amount, method: v.method, date: v.date }); toast("Payment recorded"); show(); }, "Record");
@@ -758,7 +709,7 @@ ACT.feedetail = async btn => {
   form(`${f.title} · ${f.student_name || f.student_username}`, [{ type: "html", html: `${f.note ? `<p class="mu">${esc(f.note)}</p>` : ""}<div>${f.installments.map(i => `<div class="r"><span>${fmtDate(i.due_on)}</span><span>${money(i.paid)} / ${money(i.amount)}</span><span class="mu">${i.paid_on ? `${fmtDate(i.paid_on)} · ${esc(i.method)}` : i.reminded_at ? "reminded " + ago(i.reminded_at) : ""}</span></div>`).join("")}</div>
     <button type="button" class="b d" data-go="delfee" data-f="${f.id}" style="align-self:flex-start">Delete this fee</button>` }], async () => {}, "Close");
 };
-ACT.delfee = async btn => { if (!await sure(btn, "Delete this payment?", "It disappears from the student's fees and from the totals.", "Click again to delete")) return; await api("DELETE", `/fees/${btn.dataset.f}`); $("#dlg").close(); show(); };
+ACT.delfee = async btn => { if (!await sure(btn, "Delete this payment?", "It disappears from the student's fees and from the totals.", "Click again to delete")) return; await api("DELETE", `/fees/${btn.dataset.f}`); K.closeDialogs(); show(); };
 ACT["export-fees"] = async () => {
   const { fees } = await api("GET", "/fees"), q = s => `"${String(s ?? "").replace(/"/g, '""')}"`;
   const rows = fees.flatMap(f => f.installments.map(i => [f.student_name || f.student_username, f.student_email, f.title, f.class_name || "", i.due_on, (i.amount / 100).toFixed(2), (i.paid / 100).toFixed(2), i.paid_on, i.method].map(q).join(",")));
@@ -779,7 +730,7 @@ V.live = async id => {
     <b style="font-size:12.5px">Chat</b><div class="chat" id="chat"></div><form id="chatForm" style="display:flex;gap:6px"><input class="in" id="chatIn" placeholder="Message…" autocomplete="off" maxlength="500"><button class="b sm">Send</button></form></div>
   <div class="lv-tools">${T ? `
     <button class="tl on" data-tool="pen" title="Pen">✏️</button><button class="tl" data-tool="text" title="Text">T</button>
-    ${["#111111", "#2563EB", "#DC2626", "#059669", "#F59E0B"].map((c, i) => `<button class="sw ${i ? "" : "on"}" data-color="${c}" style="background:${c}" title="Colour"></button>`).join("")}
+    ${["#111111", "#2563EB", "#DC2626", "#059669", "#F59E0B"].map((c, i) => `<button class="swatch ${i ? "" : "on"}" data-color="${c}" style="background:${c}" title="Colour"></button>`).join("")}
     <button class="tl" data-tool="undo" title="Undo">↶</button><button class="tl" data-tool="clear" title="Clear page">🧽</button>
     <button class="tl" data-tool="prev" title="Previous page">‹</button><button class="tl" data-tool="next" title="Next page">›</button><button class="tl" data-tool="add" title="New page">＋</button>
     <button class="tl" data-tool="show" title="Show material">📎 Show</button><button class="tl" data-tool="poll" title="Quick question">❓ Ask</button>`
@@ -877,7 +828,7 @@ function liveStart(id, info) {
         const m = materials.find(x => String(x.id) === v.m); if (!m) throw new Error("Add material to the class first");
         send({ t: "show", show: { kind: m.kind, title: m.title, body: m.body, type: m.file_type || "", url: m.kind === "file" ? `/api/org/${SLUG}/files/${m.file_id}` : m.url } });
       }, "Show");
-      if (!materials.length) $("#dlgErr").textContent = "This class has no material yet — add it on the class page.";
+      if (!materials.length) formErr("This class has no material yet — add it on the class page.");
     }
   };
   $("#poll").onclick = e => { const v = e.target.closest("[data-vote]"); if (v && !v.disabled) { L.myVote = Number(v.dataset.vote); send({ t: "vote", i: L.myVote }); } const p = e.target.closest("[data-poll]"); if (p) send(p.dataset.poll === "close" ? { t: "poll-close" } : { t: "poll", poll: null }); };

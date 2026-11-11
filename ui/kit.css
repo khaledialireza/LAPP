@@ -1,0 +1,155 @@
+/* LAPP kit — the ONE look the pages share: colours, buttons, fields, switches, segmented controls, chips, cards,
+   empty states, search fields, spinners, bars, keys, toasts, dialogs, popovers, menus, avatars, tooltips.
+   A page may place these, never redefine them. A theme (ui/theme.js) swaps the tokens. */
+:root{--bg:#07070B;--p1:#0F0F16;--p2:#15151F;--p3:#1C1C29;--p4:#26263C;--ln:rgba(255,255,255,.08);--ln2:rgba(255,255,255,.14);--tx:#F4F4F8;--mu:rgba(235,235,245,.6);--mu2:rgba(235,235,245,.38);
+--pk:#FF3D7F;--vi:#8B5CF6;--acc:#8B5CF6;--cy:#22D3EE;--gr:#34D399;--am:#FBBF24;--rd:#F87171;--g:linear-gradient(135deg,#FF3D7F,#8B5CF6 55%,#22D3EE);--pop:#1A1A27;--r:12px;color-scheme:dark;
+--ui-surface:var(--p2);--ui-surface-2:var(--p3);--ui-line:var(--ln2);--ui-text:var(--tx);--ui-muted:var(--mu);--ui-accent:var(--vi);--ui-radius:10px}
+.ic{flex:none;display:block}
+.mu{color:var(--mu)}.mu2{color:var(--mu2)}
+.spark{background:var(--g);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800}
+@keyframes k-sp{to{transform:rotate(360deg)}}
+@keyframes k-pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+body.dragging{user-select:none;-webkit-user-select:none}
+
+/* ---------- buttons: .b (and the old name .btn) ---------- */
+.b,.btn{height:32px;padding:0 12px;border-radius:10px;border:1px solid var(--ln2);background:var(--p2);color:var(--tx);font:700 12.5px/1 Inter,Vazirmatn,system-ui,sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;text-decoration:none;cursor:pointer;flex:none}
+.b:hover,.btn:hover{background:var(--p3);border-color:rgba(255,255,255,.22)}
+.b.pr,.btn.pr{background:var(--g);border:0;color:#fff;box-shadow:0 6px 20px rgba(139,92,246,.3)}
+.b.d,.btn.d,.b.danger,.btn.danger{color:var(--rd);border-color:rgba(248,113,113,.4);background:rgba(248,113,113,.08)}
+.b.gn,.btn.gn{color:var(--gr);border-color:rgba(52,211,153,.4);background:rgba(52,211,153,.12)}
+.b.sm,.btn.sm{height:28px;padding:0 10px;font-size:12px;border-radius:8px}
+.b.lg,.btn.lg{height:40px;padding:0 18px;font-size:14px;border-radius:12px}
+.b.icon,.btn.icon{width:32px;padding:0}.b.sm.icon,.btn.sm.icon{width:28px}
+.b.ghost,.btn.ghost{background:none;border-color:transparent;color:var(--mu)}.b.ghost:hover,.btn.ghost:hover{background:var(--p3);color:var(--tx)}
+.b:disabled,.btn:disabled,.b[aria-disabled=true]{opacity:.4;cursor:default;pointer-events:none}
+
+/* ---------- fields ---------- */
+.in{width:100%;background:var(--p3);border:1px solid var(--ln2);border-radius:10px;padding:9px 11px;color:var(--tx);font:inherit;outline:none}
+.in:focus{border-color:var(--vi);box-shadow:0 0 0 3px rgba(139,92,246,.2)}.in:disabled{opacity:.6}
+textarea.in{min-height:84px;resize:vertical;line-height:1.5}
+.k-search{display:flex;align-items:center;gap:7px;padding:0 10px;height:34px;border-radius:10px;background:var(--p3);border:1px solid var(--ln2);color:var(--mu2);min-width:0}
+.k-search:focus-within{border-color:var(--vi)}
+.k-search input{flex:1;min-width:0;background:none;border:0;outline:none;color:var(--tx);font:inherit}
+
+/* ---------- a switch: <button class="sw on" role="switch" aria-checked="true"> ---------- */
+.sw{position:relative;width:40px;height:22px;border-radius:99px;background:rgba(255,255,255,.15);border:0;flex:none;cursor:pointer;transition:background .15s;padding:0}
+.sw::after{content:"";position:absolute;top:3px;inset-inline-start:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:inset-inline-start .15s}
+.sw.on{background:var(--vi)}.sw.on::after{inset-inline-start:21px}.sw:disabled{opacity:.45;cursor:default}
+
+/* ---------- a segmented control ---------- */
+.seg{display:inline-flex;flex-wrap:wrap;gap:1px;background:var(--p2);border:1px solid var(--ln);border-radius:10px;padding:2px;max-width:100%}
+.seg>button,.seg>a{height:28px;padding:0 10px;border-radius:8px;border:0;background:none;color:var(--mu);font:600 12.5px Inter,Vazirmatn,system-ui,sans-serif;display:inline-flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap;text-decoration:none}
+.seg>button:hover,.seg>a:hover{color:var(--tx)}
+.seg>button.on,.seg>a.on,.seg>button[aria-pressed=true]{background:var(--p4);color:var(--tx);box-shadow:inset 0 0 0 1px var(--ln2)}
+.seg.fill{display:flex}.seg.fill>button{flex:1;justify-content:center}
+.seg.sm>button{height:24px;padding:0 8px;font-size:12px}
+
+/* ---------- chips ---------- */
+.chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:99px;background:var(--p3);border:1px solid var(--ln);font-size:12px;color:var(--mu);white-space:nowrap;line-height:1.4}
+button.chip{cursor:pointer;font-family:inherit}button.chip:hover{color:var(--tx);border-color:var(--ln2)}
+.chip.on{color:var(--tx);border-color:rgba(139,92,246,.6);background:rgba(139,92,246,.14)}
+.chip.ok{color:var(--gr);border-color:rgba(52,211,153,.35)}.chip.warn{color:var(--am);border-color:rgba(251,191,36,.35)}.chip.bad{color:var(--rd);border-color:rgba(248,113,113,.35)}
+
+/* ---------- a page's heading row: <div class="top"><h1>Title</h1> buttons…</div> ---------- */
+.top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.top h1{font-size:26px;font-weight:800;margin-inline-end:auto;text-wrap:balance}
+
+/* ---------- cards, setting rows, empty states ---------- */
+.card{background:var(--p2);border:1px solid var(--ln);border-radius:16px;padding:16px;min-width:0}
+.card.rows{padding:2px 16px}
+.opt{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 0;border-top:1px solid var(--ln)}
+.card.rows>.opt:first-child,.card.rows>h3+.opt{border-top:0}
+.opt b{display:block;font-weight:600}.opt small{display:block;color:var(--mu2);font-size:12px}
+.empty{padding:32px 16px;text-align:center;color:var(--mu)}
+.empty b{display:block;color:var(--tx);font-size:15px;margin:10px 0 4px}
+.empty.tight{padding:14px;font-size:13px;color:var(--mu2)}
+
+/* ---------- spinners, progress bars, keys ---------- */
+.spin{width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,.2);border-top-color:var(--cy);animation:k-sp 1s linear infinite;flex:none;display:inline-block}
+.bar{height:6px;border-radius:4px;background:var(--p3);overflow:hidden}.bar>i,.bar>span{display:block;height:100%;background:var(--g);border-radius:inherit}
+.kbd,kbd.k{direction:ltr;unicode-bidi:isolate;font:600 10.5px Inter,system-ui;border:1px solid var(--ln2);border-bottom-width:2px;border-radius:5px;padding:0 5px;color:var(--mu);white-space:nowrap;background:none}
+
+/* ---------- pills (a state, a plan, a score): <span class="pl ok">published</span> · tones ok warn bad vi cy g ---------- */
+.pl{display:inline-block;font-size:11px;font-weight:800;padding:2px 9px;border-radius:99px;white-space:nowrap;background:rgba(255,255,255,.08);color:var(--mu);line-height:1.5}
+.pl.ok{background:rgba(52,211,153,.16);color:var(--gr)}.pl.warn{background:rgba(251,191,36,.16);color:var(--am)}.pl.bad{background:rgba(248,113,113,.14);color:var(--rd)}
+.pl.vi{background:rgba(139,92,246,.22);color:#C4B5FD}.pl.cy{background:rgba(34,211,238,.16);color:var(--cy)}.pl.g{background:var(--g);color:#fff}
+
+/* ---------- numbers at a glance: <div class="kp"><div><b>12</b><span>students</span></div>…</div> ---------- */
+.kp{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.kp>div{background:var(--p2);border:1px solid var(--ln);border-radius:14px;padding:12px 14px;min-width:0}
+.kp b{font-size:22px;font-weight:800;display:block;font-variant-numeric:tabular-nums}.kp span{font-size:12px;color:var(--mu)}
+
+/* ---------- a small bar chart: <div class="k-bars"><i style="height:40%"></i>…</div> (i.drop: a bad one) ---------- */
+.k-bars{display:flex;align-items:flex-end;gap:3px;height:110px;direction:ltr}
+.k-bars i{flex:1;border-radius:4px 4px 0 0;background:linear-gradient(to top,rgba(139,92,246,.45),rgba(34,211,238,.85));min-height:2px}
+.k-bars i.drop{background:linear-gradient(to top,rgba(248,113,113,.4),rgba(248,113,113,.9))}
+
+/* ---------- tooltips: data-tip="…" ---------- */
+[data-tip]{position:relative}
+[data-tip]:hover::after,[data-tip]:focus-visible::after{content:attr(data-tip);position:absolute;z-index:50;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#20202E;border:1px solid var(--ln2);padding:4px 9px;border-radius:7px;font:600 11.5px Inter,system-ui;color:var(--tx);white-space:nowrap;pointer-events:none;box-shadow:0 8px 20px rgba(0,0,0,.5)}
+[data-tip][data-tip-side=end]:hover::after{bottom:auto;top:50%;left:calc(100% + 8px);transform:translateY(-50%)}
+
+/* ---------- toasts ---------- */
+.k-toasts{position:fixed;bottom:16px;inset-inline-end:12px;z-index:2000;display:flex;flex-direction:column-reverse;gap:8px;width:min(360px,calc(100vw - 24px));pointer-events:none}
+html.desk-host .k-toasts{bottom:68px}
+.k-toast{pointer-events:auto;display:flex;gap:10px;align-items:center;background:var(--pop);border:1px solid var(--ln2);border-radius:12px;padding:9px 12px;font-size:13px;color:var(--tx);box-shadow:0 18px 40px rgba(0,0,0,.6);animation:k-pop .14s ease-out}
+.k-toast .i{width:24px;height:24px;border-radius:7px;display:grid;place-items:center;flex:none}.k-toast .m{flex:1;min-width:0}
+.k-toast .a{margin-inline-start:auto;color:#C4B5FD;font-weight:700;white-space:nowrap;background:none;border:0;cursor:pointer;font:inherit;font-weight:700}
+
+/* ---------- dialogs ---------- */
+dialog.k-dlg{background:var(--pop);color:var(--tx);border:1px solid var(--ln2);border-radius:18px;padding:20px;margin:auto;width:min(520px,calc(100vw - 24px));max-height:calc(100vh - 32px);overflow:auto;box-shadow:0 40px 110px rgba(0,0,0,.8);animation:k-pop .14s ease-out}
+dialog.k-dlg.wide{width:min(680px,calc(100vw - 24px))}
+dialog.k-dlg::backdrop{background:rgba(0,0,0,.55);backdrop-filter:blur(3px)}
+/* one rhythm inside every dialog: 12px between the parts, a label sits on its field */
+.k-dlg form>*{margin-top:0;margin-bottom:0}.k-dlg form>*+*{margin-top:12px}.k-dlg form>label+*{margin-top:0}
+.k-dlg h3{font-size:17px}.k-dlg h3.dz{color:var(--rd)}.k-dlg p{font-size:13.5px;line-height:1.5}
+.k-dlg label,.f>label,.k-lbl{display:block;font-size:12.5px;color:var(--mu);font-weight:600;margin-bottom:5px}
+.k-lbl .in{margin-top:6px}
+.k-dlg .checks{display:flex;flex-wrap:wrap;gap:6px 14px;max-height:180px;overflow:auto;font-size:13px}.k-dlg .checks label{display:flex;align-items:center;gap:6px;cursor:pointer;margin:0;font-weight:500;color:var(--tx)}
+.k-dlg .err{color:var(--rd);font-size:12.5px}.k-dlg .err:empty{display:none}
+.k-acts{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}.k-dlg form>.k-acts{margin-top:18px}
+
+/* columns inside a form */
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.cols3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media (max-width:520px){.cols3{grid-template-columns:1fr 1fr}}
+
+/* ---------- popovers ---------- */
+.k-pop{position:fixed;z-index:1500;width:340px;max-width:calc(100vw - 16px);max-height:min(460px,calc(100vh - 80px));overflow:auto;background:var(--pop);border:1px solid var(--ln2);border-radius:calc(var(--r) + 2px);padding:6px;box-shadow:0 24px 60px rgba(0,0,0,.7);animation:k-pop .14s ease-out;font-size:13px;color:var(--tx)}
+.k-pop h6{font:700 10.5px Inter,system-ui;letter-spacing:.5px;text-transform:uppercase;color:var(--mu2);padding:6px 8px 4px;display:flex;align-items:center;gap:8px;margin:0}
+.k-pop h6 button{margin-inline-start:auto;text-transform:none;letter-spacing:0;font-weight:600;color:#C4B5FD;font-size:11.5px;background:none;border:0;cursor:pointer}
+
+/* a row in a popover or a list: <button class="pi"><span class="ri">icon</span><span class="tx"><b>…</b><small>…</small></span></button> */
+.pi{display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:9px;width:100%;text-align:start}
+.pi:hover,.pi.sel{background:rgba(139,92,246,.18)}
+.pi .ri{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;flex:none;background:var(--p3);color:var(--mu)}
+.pi .tx{min-width:0;flex:1}.pi b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pi small{display:block;color:var(--mu2);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pi .qa{display:flex;gap:2px;opacity:0}.pi:hover .qa,.pi.sel .qa{opacity:1}
+.pi .qa button{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;color:var(--mu)}.pi .qa button:hover{background:var(--p4);color:var(--tx)}
+.pi .k{margin-inline-start:auto;color:var(--mu2);font-size:11px;padding-inline-start:8px;white-space:nowrap}
+
+
+/* ---------- the menu (ui/menu.js) ---------- */
+.k-menu{position:fixed;z-index:1800;min-width:220px;max-width:min(320px,calc(100vw - 12px));background:var(--pop);border:1px solid var(--ln2);border-radius:var(--r);box-shadow:0 24px 60px rgba(0,0,0,.75);font:13px/1.4 Inter,Vazirmatn,system-ui,sans-serif;color:var(--tx);animation:k-pop .1s ease-out;text-align:start}
+.k-menu.wide{width:300px}
+.k-menu .ls{padding:4px;max-height:70vh;overflow-y:auto;overflow-x:visible}
+.k-menu .ls:has(.sub){overflow:visible;max-height:none}
+.k-menu .it{position:relative;display:flex;align-items:center;gap:9px;width:100%;padding:6px 9px;border-radius:8px;text-align:start;color:var(--tx);background:none;border:0;font:inherit;cursor:pointer}
+.k-menu .it:hover,.k-menu .it.hov,.k-menu .it:focus-visible{background:rgba(139,92,246,.25);outline:none}
+.k-menu .it .ic{color:var(--mu)}.k-menu .it .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.k-menu .it.dz,.k-menu .it.dz .ic{color:var(--rd)}.k-menu .it[disabled]{opacity:.4;pointer-events:none}
+.k-menu .it.on{font-weight:700}.k-menu .it.on::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--vi);flex:none}
+.k-menu .it kbd{margin-inline-start:auto;font:600 10.5px Inter,system-ui;color:var(--mu2);border:0;background:none;padding-inline-start:10px}
+.k-menu .it .ar{margin-inline-start:auto;color:var(--mu2)}
+.k-menu hr{border:0;border-top:1px solid var(--ln);margin:4px 2px}
+.k-menu .mh{font:700 10.5px Inter,system-ui;letter-spacing:.5px;text-transform:uppercase;color:var(--mu2);padding:7px 10px 3px}
+.k-menu .sub{display:none;position:absolute;left:calc(100% - 6px);top:-5px;min-width:210px;max-height:min(60vh,520px);overflow:auto;background:var(--pop);border:1px solid var(--ln2);border-radius:12px;padding:4px;box-shadow:0 20px 50px rgba(0,0,0,.7);z-index:1}
+.k-menu.flip .sub{left:auto;right:calc(100% - 6px)}
+.k-menu .it:hover>.sub,.k-menu .it.hov>.sub,.k-menu .it:focus-within>.sub{display:block}
+.k-menu .q,.k-menu .ask{display:flex;align-items:center;gap:7px;padding:8px 10px;color:var(--mu2)}
+.k-menu .q{border-bottom:1px solid var(--ln)}.k-menu .ask{border-top:1px solid var(--ln)}
+.k-menu .q input,.k-menu .ask input{flex:1;min-width:0;background:none;border:0;outline:none;font:inherit;color:var(--tx)}
+.k-menu .ask kbd{font-size:10.5px;color:var(--mu2);border:0;background:none}
+
+/* ---------- avatars ---------- */
+.k-av{display:inline-grid;place-items:center;border-radius:50%;flex:none;color:#fff;font-weight:800;background-size:cover;background-position:center;line-height:1}
+
+@media (prefers-reduced-motion:reduce){.k-toast,.k-dlg,.k-pop,.k-menu,.spin{animation:none}}

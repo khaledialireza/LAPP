@@ -109,12 +109,12 @@
   document.addEventListener("click", e => {
     const t = e.target; if (!t.closest) return;
     if (t.closest("#lb")) return D.ccOpen();
-    if (t.closest("#wsb")) return $(".pop") ? D.closeMenus() : wsPop($("#wsb"));
+    if (t.closest("#wsb")) return $(".k-pop") ? D.closeMenus() : wsPop($("#wsb"));
     const tr = t.closest("[data-tr]"); if (tr) { if (tr.classList.contains("open")) return D.closeMenus(); const k = tr.dataset.tr; if (k === "ai") return D.ccOpen("ai"); if (k === "running") return runPop(tr); if (k === "alerts") return bellPop(tr); if (k === "me") return mePop(tr); }
     const dk = t.closest("[data-dk]"); if (dk) { D.closeMenus(); const it = appItem(dk.dataset.dk); return it && openApp(it, dk); }
     const gw = t.closest("[data-gw]"); if (gw) { const w = D.W(gw.dataset.gw); return w.id === D.ACTW && !w.min ? D.minWin(w) : D.focusWin(w); }
     const cap = t.closest("[data-cap]"); if (cap) { const c = capOf(cap.dataset.cap); if (c) { c.wins.forEach(w => { w.min = false; D.place(w); }); c.wins.forEach(w => D.focusWin(w)); } return; }
-    const pw = t.closest("[data-pw]"); if (pw) { const w = D.W(pw.dataset.pw), q = t.closest("[data-pq]"); if (q) { if (q.dataset.pq === "close") { D.closeWin(w); pw.remove(); if (!$$(".pop [data-pw]").length) D.closeMenus(); } else { D.snap(w, q.dataset.pq); D.closeMenus(); } return; } D.closeMenus(); return D.focusWin(w); }
+    const pw = t.closest("[data-pw]"); if (pw) { const w = D.W(pw.dataset.pw), q = t.closest("[data-pq]"); if (q) { if (q.dataset.pq === "close") { D.closeWin(w); pw.remove(); if (!$$(".k-pop [data-pw]").length) D.closeMenus(); } else { D.snap(w, q.dataset.pq); D.closeMenus(); } return; } D.closeMenus(); return D.focusWin(w); }
     const wsx = t.closest("[data-ws]"); if (wsx) { D.closeMenus(); return D.switchWs(wsx.dataset.ws); }
     if (t.closest("[data-markread]")) { D.NOTES.forEach(n => n.read = true); D.closeMenus(); return draw(); }
   });
@@ -123,7 +123,7 @@
   let hovT;
   document.addEventListener("mouseover", e => {
     if (!e.target.closest) return; const dk = e.target.closest("[data-dk]");
-    clearTimeout(hovT); if (!dk || $(".pop")) { if (!dk) $(".prev")?.remove(); return; }
+    clearTimeout(hovT); if (!dk || $(".k-pop")) { if (!dk) $(".prev")?.remove(); return; }
     hovT = setTimeout(() => { const it = appItem(dk.dataset.dk); if (!it) return; $(".prev")?.remove(); const p = document.createElement("div"); p.className = "prev"; p.innerHTML = `<b>${esc(it.app.title)}</b>` + (it.wins.length ? it.wins.map(w => `<small>${esc(w.title)}${w.min ? " · minimised" : ""}${w.state ? " · " + w.state : ""}</small>`).join("") : `<small>Click to open</small>`); const r = dk.getBoundingClientRect(); document.body.append(p); p.style.left = Math.max(8, Math.min(r.left, innerWidth - 250)) + "px"; }, 380);
   });
   document.addEventListener("contextmenu", e => {

@@ -1,6 +1,7 @@
+import { cleanName, blobPut, blobGet } from "./util.js";
 // The work desktop of /manage: a person's layout (windows, icons, widgets, wallpaper, shortcuts)
 // and the files they drop on it. Only people who work in /manage have one.
-const PART = 1_500_000, MAX_FILE = 10_000_000, MAX_FILES = 60, MAX_TOTAL = 100_000_000;
+const MAX_FILE = 10_000_000, MAX_FILES = 60, MAX_TOTAL = 100_000_000;
 // shown in the browser; anything else is downloaded, so a dropped page or SVG can't run as ours
 const INLINE = /^(image\/(png|jpeg|gif|webp|avif)|application\/pdf|audio\/[a-z0-9.+-]+|video\/(mp4|webm|quicktime)|text\/plain)$/;
 
@@ -27,7 +28,7 @@ export async function deskApi(req, env, H, p, u) {
     return H.json({ ok: true });
   }
   if (p === "/files" && M === "POST") {
-    const name = decodeURIComponent(req.headers.get("X-Name") || "").replace(/[\u0000-\u001f\\/]/g, "").trim().slice(0, 120) || "file";
+    const name = cleanName(decodeURIComponent(req.headers.get("X-Name") || ""), 120) || "file";
     const type = String(req.headers.get("Content-Type") || "application/octet-stream").split(";")[0].trim().toLowerCase().slice(0, 100);
     const buf = new Uint8Array(await req.arrayBuffer());
     if (!buf.length) throw H.fail("the file is empty");
@@ -39,7 +40,7 @@ export async function deskApi(req, env, H, p, u) {
     if (folder && !(await env.DB.prepare("SELECT 1 FROM user_folders WHERE id = ? AND user_id = ?").bind(folder, u.id).first())) folder = 0;
     const f = await env.DB.prepare("INSERT INTO user_files (user_id, name, type, size, created_at, folder) VALUES (?, ?, ?, ?, ?, ?) RETURNING id, name, type, size, created_at, folder, star").bind(u.id, name, type, buf.length, t, folder).first();
     const st = [];
-    for (let i = 0, k = 0; i < buf.length; i += PART, k++) st.push(env.DB.prepare("INSERT INTO blobs (key, part, data) VALUES (?, ?, ?)").bind(`ufile/${f.id}`, k, buf.subarray(i, i + PART)));
+    st.push(...blobPut(env, `ufile/${f.id}`, buf));
     await env.DB.batch(st);
     return H.json(f);
   }
@@ -48,7 +49,7 @@ export async function deskApi(req, env, H, p, u) {
     if (!f) throw H.fail("no such file", 404);
     if (M === "PATCH") {
       const b = await H.body(req);
-      const name = b.name != null ? String(b.name).replace(/[\u0000-\u001f\\/]/g, "").trim().slice(0, 120) : f.name;
+      const name = b.name != null ? cleanName(b.name, 120) : f.name;
       let folder = b.folder != null ? Number(b.folder) || 0 : f.folder;
       if (folder && !(await env.DB.prepare("SELECT 1 FROM user_folders WHERE id = ? AND user_id = ?").bind(folder, u.id).first())) throw H.fail("no such folder", 404);
       if (!name) throw H.fail("the file needs a name");
@@ -61,8 +62,7 @@ export async function deskApi(req, env, H, p, u) {
       return H.json({ ok: true });
     }
     if (M === "GET") {
-      const parts = (await env.DB.prepare("SELECT data FROM blobs WHERE key = ? ORDER BY part").bind(`ufile/${f.id}`).all()).results;
-      const all = new Uint8Array(f.size); let o = 0; for (const x of parts) { const b = new Uint8Array(x.data); all.set(b, o); o += b.length; }
+      const all = await blobGet(env, `ufile/${f.id}`, f.size) || new Uint8Array(0);
       const inline = INLINE.test(f.type);
       return new Response(all, { headers: {
         "Content-Type": inline ? f.type : "application/octet-stream", "Content-Length": String(f.size), "Cache-Control": "private, max-age=3600",
@@ -72,7 +72,7 @@ export async function deskApi(req, env, H, p, u) {
   }
   /* ---- folders of the Files app ---- */
   if (p === "/folders" && M === "POST") {
-    const b = await H.body(req), name = String(b.name || "").replace(/[\u0000-\u001f\\/]/g, "").trim().slice(0, 60), parent = Number(b.parent) || 0;
+    const b = await H.body(req), name = cleanName(b.name, 60), parent = Number(b.parent) || 0;
     if (!name) throw H.fail("the folder needs a name");
     if (parent && !(await env.DB.prepare("SELECT 1 FROM user_folders WHERE id = ? AND user_id = ?").bind(parent, u.id).first())) throw H.fail("no such folder", 404);
     const n = await env.DB.prepare("SELECT COUNT(*) n FROM user_folders WHERE user_id = ?").bind(u.id).first();
@@ -83,7 +83,7 @@ export async function deskApi(req, env, H, p, u) {
     const id = Number(m[1]), f = await env.DB.prepare("SELECT * FROM user_folders WHERE id = ? AND user_id = ?").bind(id, u.id).first();
     if (!f) throw H.fail("no such folder", 404);
     if (M === "PATCH") {
-      const b = await H.body(req), name = b.name != null ? String(b.name).replace(/[\u0000-\u001f\\/]/g, "").trim().slice(0, 60) : f.name;
+      const b = await H.body(req), name = b.name != null ? cleanName(b.name, 60) : f.name;
       let parent = b.parent != null ? Number(b.parent) || 0 : f.parent;
       if (!name) throw H.fail("the folder needs a name");
       // never into itself or one of its own folders

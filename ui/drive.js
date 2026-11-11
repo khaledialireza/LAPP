@@ -12,8 +12,6 @@
 .dv-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.dv-top h1{font-size:28px;font-weight:800;margin-inline-end:6px}
 .dv-crumb{display:flex;gap:4px;align-items:center;flex-wrap:wrap;color:var(--mu);font-size:13px;margin-inline-end:auto}
 .dv-crumb button{padding:3px 7px;border-radius:7px;color:var(--mu)}.dv-crumb button:hover{background:var(--p3);color:var(--tx)}.dv-crumb b{color:var(--tx);padding:3px 4px}
-.dv-seg{display:inline-flex;background:var(--p3);border:1px solid var(--ln2);border-radius:10px;padding:3px;gap:2px}
-.dv-seg button{padding:5px 11px;border-radius:7px;font-size:12.5px;font-weight:700;color:var(--mu)}.dv-seg button.on{background:rgba(139,92,246,.3);color:var(--tx)}
 .dv-cmd{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:14px;background:linear-gradient(var(--p2),var(--p2)) padding-box,var(--g) border-box;border:1px solid transparent}
 .dv-cmd input{flex:1;background:none;border:0;outline:none;font-size:14px;min-width:0}
 .dv-cmd .s{background:var(--g);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800;font-size:17px}
@@ -41,7 +39,7 @@
 .t-published{background:rgba(52,211,153,.16);color:var(--gr)}.t-review{background:rgba(251,191,36,.16);color:var(--am)}.t-draft{background:rgba(255,255,255,.08);color:var(--mu)}.t-plus{background:rgba(255,61,127,.16);color:#FF9DBD}.t-bin{background:rgba(248,113,113,.15);color:var(--rd)}
 .dv-rule{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--ln);font-size:12.5px}
 .dv-rule:last-child{border:0}.dv-rule small{display:block;color:var(--mu2);font-size:11px}
-.dv-rule select{background:var(--p3);border:1px solid var(--ln2);border-radius:8px;padding:5px 7px;max-width:150px}
+.dv-rule l-select{width:160px;flex:none}
 .dv-ck{display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px solid var(--ln);font-size:12.5px}.dv-ck span:first-child{color:var(--mu)}
 .dv-acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
 .dv-empty{padding:26px;text-align:center;color:var(--mu);grid-column:1/-1}
@@ -58,7 +56,7 @@
 .dv-card small{display:block;color:var(--mu2);font-size:11px}
 @container (max-width:1050px){.dv{grid-template-columns:200px minmax(0,1fr)}.dv-ins{grid-column:1/-1}}
 @container (max-width:680px){.dv{grid-template-columns:1fr}.dv-tree{position:static;flex-direction:row;overflow-x:auto}.dv-tree .dv-node{width:auto;flex:none}.dv-sep,.dv-tree h3{display:none}}`;
-  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+  const esc = K.esc;
   const LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2"];
   const TOPIC = { daily: "Daily life", travel: "Travel & hotel", food: "Food & shopping", health: "Health & doctor", work: "Work & office", home: "Home & family", city: "City & transport", school: "School & study", story: "Stories", other: "Other" };
   const TYPE = { talk: "💬", lesson: "🎧", story: "📖" }, FLAG = { de: "🇩🇪", nl: "🇳🇱", pl: "🇵🇱" };
@@ -137,7 +135,7 @@
         <div class="dv-ck"><span>Lines approved</span><b>${l.approved} / ${l.lines}</b></div>
         <div class="dv-ck"><span>Audio</span><b>${{ ready: "ready", old: "older than the text", none: "not made yet" }[l.audio]}</b></div>
         <div class="dv-ck"><span>Folder</span><b>${esc(F(l.folder) ? F(l.folder).name : "All content")}</b></div>
-        ${C.lapp && !l.binned ? `<div class="dv-rule"><span>Who can open it<small>${fr.access === "plus" ? `“${esc(fr.from.access)}” makes it Plus` : "the folder lets everyone in"}</small></span><select data-dv-own="${l.id}" aria-label="Who can open it"><option value="" ${!l.own ? "selected" : ""}>${fr.access === "plus" ? "Plus (from the folder)" : "Same as the folder · free"}</option><option value="plus" ${l.own === "plus" ? "selected" : ""}>Plus only</option></select></div>` : ""}
+        ${C.lapp && !l.binned ? `<div class="dv-rule"><span>Who can open it<small>${fr.access === "plus" ? `“${esc(fr.from.access)}” makes it Plus` : "the folder lets everyone in"}</small></span><l-select data-dv-own="${l.id}" aria-label="Who can open it"><option value="" ${!l.own ? "selected" : ""}>${fr.access === "plus" ? "Plus (from the folder)" : "Same as the folder · free"}</option><option value="plus" ${l.own === "plus" ? "selected" : ""}>Plus only</option></l-select></div>` : ""}
         ${fr.approved ? `<p class="mu" style="font-size:12px;margin-top:6px">✅ “${esc(fr.from.approved)}”: every line approved before publishing.</p>` : ""}
         <div class="dv-acts">${l.binned ? `<button class="b sm pr" data-dv-a="restore">Restore</button><button class="b sm d" data-dv-a="forever">Delete for good</button>`
           : `<a class="b sm pr" href="${esc(C.studioUrl(l.id))}" target="_blank" rel="noopener">🎬 Open in the studio ↗</a>${l.status === "published" ? `<button class="b sm" data-dv-a="unpub">Unpublish</button>` : ""}<button class="b sm" data-dv-a="move">Move to…</button><button class="b sm d" data-dv-a="bin">🗑</button>`}</div>`;
@@ -145,7 +143,7 @@
     const fid = sel.length === 1 && sel[0][0] === "f" ? +sel[0].slice(1) : typeof S.cur === "number" ? S.cur : null;
     if (fid === null) return `<h3>${smart[S.cur][0]} ${smart[S.cur][1]}</h3><p class="mu">${S.cur === "bin" ? `Lessons in the bin are hidden from learners and removed after ${D.binDays} days. Right-click one to restore it.` : "A live view of every folder. Select a lesson to see it here."}</p>`;
     const f = F(fid), inh = f ? f.inherited : { access: "", level: "", approved: false, from: {} }, r = f ? f.rules : null;
-    const sel2 = (k, opts, v) => `<select data-dv-rule="${k}" data-f="${fid}" aria-label="${k}">${opts.map(([a, b]) => `<option value="${a}" ${String(v) === String(a) ? "selected" : ""}>${esc(b)}</option>`).join("")}</select>`;
+    const sel2 = (k, opts, v) => `<l-select data-dv-rule="${k}" data-f="${fid}" aria-label="${k}">${opts.map(([a, b]) => `<option value="${a}" ${String(v) === String(a) ? "selected" : ""}>${esc(b)}</option>`).join("")}</l-select>`;
     return `<h3>📁 ${esc(f ? f.name : "All content")} · rules</h3>
       ${f ? `${C.lapp ? `<div class="dv-rule"><span>Who can open it<small>${inh.access === "plus" ? `already Plus from “${esc(inh.from.access)}”` : "files inside may be stricter, never looser"}</small></span>${inh.access === "plus" ? "<b>Plus</b>" : sel2("access", [["", "Everyone, free"], ["plus", "Plus members"]], r.access)}</div>` : ""}
         <div class="dv-rule"><span>Level<small>${inh.level && !r.level ? `“${esc(inh.from.level)}” says ${inh.level}` : "new lessons get it; the AI writes at it"}</small></span>${sel2("level", [["", inh.level ? `As above (${inh.level})` : "Any level"], ...LEVELS.map(l => [l, l])], r.level)}</div>
@@ -156,7 +154,7 @@
   function html() {
     const crumbs = inSmart() ? `<b>${smart[S.cur][1]}</b>` : [`<button data-dv-go="0">All content</button>`, ...path(S.cur).map((f, i, a) => i === a.length - 1 ? `<b>${esc(f.name)}</b>` : `<button data-dv-go="${f.id}">${esc(f.name)}</button>`)].join(" › ");
     return `<div class="dv-top"><h1>Lesson library</h1><div class="dv-crumb">${crumbs}</div>
-        <div class="dv-seg" role="tablist">${[["files", "▦ Files"], ["map", "🗺 Map"], ["board", "▥ Board"]].map(([k, l]) => `<button class="${S.view === k ? "on" : ""}" data-dv-view="${k}">${l}</button>`).join("")}</div>
+        <div class="seg" role="tablist">${[["files", "▦ Files"], ["map", "🗺 Map"], ["board", "▥ Board"]].map(([k, l]) => `<button class="${S.view === k ? "on" : ""}" data-dv-view="${k}">${l}</button>`).join("")}</div>
         <button class="b" data-dv-a="newfolder">📁 New folder</button><button class="b pr" data-dv-a="newlesson">＋ New lesson</button></div>
       <form class="dv-cmd" data-dv-plan><span class="s">✦</span><input name="q" placeholder="Describe lessons to plan, e.g. “6 A1 lessons for a trip to Vienna”" aria-label="Describe lessons for the AI to plan" maxlength="400"><button class="b sm pr" ${S.busy ? "disabled" : ""}>${S.busy ? "Thinking…" : "✦ Suggest"}</button></form>
       <div class="dv"><aside class="dv-pn dv-tree">${tree()}</aside>

@@ -1,19 +1,20 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<script src="/ui/panel-i18n.js?v=11"></script>
-<script src="/ui/lapp-ui.js?v=3"></script>
+<link rel="stylesheet" href="/ui/kit.css?v=1">
+<script src="/ui/kit.js?v=1"></script>
+<script src="/ui/menu.js?v=1"></script>
+<script src="/ui/panel-i18n.js?v=12"></script>
+<script src="/ui/lapp-ui.js?v=5"></script>
 <script src="/ui/cursor.js?v=2"></script>
 <script src="/ui/theme.js?v=2"></script>
 <script src="/ui/frame.js?v=4"></script>
-<script src="/ui/shell.js?v=5"></script>
-<script src="/ui/drive.js?v=3"></script>
+<script src="/ui/shell.js?v=6"></script>
+<script src="/ui/drive.js?v=5"></script>
 <title>LAPP Admin</title>
 <meta name="robots" content="noindex">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 /* same look as the studio (studio.html) */
-:root{--ui-surface:#15151F;--ui-surface-2:#1C1C29;--ui-line:rgba(255,255,255,.14);--ui-text:#F4F4F8;--ui-muted:rgba(235,235,245,.55);--ui-accent:#8B5CF6;--bg:#07070B;--p1:#0F0F16;--p2:#15151F;--p3:#1C1C29;--ln:rgba(255,255,255,.08);--ln2:rgba(255,255,255,.14);--tx:#F4F4F8;--mu:rgba(235,235,245,.55);--mu2:rgba(235,235,245,.35);
---pk:#FF3D7F;--vi:#8B5CF6;--cy:#22D3EE;--gr:#34D399;--am:#FBBF24;--rd:#F87171;--g:linear-gradient(135deg,#FF3D7F,#8B5CF6 55%,#22D3EE)}
 *{box-sizing:border-box;margin:0}
 body{background:var(--bg);color:var(--tx);font:14px/1.5 Inter,system-ui,sans-serif;min-height:100vh;display:grid;grid-template-columns:240px 1fr}
 body::before{content:"";position:fixed;inset:-30% auto auto -10%;width:720px;height:720px;background:radial-gradient(closest-side,rgba(139,92,246,.12),transparent);pointer-events:none}
@@ -24,40 +25,24 @@ aside{background:var(--p1);border-inline-end:1px solid var(--ln);padding:16px;di
 .nv.on{background:var(--p3);color:var(--tx);border-color:var(--ln2)}.nv em{font-style:normal;font-size:11px;background:rgba(255,255,255,.08);padding:0 7px;border-radius:6px}
 .sp{flex:1}.me{border-top:1px solid var(--ln);padding-top:12px;font-size:12px;color:var(--mu);display:flex;justify-content:space-between;align-items:center;gap:8px}
 main{padding:22px 26px 60px;display:flex;flex-direction:column;gap:14px;min-width:0;z-index:1}
-.top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.top h1{font-size:28px;font-weight:800;margin-inline-end:auto}
-.b{height:36px;padding:0 14px;border-radius:10px;border:1px solid var(--ln2);background:var(--p2);font-weight:700;font-size:13px;display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;text-decoration:none;color:var(--tx)}
-.b:hover{background:var(--p3)}.b.pr{background:var(--g);border:0;box-shadow:0 8px 24px rgba(139,92,246,.3)}.b.d{color:var(--rd);border-color:rgba(248,113,113,.4);background:rgba(248,113,113,.08)}.b.sm{height:30px;padding:0 10px;font-size:12.5px}.b:disabled{opacity:.4;cursor:default}
-.kp{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}.kp div{background:var(--p2);border:1px solid var(--ln);border-radius:14px;padding:12px 14px}.kp b{font-size:24px;font-weight:800;display:block}.kp span{font-size:12px;color:var(--mu)}
-.card{background:var(--p2);border:1px solid var(--ln);border-radius:16px;padding:16px}.card h3{font-size:14px;margin-bottom:10px}
+
+.card h3{font-size:14px;margin-bottom:10px}
 .two{display:grid;grid-template-columns:1.4fr 1fr;gap:14px}
 .flt{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.srch{flex:1;min-width:220px;background:var(--p2);border:1px solid var(--ln2);border-radius:10px;padding:8px 12px;outline:none}.srch:focus{border-color:rgba(139,92,246,.7)}
-.chip{padding:5px 11px;border-radius:99px;background:var(--p3);border:1px solid var(--ln);font-size:12.5px;color:var(--mu)}.chip.on{color:var(--tx);border-color:rgba(139,92,246,.7);background:rgba(139,92,246,.16)}
+.flt .k-search{flex:1;min-width:220px}
 .row{display:grid;grid-template-columns:44px 1.6fr 1fr 1fr 90px 110px;gap:12px;align-items:center;padding:10px 12px;border-radius:12px;border:1px solid var(--ln);background:rgba(21,21,31,.8);cursor:pointer}
 .row:hover{border-color:var(--ln2)}.row.sel{box-shadow:0 0 0 1px var(--vi);background:rgba(139,92,246,.1)}.row.off{opacity:.55}
 .row.hd{background:none;border:0;padding:0 12px;color:var(--mu2);font-size:12px;cursor:default}
-.av{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-weight:800;color:#fff;flex:none}
 .u{min-width:0}.u b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.u small{color:var(--mu);font-size:12px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .mu{color:var(--mu);font-size:12.5px}
 .role{font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:7px;display:inline-block}.r-admin{background:#fff;color:#111}.r-manager{background:rgba(139,92,246,.22);color:#C4B5FD}.r-designer{background:rgba(34,211,238,.16);color:var(--cy)}.r-user{background:rgba(255,255,255,.07);color:var(--mu)}
-.pl{font-size:11px;font-weight:800;padding:2px 9px;border-radius:99px;display:inline-block}.p-plus{background:var(--g);color:#fff}.p-free{background:rgba(255,255,255,.07);color:var(--mu)}.p-ir{background:rgba(52,211,153,.16);color:var(--gr)}.p-off{background:rgba(248,113,113,.14);color:var(--rd)}.p-trial{background:rgba(251,191,36,.16);color:var(--am)}
 .dr{background:var(--p1);border-inline-start:1px solid var(--ln2);padding:20px;display:flex;flex-direction:column;gap:12px;height:100vh;position:fixed;inset-inline-end:0;top:0;width:min(400px,100%);overflow:auto;z-index:50;box-shadow:-20px 0 60px rgba(0,0,0,.55)}
-.dh{display:flex;gap:12px;align-items:center}.dh .av{width:54px;height:54px;font-size:22px}.dh b{font-size:18px;display:block}
+.dh{display:flex;gap:12px;align-items:center}.dh b{font-size:18px;display:block}
 .x{margin-inline-start:auto;width:30px;height:30px;border-radius:50%;background:var(--p3);color:var(--mu)}
-.f label{display:block;font-size:12px;color:var(--mu);margin-bottom:4px}
-.in{width:100%;background:var(--p3);border:1px solid var(--ln2);border-radius:10px;padding:9px 11px;outline:none}.in:focus{border-color:rgba(139,92,246,.7)}.in:disabled{opacity:.6}
-.f2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.seg{display:flex;background:var(--p3);border:1px solid var(--ln2);border-radius:10px;padding:3px}.seg button{flex:1;padding:6px 0;border-radius:8px;font-size:12.5px;color:var(--mu)}.seg button.on{background:rgba(139,92,246,.32);color:var(--tx)}.seg button:disabled{cursor:default}
 .tg{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--ln);border-radius:12px;background:var(--p2)}.tg small{display:block;color:var(--mu);font-size:11.5px}
-.sw{position:relative;width:42px;height:24px;border-radius:99px;background:rgba(255,255,255,.15);flex:none;transition:.2s}.sw::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s}.sw.on{background:var(--gr)}.sw.on::after{left:21px}.sw:disabled{opacity:.45;cursor:default}
 .acts{display:flex;gap:8px;flex-wrap:wrap}.foot{margin-top:auto;display:flex;gap:8px;padding-top:8px}
 .list .r{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--ln)}.list .r:last-child{border:0}
-.bars{display:flex;align-items:flex-end;gap:3px;height:110px}.bars i{flex:1;background:linear-gradient(to top,var(--vi),var(--pk));border-radius:3px 3px 0 0;min-height:2px;opacity:.9}
-.empty{padding:30px;text-align:center;color:var(--mu)}
-.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--p3);border:1px solid var(--ln2);border-radius:12px;padding:10px 16px;z-index:9;opacity:0;transition:.2s;pointer-events:none}.toast.on{opacity:1}
-dialog{margin:auto;background:var(--p2);color:var(--tx);border:1px solid var(--ln2);border-radius:18px;padding:22px;width:min(480px,92vw)}dialog::backdrop{background:rgba(0,0,0,.6)}
-dialog form{display:flex;flex-direction:column;gap:12px}dialog.wide{width:min(620px,94vw)}.f3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-.st{font:700 10.5px Inter;padding:2px 7px;border-radius:6px;text-transform:uppercase;letter-spacing:.4px}.st-draft{background:rgba(255,255,255,.08);color:var(--mu)}.st-review{background:rgba(251,191,36,.16);color:var(--am)}.st-published{background:rgba(52,211,153,.16);color:var(--gr)}dialog h3{font-size:18px}
+
 .grp{font-size:12px;font-weight:800;color:var(--mu);margin:8px 0 2px;letter-spacing:.4px;text-transform:uppercase}
 @media (max-width:1100px){html:not(.desk) .two{grid-template-columns:1fr}}
 @container (max-width:900px){.two{grid-template-columns:1fr}.row{grid-template-columns:40px 1fr auto}.row>:nth-child(n+4){display:none}.row.hd{display:none}}
@@ -66,78 +51,63 @@ dialog form{display:flex;flex-direction:column;gap:12px}dialog.wide{width:min(62
 <aside id="side"></aside>
 <main id="view"></main>
 
-<dialog id="addDlg"><form method="dialog" id="addForm">
+<dialog id="addDlg" class="k-dlg"><form method="dialog" id="addForm">
   <h3>Add user</h3>
-  <div class="f2"><div class="f"><label>Name</label><input class="in" name="name" maxlength="40"></div>
+  <div class="cols2"><div class="f"><label>Name</label><input class="in" name="name" maxlength="40"></div>
   <div class="f"><label>Username</label><input class="in" name="username" required pattern="[a-zA-Z0-9_.]{3,20}" maxlength="20"></div></div>
   <div class="f"><label>E-mail</label><input class="in" name="email" type="email" required></div>
-  <div class="f"><label>Role</label><div class="seg" id="addRole"></div></div>
+  <div class="f"><label>Role</label><div class="seg fill" id="addRole"></div></div>
   <div class="tg"><div>Send an invitation e-mail<small>They choose their own password from the link (valid 7 days)</small></div><button type="button" class="sw on" id="addInvite" aria-pressed="true"></button></div>
-  <div class="acts" style="justify-content:flex-end"><button class="b" value="cancel" formnovalidate>Cancel</button><button class="b pr" value="ok">Create</button></div>
+  <div class="k-acts"><button class="b" value="cancel" formnovalidate>Cancel</button><button class="b pr" value="ok">Create</button></div>
 </form></dialog>
 
-<dialog id="lessonDlg" class="wide"><form method="dialog" id="lessonForm">
+<dialog id="lessonDlg" class="k-dlg wide"><form method="dialog" id="lessonForm">
   <h3>New lesson</h3>
   <div class="f"><label>Title (in the course language)</label><input class="in" name="title" required maxlength="80" placeholder="Am Bahnhof"></div>
-  <div class="f3"><div class="f"><label>Course</label><l-select name="course" id="lCourse"></l-select></div><div class="f"><label>Level</label><l-select name="level" id="lLevel"></l-select></div><div class="f"><label>Type</label><l-select name="type" id="lType"></l-select></div></div>
+  <div class="cols3"><div class="f"><label>Course</label><l-select name="course" id="lCourse"></l-select></div><div class="f"><label>Level</label><l-select name="level" id="lLevel"></l-select></div><div class="f"><label>Type</label><l-select name="type" id="lType"></l-select></div></div>
   <div class="f"><label>Topic</label><l-select name="topic" id="lTopic"></l-select></div>
   <div class="f"><label>What should it be about? (the AI writes from this)</label><textarea class="in" name="brief" rows="3" placeholder="Buying a ticket, finding the platform, a delay…"></textarea></div>
   <p class="mu">The studio opens with the new lesson: write it (with AI or by hand), make the audio, publish.</p>
-  <div class="acts" style="justify-content:flex-end"><button class="b" value="cancel" formnovalidate>Cancel</button><button class="b pr" value="ok">Create and open the studio ↗</button></div>
+  <div class="k-acts"><button class="b" value="cancel" formnovalidate>Cancel</button><button class="b pr" value="ok">Create and open the studio ↗</button></div>
 </form></dialog>
 
-<dialog id="aiDlg" class="wide"><form method="dialog" id="aiForm">
+<dialog id="aiDlg" class="k-dlg wide"><form method="dialog" id="aiForm">
   <h3 id="aiTitle">Add an AI</h3>
   <div class="f"><label>Provider</label><l-select name="kind" id="aiKind"></l-select></div>
-  <div class="f2"><div class="f"><label>Name (as you'll see it)</label><input class="in" name="name" maxlength="60" placeholder="GPT for translations"></div>
+  <div class="cols2"><div class="f"><label>Name (as you'll see it)</label><input class="in" name="name" maxlength="60" placeholder="GPT for translations"></div>
   <div class="f"><label>Model</label><input class="in" name="model" id="aiModel" list="aiModels" required maxlength="120"><datalist id="aiModels"></datalist></div></div>
   <div class="f" id="aiUrlF"><label>Address of the server (…/v1)</label><input class="in" name="base_url" id="aiUrl" maxlength="300"></div>
   <div class="f" id="aiKeyF"><label id="aiKeyL">API key</label><input class="in" name="api_key" id="aiKey" type="password" autocomplete="off" maxlength="400"></div>
   <p class="mu" id="aiHint"></p>
-  <div class="acts" style="justify-content:flex-end"><button class="b" value="cancel" formnovalidate>Cancel</button><button class="b pr" value="ok" id="aiOk">Add</button></div>
+  <div class="k-acts"><button class="b" value="cancel" formnovalidate>Cancel</button><button class="b pr" value="ok" id="aiOk">Add</button></div>
 </form></dialog>
 
-<dialog id="orgDlg"><form method="dialog" id="orgForm">
+<dialog id="orgDlg" class="k-dlg"><form method="dialog" id="orgForm">
   <h3>New school</h3>
   <div class="f"><label>School name</label><input class="in" name="name" required placeholder="Sprachschule Berlin"></div>
   <div class="f"><label>Address · lapp.khaledi.eu/s/…</label><input class="in" name="slug" required pattern="[a-z0-9][a-z0-9-]{1,30}" placeholder="berlin"></div>
-  <div class="f2"><div class="f"><label>School admin's e-mail</label><input class="in" name="adminEmail" type="email" placeholder="director@school.de"></div><div class="f"><label>Their name</label><input class="in" name="adminName"></div></div>
+  <div class="cols2"><div class="f"><label>School admin's e-mail</label><input class="in" name="adminEmail" type="email" placeholder="director@school.de"></div><div class="f"><label>Their name</label><input class="in" name="adminName"></div></div>
   <div class="f"><label>Colour</label><input class="in" name="color" type="color" value="#8B5CF6" style="height:42px;padding:4px"></div>
   <p class="mu">The admin gets an invitation e-mail and adds the school's teachers, staff and students.</p>
-  <div class="acts" style="justify-content:flex-end"><button class="b" value="cancel" formnovalidate>Cancel</button><button class="b pr" value="ok">Create school</button></div>
-</form></dialog>
-
-<dialog id="delDlg"><form method="dialog" id="delForm">
-  <h3>Delete account?</h3>
-  <p class="mu" id="delText"></p>
-  <input class="in" id="delName" autocomplete="off" placeholder="type the username">
-  <div class="acts" style="justify-content:flex-end"><button class="b" value="cancel" formnovalidate>Cancel</button><button class="b d" value="ok" id="delGo" disabled>Delete for good</button></div>
+  <div class="k-acts"><button class="b" value="cancel" formnovalidate>Cancel</button><button class="b pr" value="ok">Create school</button></div>
 </form></dialog>
 
 <script>
-const $ = s => document.querySelector(s);
-const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+const { $, esc } = K;
 const flag = c => c && /^[A-Z]{2}$/.test(c) ? String.fromCodePoint(...[...c].map(x => 127397 + x.charCodeAt(0))) + " " + c : "—";
-const day = ms => ms ? new Date(ms).toLocaleDateString((window.PanelI18N ? PanelI18N.locale : "en-GB"), { day: "numeric", month: "short", year: "numeric" }) : "—";
-const ago = ms => { if (!ms) return "—"; const m = (Date.now() - ms) / 60000; return m < 2 ? "now" : m < 60 ? Math.round(m) + " min ago" : m < 1440 ? Math.round(m / 60) + " h ago" : m < 2880 ? "yesterday" : Math.round(m / 1440) + " days ago"; };
+const day = ms => K.date(ms) || "—";
+const ago = ms => K.ago(ms);
 const ROLE = { user: "Learner", designer: "Designer", manager: "Manager", admin: "Admin" };
-const GRAD = ["#FF6B9A,#8A6CF0", "#F59E0B,#EF4444", "#34D399,#22D3EE", "#22D3EE,#8B5CF6", "#8B5CF6,#FF3D7F", "#FBBF24,#34D399"];
-const avatar = (u, cls = "") => `<div class="av ${cls}" style="background:${u.disabled ? "#444" : `linear-gradient(135deg,${GRAD[u.id % GRAD.length]})`}">${esc((u.name || u.username || "?").trim().charAt(0).toUpperCase())}</div>`;
-let ME = null, toastT;
+const avatar = u => K.avatar(u, 36);
+let ME = null;
 const toast = (t, o) => Shell.toast(t, o);
-async function api(method, path, body) {
-  const r = await fetch("/api" + path, { method, credentials: "same-origin", headers: { ...(body ? { "Content-Type": "application/json" } : {}), ...(method !== "GET" ? { "X-LAPP": "1" } : {}) }, body: body ? JSON.stringify(body) : undefined });
-  const j = await r.json().catch(() => ({}));
-  if (r.status === 401) { location.href = "/?login=1&next=/admin"; throw new Error("signed out"); }
-  if (!r.ok) throw new Error(j.error || r.statusText);
-  return j;
-}
+const api = K.apiAt("/api");
 const isAdmin = () => ME.role === "admin";
-const plan = u => u.disabled ? `<span class="pl p-off">Disabled</span>`
-  : u.sub_status === "active" ? `<span class="pl p-plus">Plus · ${u.sub_interval === "year" ? "yearly" : "monthly"}</span>`
-  : u.sub_status === "trialing" ? `<span class="pl p-trial">Trial</span>`
-  : u.plus_until > Date.now() ? `<span class="pl p-plus">Plus · gift</span>`
-  : u.role !== "user" ? `<span class="mu">—</span>` : u.country === "IR" ? `<span class="pl p-ir">Iran · free</span>` : `<span class="pl p-free">Free</span>`;
+const plan = u => u.disabled ? `<span class="pl bad">Disabled</span>`
+  : u.sub_status === "active" ? `<span class="pl g">Plus · ${u.sub_interval === "year" ? "yearly" : "monthly"}</span>`
+  : u.sub_status === "trialing" ? `<span class="pl warn">Trial</span>`
+  : u.plus_until > Date.now() ? `<span class="pl g">Plus · gift</span>`
+  : u.role !== "user" ? `<span class="mu">—</span>` : u.country === "IR" ? `<span class="pl ok">Iran · free</span>` : `<span class="pl">Free</span>`;
 
 /* ================= views ================= */
 const V = {};
@@ -151,7 +121,7 @@ V.dash = async () => {
   return `<div class="top"><h1>Dashboard</h1></div>
   <div class="kp"><div><b>${s.users}</b><span>Users · ${s.verified} verified</span></div><div><b>${s.activeWeek}</b><span>Active this week</span></div><div><b>${s.newWeek}</b><span>New this week</span></div>
    <div><b>${s.plus}</b><span>Plus subscribers</span></div><div><b>${s.trial}</b><span>In trial</span></div><div><b>${s.iran}</b><span>Iran · free</span></div><div><b>${s.schools}</b><span>Schools · ${s.seats} people</span></div><div><b>${s.staff}</b><span>Team</span></div></div>
-  <div class="two"><div class="card"><h3>Sign-ups · last 30 days</h3><div class="bars">${bars.map(n => `<i style="height:${n / max * 100}%" title="${n}"></i>`).join("")}</div></div>
+  <div class="two"><div class="card"><h3>Sign-ups · last 30 days</h3><div class="k-bars">${bars.map(n => `<i style="height:${n / max * 100}%" title="${n}"></i>`).join("")}</div></div>
    <div class="card"><h3>Countries</h3><div class="list">${s.countries.map(c => `<div class="r"><span>${flag(c.country)}</span><b>${c.n}</b></div>`).join("") || `<div class="empty">No users yet</div>`}</div></div></div>
   <div class="card"><h3>Newest users</h3><div class="list">${s.recent.map(u => `<div class="r"><span><b>@${esc(u.username)}</b> <span class="mu">${esc(u.email)}</span></span><span class="mu">${flag(u.country)} · ${ago(u.created_at)}</span></div>`).join("") || `<div class="empty">No users yet</div>`}</div></div>`;
 };
@@ -169,11 +139,11 @@ V.users = async () => {
   const s = STATS, F = [["all", "All"], ["free", "Free"], ["plus", "Plus"], ["schools", "Schools"], ["staff", "Team"], ["iran", "Iran"], ["unverified", "Unverified"], ["disabled", "Disabled"]];
   const orgRow = o => `<div class="row ${o.disabled ? "off" : ""}" data-org="${o.id}" title="A school account: its own people are managed by the school">
     <div class="av" style="background:${esc(o.color)};border-radius:11px">${esc(o.name.charAt(0))}</div><div class="u"><b>${esc(o.name)}</b><small>/s/${esc(o.slug)} · ${esc(o.admin_email || "no admin yet")}</small></div>
-    <div><span class="role r-manager">School</span></div><div><span class="pl p-plus">${o.students} students</span></div><div class="mu">${o.teachers} teachers</div><div class="acts"><a class="b sm" href="/s/${esc(o.slug)}" target="_blank" rel="noopener">Open ↗</a></div></div>`;
+    <div><span class="role r-manager">School</span></div><div><span class="pl g">${o.students} students</span></div><div class="mu">${o.teachers} teachers</div><div class="acts"><a class="b sm" href="/s/${esc(o.slug)}" target="_blank" rel="noopener">Open ↗</a></div></div>`;
   return `<div class="top"><h1>Users</h1><button class="b" id="export">⬇ Export</button>${isAdmin() ? `<button class="b" id="addSchool">🏫 New school</button>` : ""}<button class="b pr" id="add">＋ Add user</button></div>
   <div class="kp"><div><b>${s.users}</b><span>Your users</span></div><div><b>${s.plus + s.trial + s.grants}</b><span>Plus · paying or gift</span></div><div><b>${s.schools}</b><span>School accounts · ${s.seats} people</span></div><div><b>${s.staff}</b><span>Team</span></div></div>
-  <div class="flt"><input class="srch" id="q" placeholder="🔍 Name, e-mail, username, school…" value="${esc(U.q)}">${F.filter(([k]) => k !== "schools" || isAdmin()).map(([k, l]) => `<button class="chip ${U.filter === k ? "on" : ""}" data-f="${k}">${l}</button>`).join("")}</div>
-  ${plusF ? `<div class="card"><h3>💳 Subscriptions ${cust.stripe ? `<a class="b sm" style="float:inline-end" href="https://dashboard.stripe.com/" target="_blank" rel="noopener">Stripe ↗</a>` : `<span class="pl p-trial">Stripe is not connected yet</span>`}</h3><div class="list">
+  <div class="flt"><label class="k-search">${K.I("search", 15)}<input id="q" placeholder="Name, e-mail, username, school…" value="${esc(U.q)}"></label>${F.filter(([k]) => k !== "schools" || isAdmin()).map(([k, l]) => `<button class="chip ${U.filter === k ? "on" : ""}" data-f="${k}">${l}</button>`).join("")}</div>
+  ${plusF ? `<div class="card"><h3>💳 Subscriptions ${cust.stripe ? `<a class="b sm" style="float:inline-end" href="https://dashboard.stripe.com/" target="_blank" rel="noopener">Stripe ↗</a>` : `<span class="pl warn">Stripe is not connected yet</span>`}</h3><div class="list">
      ${cust.subscriptions.map(x => `<div class="r"><span><b>@${esc(x.username)}</b> <span class="mu">${esc(x.status)} · ${x.interval === "year" ? "yearly" : x.interval === "month" ? "monthly" : "—"}</span></span><span class="mu">${x.cancel_at_end ? "ends" : "renews"} ${day(x.period_end)}</span></div>`).join("") || `<div class="r mu">No subscriptions yet</div>`}
      ${cust.grants.map(g => `<div class="r"><span><b>🎁 @${esc(g.username)}</b> <span class="mu">gift</span></span><span class="mu">until ${day(g.plus_until)}</span></div>`).join("")}</div></div>` : ""}
   <div class="row hd"><span></span><span>${sch ? "School" : "User"}</span><span>Type</span><span>Plan</span><span>${sch ? "Teachers" : "Country"}</span><span>${sch ? "" : "Last seen"}</span></div>
@@ -194,10 +164,10 @@ function drawer() {
   const self = u.id === ME.id, can = isAdmin() || u.role === "user", gift = u.plus_until > Date.now();
   const stripe = u.sub_status ? `${u.sub_status === "trialing" ? "Trial" : "Plus"} · ${u.sub_interval === "year" ? "yearly" : "monthly"} (Stripe)` : "";
   d.innerHTML = `<div class="dh">${avatar(u)}<div><b>@${esc(u.username)}</b><span class="mu">Joined ${day(u.created_at)} · ${flag(u.country)} · seen ${ago(u.last_seen)}</span></div><button class="x" id="close" aria-label="Close">✕</button></div>
-    <div class="f2"><div class="f"><label>Name</label><input class="in" data-e="name" value="${esc(E.name)}" maxlength="40" ${can ? "" : "disabled"}></div>
+    <div class="cols2"><div class="f"><label>Name</label><input class="in" data-e="name" value="${esc(E.name)}" maxlength="40" ${can ? "" : "disabled"}></div>
     <div class="f"><label>Username</label><input class="in" data-e="username" value="${esc(E.username)}" maxlength="20" ${can ? "" : "disabled"}></div></div>
     <div class="f"><label>E-mail ${u.verified ? `<span style="color:var(--gr)">✓ verified</span>` : `<span style="color:var(--am)">not verified</span>`}</label><input class="in" data-e="email" type="email" value="${esc(E.email)}" ${can ? "" : "disabled"}></div>
-    <div class="f"><label>Role${isAdmin() && !self ? "" : " · only an admin can change it"}</label><div class="seg">${Object.entries(ROLE).map(([k, l]) => `<button type="button" data-role="${k}" class="${E.role === k ? "on" : ""}" ${isAdmin() && !self ? "" : "disabled"}>${l}</button>`).join("")}</div></div>
+    <div class="f"><label>Role${isAdmin() && !self ? "" : " · only an admin can change it"}</label><div class="seg fill">${Object.entries(ROLE).map(([k, l]) => `<button type="button" data-role="${k}" class="${E.role === k ? "on" : ""}" ${isAdmin() && !self ? "" : "disabled"}>${l}</button>`).join("")}</div></div>
     <div class="tg"><div>${stripe ? `💳 ${stripe}<small>${u.period_end ? "Until " + day(u.period_end) : ""}</small>` : gift ? `🎁 Plus gift<small>Until ${day(u.plus_until)}</small>` : `No Plus<small>${u.country === "IR" ? "Free full access from Iran" : "Free plan"}</small>`}</div>
       ${can ? `<span class="acts">${gift ? `<button class="b sm" data-act="ungift">Remove</button>` : ""}<button class="b sm" data-act="gift">${gift ? "Change" : "Gift Plus"}</button></span>` : ""}</div>
     <div class="tg"><div>Account active<small>Off = signed out everywhere and can't sign in</small></div><button class="sw ${E.disabled ? "" : "on"}" id="active" ${can && !self ? "" : "disabled"}></button></div>
@@ -274,7 +244,7 @@ V.ai = async () => {
   if (!isAdmin()) return `<div class="top"><h1>AI</h1></div><div class="card empty">Only an admin manages the AI.</div>`;
   AIS = await api("GET", "/admin/ai");
   const { providers: P, setting: st, kinds: K, tasks: T } = AIS;
-  const opt = (v, empty) => `${empty ? `<option value="0">${empty}</option>` : ""}${P.filter(x => x.enabled).map(x => `<option value="${x.id}" ${+v === x.id ? "selected" : ""}>${AI_ICON[x.kind]} ${esc(x.name)} · ${esc(x.model)}</option>`).join("")}`;
+  const opt = (v, empty) => `${empty ? `<option value="0" ${+v ? "" : "selected"}>${empty}</option>` : ""}${P.filter(x => x.enabled).map(x => `<option value="${x.id}" ${+v === x.id ? "selected" : ""}>${AI_ICON[x.kind]} ${esc(x.name)} · ${esc(x.model)}</option>`).join("")}`;
   const keyText = x => K[x.kind].key ? (x.hasKey ? `🔑 ••••${esc(x.keyEnd)}` : `<span style="color:var(--rd)">🔑 no key</span>`)
     : x.kind === "workers" ? (AIS.builtin ? "no key needed" : `<span style="color:var(--rd)">not available on this server</span>`) : x.hasKey ? `🔑 ••••${esc(x.keyEnd)}` : "no key";
   return `<div class="top"><h1>AI</h1><button class="b pr" id="aiAdd">＋ Add an AI</button></div>
@@ -288,8 +258,8 @@ V.ai = async () => {
       <button class="sw ${x.enabled ? "on" : ""}" data-ai-on="${x.id}" title="On / off"></button>${x.id !== 1 ? `<button class="b sm d" data-ai-del="${x.id}">✕</button>` : ""}</span></div>`).join("")}
   </div></div>
   <div class="card"><h3>⚙️ Which AI does what</h3><div class="list">
-    <div class="r"><span><b>Default</b><br><span class="mu">used for everything that says “same as default”</span></span><select class="in" id="aiDef" style="width:auto;max-width:260px">${opt(st.default)}</select></div>
-    ${Object.entries(T).map(([k, label]) => `<div class="r"><span>${esc(label)}</span><select class="in" data-ai-task="${k}" style="width:auto;max-width:260px">${opt(st.tasks[k] || 0, "Same as default")}</select></div>`).join("")}
+    <div class="r"><span><b>Default</b><br><span class="mu">used for everything that says “same as default”</span></span><l-select id="aiDef" style="width:260px" aria-label="Default AI">${opt(st.default)}</l-select></div>
+    ${Object.entries(T).map(([k, label]) => `<div class="r"><span>${esc(label)}</span><l-select data-ai-task="${k}" style="width:260px" aria-label="${esc(label)}">${opt(st.tasks[k] || 0, "Same as default")}</l-select></div>`).join("")}
   </div><p class="mu" style="margin-top:10px">If a chosen AI is switched off or removed, LAPP AI takes over.</p></div></div>`;
 };
 const AI_HINT = {
@@ -472,16 +442,11 @@ $("#orgDlg").addEventListener("close", async () => {
 });
 
 /* ---- delete user: type the username to confirm ---- */
-function openDel() {
+async function openDel() {
   const u = U.rows.find(x => x.id === U.sel);
-  $("#delText").textContent = `@${u.username} (${u.email}) and all their progress are removed for good. Type the username to confirm.`;
-  $("#delName").value = ""; $("#delGo").disabled = true;
-  $("#delDlg").showModal();
+  if (!await K.confirm({ title: "Delete account?", text: `@${u.username} (${u.email}) and all their progress are removed for good.`, ok: "Delete for good", danger: true, type: u.username })) return;
+  try { await api("DELETE", `/admin/users/${U.sel}`); toast("Account deleted"); U.sel = null; STATS = null; await show(); } catch (x) { toast(x.message, { kind: "err" }); }
 }
-$("#delDlg").addEventListener("close", async () => {
-  if ($("#delDlg").returnValue !== "ok") return;
-  try { await api("DELETE", `/admin/users/${U.sel}`); toast("Account deleted"); U.sel = null; STATS = null; await show(); } catch (x) { toast(x.message); }
-});
 
 /* ---- export the current list ---- */
 async function exportCsv() {
@@ -507,20 +472,14 @@ async function exportCsv() {
   });
   Shell.init({
     side: $("#side"), main: $("#view"), key: "lapp.admin.tabs." + ME.id, name: "LAPP Admin", home: "dash", nav: NAV,
-    me: { name: ME.name || "@" + ME.username, sub: ROLE[ME.role] + " · LAPP", initial: (ME.name || ME.username).charAt(0).toUpperCase(), color: `linear-gradient(135deg,${GRAD[ME.id % GRAD.length]})` },
     render: async r => { const v = r.split("/")[0]; return await (V[v] || V.dash)(); },
     after: r => { if (r === "users") drawer(); },
     onShow: r => { if (r !== "users" && U.sel) { U.sel = null; drawer(); } },
-    menu: () => [
-      { icon: "🌐", label: "Language", run: () => PanelI18N.menu(document.querySelector(".sh-me")) },
-      { icon: "🎧", label: "Open the learner app ↗", run: () => window.open("/", "_blank") }],
     commands: () => [
       { icon: "＋", label: "Add a user", run: () => { Shell.open("users"); openAdd(); } },
       { icon: "🎬", label: "New lesson", run: () => newLesson(0, {}) },
       ...(isAdmin() ? [{ icon: "🏫", label: "New school", run: () => $("#orgDlg").showModal() }, { icon: "🤖", label: "Add an AI", run: () => { Shell.open("ai"); setTimeout(() => $("#aiAdd")?.click(), 400); } }] : []),
-      { icon: "⬇", label: "Export the user list", run: exportCsv }],
-    jobs: async () => (await api("GET", "/studio/jobs")).jobs.map(j => ({ ...j, what: "Audio", href: `/studio#voice/${j.lesson}` })),
-    signOut: async () => { await api("POST", "/auth/logout"); location.href = "/"; }
+      { icon: "⬇", label: "Export the user list", run: exportCsv }]
   });
   stats().catch(() => {});
 })();

@@ -3,9 +3,7 @@
 // Settings live in the lesson's data (data.meta), so they travel with the lesson.
 (function () {
   "use strict";
-  const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
-  const E = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
-  const I = (n, s = 15) => window.Icon ? Icon(n, s) : "";
+  const { $, $$, esc: E } = K, I = (n, s = 15) => K.I(n, s);
   const st = document.createElement("style");
   st.textContent = `.la{display:grid;grid-template-columns:200px 1fr;gap:16px;align-items:start}
 .la nav{display:flex;flex-direction:column;gap:2px;position:sticky;top:0}
@@ -20,7 +18,7 @@
 .la .bar2{height:6px;border-radius:3px;background:var(--p3);overflow:hidden;margin-top:4px}.la .bar2 i{display:block;height:100%;background:var(--g)}
 .la .tg{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--ln)}.la .tg:first-of-type{border:0}
 .la .tg input{width:18px;height:18px;accent-color:#8B5CF6}
-.la .seg2{display:inline-flex;background:var(--p2);border:1px solid var(--ln);border-radius:9px;padding:2px}.la .seg2 button{padding:4px 10px;border-radius:7px;background:none;border:0;color:var(--mu);font:inherit;cursor:pointer}.la .seg2 button.on{background:var(--p3);color:var(--tx)}
+
 .la .chk{display:flex;align-items:center;gap:8px;padding:5px 0}.la .chk .ic{flex:none}
 .tws{display:flex;flex-wrap:wrap;gap:6px}.twc{display:inline-flex;align-items:center;gap:4px;padding:3px 6px 3px 10px;border-radius:99px;border:1px dashed #FBBF24;font-weight:600}.twc button{background:none;border:0;color:var(--mu);cursor:pointer;display:grid;place-items:center}
 .hwi{display:flex;gap:8px;align-items:flex-start;padding:7px 0;border-top:1px solid var(--ln)}.hwi:first-child{border:0}.hwi .x{margin-inline-start:auto}.hwi small{color:var(--mu)}
@@ -60,16 +58,16 @@
     if (p === "pace") b.innerHTML = `<section><h2>${I("clock")} Length & pace</h2>
       <div class="kv"><span>Scenes</span><b>${L.data.scenes.length}</b></div><div class="kv"><span>Lines</span><b>${n}</b></div><div class="kv"><span>Words</span><b>${w}</b></div><div class="kv"><span>About</span><b>${mins} min</b></div>
       <div class="kv"><span>Longest line</span><b>${Math.max(0, ...all().map(x => words(x.de).length))} words (≤ ${S.scope.maxWords[L.level]} for ${E(L.level)})</b></div>
-      <label>Target length</label><div class="seg2" id="lpLen">${[["short", "Short · 2–4 min"], ["mid", "Medium · 5–8 min"], ["long", "Long · 10+ min"]].map(([k, l]) => `<button data-len="${k}" class="${(m.length || "mid") === k ? "on" : ""}">${l}</button>`).join("")}</div>
-      <label>Speaking pace for all voices</label><div class="seg2" id="lpPace">${[[0.8, "Slow"], [0.9, "Calm"], [0.95, "Normal"], [1, "Natural"]].map(([v, l]) => `<button data-pace="${v}" class="${(m.pace || 0.95) === v ? "on" : ""}">${l}</button>`).join("")}</div>
+      <label>Target length</label><div class="seg" id="lpLen">${[["short", "Short · 2–4 min"], ["mid", "Medium · 5–8 min"], ["long", "Long · 10+ min"]].map(([k, l]) => `<button data-len="${k}" class="${(m.length || "mid") === k ? "on" : ""}">${l}</button>`).join("")}</div>
+      <label>Speaking pace for all voices</label><div class="seg" id="lpPace">${[[0.8, "Slow"], [0.9, "Calm"], [0.95, "Normal"], [1, "Natural"]].map(([v, l]) => `<button data-pace="${v}" class="${(m.pace || 0.95) === v ? "on" : ""}">${l}</button>`).join("")}</div>
       <div class="mu sm" style="margin-top:8px">The pace applies to every speaker; one line can still have its own speed (right-click it → Voice).</div></section>`;
     if (p === "tr") {
       const miss = l => { let t = 0, h = 0; for (const s of L.data.scenes) { t++; if (s.title[l]) h++; for (const r of s.lines) { t++; if (r[l]) h++; } } for (const ph of L.data.phrases || []) { t++; if (ph[l]) h++; } return [h, t]; };
       b.innerHTML = `<section><h2>${I("translate")} Translations</h2>${Object.entries(LANGS).map(([k, l]) => { const [h, t] = miss(k), pc = t ? Math.round(h / t * 100) : 100; return `<div class="kv" style="display:block"><div style="display:flex;justify-content:space-between"><span>${l}</span><b>${pc}%</b></div><div class="bar2"><i style="width:${pc}%"></i></div></div>`; }).join("")}
         <div class="acts" style="margin-top:12px">${S.scope.ai ? `<button class="btn pr" data-act="translate">✦ Fill the missing ones</button>` : ""}<a class="btn" href="#script/${L.id}">Edit in the script</a></div></section>
         <section><h2>${I("settings")} Translation settings</h2>
-        <label>Style</label><div class="seg2" id="trStyle">${[["natural", "Natural"], ["close", "Close to the original"], ["simple", "Simple words"]].map(([k, l]) => `<button data-trs="${k}" class="${(m.trStyle || "natural") === k ? "on" : ""}">${l}</button>`).join("")}</div>
-        <label>Shown under the lines while you write</label><div class="seg2" id="trShow">${Object.keys(LANGS).map(k => `<button data-trshow="${k}" class="${S.tr === k ? "on" : ""}">${k.toUpperCase()}</button>`).join("")}</div>
+        <label>Style</label><div class="seg" id="trStyle">${[["natural", "Natural"], ["close", "Close to the original"], ["simple", "Simple words"]].map(([k, l]) => `<button data-trs="${k}" class="${(m.trStyle || "natural") === k ? "on" : ""}">${l}</button>`).join("")}</div>
+        <label>Shown under the lines while you write</label><div class="seg" id="trShow">${Object.keys(LANGS).map(k => `<button data-trshow="${k}" class="${S.tr === k ? "on" : ""}">${k.toUpperCase()}</button>`).join("")}</div>
         <div class="tg"><span>Needed before publishing<div class="mu sm">a lesson can't go online while a translation is missing</div></span><input type="checkbox" id="trNeed" ${m.trRequired !== false ? "checked" : ""}></div>
         <label>Notes for translators (names, words to keep)</label><textarea class="in" id="trNote" rows="3" maxlength="400">${E(m.trNote || "")}</textarea><div class="acts"><button class="btn" data-lsave="tr">Save</button></div></section>`;
     }
@@ -85,7 +83,7 @@
         <div class="acts" style="margin-top:12px">${L.status === "published" ? `<button class="btn" data-act="unpublishL">Take offline</button>` : `<button class="btn pr" data-act="publish">Publish now</button>`}<a class="btn" href="#voice/${L.id}">〰 Make the audio</a></div></section>`;
     }
     if (p === "history") {
-      const t = x => x ? new Date(x).toLocaleString(window.PanelI18N ? PanelI18N.locale : "en-GB", { dateStyle: "medium", timeStyle: "short" }) : "—";
+      const t = x => x ? new Date(x).toLocaleString(K.loc(), { dateStyle: "medium", timeStyle: "short" }) : "—";
       b.innerHTML = `<section><h2>${I("history")} History</h2><div class="kv"><span>Version now</span><b>${E(L.rev)}</b></div><div class="kv"><span>Last change</span><b>${t(L.updated_at)}</b></div><div class="kv"><span>Published</span><b>${t(L.published_at)}</b></div></section><section><h2>${I("undo")} Earlier versions</h2><div class="mu sm">Kept before every change by the AI and at most every 10 minutes while you write (the last 40). Go back to any of them; the current one is kept too.</div><div id="vers" style="margin-top:8px"><div class="mu">Loading…</div></div></section>`;
       api("GET", `/lessons/${L.id}/versions`).then(r => { const el = $("#vers"); if (!el) return; el.innerHTML = r.versions.map(v => `<div class="kv" style="align-items:center"><span>${I(v.ai ? "ai" : "edit", 14)} <b>${E(v.note || "edited")}</b><br><small class="mu">version ${v.rev} · ${t(v.at)}${v.by ? " · " + E(v.by) : ""}</small></span><span style="display:flex;gap:6px"><button class="btn sm" data-vlook="${v.id}">Look</button><button class="btn sm" data-vback="${v.id}">Go back to it</button></span></div>`).join("") || `<div class="mu">No earlier versions yet.</div>`; }).catch(x => { const el = $("#vers"); if (el) el.textContent = x.message; });
     }
@@ -110,7 +108,7 @@
     const hd = t.closest("[data-hwdel]"); if (hd) { hw().quiz.splice(+hd.dataset.hwdel, 1); saveMeta(); draw("practice"); return; }
     if (t.closest("[data-hwgive]")) return giveHomework();
     const vl = t.closest("[data-vlook]"); if (vl) { const r = await api("GET", `/lessons/${S.L.id}/versions/${vl.dataset.vlook}`); const d = r.version.data; form(`Version ${r.version.rev} · ${r.version.note || ""}`, `<div class="vprev">${(d.scenes || []).map(s => `<b>${E(s.title && s.title.de || "")}</b><br>${s.lines.map(x => `<span class="mu">${E(x.who)}:</span> ${E(x.de)}`).join("<br>")}`).join("<br><br>") || "—"}</div>`, async () => {}, "Close"); return; }
-    const vb = t.closest("[data-vback]"); if (vb) { if (!confirm("Go back to this version? The current text is kept as a version too.")) return; await flush(); try { const r = await api("POST", `/lessons/${S.L.id}/versions/${vb.dataset.vback}/restore`); S.L.data = r.data; S.L.rev = r.rev; toast("Back to the earlier version"); draw("history"); } catch (x) { toast(x.message); } return; }
+    const vb = t.closest("[data-vback]"); if (vb) { if (!await K.confirm({ title: "Go back to this version?", text: "The current text is kept as a version too.", ok: "Go back" })) return; await flush(); try { const r = await api("POST", `/lessons/${S.L.id}/versions/${vb.dataset.vback}/restore`); S.L.data = r.data; S.L.rev = r.rev; toast("Back to the earlier version"); draw("history"); } catch (x) { toast(x.message); } return; }
     if (t.closest("[data-goaladd]")) { m.goals = [...(m.goals || []).filter(Boolean), ""]; draw("goals"); $$("[data-goal]").pop()?.focus(); return; }
     const gd = t.closest("[data-goaldel]"); if (gd) { m.goals = (m.goals || []).filter((_, i) => i !== +gd.dataset.goaldel); saveMeta(); draw("goals"); return; }
     if (t.closest("[data-goalai]")) { const lines = all().slice(0, 30).map(x => x.de).join(" / "); if (window.LAPPFrame && LAPPFrame.embed) LAPPFrame.up({ t: "ask", text: `Suggest 3 short learning goals (can-do statements, ${S.L.level}) for this lesson “${S.L.title}”: ${lines}` }); return; }
@@ -145,7 +143,7 @@
       <div class="acts"><button class="btn" data-hwmake>${I("wand", 14)} ${h.quiz.length ? "Make again" : "Make from the lines"}</button></div>
       <label>${I("mic", 13)} Say it · lines to record</label><div style="max-height:180px;overflow:auto">${rs.map((r, i) => `<label class="tg" style="margin:0;padding:5px 0"><span class="de">${E(r.who)}: ${E(r.de)}</span><input type="checkbox" data-hwspeak="${i}" ${(h.speak || []).includes(i) ? "checked" : ""}></label>`).join("") || `<span class="mu sm">No lines yet.</span>`}</div>
       <label>${I("pen", 13)} Writing task</label><textarea class="in" id="hwWrite" rows="2" maxlength="1000" placeholder="e.g. Write 3 sentences: you buy a ticket at the station.">${E(h.write || "")}</textarea>
-      <label>Due</label><select class="in" id="hwDue" style="width:auto">${[1, 2, 3, 5, 7, 14].map(d => `<option value="${d}" ${(h.due || 3) === d ? "selected" : ""}>${d} day${d > 1 ? "s" : ""} after class</option>`).join("")}</select>
+      <label>Due</label><l-select id="hwDue" style="width:220px" aria-label="Due">${[1, 2, 3, 5, 7, 14].map(d => `<option value="${d}" ${(h.due || 3) === d ? "selected" : ""}>${d} day${d > 1 ? "s" : ""} after class</option>`).join("")}</l-select>
       <div class="acts" style="margin-top:10px"><button class="btn" data-lsave="hw">Save</button>${S.scope.kind === "school" ? `<button class="btn pr" data-hwgive>${I("send", 14)} Give to a class…</button>` : `<span class="mu sm" style="align-self:center">Schools give it to their classes.</span>`}</div></section>`;
   }
   async function giveHomework() {
@@ -172,7 +170,7 @@
     const folderPlus = rule === "plus", own = L.access_own || "", eff = folderPlus || own === "plus" ? "plus" : "free";
     if (!$("#lpBody")) return;
     $("#lpBody").innerHTML = `<section><h2>${I("lock")} Access</h2><div class="kv"><span>From its folder</span><b>${rule ? (folderPlus ? "Plus members" : "Everyone (free)") : "no rule"}</b></div><div class="kv"><span>Who can open it now</span><b>${eff === "plus" ? "Plus members" : "Everyone (free)"}</b></div>
-      <label>This lesson</label><div class="seg2">${[["free", "As its folder" + (folderPlus ? " (Plus)" : " (free)")], ["plus", "Plus members only"]].map(([k, l]) => `<button data-acc="${k}" class="${(own === "plus" ? "plus" : "free") === k ? "on" : ""}">${l}</button>`).join("")}</div>
+      <label>This lesson</label><div class="seg">${[["free", "As its folder" + (folderPlus ? " (Plus)" : " (free)")], ["plus", "Plus members only"]].map(([k, l]) => `<button data-acc="${k}" class="${(own === "plus" ? "plus" : "free") === k ? "on" : ""}">${l}</button>`).join("")}</div>
       <div class="mu sm" style="margin-top:8px">A lesson can be stricter than its folder, never more open: in a Plus folder it stays Plus.</div></section>`;
   }
 

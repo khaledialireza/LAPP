@@ -2,24 +2,23 @@
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex">
 <title>LAPP Studio</title>
-<script src="/ui/lapp-ui.js?v=3"></script>
-<script src="/ui/panel-i18n.js?v=11"></script>
+<link rel="stylesheet" href="/ui/kit.css?v=1">
+<script src="/ui/kit.js?v=1"></script>
+<script src="/ui/menu.js?v=1"></script>
+<script src="/ui/lapp-ui.js?v=5"></script>
+<script src="/ui/panel-i18n.js?v=12"></script>
 <script src="/ui/cursor.js?v=2"></script>
 <script src="/ui/theme.js?v=2"></script>
 <script src="/ui/frame.js?v=4"></script>
 <script src="/ui/icons.js?v=1"></script>
 <script>
 // the studio lives inside the management environment; opened on its own, it goes there
-const EMBED = new URLSearchParams(location.search).has("embed") && window.parent !== window;
-if (!EMBED) location.replace("/manage#open=" + encodeURIComponent(location.pathname + location.search + location.hash));
-const up = m => { try { parent.postMessage({ lapp: 1, ...m }, location.origin); } catch {} };
+const EMBED = K.embed; K.inDesk();
+const up = m => LAPPFrame.up(m);
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 /* LAPP Studio: ⌘ command centre · ✎ live script · 〰 voice desk · 🎭 universe · 📈 insights */
-:root{--ui-surface:#15151F;--ui-surface-2:#1C1C29;--ui-line:rgba(255,255,255,.14);--ui-text:#F4F4F8;--ui-muted:rgba(235,235,245,.55);--ui-accent:#8B5CF6;
- --bg:#07070B;--p1:#0F0F16;--p2:#15151F;--p3:#1C1C29;--ln:rgba(255,255,255,.07);--ln2:rgba(255,255,255,.13);--tx:#F4F4F8;--mu:rgba(235,235,245,.58);--mu2:rgba(235,235,245,.36);
- --pk:#FF3D7F;--vi:#8B5CF6;--cy:#22D3EE;--gr:#34D399;--am:#FBBF24;--rd:#F87171;--g:linear-gradient(135deg,#FF3D7F 0%,#8B5CF6 55%,#22D3EE 100%)}
 *{box-sizing:border-box;margin:0}[hidden]{display:none!important}
 html,body{height:100%}
 body{background:var(--bg);color:var(--tx);font:13.5px/1.55 Inter,system-ui,sans-serif;display:grid;grid-template-columns:64px 1fr;overflow:hidden}
@@ -34,7 +33,6 @@ a{color:inherit}
 .lg{width:38px;height:38px;border-radius:12px;background:var(--g);display:grid;place-items:center;font:800 18px Inter;margin-bottom:10px;box-shadow:0 8px 24px rgba(255,61,127,.35);text-decoration:none}
 .ri{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;color:var(--mu);font-size:17px;position:relative;text-decoration:none}
 .ri:hover{background:var(--p2);color:var(--tx)}.ri.on{background:var(--p3);color:var(--tx);box-shadow:inset 0 0 0 1px var(--ln2)}
-.ri[data-tip]:hover::after{content:attr(data-tip);position:absolute;inset-inline-start:52px;top:50%;transform:translateY(-50%);background:#20202E;border:1px solid var(--ln2);padding:4px 9px;border-radius:8px;font-size:12px;white-space:nowrap;color:var(--tx);z-index:9}
 .ri.off{opacity:.35}
 .rail .sp{flex:1}.me{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#F59E0B,#EF4444);display:grid;place-items:center;font-weight:800;font-size:13px}
 /* main */
@@ -43,35 +41,15 @@ a{color:inherit}
 .crumb{color:var(--mu);font-size:13px;display:flex;gap:6px;align-items:center;min-width:0}.crumb b{color:var(--tx);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:320px}
 .crumb a{text-decoration:none}.crumb a:hover{color:var(--tx)}
 .top .sp{flex:1}
-.chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:99px;background:var(--p3);border:1px solid var(--ln);font-size:12px;color:var(--mu);white-space:nowrap}
 button.chip:hover{color:var(--tx);border-color:var(--ln2)}
-.chip.on{color:var(--tx);border-color:rgba(139,92,246,.6);background:rgba(139,92,246,.14)}
-.chip.ok{color:var(--gr);border-color:rgba(52,211,153,.35)}.chip.warn{color:var(--am);border-color:rgba(251,191,36,.35)}.chip.bad{color:var(--rd);border-color:rgba(248,113,113,.35)}
-.btn{display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 14px;border-radius:10px;font-weight:700;font-size:13px;border:1px solid var(--ln2);background:var(--p2);color:var(--tx);white-space:nowrap;text-decoration:none}
-.btn:hover{border-color:rgba(255,255,255,.25)}.btn:disabled{opacity:.45;cursor:default}
-.btn.pr{background:var(--g);border:0;box-shadow:0 8px 24px rgba(139,92,246,.35)}
-.btn.gn{background:rgba(52,211,153,.14);border-color:rgba(52,211,153,.4);color:var(--gr)}
-.btn.sm{height:28px;padding:0 10px;font-size:12px;border-radius:8px}
-.btn.danger{color:var(--rd)}
 .view{flex:1;min-height:0;overflow:auto;padding:16px}
 .pn{background:rgba(21,21,31,.72);backdrop-filter:blur(12px);border:1px solid var(--ln);border-radius:16px;padding:14px;min-width:0}
 .pn h3{font-size:12px;font-weight:700;color:var(--mu);letter-spacing:.3px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
 .pn h3 .r{margin-inline-start:auto}
 .ai{background:linear-gradient(var(--p2),var(--p2)) padding-box,var(--g) border-box;border:1px solid transparent}
-.spark{background:var(--g);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800}
 .mu{color:var(--mu)}.mu2{color:var(--mu2)}.sm{font-size:12px}
-.bar{height:6px;border-radius:4px;background:var(--p3);overflow:hidden}.bar i{display:block;height:100%;border-radius:4px;background:var(--g)}
-.in{width:100%;background:var(--p3);border:1px solid var(--ln2);border-radius:10px;padding:9px 11px;color:var(--tx);outline:none}
-.in:focus{border-color:var(--vi);box-shadow:0 0 0 3px rgba(139,92,246,.2)}
 textarea.in{resize:vertical;min-height:70px}
-.empty{color:var(--mu);text-align:center;padding:36px 16px}.empty b{display:block;color:var(--tx);font-size:16px;margin-bottom:6px}
-.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--p3);border:1px solid var(--ln2);border-radius:12px;padding:10px 16px;z-index:99;display:none;max-width:90vw}.toast.on{display:block}
-dialog{background:var(--p2);color:var(--tx);border:1px solid var(--ln2);border-radius:18px;padding:20px;width:min(560px,94vw);margin:auto}
-dialog::backdrop{background:rgba(0,0,0,.6)}dialog h3{margin-bottom:12px;font-size:17px}
-dialog label{display:block;font-size:12px;color:var(--mu);margin:10px 0 4px}
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 .acts{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
-.err{color:var(--rd);font-size:12.5px;margin-top:8px;min-height:1em}
 
 /* ===== ⌘ command centre ===== */
 .cc{display:grid;grid-template-columns:1.25fr 1fr;gap:14px;align-items:start}
@@ -94,8 +72,7 @@ button.cell:hover{outline:2px solid rgba(255,255,255,.35)}
 .c1{background:rgba(139,92,246,.22)}.c2{background:rgba(139,92,246,.45)}.c3{background:rgba(139,92,246,.75)}
 .cell.hot{box-shadow:0 0 0 2px var(--pk),0 0 18px rgba(255,61,127,.45)}
 .cell.hot::after{content:"✨";position:absolute;top:-8px;inset-inline-start:-6px;font-size:12px}
-.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
-.kp{background:var(--p3);border-radius:12px;padding:10px;border:1px solid var(--ln)}.kp b{font:800 20px Inter;display:block}.kp span{font-size:11.5px;color:var(--mu)}
+.kp.three{grid-template-columns:repeat(3,1fr);margin-bottom:12px}
 .feed{display:flex;flex-direction:column;gap:9px}
 .fi{display:flex;gap:10px;align-items:center;background:var(--p3);border:1px solid var(--ln);border-radius:12px;padding:10px}
 .fi .ic{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;flex:none;font-size:14px}
@@ -105,7 +82,6 @@ button.cell:hover{outline:2px solid rgba(255,255,255,.35)}
 .lc:hover{border-color:var(--ln2);transform:translateY(-1px)}
 .lc .t1{display:flex;gap:6px;align-items:center;font-size:11.5px;color:var(--mu)}
 .lc b{font-size:15px}
-.st{font:700 10.5px Inter;padding:2px 7px;border-radius:6px;text-transform:uppercase;letter-spacing:.4px}
 .st-draft{background:rgba(255,255,255,.08);color:var(--mu)}.st-review{background:rgba(251,191,36,.16);color:var(--am)}.st-published{background:rgba(52,211,153,.16);color:var(--gr)}
 
 /* ===== ✎ live script ===== */
@@ -182,7 +158,6 @@ button.cell:hover{outline:2px solid rgba(255,255,255,.35)}
 .tp{width:40px;height:40px;border-radius:50%;background:#fff;color:#000;display:grid;place-items:center;font-size:15px;flex:none}
 .tp:disabled{opacity:.3}
 .job{display:flex;align-items:center;gap:8px}
-.spin{width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,.25);border-top-color:var(--cy);animation:sp 1s linear infinite;flex:none}@keyframes sp{to{transform:rotate(360deg)}}
 
 /* ===== 🎭 universe ===== */
 .uv{display:grid;grid-template-columns:1fr 1.35fr;gap:14px;align-items:start}
@@ -207,59 +182,46 @@ button.cc2:hover{border-color:var(--ln2)}
 .ins{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;align-items:start}
 .hl{display:grid;grid-template-columns:26px 1fr 46px auto;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid var(--ln);font:500 13px Inter}
 .hl .m{font:700 12px Inter;text-align:end}.hl.bad .m{color:var(--rd)}.hl.mid .m{color:var(--am)}.hl.ok .m{color:var(--gr)}
-.spark2{display:flex;align-items:flex-end;gap:3px;height:110px;direction:ltr}
-.spark2 i{flex:1;border-radius:4px 4px 0 0;background:linear-gradient(to top,rgba(139,92,246,.4),rgba(34,211,238,.8));min-height:2px}
-.spark2 i.drop{background:linear-gradient(to top,rgba(248,113,113,.4),rgba(248,113,113,.9))}
 
 @media (max-width:1100px){html:not(.desk) .ed{grid-template-columns:1fr}html:not(.desk) .ed>.pn.outl{display:none}html:not(.desk) .cc,html:not(.desk) .uv,html:not(.desk) .ins{grid-template-columns:1fr}html:not(.desk) .vd{grid-template-columns:1fr}}
 @media (max-width:700px){html:not(.desk) body{grid-template-columns:1fr;grid-template-rows:1fr auto}html:not(.desk) .rail{flex-direction:row;height:auto;order:2;padding:6px;justify-content:space-around}html:not(.desk) .rail .lg,html:not(.desk) .rail .sp,html:not(.desk) .rail .me{display:none}html:not(.desk) .main{height:calc(100vh - 56px)}html:not(.desk) .map{grid-template-columns:80px repeat(6,1fr)}html:not(.desk) .board{grid-template-columns:1fr 1fr}html:not(.desk) .cast{grid-template-columns:1fr}html:not(.desk) .row3{grid-template-columns:1fr}}
 </style></head><body>
 <nav class="rail" aria-label="Studio">
   <a class="lg" href="/" title="LAPP">L</a>
-  <a class="ri" href="#home" data-v="home" data-tip="Command centre">⌘</a>
-  <a class="ri" href="#script" data-v="script" data-tip="Live script">✎</a>
-  <a class="ri" href="#voice" data-v="voice" data-tip="Voice desk">〰</a>
-  <a class="ri" href="#universe" data-v="universe" data-tip="Universe">🎭</a>
-  <a class="ri" href="#insights" data-v="insights" data-tip="Insights">📈</a>
+  <a class="ri" href="#home" data-v="home" data-tip-side="end" data-tip="Command centre">⌘</a>
+  <a class="ri" href="#script" data-v="script" data-tip-side="end" data-tip="Live script">✎</a>
+  <a class="ri" href="#voice" data-v="voice" data-tip-side="end" data-tip="Voice desk">〰</a>
+  <a class="ri" href="#universe" data-v="universe" data-tip-side="end" data-tip="Universe">🎭</a>
+  <a class="ri" href="#insights" data-v="insights" data-tip-side="end" data-tip="Insights">📈</a>
   <div class="sp"></div>
-  <button class="ri" id="lng" data-tip="Language">🌐</button>
-  <a class="ri" id="back" href="/admin" data-tip="Back to the panel">↩</a>
+  <button class="ri" id="lng" data-tip-side="end" data-tip="Language">🌐</button>
+  <a class="ri" id="back" href="/admin" data-tip-side="end" data-tip="Back to the panel">↩</a>
   <div class="me" id="me" title=""></div>
 </nav>
 <div class="main">
   <div class="top" id="top"></div>
   <div class="view" id="view"><div class="empty">Loading…</div></div>
 </div>
-<div class="toast" id="toast"></div>
-<dialog id="dlg"><form method="dialog" id="dlgForm"></form></dialog>
 <audio id="player" preload="none"></audio>
 <script>
-const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
-const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const { $, $$, esc, opts } = K;
 const ORG = new URLSearchParams(location.search).get("org") || "";
 const TRL = ["en", "fa", "ru", "uk"];
 const FLAG = { de: "🇩🇪", nl: "🇳🇱", pl: "🇵🇱" };
-const SPEECH = { de: "de-DE", nl: "nl-NL", pl: "pl-PL" };
 const TYPE = { talk: ["💬", "Conversation"], lesson: ["🎧", "Lesson"], story: ["📖", "Story"] };
 const TOPIC = { daily: "Daily life", travel: "Travel & hotel", food: "Food & shopping", health: "Health & doctor", work: "Work & office", home: "Home & family", city: "City & transport", school: "School & study", story: "Stories", other: "Other" };
 const COLORS = ["#38BDF8", "#FF3D7F", "#8B5CF6", "#F59E0B", "#10B981", "#EF4444", "#22D3EE", "#A3E635"];
 const S = { scope: null, lessons: [], L: null, dirty: false, saving: null, tr: "en", sel: -1, chars: null, dicts: {}, ov: null };
 
 /* ---------- small helpers ---------- */
-let toastT;
-function toast(m) { const t = $("#toast"); t.textContent = m; t.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("on"), 3500); }
-async function api(m, p, b) {
-  const q = ORG ? (p.includes("?") ? "&" : "?") + "org=" + encodeURIComponent(ORG) : "";
-  const r = await fetch("/api/studio" + p + q, { method: m, headers: { "Content-Type": "application/json", "X-LAPP": "1" }, body: b ? JSON.stringify(b) : undefined });
-  const j = await r.json().catch(() => ({}));
-  if (!r.ok) throw Object.assign(new Error(j.error || r.status), { status: r.status, code: j.code });
-  return j;
-}
+const toast = (m, o) => K.toast(m, o);
+// the studio's API: /api/studio, for the school (?org=) the window was opened for
+const studioApi = K.apiAt("/api/studio");
+const api = (m, p, b) => studioApi(m, p + (ORG ? (p.includes("?") ? "&" : "?") + "org=" + encodeURIComponent(ORG) : ""), b);
 const rows = L => (L || S.L).data.scenes.flatMap(s => s.lines);
 const speakerColor = who => { const c = S.L && S.L.data.cast[who]; if (c && c.color) return c.color; const names = Object.keys(S.L ? S.L.data.cast : {}); return COLORS[Math.max(0, names.indexOf(who)) % COLORS.length]; };
 const words = t => (t.match(/[\p{L}\p{M}'’-]+/gu) || []);
 const fmtT = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
-function opts(el, list, v) { el.options = list; if (v !== undefined) el.value = v; return el; }
 const levelOpts = () => S.scope.levels.map(l => ({ value: l, label: l }));
 const courseOpts = () => Object.entries(S.scope.courses).map(([k, c]) => ({ value: k, label: c.name, icon: FLAG[k] }));
 const typeOpts = () => Object.entries(TYPE).map(([k, [i, l]]) => ({ value: k, label: l, icon: i }));
@@ -267,9 +229,7 @@ const topicOpts = () => S.scope.topics.map(k => ({ value: k, label: TOPIC[k] || 
 const voiceName = v => (v || "").replace(/^piper:/, "").replace(/^[a-z]{2}_[A-Z]{2}-/, "").replace(/-(x_low|low|medium|high)$/, "").replace(/^./, c => c.toUpperCase());
 
 // the browser's own voice, for a quick listen before the real audio is made
-function say(text, course, rate = 1) {
-  try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = SPEECH[course] || "de-DE"; u.rate = rate; speechSynthesis.speak(u); } catch { toast("This browser cannot speak"); }
-}
+const say = (text, course, rate = 1) => K.speak(text, { lang: course, rate });
 
 // the words LAPP's dictionary knows (anything else is new for learners)
 async function dictOf(course) {
@@ -295,7 +255,7 @@ function bar(crumb, right = "") { $("#top").innerHTML = `<span class="crumb">${c
 function scopeCrumb() { return S.scope.kind === "school" ? `<a href="/s/${esc(ORG)}">🏫 ${esc(S.scope.name)}</a> ›` : `<a href="#home">LAPP library</a> ›`; }
 function lessonCrumb(part) {
   const L = S.L;
-  return `${scopeCrumb()} ${L.series ? `<span>${esc(L.series)}</span> ›` : ""} <b class="de">${FLAG[L.course] || ""} ${esc(L.title)}</b> <span class="st st-${L.status}">${L.status}</span>${part ? ` › <span>${part}</span>` : ""}`;
+  return `${scopeCrumb()} ${L.series ? `<span>${esc(L.series)}</span> ›` : ""} <b class="de">${FLAG[L.course] || ""} ${esc(L.title)}</b> ${K.lessonState(L.status)}${part ? ` › <span>${part}</span>` : ""}`;
 }
 
 /* ---------- router ---------- */
@@ -372,7 +332,7 @@ V.home = async () => {
       <div class="mu sm" style="margin-top:8px">✨ = a gap next to lessons you already have · click a cell to make a lesson there</div>
     </div>
     <div class="pn">
-      <div class="kpis"><div class="kp"><b>${ov.learners}</b><span>${S.scope.kind === "school" ? "students active this week" : "learners active this week"}</span></div><div class="kp"><b style="color:var(--gr)">${ov.says}</b><span>sentences spoken this week</span></div><div class="kp"><b>${published}</b><span>lessons published</span></div></div>
+      <div class="kp three"><div><b>${ov.learners}</b><span>${S.scope.kind === "school" ? "students active this week" : "learners active this week"}</span></div><div><b style="color:var(--gr)">${ov.says}</b><span>sentences spoken this week</span></div><div><b>${published}</b><span>lessons published</span></div></div>
       <h3>Next steps</h3>
       <div class="feed">
         ${ov.hard.slice(0, 3).map(h => `<div class="fi"><span class="ic" style="background:rgba(248,113,113,.16)">🎯</span><div><b>${h.avg}% say “<span class="de">${esc(h.text)}</span>” right</b><div class="t">${esc(h.title)} · line ${h.line + 1} · ${h.n} tries</div></div><a class="btn sm pr" href="#script/${h.lesson}" data-line="${h.line}">✦ Rewrite</a></div>`).join("")}
@@ -385,7 +345,7 @@ V.home = async () => {
     <div class="pn" style="grid-column:1/-1">
       <h3>Lessons <span class="r mu2">${ov.lessons.length}</span></h3>
       ${ov.lessons.length ? `<div class="lsgrid">${ov.lessons.map(l => `<a class="lc" href="#script/${l.id}">
-        <div class="t1">${FLAG[l.course] || ""} ${l.level} · ${TYPE[l.type][0]} ${esc(TOPIC[l.topic] || "")}<span style="flex:1"></span><span class="st st-${l.status}">${l.status}</span></div>
+        <div class="t1">${FLAG[l.course] || ""} ${l.level} · ${TYPE[l.type][0]} ${esc(TOPIC[l.topic] || "")}<span style="flex:1"></span>${K.lessonState(l.status)}</div>
         <b class="de">${esc(l.title)}</b>
         <div class="t1">${l.lines ? `${l.approved}/${l.lines} lines approved` : "no text yet"} · ${{ ready: "🎧 audio", old: "🎧 audio is older than the text", none: "no audio" }[l.audio]}</div>
         <div class="bar"><i style="width:${l.lines ? Math.round(l.approved / l.lines * 100) : 0}%"></i></div>
@@ -408,7 +368,7 @@ ACT.new = () => newLesson({});
 function newLesson(pre) {
   form("New lesson", `
     <label>Title (in the course language)</label><input class="in de" name="title" required placeholder="Am Bahnhof" maxlength="80">
-    <div class="row3"><div><label>Course</label><l-select name="course" id="nCourse"></l-select></div><div><label>Level</label><l-select name="level" id="nLevel"></l-select></div><div><label>Type</label><l-select name="type" id="nType"></l-select></div></div>
+    <div class="cols3"><div><label>Course</label><l-select name="course" id="nCourse"></l-select></div><div><label>Level</label><l-select name="level" id="nLevel"></l-select></div><div><label>Type</label><l-select name="type" id="nType"></l-select></div></div>
     <label>Topic</label><l-select name="topic" id="nTopic"></l-select>
     <label>What should it be about? (the AI writes from this)</label><textarea class="in" name="brief" placeholder="Buying a ticket, finding the platform, a delay… words and grammar it should practise"></textarea>
     ${S.chars && S.chars.length ? `<label>Characters (optional)</label><l-select name="characters" id="nChars" multiple></l-select>` : ""}`,
@@ -627,7 +587,7 @@ document.addEventListener("click", e => {
   const who = t.closest("[data-who]"); if (who) { pickSpeaker(Number(who.dataset.who)); return; }
   const gs = t.closest("[data-goscene]"); if (gs) { $(`#sc${gs.dataset.goscene}`).scrollIntoView({ behavior: "smooth", block: "start" }); return; }
   const al = t.closest("[data-addline]"); if (al) { const si = Number(al.dataset.addline); const end = S.L.data.scenes.slice(0, si + 1).reduce((a, s) => a + s.lines.length, 0); insertLine(end - 1, si); return; }
-  const ds = t.closest("[data-delscene]"); if (ds) { if (confirm("Delete this scene and its lines?")) { S.L.data.scenes.splice(Number(ds.dataset.delscene), 1); changed(); renderDoc(); } return; }
+  const ds = t.closest("[data-delscene]"); if (ds) { K.confirm({ title: "Delete this scene and its lines?", ok: "Delete", danger: true }).then(y => { if (y) { S.L.data.scenes.splice(Number(ds.dataset.delscene), 1); changed(); renderDoc(); } }); return; }
   const pick = t.closest("[data-pick]"); if (pick) { const [i, k] = pick.dataset.pick.split("|").map(Number); const o = S.rw[k], r = rows()[i]; r.de = o.de; TRL.forEach(l => { if (o[l]) r[l] = o[l]; }); r.ok = false; changed(); renderDoc(); selLine(i); toast("Line replaced"); return; }
 });
 // where line i sits: [scene, index in scene]
@@ -665,10 +625,10 @@ function pickSpeaker(i) {
   opts($("#spk"), names.map(n => ({ value: n, label: n, icon: "●" })), r.who);
   opts($("#spg"), [{ value: "f", label: "female" }, { value: "m", label: "male" }], "f");
 }
-async function rewrite(i, mode) {
+async function rewrite(i, mode, how) {
   if (i < 0) return;
-  let instruction = "";
-  if (mode === "custom") { instruction = prompt("How should the line change?"); if (!instruction) return; }
+  let instruction = how || "";
+  if (mode === "custom" && !instruction) { instruction = await K.ask({ title: "How should the line change?", placeholder: "e.g. make it a question", ok: "Rewrite" }); if (!instruction) return; }
   const slot = $(`#slot${i}`); if (!slot) return;
   await flush();
   slot.innerHTML = `<div class="sugg"><div class="job"><span class="spin"></span> ✦ thinking…</div></div>`;
@@ -682,11 +642,11 @@ ACT.approveAll = () => { rows().forEach(r => r.ok = true); changed(); renderDoc(
 ACT.listen = () => {
   const all = rows(); let k = Math.max(0, S.sel);
   speechSynthesis.cancel();
-  const next = () => { if (k >= all.length || !/^#script/.test(location.hash)) return; selLine(k, true); const r = all[k++]; const u = new SpeechSynthesisUtterance(r.de); u.lang = SPEECH[S.L.course]; u.rate = r.speed || 0.95; u.onend = next; speechSynthesis.speak(u); };
+  const next = () => { if (k >= all.length || !/^#script/.test(location.hash)) return; selLine(k, true); const r = all[k++]; K.speak(r.de, { lang: S.L.course, rate: r.speed || 0.95, onend: next }); };
   next(); toast("Browser voice — the real voices come from the voice desk");
 };
 ACT.write = async () => {
-  if (rows().length && !confirm("The AI writes a new text and replaces the current one. Continue?")) return;
+  if (rows().length && !await K.confirm({ title: "Write a new text?", text: "The AI writes a new text and replaces the current one.", ok: "Write" })) return;
   await flush();
   $("#doc").innerHTML = `<div class="job" style="margin-bottom:12px"><span class="spin"></span> <b>✦ Writing…</b> <span class="mu sm" id="wn"></span></div><div id="wl"></div>`;
   let shown = 0;
@@ -716,8 +676,8 @@ ACT.check = async btn => {
 ACT.settings = () => {
   const L = S.L;
   form("Lesson", `<label>Title</label><input class="in de" name="title" value="${esc(L.title)}" required maxlength="80">
-    <div class="row3"><div><label>Course</label><l-select name="course" id="eCourse"></l-select></div><div><label>Level</label><l-select name="level" id="eLevel"></l-select></div><div><label>Type</label><l-select name="type" id="eType"></l-select></div></div>
-    <div class="row2"><div><label>Topic</label><l-select name="topic" id="eTopic"></l-select></div><div><label>Series</label><input class="in" name="series" value="${esc(L.series)}" maxlength="60"></div></div>
+    <div class="cols3"><div><label>Course</label><l-select name="course" id="eCourse"></l-select></div><div><label>Level</label><l-select name="level" id="eLevel"></l-select></div><div><label>Type</label><l-select name="type" id="eType"></l-select></div></div>
+    <div class="cols2"><div><label>Topic</label><l-select name="topic" id="eTopic"></l-select></div><div><label>Series</label><input class="in" name="series" value="${esc(L.series)}" maxlength="60"></div></div>
     ${S.scope.kind === "lapp" ? `<label>Who can open it</label><l-select name="access" id="eAccess"></l-select>` : ""}
     <label>Brief</label><textarea class="in" name="brief">${esc(L.brief)}</textarea>
     <div class="acts" style="justify-content:space-between"><button class="btn danger" type="button" id="delLesson">🗑 Delete lesson</button>
@@ -725,8 +685,8 @@ ACT.settings = () => {
     async f => { await flush(); const r = await api("PUT", `/lessons/${L.id}`, { rev: S.L.rev, ...f }); Object.assign(S.L, f, { rev: r.rev }); show(); }, "Save");
   opts($("#eCourse"), courseOpts(), L.course); opts($("#eLevel"), levelOpts(), L.level); opts($("#eType"), typeOpts(), L.type); opts($("#eTopic"), topicOpts(), L.topic);
   if ($("#eAccess")) opts($("#eAccess"), [{ value: "free", label: "Everyone (free)", icon: "🌍" }, { value: "plus", label: "Plus members", icon: "⭐" }], L.access);
-  $("#delLesson").onclick = async () => { if (!confirm(`Delete “${L.title}” for good?`)) return; await api("DELETE", `/lessons/${L.id}`); $("#dlg").close(); S.L = null; S.dirty = false; location.hash = "home"; };
-  if ($("#unpub")) $("#unpub").onclick = async () => { await api("POST", `/lessons/${L.id}/unpublish`); $("#dlg").close(); S.L.status = "review"; toast("Taken offline"); show(); };
+  $("#delLesson").onclick = async () => { if (!await K.confirm({ title: `Delete “${L.title}” for good?`, ok: "Delete", danger: true })) return; await api("DELETE", `/lessons/${L.id}`); closeForm(); S.L = null; S.dirty = false; location.hash = "home"; };
+  if ($("#unpub")) $("#unpub").onclick = async () => { await api("POST", `/lessons/${L.id}/unpublish`); closeForm(); S.L.status = "review"; toast("Taken offline"); show(); };
 };
 
 /* ---------- saving: a moment after the last change ---------- */
@@ -823,12 +783,9 @@ function preview(pos) {
     $$(".clip").forEach(x => x.classList.toggle("sel", Number(x.dataset.clip) === i));
     const ph = $("#ph"); if (ph) ph.style.left = `calc(170px + (100% - 170px) * ${pos[i][0] / S.vtotal})`;
     $("#clock").innerHTML = `${fmtT(pos[i][0])} <span class="mu">/ ${fmtT(S.vtotal)}</span> <span class="chip">browser voice</span>`;
-    const u = new SpeechSynthesisUtterance(r.de); u.lang = SPEECH[S.L.course]; u.rate = r.speed || c.speed || 0.95;
     // a lower pitch for male speakers, so two people sound different even in the preview
-    u.pitch = c.gender === "m" ? 0.8 : 1.15;
-    u.onend = () => setTimeout(next, (r.pause ?? S.L.data.pause ?? 0.6) * 1000);
-    u.onerror = () => { pv = null; toast("This browser cannot speak"); };
-    speechSynthesis.speak(u);
+    K.speak(r.de, { lang: S.L.course, rate: r.speed || c.speed || 0.95, pitch: c.gender === "m" ? 0.8 : 1.15,
+      onend: () => setTimeout(next, (r.pause ?? S.L.data.pause ?? 0.6) * 1000), onerror: () => { pv = null; toast("This browser cannot speak"); } });
   };
   next();
 }
@@ -882,8 +839,8 @@ ACT.publish = async () => {
   const go = async force => {
     try { await api("POST", `/lessons/${L.id}/publish`, force ? { force: true } : {}); L.status = "published"; toast(S.scope.kind === "school" ? "Published — your students can open it now" : "Published — learners can open it now"); show(); }
     catch (e) {
-      if (e.code === "stale" && confirm("The text changed after the audio was made, so the audio doesn't match it. Publish anyway?")) return go(true);
-      if (e.code === "tr") { if (confirm(e.message + "\n\nOpen the script to fill them?")) location.hash = `script/${L.id}`; return; }
+      if (e.code === "stale" && await K.confirm({ title: "Publish anyway?", text: "The text changed after the audio was made, so the audio doesn't match it." , ok: "Publish" })) return go(true);
+      if (e.code === "tr") { if (await K.confirm({ title: "Translations are missing", text: e.message, ok: "Open the script" })) location.hash = `script/${L.id}`; return; }
       toast(e.message);
     }
   };
@@ -939,10 +896,10 @@ ACT.charNew = () => charForm({});
 document.addEventListener("click", e => { const c = e.target.closest("[data-char]"); if (c) charForm(S.chars.find(x => x.id === Number(c.dataset.char))); });
 function charForm(c) {
   const courses = Object.keys(S.scope.courses);
-  form(c.id ? c.name : "New character", `<div class="row2"><div><label>Name</label><input class="in" name="name" value="${esc(c.name || "")}" required maxlength="40"></div><div><label>Age</label><input class="in" name="age" type="number" min="0" max="120" value="${c.age || ""}"></div></div>
+  form(c.id ? c.name : "New character", `<div class="cols2"><div><label>Name</label><input class="in" name="name" value="${esc(c.name || "")}" required maxlength="40"></div><div><label>Age</label><input class="in" name="age" type="number" min="0" max="120" value="${c.age || ""}"></div></div>
     <label>Who are they?</label><input class="in" name="bio" value="${esc(c.bio || "")}" maxlength="400" placeholder="graphic designer from Hamburg, a bit chaotic">
     <label>Traits (comma)</label><input class="in" name="traits" value="${esc((c.traits || []).join(", "))}" placeholder="curious, funny, loves coffee">
-    <div class="row3"><div><label>Emoji</label><input class="in" name="emoji" value="${esc(c.emoji || "🙂")}" maxlength="8"></div><div><label>Colour</label><input class="in" name="color" type="color" value="${esc(c.color || "#8B5CF6")}" style="height:40px;padding:4px"></div><div><label>Voice</label><l-select name="gender" id="cg"></l-select></div></div>
+    <div class="cols3"><div><label>Emoji</label><input class="in" name="emoji" value="${esc(c.emoji || "🙂")}" maxlength="8"></div><div><label>Colour</label><input class="in" name="color" type="color" value="${esc(c.color || "#8B5CF6")}" style="height:40px;padding:4px"></div><div><label>Voice</label><l-select name="gender" id="cg"></l-select></div></div>
     ${courses.map(k => `<label>${FLAG[k]} ${esc(S.scope.courses[k].name)} voice</label><div style="display:flex;gap:6px"><l-select name="v_${k}" id="cv_${k}" style="flex:1"></l-select><button type="button" class="btn sm" data-tryvoice="${k}">🔊</button></div>`).join("")}
     ${c.id ? `<div class="acts" style="justify-content:flex-start"><button type="button" class="btn danger" id="cdel">🗑 Delete</button></div>` : ""}`, async f => {
     const body = { name: f.name, age: f.age, bio: f.bio, traits: f.traits.split(",").map(x => x.trim()).filter(Boolean), emoji: f.emoji, color: f.color, gender: f.gender, voices: Object.fromEntries(courses.map(k => [k, f["v_" + k]]).filter(x => x[1])) };
@@ -951,8 +908,8 @@ function charForm(c) {
   }, c.id ? "Save" : "Create");
   opts($("#cg"), [{ value: "f", label: "female" }, { value: "m", label: "male" }], c.gender || "f");
   for (const k of courses) opts($(`#cv_${k}`), [{ value: "", label: "chosen per lesson" }, ...S.scope.courses[k].voices.map(v => ({ value: v.id, label: voiceName(v.id), sub: v.g === "f" ? "female" : "male" }))], (c.voices || {})[k] || "");
-  $$("[data-tryvoice]").forEach(b => b.onclick = () => { const nm = $("#dlgForm [name=name]").value || "neu"; say({ de: `Hallo! Ich bin ${nm}.`, nl: `Hallo! Ik ben ${nm}.`, pl: `Cześć! Jestem ${nm}.` }[b.dataset.tryvoice], b.dataset.tryvoice); });
-  if ($("#cdel")) $("#cdel").onclick = async () => { if (!confirm(`Delete ${c.name}?`)) return; await api("DELETE", `/characters/${c.id}`); $("#dlg").close(); V.universe(); };
+  $$("[data-tryvoice]").forEach(b => b.onclick = () => { const nm = $("dialog.k-dlg [name=name]").value || "neu"; say({ de: `Hallo! Ich bin ${nm}.`, nl: `Hallo! Ik ben ${nm}.`, pl: `Cześć! Jestem ${nm}.` }[b.dataset.tryvoice], b.dataset.tryvoice); });
+  if ($("#cdel")) $("#cdel").onclick = async () => { if (!await K.confirm({ title: `Delete ${c.name}?`, ok: "Delete", danger: true })) return; await api("DELETE", `/characters/${c.id}`); closeForm(); V.universe(); };
 }
 
 /* ================= 📈 insights ================= */
@@ -968,13 +925,13 @@ V.insights = async () => {
   const all = rows(L), said = ins.say.slice().sort((a, b) => a.avg - b.avg);
   const top = ins.reach[0] || 0, pct = ins.reach.map(n => top ? Math.round(n / top * 100) : 0);
   let drop = -1, dropBy = 0; for (let i = 1; i < pct.length; i++) if (pct[i - 1] - pct[i] > dropBy) { dropBy = pct[i - 1] - pct[i]; drop = i; }
-  $("#view").innerHTML = `<div class="kpis" style="max-width:640px"><div class="kp"><b>${ins.opens}</b><span>times opened</span></div><div class="kp"><b>${ins.learners}</b><span>signed-in learners</span></div><div class="kp"><b>${ins.say.reduce((a, x) => a + x.n, 0)}</b><span>sentences spoken</span></div></div>
+  $("#view").innerHTML = `<div class="kp three" style="max-width:640px"><div><b>${ins.opens}</b><span>times opened</span></div><div><b>${ins.learners}</b><span>signed-in learners</span></div><div><b>${ins.say.reduce((a, x) => a + x.n, 0)}</b><span>sentences spoken</span></div></div>
     <div class="ins">
     <div class="pn"><h3>Hard to say <span class="r mu2">right %</span></h3>
       ${said.length ? said.slice(0, 10).map(x => { const r = all[x.line]; return r ? `<div class="hl ${x.avg < 50 ? "bad" : x.avg < 75 ? "mid" : "ok"}"><span class="mu2">${x.line + 1}</span><span class="de">${esc(r.de)}</span><span class="m">${x.avg}%</span>${x.avg < 75 && S.scope.ai ? `<a class="btn sm" href="#script/${L.id}" data-line="${x.line}" title="Rewrite">✦</a>` : "<span></span>"}</div>` : ""; }).join("") : `<div class="mu sm">No spoken sentences yet.</div>`}
     </div>
     <div class="pn"><h3>Where learners stop</h3>
-      ${top ? `<div class="spark2">${pct.map((v, i) => `<i style="height:${Math.max(2, v)}%" class="${i === drop && dropBy >= 10 ? "drop" : ""}" title="line ${i + 1}: ${v}%"></i>`).join("")}</div>
+      ${top ? `<div class="k-bars">${pct.map((v, i) => `<i style="height:${Math.max(2, v)}%" class="${i === drop && dropBy >= 10 ? "drop" : ""}" title="line ${i + 1}: ${v}%"></i>`).join("")}</div>
       <div class="mu sm" style="margin-top:8px">${drop > 0 && dropBy >= 10 ? `${dropBy}% stop around line ${drop + 1}: “<span class="de">${esc((all[drop] || {}).de || "")}</span>”` : "No big drop — learners stay to the end."}</div>
       ${drop > 0 && dropBy >= 10 && S.scope.ai ? `<div class="fi" style="margin-top:10px"><span class="ic" style="background:rgba(139,92,246,.18)">✦</span><div><b>Make line ${drop + 1} easier to follow</b><div class="t">shorter or simpler lines keep learners listening</div></div><a class="btn sm" href="#script/${L.id}" data-line="${drop}">Rewrite</a></div>` : ""}`
         : `<div class="mu sm">No listening data yet.</div>`}
@@ -984,20 +941,9 @@ V.insights = async () => {
 };
 document.addEventListener("click", e => { const d = e.target.closest("[data-days]"); if (d) { S.days = Number(d.dataset.days); V.insights(); } });
 
-/* ---------- a small form dialog ---------- */
-function form(title, html, submit, okLabel = "Save") {
-  const d = $("#dlg"), f = $("#dlgForm");
-  f.innerHTML = `<h3>${esc(title)}</h3>${html}<div class="err" id="dlgErr"></div><div class="acts"><button class="btn" value="cancel" formnovalidate>Cancel</button><button class="btn pr" value="ok">${esc(okLabel)}</button></div>`;
-  f.onsubmit = async e => {
-    if (e.submitter && e.submitter.value === "cancel") return;
-    e.preventDefault();
-    const v = Object.fromEntries(new FormData(f));
-    const ok = f.querySelector("[value=ok]"); ok.disabled = true;
-    try { await submit(v); d.close(); } catch (err) { $("#dlgErr").textContent = err.message; } finally { ok.disabled = false; }
-  };
-  d.showModal();
-  const first = f.querySelector("input,textarea"); first && first.focus();
-}
+/* ---------- the form dialog: the shared one (K.form) ---------- */
+const form = (title, html, submit, okLabel = "Save") => K.form(title, html, submit, okLabel);
+const closeForm = () => K.closeDialogs();
 
 /* ---------- start ---------- */
 (async () => {
@@ -1016,7 +962,7 @@ function form(title, html, submit, okLabel = "Save") {
   show();
 })();
 </script>
-<script src="/ui/studio-lesson.js?v=3"></script>
-<script src="/ui/studio-menu.js?v=4"></script>
-<script src="/ui/studio-script.js?v=1"></script>
+<script src="/ui/studio-lesson.js?v=6"></script>
+<script src="/ui/studio-menu.js?v=5"></script>
+<script src="/ui/studio-script.js?v=2"></script>
 </body></html>

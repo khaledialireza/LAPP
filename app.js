@@ -5,7 +5,7 @@
       .catch(() => {});
   }
 
-  const $ = (s, r = document) => r.querySelector(s);
+  const { $ } = K;
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const LESSONS = window.LESSONS || [];
   const SPEEDS = [0.75, 0.9, 1, 1.1, 1.25];
@@ -60,24 +60,16 @@
   const iso = s => I18N.info().dir === "rtl" ? "\u2068" + s + "\u2069" : s;
   const tf = (k, o) => iso(t(k).replace(/\{(\w+)\}/g, (m, x) => o[x]));
   const uiLocale = () => I18N.info().locale;
-  const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const esc = K.esc;
   const fmt = t => isFinite(t) ? `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, "0")}` : "0:00";
   const SAY_ICON = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 4V5L7 9zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4z"/></svg>';
   const PLAY = '<path d="M7 5v14l12-7z"/>', PAUSE = '<path d="M6 5h4v14H6zM14 5h4v14h-4z"/>';
 
-  function toast(msg) {
-    const t = $("#toast"); t.textContent = msg; t.classList.add("on");
-    clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("on"), 2200);
-  }
+  const toast = msg => K.toast(msg, { plain: true, kind: "info", ms: 2200 });
 
   function speak(text) {
     if (!("speechSynthesis" in window)) return toast(t("noTts"));
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text.replace(/[*"]/g, ""));
-    u.lang = COURSE.speech; u.rate = SPEEDS[state.speed] * 0.95;
-    const v = speechSynthesis.getVoices().find(v => v.lang.startsWith(COURSE.code));
-    if (v) u.voice = v;
-    speechSynthesis.speak(u);
+    K.speak(text.replace(/[*"]/g, ""), { lang: COURSE.speech, rate: SPEEDS[state.speed] * 0.95 });
   }
 
   /* ---------- Navigation ---------- */

@@ -2,12 +2,12 @@
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Files · LAPP</title>
 <meta name="robots" content="noindex">
-<script>
-// Files lives inside the work desktop; opened on its own, it goes there
-if (!(new URLSearchParams(location.search).has("embed") && window.parent !== window)) location.replace("/manage#open=" + encodeURIComponent(location.pathname + location.search + location.hash));
-</script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@500;700&display=swap" rel="stylesheet">
-<script src="/ui/panel-i18n.js?v=11"></script>
+<link rel="stylesheet" href="/ui/kit.css?v=1">
+<script src="/ui/kit.js?v=1"></script>
+<script>K.inDesk();   // Files lives inside the work desktop</script>
+<script src="/ui/menu.js?v=1"></script>
+<script src="/ui/panel-i18n.js?v=12"></script>
 <script src="/ui/cursor.js?v=2"></script>
 <script src="/ui/icons.js?v=1"></script>
 <script src="/ui/theme.js?v=2"></script>
@@ -15,19 +15,14 @@ if (!(new URLSearchParams(location.search).has("embed") && window.parent !== win
 <style>
 /* Files: every file of the system in one explorer. Sources on the left (recent, starred, my files, the lesson libraries,
    cloud drives later), the folder in the middle (list or grid), a preview on the right. Lessons are files: they open in the studio. */
-:root{--bg:#07070B;--p1:#0F0F16;--p2:#15151F;--p3:#1C1C29;--p4:#26263C;--ln:rgba(255,255,255,.08);--ln2:rgba(255,255,255,.14);--tx:#F4F4F8;--mu:rgba(235,235,245,.6);--mu2:rgba(235,235,245,.38);--vi:#8B5CF6;--cy:#22D3EE;--gr:#34D399;--am:#FBBF24;--rd:#F87171;--pk:#FF3D7F;--g:linear-gradient(135deg,#FF3D7F,#8B5CF6 55%,#22D3EE);color-scheme:dark}
 *{box-sizing:border-box;margin:0}[hidden]{display:none!important}
 html,body{height:100%}
 body{background:var(--bg);color:var(--tx);font:13.5px/1.45 Inter,Vazirmatn,system-ui,sans-serif;display:grid;grid-template-columns:220px 1fr auto;overflow:hidden}
 button,input{font:inherit;color:inherit}button{cursor:pointer;border:0;background:none}
 :focus-visible{outline:2px solid var(--cy);outline-offset:1px}
-.ic{flex:none;display:block}
-.top{display:flex;align-items:center;gap:8px;padding:10px 14px}.top h1{font-size:18px;margin-inline-end:auto}
-.b{height:30px;padding:0 11px;border-radius:9px;border:1px solid var(--ln2);background:var(--p2);font-weight:700;font-size:12.5px;display:inline-flex;align-items:center;gap:6px}.b.pr{background:var(--g);border:0;color:#fff}
-.seg{display:inline-flex}
+.top{gap:8px;padding:10px 14px;flex-wrap:nowrap}.top h1{font-size:18px}
 aside{border-inline-end:1px solid var(--ln);background:var(--p1);overflow:auto;padding:10px 8px;display:flex;flex-direction:column;gap:2px}
-.find{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:9px;background:var(--p3);border:1px solid var(--ln);margin-bottom:8px;color:var(--mu2)}
-.find input{flex:1;background:none;border:0;outline:none;min-width:0}
+.k-search{margin-bottom:8px}
 .sh{font:700 10.5px Inter,system-ui;letter-spacing:.5px;text-transform:uppercase;color:var(--mu2);padding:10px 8px 4px}
 .src{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:8px;width:100%;text-align:start;color:var(--mu);white-space:nowrap;overflow:hidden}
 .src span{overflow:hidden;text-overflow:ellipsis}
@@ -54,27 +49,17 @@ tr.it{cursor:default}tr.it:hover td{background:rgba(255,255,255,.03)}tr.it.sel t
 .cell .th img{width:100%;height:100%;object-fit:cover}
 .cell span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .fi{color:var(--mu)}.fi.folder{color:#FBBF24}.fi.lesson{color:#FF6B9A}.fi.image{color:#22D3EE}.fi.music,.fi.video{color:#A78BFA}
-.st{font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:99px;border:1px solid var(--ln2)}
-.st.published{color:var(--gr);border-color:rgba(52,211,153,.4)}.st.review{color:var(--am);border-color:rgba(251,191,36,.4)}
-.empty{padding:50px 20px;text-align:center;color:var(--mu2)}
-.empty b{display:block;color:var(--mu);font-size:15px;margin:10px 0 4px}
 .pv{width:280px;border-inline-start:1px solid var(--ln);background:var(--p1);overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
 .pv .big{width:100%;aspect-ratio:4/3;border-radius:12px;background:var(--p3);display:grid;place-items:center;overflow:hidden;color:var(--mu)}
 .pv .big img,.pv .big video{width:100%;height:100%;object-fit:contain}
 .pv h3{font-size:14px;overflow-wrap:anywhere}
 .pv dl{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:12px}.pv dt{color:var(--mu2)}.pv dd{margin:0;overflow-wrap:anywhere}
 .pv .acts{display:flex;flex-wrap:wrap;gap:6px}
-.cm{position:fixed;z-index:50;min-width:200px;background:#1A1A27;border:1px solid var(--ln2);border-radius:12px;padding:5px;box-shadow:0 20px 50px rgba(0,0,0,.7)}
-.cm button{display:flex;align-items:center;gap:9px;width:100%;padding:6px 9px;border-radius:7px;text-align:start}.cm button:hover,.cm button:focus-visible{background:rgba(139,92,246,.25)}.cm .dz{color:var(--rd)}.cm hr{border:0;border-top:1px solid var(--ln);margin:4px}
-dialog{background:#1A1A27;color:var(--tx);border:1px solid var(--ln2);border-radius:16px;padding:16px;width:min(420px,92vw)}dialog::backdrop{background:rgba(0,0,0,.5)}
-dialog h4{margin-bottom:10px}dialog input{width:100%;background:var(--p3);border:1px solid var(--ln2);border-radius:9px;padding:8px 10px;outline:none}
-dialog .row{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
 .picker{max-height:260px;overflow:auto;display:flex;flex-direction:column;gap:2px}
-.toast{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);background:#1A1A27;border:1px solid var(--ln2);border-radius:10px;padding:8px 14px;font-size:13px;z-index:60}
 @media (max-width:760px){html:not(.desk) body{grid-template-columns:1fr}html:not(.desk) aside,html:not(.desk) .pv{display:none}}
 </style></head><body>
 <aside aria-label="Places">
-  <label class="find"><span id="fic"></span><input id="q" placeholder="Search files" aria-label="Search files"></label>
+  <label class="k-search"><span id="fic"></span><input id="q" placeholder="Search files" aria-label="Search files"></label>
   <div id="srcs"></div>
 </aside>
 <main>
@@ -88,23 +73,14 @@ dialog .row{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
 </main>
 <div class="pv" id="pv" hidden></div>
 <input type="file" id="fileIn" multiple hidden>
-<dialog id="dlg"></dialog>
 <script>
 "use strict";
-const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
-const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
-const I = (n, s = 16) => window.Icon ? Icon(n, s) : "";
+const { $, $$, esc, I, LS, loc, size, toast, ask } = K;
 const ORG = new URLSearchParams(location.search).get("org") || "";
-async function api(m, p, b, raw) {
-  const r = await fetch("/api" + p, { method: m, credentials: "same-origin", headers: raw ? { "X-LAPP": "1", ...raw.headers } : { ...(b ? { "Content-Type": "application/json" } : {}), ...(m !== "GET" ? { "X-LAPP": "1" } : {}) }, body: raw ? raw.body : b ? JSON.stringify(b) : undefined });
-  const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error || r.statusText); return j;
-}
-const LS = { get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
-const loc = () => window.PanelI18N ? PanelI18N.locale : "en-GB";
-const size = n => n < 1024 ? n + " B" : n < 1048576 ? Math.round(n / 1024) + " KB" : (n / 1048576).toFixed(1) + " MB";
-const when = t => t ? new Date(t).toLocaleDateString(loc(), { day: "numeric", month: "short", year: "numeric" }) : "";
-const kindOf = (name, type) => /^image\//.test(type) ? "image" : /pdf/.test(type) ? "file-text" : /^audio\//.test(type) ? "music" : /^video\//.test(type) ? "video" : /sheet|excel|csv/i.test(type + name) ? "sheet" : /word|document|text/i.test(type + name) ? "file-text" : "file";
-function toast(t) { const d = document.createElement("div"); d.className = "toast"; d.textContent = t; document.body.append(d); setTimeout(() => d.remove(), 2600); }
+const api = K.api;
+const when = t => K.date(t);
+const kindOf = (name, type) => K.fileIcon(name, type);
+
 
 /* ---------- state ---------- */
 const S = { me: null, orgs: [], mine: { folders: [], files: [] }, libs: [], src: LS.get("lapp.files.src", "mine"), folder: 0, view: LS.get("lapp.files.view", "list"), sort: LS.get("lapp.files.sort", "name"), q: "", sel: new Set(), last: null, open: LS.get("lapp.files.open", {}) };
@@ -172,7 +148,7 @@ function thumb(x, s) { if (x.k === "file" && /^image\//.test(x.raw.type)) return
 function drawArea() {
   const L = items(), A = $("#area");
   if (!L.length) { A.innerHTML = `<div class="empty">${I(S.src === "starred" ? "star" : S.src.startsWith("bin:") ? "trash" : "folder-open", 40)}<b>${S.q ? "Nothing found" : S.src === "starred" ? "No starred files" : S.src.startsWith("bin:") ? "The bin is empty" : "This folder is empty"}</b>${S.src === "mine" && !S.q ? "Drop files here, or use Upload." : S.src.startsWith("lib:") && !S.q ? "Make lessons in the Studio; they show up here." : ""}</div>`; return; }
-  const st = x => x.k === "lesson" ? `<span class="st ${esc(x.raw.status)}">${esc({ draft: "draft", review: "in work", published: "published" }[x.raw.status] || x.raw.status)}</span>` : "";
+  const st = x => x.k === "lesson" ? `${K.lessonState(x.raw.status)}` : "";
   if (S.view === "grid") A.innerHTML = `<div class="gi">${L.map(x => `<div class="cell ${S.sel.has(key(x)) ? "sel" : ""}" data-it="${key(x)}" draggable="true" tabindex="-1"><span class="th">${thumb(x, 30)}</span><span title="${esc(x.name)}">${esc(x.name)}</span>${st(x)}</div>`).join("")}</div>`;
   else A.innerHTML = `<table><thead><tr><th data-sort="name">Name ${S.sort === "name" ? "↓" : ""}</th><th data-sort="date">Changed ${S.sort === "date" ? "↓" : ""}</th><th data-sort="size">Size ${S.sort === "size" ? "↓" : ""}</th><th>Kind</th></tr></thead><tbody>${L.map(x => `<tr class="it ${S.sel.has(key(x)) ? "sel" : ""}" data-it="${key(x)}" draggable="true"><td class="nm"><span>${thumb(x, 17)}${esc(x.name)} ${st(x)}</span></td><td>${when(x.date)}</td><td>${x.size ? size(x.size) : x.k === "lesson" ? (x.raw.lines || 0) + " lines" : ""}</td><td>${x.k === "folder" ? "Folder" : x.k === "lesson" ? "Lesson · " + esc(x.raw.level || "") : esc((x.raw.type || "").split("/").pop())}</td></tr>`).join("")}</tbody></table>`;
 }
@@ -214,11 +190,7 @@ async function newFolder() {
 }
 async function upload(files, folder = S.folder) {
   if (S.src !== "mine") { S.src = "mine"; folder = 0; S.folder = 0; }
-  for (const f of [...files].slice(0, 20)) {
-    if (f.size > 10e6) { toast(`${f.name}: files can be up to 10 MB`); continue; }
-    try { S.mine.files.push(await api("POST", "/desk/files", null, { headers: { "Content-Type": f.type || "application/octet-stream", "X-Name": encodeURIComponent(f.name), "X-Folder": String(folder) }, body: f })); draw(); }
-    catch (e) { toast(`${f.name}: ${e.message}`); }
-  }
+  await K.upload(files, { folder, each: f => { S.mine.files.push(f); draw(); } });
 }
 async function rename(x) {
   const name = await ask("Rename", x.name); if (!name || name === x.name) return;
@@ -262,23 +234,15 @@ async function star(x) { const v = !x.raw.star; await api("PATCH", `/desk/files/
 function download(x) { const a = document.createElement("a"); a.href = `/api/desk/files/${x.id}`; a.download = x.name; a.click(); }
 
 /* ---------- small dialogs of our own ---------- */
-function ask(title, value) { return new Promise(res => { const d = $("#dlg"); d.innerHTML = `<form method="dialog"><h4>${esc(title)}</h4><input name="v" value="${esc(value)}" maxlength="120" autocomplete="off"><div class="row"><button class="b" value="">Cancel</button><button class="b pr" value="ok">OK</button></div></form>`; d.onclose = () => res(d.returnValue === "ok" ? d.querySelector("input").value.trim() || null : null); d.showModal(); const i = d.querySelector("input"); i.focus(); i.select(); }); }
-function confirmIt(title, text) { return new Promise(res => { const d = $("#dlg"); d.innerHTML = `<form method="dialog"><h4>${esc(title)}</h4><p style="color:var(--mu)">${esc(text)}</p><div class="row"><button class="b" value="">Cancel</button><button class="b pr" value="ok" style="background:var(--rd)">OK</button></div></form>`; d.onclose = () => res(d.returnValue === "ok"); d.showModal(); }); }
+const confirmIt = (title, text) => K.confirm({ title, text, ok: "OK", danger: /delete/i.test(title) });
+// where to move: a folder tree in our dialog; resolves the folder id, or null
 function pickFolder(list) {
-  return new Promise(res => {
-    const fs = folders(), d = $("#dlg"), tree = (p, dep) => fs.filter(f => (f.parent || 0) === p).map(f => `<button type="button" class="src" data-pick="${f.id}" style="padding-inline-start:${10 + dep * 14}px">${I("folder", 15)}<span>${esc(f.name)}</span></button>` + tree(f.id, dep + 1)).join("");
-    d.innerHTML = `<form method="dialog"><h4>Move ${list.length} item${list.length === 1 ? "" : "s"} to…</h4><div class="picker"><button type="button" class="src" data-pick="0">${I("drive", 15)}<span>${esc(srcName())} (top)</span></button>${tree(0, 1)}</div><div class="row"><button class="b" value="">Cancel</button></div></form>`;
-    d.onclick = e => { const b = e.target.closest("[data-pick]"); if (b) { d.onclose = null; d.close(); res(+b.dataset.pick); } };
-    d.onclose = () => res(null); d.showModal();
-  });
+  const fs = folders(), tree = (p, dep) => fs.filter(f => (f.parent || 0) === p).map(f => `<button type="button" class="src" data-pick="${f.id}" style="padding-inline-start:${10 + dep * 14}px">${I("folder", 15)}<span>${esc(f.name)}</span></button>` + tree(f.id, dep + 1)).join("");
+  return K.dialog(`<h3>Move ${list.length} item${list.length === 1 ? "" : "s"} to…</h3><input type="hidden" name="v"><div class="picker"><button type="button" class="src" data-pick="0">${I("drive", 15)}<span>${esc(srcName())} (top)</span></button>${tree(0, 1)}</div><div class="k-acts"><button class="b" value="cancel" formnovalidate>Cancel</button><button value="ok" hidden></button></div>`, null,
+    { ready: f => f.addEventListener("click", e => { const b = e.target.closest("[data-pick]"); if (b) { f.elements.v.value = b.dataset.pick; f.requestSubmit(f.querySelector("button[value=ok]")); } }) }).then(v => v == null ? null : +v);
 }
-function cmenu(x, y, L) {
-  $$(".cm").forEach(m => m.remove()); const m = document.createElement("div"); m.className = "cm";
-  m.innerHTML = L.map((it, i) => it === "-" ? "<hr>" : `<button data-i="${i}" class="${it[3] ? "dz" : ""}">${I(it[2], 15)}<span>${esc(it[0])}</span></button>`).join("");
-  document.body.append(m); m.style.left = Math.min(x, innerWidth - m.offsetWidth - 6) + "px"; m.style.top = Math.min(y, innerHeight - m.offsetHeight - 6) + "px";
-  m.onclick = e => { const b = e.target.closest("[data-i]"); if (b) { m.remove(); L[+b.dataset.i][1](); } };
-  m.querySelector("button")?.focus();
-}
+// the shared menu; items here are short: [label, run, icon, danger]
+const cmenu = (x, y, L) => K.menu(x, y, L.map(it => it === "-" ? "-" : { label: it[0], run: it[1], icon: it[2], danger: it[3] }));
 
 /* ---------- the window's menus (title bar) ---------- */
 if (window.LAPPFrame) LAPPFrame.menus = () => {
@@ -308,7 +272,6 @@ $("#q").oninput = e => { S.q = e.target.value; S.sel.clear(); draw(); };
 const syncSeg = () => { $("#vList").classList.toggle("on", S.view === "list"); $("#vGrid").classList.toggle("on", S.view === "grid"); };
 document.addEventListener("click", e => {
   const t = e.target;
-  if (!t.closest(".cm")) $$(".cm").forEach(m => m.remove());
   const tw = t.closest("[data-tw]"); if (tw) { e.stopPropagation(); S.open[tw.dataset.tw] = !S.open[tw.dataset.tw]; LS.set("lapp.files.open", S.open); return drawSrc(); }
   const src = t.closest("[data-src]"); if (src && !src.disabled) return go(src.dataset.src, +src.dataset.fold);
   const cr = t.closest("[data-crumb]"); if (cr) { S.folder = +cr.dataset.crumb; S.sel.clear(); return draw(); }

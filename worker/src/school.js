@@ -6,15 +6,14 @@
 //   finance  fees, installments, reminders (and the list of students)
 //   student  their classes, calendar, material, homework, fees
 // Platform admins (users.role = admin) can open every school as its admin.
-// index.js hands in its helpers as H, so this file has no imports of its own.
+// index.js hands in its helpers as H; the shared small helpers come from util.js.
+import { str, int } from "./util.js";
 
 const ROLES = ["admin", "teacher", "finance", "student"];
 const SLUG = /^[a-z0-9][a-z0-9-]{1,30}$/;
 const COURSES = ["de", "nl", "pl"];
 const LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2"];
 const MAX_FILE = 2 * 1024 * 1024;
-const int = v => Number.isFinite(Number(v)) ? Math.trunc(Number(v)) : 0;
-const str = (v, n = 200) => String(v ?? "").trim().slice(0, n);
 const today = () => new Date().toISOString().slice(0, 10);
 
 /* ---------------- who is asking, in which school ---------------- */

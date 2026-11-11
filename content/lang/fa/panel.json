@@ -1395,5 +1395,17 @@
  "Version now": "نسخهٔ فعلی",
  "before the AI rewrote the lesson": "قبل از بازنویسی درس با هوش مصنوعی",
  "before the AI translated": "قبل از ترجمهٔ هوش مصنوعی",
- "edited": "ویرایش‌شده"
+ "edited": "ویرایش‌شده",
+ "Go back": "برگرد",
+ "Go back to this version?": "به این نسخه برگردیم؟",
+ "Locked": "قفل است",
+ "Open the script": "باز کردن متن",
+ "Publish anyway?": "با این حال منتشر شود؟",
+ "The AI writes a new text and replaces the current one.": "هوش مصنوعی متن تازه‌ای می‌نویسد و جای متن فعلی را می‌گیرد.",
+ "The current text is kept as a version too.": "متن فعلی هم به‌عنوان یک نسخه نگه داشته می‌شود.",
+ "The text changed after the audio was made, so the audio doesn't match it.": "متن بعد از ساختن صدا تغییر کرده، پس صدا با آن جور نیست.",
+ "Translations are missing": "ترجمه‌ها کامل نیستند",
+ "Write a new text?": "متن تازه نوشته شود؟",
+ "e.g. make it a question": "مثلاً آن را سؤالی کن",
+ "{a} Unlock": "{a} باز کردن قفل"
 }

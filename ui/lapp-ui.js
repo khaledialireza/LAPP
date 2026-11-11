@@ -13,7 +13,7 @@
 // --ui-accent, --ui-radius (dark defaults below).
 (() => {
   if (window.customElements && customElements.get("l-select")) return;
-  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+  const esc = K.esc;   // needs /ui/kit.js first
 
   const css = `
   l-select>option{display:none}.lu-cal-h{direction:ltr}l-select,l-date{display:block;position:relative;min-width:0;font:inherit}
@@ -100,7 +100,9 @@
       if (!this._options && document.readyState === "loading") { document.addEventListener("DOMContentLoaded", () => this.isConnected && this.connectedCallback(), { once: true }); return; }
       this._ready = true;
       if (!this._options) this._options = [...this.querySelectorAll("option")].map(o => ({ value: o.value, label: o.textContent.trim(), sub: o.dataset.sub, img: o.dataset.img, icon: o.dataset.icon, font: o.dataset.font, disabled: o.disabled }));
-      if (this._values === undefined) this._values = (this.getAttribute("value") || "").split(this.multiple ? "," : "\u0000").filter(v => v !== "");
+      // the chosen value: the value="…" attribute, or the <option selected> children
+      const sel = [...this.querySelectorAll("option[selected]")].map(o => o.value).join(this.multiple ? "," : "");
+      if (this._values === undefined) this._values = (this.getAttribute("value") ?? sel ?? "").split(this.multiple ? "," : "\u0000").filter(v => v !== "");
       this.innerHTML = `<button type="button" class="lu-field" role="combobox" aria-haspopup="listbox" aria-expanded="false"><span class="lu-val"></span><span class="lu-chev">▼</span></button>`;
       this._field = this.firstChild;
       if (this.getAttribute("aria-label")) this._field.setAttribute("aria-label", this.getAttribute("aria-label"));
@@ -185,7 +187,7 @@
     render() {
       const v = this._v;
       let txt = `<span class="lu-ph">${esc(this.getAttribute("placeholder") || (this.withTime ? "Pick a day and time" : "Pick a day"))}</span>`;
-      if (v) { const d = new Date(this.withTime ? v : v + "T12:00"); txt = d.toLocaleDateString((window.PanelI18N ? PanelI18N.locale : "en-GB"), { weekday: "short", day: "numeric", month: "short", year: "numeric" }) + (this.withTime ? " · " + v.slice(11, 16) : ""); }
+      if (v) { const d = new Date(this.withTime ? v : v + "T12:00"); txt = d.toLocaleDateString(K.loc(), { weekday: "short", day: "numeric", month: "short", year: "numeric" }) + (this.withTime ? " · " + v.slice(11, 16) : ""); }
       this.querySelector(".lu-val").innerHTML = txt;
       if (this._i) { this._i.setFormValue(v); this._i.setValidity(this.required && !v ? { valueMissing: true } : {}, "Please pick a date", this._field); }
     }
@@ -199,8 +201,8 @@
       const draw = () => {
         const first = new Date(y, m, 1), start = new Date(y, m, 1 - ((first.getDay() + 6) % 7)), today = ymd(new Date()), sel = v ? v.slice(0, 10) : "";
         const days = Array.from({ length: 42 }, (_, i) => new Date(start.getFullYear(), start.getMonth(), start.getDate() + i));
-        cal.innerHTML = `<div class="lu-cal-h"><button type="button" class="lu-nav" data-n="-1" aria-label="Previous month">‹</button><b>${first.toLocaleDateString((window.PanelI18N ? PanelI18N.locale : "en-GB"), { month: "long", year: "numeric" })}</b><button type="button" class="lu-nav" data-n="1" aria-label="Next month">›</button></div>
-          <div class="lu-grid">${Array.from({ length: 7 }, (_, i) => new Date(2024, 0, 1 + i).toLocaleDateString(window.PanelI18N ? PanelI18N.locale : "en-GB", { weekday: /^fa/.test(window.PanelI18N ? PanelI18N.locale : "") ? "narrow" : "short" })).map(d => /^[A-Za-z]/.test(d) ? d.slice(0, 2) : d).map(d => `<span>${d}</span>`).join("")}${days.map(d => { const k = ymd(d); return `<button type="button" class="lu-day ${d.getMonth() !== m ? "out" : ""} ${k === today ? "today" : ""} ${k === sel ? "sel" : ""}" data-d="${k}" ${(min && k < min) || (max && k > max) ? "disabled" : ""}>${d.getDate()}</button>`; }).join("")}</div>
+        cal.innerHTML = `<div class="lu-cal-h"><button type="button" class="lu-nav" data-n="-1" aria-label="Previous month">‹</button><b>${first.toLocaleDateString(K.loc(), { month: "long", year: "numeric" })}</b><button type="button" class="lu-nav" data-n="1" aria-label="Next month">›</button></div>
+          <div class="lu-grid">${Array.from({ length: 7 }, (_, i) => new Date(2024, 0, 1 + i).toLocaleDateString(K.loc(), { weekday: /^fa/.test(window.PanelI18N ? PanelI18N.locale : "") ? "narrow" : "short" })).map(d => /^[A-Za-z]/.test(d) ? d.slice(0, 2) : d).map(d => `<span>${d}</span>`).join("")}${days.map(d => { const k = ymd(d); return `<button type="button" class="lu-day ${d.getMonth() !== m ? "out" : ""} ${k === today ? "today" : ""} ${k === sel ? "sel" : ""}" data-d="${k}" ${(min && k < min) || (max && k > max) ? "disabled" : ""}>${d.getDate()}</button>`; }).join("")}</div>
           ${this.withTime ? `<div class="lu-time"><span>🕘</span><input type="number" min="0" max="23" value="${hh}" aria-label="Hour" data-t="h">:<input type="number" min="0" max="59" step="5" value="${mm}" aria-label="Minutes" data-t="m"></div>` : ""}
           <div class="lu-foot"><button type="button" data-a="today">Today</button>${this.required ? "" : `<button type="button" data-a="clear">Clear</button>`}</div>`;
         place(pop, this._field);
