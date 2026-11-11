@@ -187,6 +187,9 @@ dialog.k-dlg::backdrop{background:rgba(0,0,0,.55);backdrop-filter:blur(3px)}
 .k-ribbon button[disabled]{opacity:.4;pointer-events:none}
 .k-ribbon .gap{width:1px;height:20px;background:var(--ln2);margin:0 4px;flex:none}
 .k-ribbon .x{color:var(--mu2);padding:0 7px}
+.k-ribbon.mini{padding:3px;border-radius:12px;z-index:1400}.k-ribbon.mini button{height:28px;padding:0 7px}.k-ribbon button.ai .ic{color:var(--vi)}
+.k-ribbon.asking{width:min(440px,calc(100vw - 16px))}.k-ribbon .spk{display:grid;color:var(--vi);padding:0 6px}
+.k-ribbon.asking input{flex:1;min-width:0;height:28px;background:none;border:0;outline:none;color:var(--tx);font:500 13px Inter,Vazirmatn,system-ui,sans-serif}
 
 /* ---------- avatars ---------- */
 .k-av{display:inline-grid;place-items:center;border-radius:50%;flex:none;color:#fff;font-weight:800;background-size:cover;background-position:center;line-height:1}

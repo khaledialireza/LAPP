@@ -1544,5 +1544,12 @@
  "Ribbon hidden — View › Ribbon brings it back": "Лента скрыта — View › Ribbon вернёт её",
  "Drag to move · double-click to put it back": "Перетащите · двойной щелчок вернёт на место",
  "Ask the AI to change it…": "Попросить ИИ изменить…",
- "More": "Ещё"
+ "More": "Ещё",
+ "Search or ask…": "Поиск или вопрос…",
+ "Change this line…": "Изменить эту строку…",
+ "Change this line with the AI": "Изменить строку с ИИ",
+ "Word card": "Карточка слова",
+ "Bold": "Жирный",
+ "Italic": "Курсив",
+ "Highlight": "Выделение"
 }

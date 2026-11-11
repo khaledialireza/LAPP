@@ -38,7 +38,7 @@
     const r = rows()[i], ai = S.scope && S.scope.ai, cast = Object.keys(S.L.data.cast || {}), scenes = S.L.data.scenes;
     const it = (label, icon, run, o = {}) => ({ label, icon, run, ...o });
     const L = [];
-    if (word) L.push(["Word", "book", [it(`Listen to “${word}”`, "listen", () => say(word, S.L.course, .8)), it("Make it a key phrase", "star", () => { (S.L.data.phrases = S.L.data.phrases || []).push({ de: word, en: "", fa: "", ru: "", uk: "" }); changed(); renderSide(); toast("Added to the key phrases"); }), it("Ask the AI what it means here", "ai", () => askAi(`What does “${word}” mean in this line of my ${S.L.level} lesson, and is it right for that level? Line: “${r.de}”`))]]);
+    if (word) L.push(["Word", "book", [it("Word card", "book", () => wordCard(word, i)), it(`Listen to “${word}”`, "listen", () => say(word, S.L.course, .8)), it("Make it a key phrase", "star", () => { (S.L.data.phrases = S.L.data.phrases || []).push({ de: word, en: "", fa: "", ru: "", uk: "" }); changed(); renderSide(); toast("Added to the key phrases"); }), it("Ask the AI what it means here", "ai", () => askAi(`What does “${word}” mean in this line of my ${S.L.level} lesson, and is it right for that level? Line: “${r.de}”`))]]);
     L.push(["Edit", "edit", [it("Edit the text", "pen", () => { const el = $(`.txt .d[data-i="${i}"]`); el && el.focus(); }, { k: "↵" }), it(r.ok ? "Not approved" : "Approve", "approve", () => { r.ok = !r.ok; changed(); renderDoc(); selLine(i); }), it("Listen", "listen", () => say(r.de, S.L.course, r.speed || (S.L.data.cast[r.who] || {}).speed || 0.95)),
       it("Duplicate", "copy", () => { const [si, li] = locate(i); scenes[si].lines.splice(li + 1, 0, { ...r, ok: false }); changed(); renderDoc(); selLine(i + 1); }), it("Copy the text", "copy", () => K.copy(r.de))]]);
     if (ai) L.push(["AI", "ai", [it("Simpler (" + S.L.level + ")", "wand", () => rewrite(i, "simpler")), it("More natural", "wand", () => rewrite(i, "natural")), it("Shorter", "wand", () => rewrite(i, "shorter")), it("More polite", "wand", () => rewrite(i, "formal")), it("More casual", "wand", () => rewrite(i, "casual")), it("Add a question", "plus", () => rewrite(i, "question")),
@@ -74,15 +74,23 @@
   }
   async function open(x, y, i, word, k) {
     close(); selLine(i); CUR.k = word ? (k ?? -1) : -1;
-    const seq = ++OPENS, cardHtml = word ? await card(word, i) : "";
-    if (seq !== OPENS) return;   // a newer right-click won
+    const seq = ++OPENS;
+    if (seq !== OPENS) return;
     close();
     const toItem = it => ({ label: it.label, icon: it.icon, run: it.run, on: it.on, disabled: it.disabled, key: it.k });
     const L = items(i, word).map(([label, icon, sub, o = {}]) => sub ? { label, icon, sub: sub.map(toItem) } : { label, icon, danger: o.danger, key: o.k, run: o.run });
     K.menu(x, y, L, {
-      className: "line wide", header: cardHtml, search: "Search… e.g. “voice”", title: `Line ${i + 1}${rows()[i].who ? " · " + rows()[i].who : ""}`,
-      ask: S.scope && S.scope.ai ? { placeholder: "Ask the assistant to change this line…", run: v => custom(i, v) } : null,
-      // the word card's tools
+      className: "line", title: `Line ${i + 1}${rows()[i].who ? " · " + rows()[i].who : ""}`,
+      ask: S.scope && S.scope.ai ? { placeholder: "Search or ask…", run: v => custom(i, v) } : null
+    });
+  }
+  // the word card, beside the word (a chosen word opens it; a right-click closes it)
+  let CARDN = 0;
+  async function wordCard(word, i, x, y, k) {
+    if (x == null) { const el = document.querySelector(`.dl[data-i="${i}"] .txt .d`), r = el ? el.getBoundingClientRect() : { left: 100, bottom: 100 }; x = r.left; y = r.bottom + 6; }
+    CUR.k = k ?? -1; const n = ++CARDN, html = await card(word, i);
+    if (n !== CARDN) return;
+    K.menu(x, y, [], { className: "line wcardm", header: html, noSystem: true,
       ready: m => m.addEventListener("click", e => {
         const t = e.target, k = CUR.k, fx = ((rows()[i] || {}).fx || {})[k] || {};
         const f = t.closest("[data-fx]"); if (f) { e.stopPropagation(); close(); return applyFx(i, k, { [f.dataset.fx]: !fx[f.dataset.fx] }); }
@@ -94,6 +102,16 @@
       })
     });
   }
+  // choosing one word (double-click or drag) opens its card under it
+  document.addEventListener("mouseup", e => {
+    if (e.button || !S.L || !e.target.closest || !e.target.closest(".txt .d")) return;
+    setTimeout(() => {
+      const g = getSelection(), w = String(g).trim(); if (!w || /\s/.test(w) || !g.rangeCount) return;
+      const dl = e.target.closest(".dl"); if (!dl) return;
+      const i = Number(dl.dataset.i), r = g.getRangeAt(0).getBoundingClientRect();
+      wordCard(w.replace(/^[^\p{L}]+|[^\p{L}]+$/gu, ""), i, r.left, r.bottom + 6, window.wordIndexAt ? wordIndexAt(rows()[i].de, w, r.left + 2, r.top + 2) : -1);
+    }, 10);
+  });
   document.addEventListener("contextmenu", e => {
     const tg = e.target, dl = tg.closest && tg.closest(".dl"); if (!dl || !S.L) return;
     if (e.shiftKey) return;   // Shift + right-click: the browser's own menu (spelling)

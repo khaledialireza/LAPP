@@ -1544,5 +1544,12 @@
  "Ribbon hidden — View › Ribbon brings it back": "روبان پنهان شد — از View › Ribbon برمی‌گردد",
  "Drag to move · double-click to put it back": "برای جابه‌جایی بکشید · دوبار کلیک برای برگرداندن",
  "Ask the AI to change it…": "از AI بخواه تغییرش دهد…",
- "More": "بیشتر"
+ "More": "بیشتر",
+ "Search or ask…": "جست‌وجو یا پرسش…",
+ "Change this line…": "این خط را تغییر بده…",
+ "Change this line with the AI": "تغییر این خط با AI",
+ "Word card": "کارت کلمه",
+ "Bold": "پررنگ",
+ "Italic": "کج",
+ "Highlight": "برجسته"
 }

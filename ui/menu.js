@@ -75,12 +75,11 @@
       if (ed) { ed.focus(); if (ed.select) ed.select(); else { const r = document.createRange(); r.selectNodeContents(ed); s.removeAllRanges(); s.addRange(r); } return; }
       const r = document.createRange(); r.selectNodeContents((CTX.t && CTX.t.closest("main, #view, article, section, .pn")) || document.body); s.removeAllRanges(); s.addRange(r);
     },
-    ai: m => { const a = m && $(".ask input", m); if (a) { a.focus(); return false; } const t = about(); K.askAI(t ? `Explain this and tell me what I can do with it: “${t}”` : "What can I do here?"); }
   };
   const sysRow = () => {
     const ed = CTX.ed, has = !!CTX.sel;
     const b = (k, ic, l, on, key) => `<button type="button" data-sys="${k}" ${on ? "" : "disabled"} title="${esc(l)}${key ? " · " + esc(K.keyLabel(key)) : ""}">${I(ic, 16)}<span>${esc(l)}</span></button>`;
-    return `<div class="sys" role="group" aria-label="Edit">${b("cut", "cut", "Cut", ed && has, mod("X"))}${b("copy", "copy", "Copy", has, mod("C"))}${b("paste", "paste", "Paste", !!ed, mod("V"))}${b("all", "select-all", "Select all", true, mod("A"))}${b("ai", "ai", "Ask AI", true)}</div>`;
+    return `<div class="sys" role="group" aria-label="Edit">${b("cut", "cut", "Cut", ed && has, mod("X"))}${b("copy", "copy", "Copy", has, mod("C"))}${b("paste", "paste", "Paste", !!ed, mod("V"))}${b("all", "select-all", "Select all", true, mod("A"))}</div>`;
   };
   K.closeMenu = () => { const had = $$(".k-menu"); had.forEach(m => m.remove()); if (had.length && ON_CLOSE) { const f = ON_CLOSE; ON_CLOSE = null; f(); } };
   K.menuOpen = () => !!$(".k-menu");
@@ -101,9 +100,10 @@
     const L = items.map(norm), m = document.createElement("div");
     // opened by a right-click: the system's row on top, and "ask the AI" at the bottom when the page has none
     const sys = !o.noSystem && !CTX.used && Date.now() - CTX.at < 5000; if (sys) CTX.used = true;
-    if (sys && !o.ask) o = { ...o, ask: { placeholder: "Ask the AI about this…", run: v => { const t = about(); K.askAI(t ? `${v}\n\nAbout: “${t}”` : v); } } };
+    if (sys && !o.ask) o = { ...o, ask: { placeholder: "Search or ask…", run: v => { const t = about(); K.askAI(t ? `${v}\n\nAbout: “${t}”` : v); } } };
+    if (o.ask) o = { ...o, search: false };   // one field: it searches the items, Enter asks the AI
     m.className = "k-menu " + (o.className || ""); m.setAttribute("role", "menu");
-    m.innerHTML = `${o.header || ""}${sys ? sysRow() : ""}${o.search && L.length ? `<div class="q">${I("search", 14)}<input placeholder="${esc(o.search === true ? "Search…" : o.search)}" aria-label="Search actions"></div>` : ""}${o.title && L.length ? `<div class="mh">${esc(o.title)}</div>` : ""}<div class="ls">${L.map((it, k) => row(it, String(k))).join("")}</div>${o.ask ? `<div class="ask"><span class="spark">✦</span><input placeholder="${esc(o.ask.placeholder || "Ask the assistant…")}" aria-label="Ask the assistant"><kbd>↵</kbd></div>` : ""}`;
+    m.innerHTML = `${o.header || ""}${sys ? sysRow() : ""}${o.search && L.length ? `<div class="q">${I("search", 14)}<input placeholder="${esc(o.search === true ? "Search…" : o.search)}" aria-label="Search actions"></div>` : ""}${o.title && L.length ? `<div class="mh">${esc(o.title)}</div>` : ""}<div class="ls">${L.map((it, k) => row(it, String(k))).join("")}</div>${o.ask ? `<div class="ask"><span class="spark">${I("ai", 14)}</span><input placeholder="${esc(o.ask.placeholder || "Search or ask…")}" aria-label="Search or ask the AI"></div>` : ""}`;
     document.body.append(m);
     ON_CLOSE = o.onClose || null;
     const w = m.offsetWidth, h = m.offsetHeight, hasSub = L.some(it => it && it.sub);
@@ -113,7 +113,7 @@
     const find = p => p.split(".").reduce((a, k, d) => d ? (a.sub || [])[+k] && norm(a.sub[+k]) : L[+k], null);
     const run = el => { const it = find(el.dataset.p); if (!it || it.sub || it.disabled || !it.run) return; K.closeMenu(); it.run(); };
     m.addEventListener("click", e => {
-      const sb = e.target.closest("[data-sys]"); if (sb && m.contains(sb)) { e.stopPropagation(); const k = sb.dataset.sys; if (k === "ai" && SYS.ai(m) === false) return; K.closeMenu(); if (k !== "ai") SYS[k](); return; }
+      const sb = e.target.closest("[data-sys]"); if (sb && m.contains(sb)) { e.stopPropagation(); K.closeMenu(); SYS[sb.dataset.sys](); return; }
       const el = e.target.closest("[data-p]"); if (!el || !m.contains(el)) return; e.stopPropagation(); run(el);
     });
     // a sub-menu stays inside the window: it moves up when it would run past the bottom
@@ -131,18 +131,24 @@
       else if (e.key === "ArrowLeft" && c.matches(".sub")) { e.preventDefault(); const g = c.parentElement; g.classList.remove("hov"); g.focus(); }
       else if (e.key === "Enter" || e.key === " ") { e.preventDefault(); if (a.matches("[aria-haspopup]")) { a.classList.add("hov"); place(a); vis($(".sub", a))[0]?.focus(); } else run(a); }
     });
-    const q = $(".q input", m);
-    if (q) {
-      q.oninput = () => {
-        const s = q.value.trim().toLowerCase();
+    const q = $(".q input", m), filter = inp => {
+        const s = inp.value.trim().toLowerCase();
         $$(".ls > .it", m).forEach(g => { const own = g.dataset.l.includes(s), subs = $$(".sub .it", g); subs.forEach(c => c.hidden = s && !own && !c.dataset.l.includes(s)); const hit = !s || own || subs.some(c => !c.hidden); g.hidden = !hit; g.classList.toggle("hov", !!s && hit && !own && subs.length > 0); if (g.classList.contains("hov")) place(g); });
         $$(".ls > hr, .ls > .mh", m).forEach(x => x.hidden = !!s);
       };
+    if (q) {
+      q.oninput = () => filter(q);
       // Enter runs the best match: a matching sub item first, then a plain item
       q.onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); const first = $(".ls .it.hov .sub .it:not([hidden]):not([disabled])", m) || $$(".ls > .it:not([hidden]):not([disabled])", m).find(g => !g.matches("[aria-haspopup]")); if (first) run(first); } };
     }
     const ask = $(".ask input", m);
-    if (ask) ask.onkeydown = e => { if (e.key === "Enter" && ask.value.trim()) { e.preventDefault(); const v = ask.value.trim(); K.closeMenu(); o.ask.run(v); } };
+    if (ask) {
+      ask.oninput = () => filter(ask);
+      ask.onkeydown = e => {
+        if (e.key === "Enter" && ask.value.trim()) { e.preventDefault(); const v = ask.value.trim(); K.closeMenu(); o.ask.run(v); }
+        else if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); const l = vis($(".ls", m)); (e.key === "ArrowDown" ? l[0] : l[l.length - 1])?.focus(); }
+      };
+    }
     if (o.ready) o.ready(m);
     (q || vis($(".ls", m))[0] || $(".sys button:not([disabled])", m))?.focus({ preventScroll: true });
     return m;
@@ -162,6 +168,7 @@
     const el = RB.el, w = el.offsetWidth, h = el.offsetHeight, p = K.LS.get(posKey(), null);
     let x = p ? p.fx * innerWidth - w / 2 : (innerWidth - w) / 2, y = p ? p.fy * innerHeight : innerHeight - h - 16;
     const a = RB.o.anchor && RB.o.anchor.isConnected ? RB.o.anchor.getBoundingClientRect() : null;
+    if (a && RB.o.above) { el.classList.add("mini"); el.style.left = Math.max(8, Math.min(a.right - w - 8, innerWidth - w - 8)) + "px"; el.style.top = Math.max(8, a.top - h - 6) + "px"; return; }
     if (a && y < a.bottom + 6 && y + h > a.top - 6) y = a.top - h - 10 > 8 ? a.top - h - 10 : a.bottom + 10;   // step aside from the selected thing
     el.style.left = Math.max(8, Math.min(x, innerWidth - w - 8)) + "px";
     el.style.top = Math.max(8, Math.min(y, innerHeight - h - 8)) + "px";
@@ -178,6 +185,7 @@
         el = RB.el = document.createElement("div"); el.className = "k-ribbon"; el.setAttribute("role", "toolbar"); document.body.append(el);
         el.addEventListener("click", e => {
           const b = e.target.closest("button"); if (!b) return;
+          if (b.dataset.rq !== undefined) { const it = RB.L[+b.dataset.rq]; askBar(it); return; }
           if (b.dataset.rx !== undefined) { K.ribbon.set(false); K.toast("Ribbon hidden — View › Ribbon brings it back", { action: "Undo", run: () => K.ribbon.set(true) }); return; }
           const it = RB.L[+b.dataset.k]; if (!it || it.disabled) return;
           if (it.sub) K.menuAt(b, it.sub, { above: b.getBoundingClientRect().top > innerHeight / 2 }); else if (it.run) it.run(b);
@@ -192,17 +200,36 @@
       }
       const L = RB.L = items.map(norm);
       el.setAttribute("aria-label", o.title || "Actions");
-      el.innerHTML = `<span class="grip" title="Drag to move · double-click to put it back">${I("grip", 14)}</span>${o.title ? `<span class="rt">${esc(o.title)}</span>` : ""}`
-        + L.map((it, k) => it === "-" ? `<i class="gap"></i>` : `<button type="button" class="${it.danger ? "dz" : ""} ${it.on ? "on" : ""}" data-k="${k}" ${it.disabled ? "disabled" : ""} title="${esc(it.label)}${it.key ? " · " + esc(it.key) : ""}" aria-label="${esc(it.label)}">${it.icon ? K.IE(it.icon, 15) : ""}${it.iconOnly ? "" : `<span>${esc(it.short || it.label)}</span>`}${it.sub ? I("chevron-down", 12) : ""}</button>`).join("")
-        + `<button type="button" class="x" data-rx title="Hide the ribbon" aria-label="Hide the ribbon">${I("x", 13)}</button>`;
+      el.classList.remove("mini", "asking");
+      el.innerHTML = (o.above ? "" : `<span class="grip" title="Drag to move · double-click to put it back">${I("grip", 14)}</span>${o.title ? `<span class="rt">${esc(o.title)}</span>` : ""}`)
+        + L.map((it, k) => it === "-" ? `<i class="gap"></i>` : `<button type="button" class="${it.danger ? "dz" : ""} ${it.on ? "on" : ""} ${it.input ? "ai" : ""}" ${it.input ? `data-rq="${k}"` : `data-k="${k}"`} ${it.disabled ? "disabled" : ""} title="${esc(it.label)}${it.key ? " · " + esc(it.key) : ""}" aria-label="${esc(it.label)}">${it.icon ? K.IE(it.icon, 15) : ""}${it.iconOnly ? "" : `<span>${esc(it.short || it.label)}</span>`}${it.sub ? I("chevron-down", 12) : ""}</button>`).join("")
+        + (o.above ? "" : `<button type="button" class="x" data-rx title="Hide the ribbon" aria-label="Hide the ribbon">${I("x", 13)}</button>`);
       el.hidden = false; el.classList.remove("rest"); placeRibbon();
       return el;
     }
   };
   document.addEventListener("keydown", e => { if (e.key === "Escape" && RB.el && !RB.el.hidden && !K.menuOpen() && !document.querySelector("dialog[open]")) K.ribbon.hide(); });
+  // the whole bar becomes one field for the AI (Enter sends, Esc goes back)
+  function askBar(it) {
+    const el = RB.el; el.classList.add("asking");
+    el.innerHTML = `<span class="spk">${I("ai", 15)}</span><input placeholder="${esc(it.input.placeholder || "")}" aria-label="${esc(it.label)}"><button type="button" data-back aria-label="Close">${I("x", 13)}</button>`;
+    const inp = $("input", el), back = () => K.ribbon.show(RB.items, RB.o);
+    $("[data-back]", el).onclick = e => { e.stopPropagation(); back(); };
+    inp.onkeydown = e => { if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); back(); } if (e.key === "Enter" && inp.value.trim()) { e.preventDefault(); const v = inp.value.trim(); back(); it.input.run(v); } };
+    placeRibbon(); inp.focus();
+  }
   // it rests while you type and comes back when the pointer moves
   document.addEventListener("keydown", e => { if (RB.el && !RB.el.hidden && e.target.closest && e.target.closest(EDIT) && !e.target.closest(".k-ribbon")) RB.el.classList.add("rest"); }, true);
-  document.addEventListener("pointermove", () => { if (RB.el && RB.el.classList.contains("rest")) RB.el.classList.remove("rest"); }, { passive: true });
+  document.addEventListener("scroll", () => { if (RB.el && !RB.el.hidden && RB.o.above) placeRibbon(); }, true);
+  // like a word processor's small bar: it fades when the pointer goes away from it and the line, and comes back when it returns
+  document.addEventListener("pointermove", e => {
+    const el = RB.el; if (!el || el.hidden) return;
+    if (!el.classList.contains("mini")) { el.classList.remove("rest"); return; }
+    if (el.classList.contains("asking")) return;
+    const near = (r, m) => e.clientX > r.left - m && e.clientX < r.right + m && e.clientY > r.top - m && e.clientY < r.bottom + m;
+    const a = RB.o.anchor && RB.o.anchor.isConnected ? RB.o.anchor.getBoundingClientRect() : null;
+    el.classList.toggle("rest", !near(el.getBoundingClientRect(), 36) && !(a && near(a, 0)));
+  }, { passive: true });
   addEventListener("resize", () => { if (RB.el && !RB.el.hidden) placeRibbon(); });
   K.ctx(t => t.closest(".k-ribbon") ? [{ label: "Put it back at the bottom", icon: "reload", run: () => { K.LS.del(posKey()); placeRibbon(); } }, { label: "Hide the ribbon", icon: "x", run: () => K.ribbon.set(false) }] : null);
 

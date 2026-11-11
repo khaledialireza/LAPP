@@ -490,14 +490,17 @@ function selLine(i, scroll) {
 // the ribbon of the chosen line (the shared ribbon, ui/menu.js): the quick actions; "More" opens the line's whole menu
 function lineRibbon(i, el) {
   const r = rows()[i]; if (!r) return K.ribbon.hide();
-  const ai = S.scope.ai ? [{ label: "Simpler", icon: "wand", run: () => rewrite(i, "simpler") }, { label: "More natural", run: () => rewrite(i, "natural") }, { label: "Shorter", run: () => rewrite(i, "shorter") },
-    { label: "Add a question", short: "+ Question", run: () => rewrite(i, "question") }, { label: "Ask the AI to change it…", icon: "ai", iconOnly: true, run: () => rewrite(i, "custom") }, "-"] : [];
-  K.ribbon.show([...ai,
+  const fx = (r.fx || {})[-1] || {}, colors = Object.keys(window.STUDIO_COLORS || {});
+  K.ribbon.show([
+    ...(S.scope.ai ? [{ label: "Change this line with the AI", icon: "ai", iconOnly: true, input: { placeholder: "Change this line…", run: v => rewrite(i, "custom", v) } }, "-"] : []),
+    { label: "Bold", icon: "bold", iconOnly: true, on: !!fx.b, run: () => applyFx(i, -1, { b: !fx.b }) },
+    { label: "Italic", icon: "italic", iconOnly: true, on: !!fx.i, run: () => applyFx(i, -1, { i: !fx.i }) },
+    { label: "Highlight", icon: "highlight", iconOnly: true, on: !!fx.h, run: () => applyFx(i, -1, { h: fx.h ? "" : "amber" }) },
+    { label: "Colour", icon: "palette", iconOnly: true, sub: colors.map(n => ({ label: n, on: fx.c === n, run: () => applyFx(i, -1, { c: fx.c === n ? "" : n }) })) }, "-",
     { label: "Listen", icon: "listen", iconOnly: true, run: () => say(r.de, S.L.course, r.speed || (S.L.data.cast[r.who] || {}).speed || 0.95) },
     { label: "Line below", icon: "plus", iconOnly: true, run: () => insertLine(i) },
-    { label: "Delete the line", icon: "trash", iconOnly: true, danger: true, run: () => delLine(i) }, "-",
-    { label: "More", icon: "more", iconOnly: true, run: b => { const q = b.getBoundingClientRect(); if (window.lineMenu) lineMenu(q.left, q.top > innerHeight / 2 ? q.top - 8 : q.bottom + 4, i); } }],
-    { title: `Line ${i + 1}${r.who ? " · " + r.who : ""}`, anchor: el });
+    { label: "Delete the line", icon: "trash", iconOnly: true, danger: true, run: () => delLine(i) }],
+    { anchor: el, above: true });
 }
 // edits in the document
 document.addEventListener("focusin", e => {
