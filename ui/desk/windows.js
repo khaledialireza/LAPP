@@ -24,7 +24,7 @@
     w = { id: WID++, url, ws, title: o.title || (app ? app.title : "Loading…"), icon: o.icon || (app ? app.icon : "window"), lesson: o.lesson || null, ...g, min: !!o.min, snap: null, used: Date.now(), state: "", chrome: null };
     const el = document.createElement("section"); el.className = "wnd"; el.dataset.w = w.id;
     el.innerHTML = `<div class="wbar"><button class="wback" data-wc="back" hidden aria-label="Back">${I("back")}</button><span class="wi"></span><span class="tt"></span><span class="otag" hidden></span><nav class="wmenu" aria-label="Menus"></nav><span class="sp"></span><div class="wacts"></div>
-      <div class="wctl"><button class="ai" data-wc="ai" title="Ask the AI about this window">${I("ai", 15)}</button><button data-wc="min" title="Minimise">${I("minus", 15)}</button><button data-wc="max" title="Maximise · rest the pointer here for layouts">${I("square", 13)}</button><button class="cl" data-wc="close" title="Close">${I("x", 15)}</button></div></div>
+      <div class="wctl"><button data-wc="min" title="Minimise">${I("minus", 15)}</button><button data-wc="max" title="Maximise · rest the pointer here for layouts">${I("square", 13)}</button><button class="cl" data-wc="close" title="Close">${I("x", 15)}</button></div></div>
       <div class="wfr"><iframe src="${esc(embed(url))}" allow="microphone; autoplay; clipboard-write"></iframe><div class="k-wload"><div class="c"><span class="app">${I(w.icon, 22) || I("window", 22)}</span><span class="k-load creep"><i></i></span></div></div></div>${["n", "s", "e", "w", "ne", "nw", "se", "sw"].map(d => `<i class="rz ${d === "sw" ? "bl" : d}" data-rz="${d}"></i>`).join("")}`;
     w.el = el; w.fr = $("iframe", el); WN.push(w); $("#wins").append(el);
     // pages of the system say when they are there (their first title); a file or another page: when it has loaded
@@ -120,7 +120,7 @@
     const t = e.target, wnd = t.closest && t.closest(".wnd"); if (!wnd) return;
     const w = W(wnd.dataset.w);
     const wc = t.closest("[data-wc]");
-    if (wc) { const k = wc.dataset.wc; if (k === "close") closeWin(w); if (k === "min") minWin(w); if (k === "max") toggleMax(w); if (k === "ai") D.ask(`Explain the window “${w.title}” and what I can do there`, w); if (k === "back") post(w, { t: "cmd", kind: "action", i: w.chrome.backI }); return; }
+    if (wc) { const k = wc.dataset.wc; if (k === "close") closeWin(w); if (k === "min") minWin(w); if (k === "max") toggleMax(w); if (k === "back") post(w, { t: "cmd", kind: "action", i: w.chrome.backI }); return; }
     const wm = t.closest("[data-wm]"); if (wm) { e.stopPropagation(); return openMenu(w, wm); }
     const wa = t.closest("[data-wa]"); if (wa) { post(w, { t: "cmd", kind: "action", i: +wa.dataset.wa }); }
   });
