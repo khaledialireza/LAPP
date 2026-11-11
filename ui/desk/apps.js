@@ -19,7 +19,6 @@
     const lapp = ["manager", "admin"].includes(r), designer = r === "designer";
     W.push({ key: "me", name: lapp ? "LAPP" : "My work", color: "#8B5CF6" });
     if (lapp) {
-      A.push({ id: "admin:dash", title: "Dashboard", icon: "dashboard", url: "/admin#dash", ws: "me" });
       A.push({ id: "admin:users", title: "Users", icon: "users", url: "/admin#users", ws: "me" });
       if (r === "admin") A.push({ id: "admin:ai", title: "AI", icon: "bot", url: "/admin#ai", ws: "me" });
     }

@@ -41,6 +41,7 @@
     const rec = t.closest("[data-rec]"); if (rec) { D.REC = D.REC === rec.dataset.rec ? null : rec.dataset.rec; return D.keysSheet(); }
     if (t.closest("[data-keyreset]")) { D.BIND = { ...D.DEF }; D.shareKeys(); D.save(); D.keysSheet(); return D.toast("Shortcuts are back to the defaults"); }
     const pw = t.closest(".sheet [data-pw]"); if (pw) { const w = D.W(pw.dataset.pw), q = t.closest("[data-pq]"); if (q) { q.dataset.pq === "close" ? (D.closeWin(w), pw.remove()) : D.snap(w, q.dataset.pq); return; } D.closeSheet(); return D.focusWin(w); }
+    if (!t.isConnected) return;   // the click re-drew what it was in (e.g. a view of the command center)
     if (!t.closest("#cc, .k-menu, .sheet, .snapfly, #tb, .k-pop, .wmenu, dialog")) { D.closeMenus(); D.ccClose(); }
     else if (!t.closest(".k-menu, .k-pop, .wmenu, #tb, dialog")) D.closeMenus();
   });

@@ -100,10 +100,11 @@
     const L = items.map(norm), m = document.createElement("div");
     // opened by a right-click: the system's row on top, and "ask the AI" at the bottom when the page has none
     const sys = !o.noSystem && !CTX.used && Date.now() - CTX.at < 5000; if (sys) CTX.used = true;
+    const sysRowOn = (K.LS.get("lapp.theme", {}) || {}).ctxSys !== false;
     if (sys && !o.ask) o = { ...o, ask: { placeholder: "Search or ask…", run: v => { const t = about(); K.askAI(t ? `${v}\n\nAbout: “${t}”` : v); } } };
     if (o.ask) o = { ...o, search: false };   // one field: it searches the items, Enter asks the AI
     m.className = "k-menu " + (o.className || ""); m.setAttribute("role", "menu");
-    m.innerHTML = `${o.header || ""}${sys ? sysRow() : ""}${o.search && L.length ? `<div class="q">${I("search", 14)}<input placeholder="${esc(o.search === true ? "Search…" : o.search)}" aria-label="Search actions"></div>` : ""}${o.title && L.length ? `<div class="mh">${esc(o.title)}</div>` : ""}<div class="ls">${L.map((it, k) => row(it, String(k))).join("")}</div>${o.ask ? `<div class="ask"><span class="spark">${I("ai", 14)}</span><input placeholder="${esc(o.ask.placeholder || "Search or ask…")}" aria-label="Search or ask the AI"></div>` : ""}`;
+    m.innerHTML = `${o.header || ""}${sys && sysRowOn ? sysRow() : ""}${o.search && L.length ? `<div class="q">${I("search", 14)}<input placeholder="${esc(o.search === true ? "Search…" : o.search)}" aria-label="Search actions"></div>` : ""}${o.title && L.length ? `<div class="mh">${esc(o.title)}</div>` : ""}<div class="ls">${L.map((it, k) => row(it, String(k))).join("")}</div>${o.ask ? `<div class="ask"><span class="spark">${I("ai", 14)}</span><input placeholder="${esc(o.ask.placeholder || "Search or ask…")}" aria-label="Search or ask the AI"></div>` : ""}`;
     document.body.append(m);
     ON_CLOSE = o.onClose || null;
     const w = m.offsetWidth, h = m.offsetHeight, hasSub = L.some(it => it && it.sub);

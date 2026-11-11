@@ -160,6 +160,22 @@ body.dragging iframe{pointer-events:none}
 .chatin button{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;color:var(--mu)}.chatin button.send{background:var(--g);color:#fff}
 .chathd{display:flex;align-items:center;gap:8px;margin:0 12px 6px;flex:none}
 .chathd button{height:28px;padding:0 9px;border-radius:8px;display:inline-flex;align-items:center;gap:6px;color:var(--mu);font-size:12.5px}.chathd button:hover{background:var(--p3);color:var(--tx)}
+#cc.full{left:16px!important;top:16px!important;right:16px;width:auto;height:calc(100% - 92px);transform:none}
+.cchero{border-radius:16px;padding:12px 14px;background:color-mix(in srgb,var(--vi) 12%,var(--p2));border:1px solid color-mix(in srgb,var(--vi) 35%,transparent);display:flex;flex-direction:column;gap:8px}
+.cchero .hh,.ccset .hh{display:flex;align-items:center;gap:8px}.cchero .hh b{font-size:14px}.cchero .sp,.ccset .sp{flex:1}
+.cchero p{margin:0;font-size:13px;line-height:1.6;color:var(--mu)}.cchero .acts{display:flex;gap:6px;flex-wrap:wrap}.cchero .why{font-size:11.5px;color:var(--mu2)}
+#cc .ib{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;color:var(--mu);background:none;border:0;cursor:pointer}#cc .ib:hover,#cc .ib.on{background:var(--p4);color:var(--tx)}
+.cctiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.cctile{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:10px 12px;border-radius:14px;border:1px solid color-mix(in srgb,var(--tone) 28%,transparent);background:color-mix(in srgb,var(--tone) 11%,var(--p2));text-align:start;cursor:pointer;min-width:0;color:var(--tx)}
+.cctile .th{display:flex;align-items:center;gap:6px;font:700 10.5px Inter,system-ui;letter-spacing:.06em;text-transform:uppercase;color:var(--mu)}.cctile .th .ic{color:var(--tone)}
+.cctile b{font:800 24px/1.1 Inter,system-ui;font-variant-numeric:tabular-nums}.cctile small{font-size:11.5px;color:var(--mu2);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cctiles.colour .cctile{background:var(--tone);border-color:transparent;color:#15151C}.cctiles.colour .cctile .th,.cctiles.colour .cctile small,.cctiles.colour .cctile .th .ic{color:rgba(21,21,28,.72)}
+.cclist{display:flex;flex-direction:column;background:var(--p2);border:1px solid var(--ln);border-radius:14px;padding:4px}
+.ccset{display:flex;flex-direction:column;gap:10px}.ccset .grp{background:var(--p2);border:1px solid var(--ln);border-radius:14px;padding:6px 12px}
+.ccset .grp h5{margin:6px 0 2px;font:700 10.5px Inter,system-ui;letter-spacing:.5px;text-transform:uppercase;color:var(--mu2)}
+.ccset .opt{padding:8px 0;font-size:13px}
+.ccfoot{display:flex;align-items:center;gap:4px;padding:6px 12px 10px;flex:none}
+.ccfoot .ws{display:inline-flex;align-items:center;gap:6px;font:700 12px Inter,system-ui;margin-inline-start:6px}.ccfoot .ws i{width:8px;height:8px;border-radius:50%}
 .ccf{display:flex;align-items:center;gap:12px;padding:7px 14px;border-top:1px solid var(--ln);font-size:11.5px;color:var(--mu2);flex:none}
 
 /* ---------- sheets, menus, toasts ---------- */

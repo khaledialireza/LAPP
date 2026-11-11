@@ -3,7 +3,7 @@
 "use strict";
 (function () {
   const { $, esc, I } = D;
-  const LOOK_KEYS = ["theme", "accent", "radius", "wall", "groupBy", "restore", "toasts", "jobnotes", "trMode", "trLang", "lockAfter"];
+  const LOOK_KEYS = ["theme", "accent", "radius", "wall", "groupBy", "restore", "toasts", "jobnotes", "trMode", "trLang", "lockAfter", "ctxSys"];
   D.look = () => { const l = (D.DESK && D.DESK.look) || {}; return { ...l, wall: D.DESK ? D.DESK.wall || "" : "", groupBy: D.DESK ? D.DESK.groupBy || "auto" : "auto" }; };
   D.applyLook = () => {
     const l = D.look();
@@ -26,6 +26,9 @@
     if (key === "cursor") { D.LS.set("lapp.cursor", value ? "" : "system"); return D.applyLook(); }
     if (key === "widget") return D.gallery();
     if (key === "keys") return D.keysSheet();
+    if (key === "cc") { D.DESK.cc = { ...(D.DESK.cc || {}), ...(value || {}) }; K.LS.set("lapp.cc", D.DESK.cc); D.save(); return; }
+    if (key === "cc-ai" || key === "cc-learn") return D.settings("cc", { [key.slice(3)]: !!value });
+    if (key === "ribbon") { K.LS.set("lapp.ribbon.off", !value); return; }
   };
   D.on("ready", D.applyLook);
 

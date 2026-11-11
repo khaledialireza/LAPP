@@ -40,6 +40,7 @@
     const ic = { id: "i" + Date.now() + Math.round(Math.random() * 1e4), x, y, ...c }; D.DESK.icons.push(ic); D.save(); D.drawDesk(); return ic;
   };
   D.addWidget = t => { const A = $("#desk").getBoundingClientRect(); D.DESK.widgets.push({ id: Date.now(), t, x: Math.max(0, Math.round(A.width / 2 - 140)), y: 40, w: 280 }); D.save(); D.drawDesk(); D.closeSheet(); D.toast("Widget added · drag it by ⋮⋮"); };
+  D.WIDGET_TYPES = WT;
   D.gallery = () => { const s = D.sheet(`<h4>${I("puzzle")} Add a widget<button data-sx aria-label="Close">${I("x")}</button></h4><div class="galg">${Object.entries(WT).map(([k, [i, t, d]]) => `<button data-add="${k}"><b>${I(i, 15)} ${esc(t)}</b><span class="mu">${esc(d)}</span></button>`).join("")}</div><p class="mu sm" style="margin-top:10px">Drag widgets by ⋮⋮. Your desktop is saved with your account.</p>`); $("[data-add]", s).focus(); };
   D.ACT.widget = D.gallery;
   // files from the computer become icons on the desktop (the shared K.upload)

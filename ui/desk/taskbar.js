@@ -80,12 +80,6 @@
     const ns = D.NOTES.slice(0, 20);
     D.pop(anchor, `<h6>Notifications ${ns.some(n => !n.read) ? `<button data-markread>mark all read</button>` : ""}</h6>` + (ns.map(n => { const [ic, bg] = D.KIND[n.kind] || D.KIND.info; return `<button class="pi" data-go="nopen:${esc(n.id)}" style="${n.read ? "opacity:.55" : ""}"><span class="ri" style="background:${bg}">${I(n.icon && Icon.names.includes(n.icon) ? n.icon : ic, 15)}</span><span class="tx"><b>${esc(n.text)}</b><small>${esc(n.from || "")} · ${D.ago(n.at)}</small></span></button>`; }).join("") || `<div class="pempty">Nothing yet. Finished audio, problems in your pages and messages land here.</div>`));
   }
-  function mePop(anchor) {
-    const me = D.ME;
-    D.pop(anchor, `<div class="pi" style="pointer-events:none">${D.avatar(30)}<span class="tx"><b>${esc(me.name || "@" + me.username)}</b><small>${esc(D.WS.map(w => w.name).join(" · "))}</small></span></div><h6>Settings</h6>`
-      + [["lock", "Lock the screen", D.nice(D.BIND.lock), "lock"], ["settings", "Settings", "", "settings"], ["guide", "Guide", "", "guide"], ["globe", "Language", (window.PanelI18N ? PanelI18N.lang : "en").toUpperCase(), "lang"], ["keyboard", "Keyboard shortcuts", "", "keys"], ["pointer", "Mouse pointer", D.LS.get("lapp.cursor", "") === "system" ? "standard" : "LAPP", "cursor"], ["image", "Wallpaper", D.DESK.wall || "aurora", "wall"], ["puzzle", "Add a widget", D.nice(D.BIND.widget), "widget"], ["group", "Group windows", { auto: "automatic", app: "by app", task: "by task" }[D.groupMode()], "groupby"], ["headphones", "The learning site ↗", "", "site"], ["log-out", "Sign out", "", "out"]]
-        .map(([ic, l, k, g]) => `<button class="pi" data-go="${g}"><span class="ri">${I(ic, 15)}</span><span class="tx"><b>${esc(l)}</b></span>${k ? `<span class="k">${esc(k)}</span>` : ""}</button>`).join(""));
-  }
   D.groupMenu = (x, y) => D.cmenu(x, y, [{ head: "Group windows" }, ["Automatic (AI)", "", () => setMode("auto"), 0, "ai", { on: D.groupMode() === "auto" }], ["By app", "", () => setMode("app"), 0, "grid", { on: D.groupMode() === "app" }], ["By task (my groups)", "", () => setMode("task"), 0, "group", { on: D.groupMode() === "task" }], "-", ["✦ Group my windows with the AI", "", aiGroup, 0, "wand"], ["New task group from the open windows…", "", newTask, 0, "plus"]], { above: true });
   function setMode(m) { D.DESK.groupBy = m; D.save(); draw(); }
   async function newTask() {
@@ -110,7 +104,7 @@
     const t = e.target; if (!t.closest) return;
     if (t.closest("#lb")) return D.ccOpen();
     if (t.closest("#wsb")) return $(".k-pop") ? D.closeMenus() : wsPop($("#wsb"));
-    const tr = t.closest("[data-tr]"); if (tr) { if (tr.classList.contains("open")) return D.closeMenus(); const k = tr.dataset.tr; if (k === "ai") return D.ccOpen("ai"); if (k === "running") return runPop(tr); if (k === "alerts") return bellPop(tr); if (k === "me") return mePop(tr); }
+    const tr = t.closest("[data-tr]"); if (tr) { if (tr.classList.contains("open")) return D.closeMenus(); const k = tr.dataset.tr; if (k === "ai") return D.ccOpen("ai"); if (k === "running") return runPop(tr); if (k === "alerts") return bellPop(tr); if (k === "me") return D.ccOpen("settings"); }
     const dk = t.closest("[data-dk]"); if (dk) { D.closeMenus(); const it = appItem(dk.dataset.dk); return it && openApp(it, dk); }
     const gw = t.closest("[data-gw]"); if (gw) { const w = D.W(gw.dataset.gw); return w.id === D.ACTW && !w.min ? D.minWin(w) : D.focusWin(w); }
     const cap = t.closest("[data-cap]"); if (cap) { const c = capOf(cap.dataset.cap); if (c) { c.wins.forEach(w => { w.min = false; D.place(w); }); c.wins.forEach(w => D.focusWin(w)); } return; }

@@ -20,7 +20,7 @@ h2{font-size:18px;margin-bottom:4px}.sub{color:var(--mu);margin-bottom:16px}
 "use strict";
 const { $, $$, esc: E, I, LS, MAC } = K, keyName = K.keyLabel;
 const tell = (key, value) => LAPPFrame.up({ t: "settings", key, value });   // the desktop applies it to every window and saves it
-const PARTS = [["you", "user", "You"], ["look", "palette", "Look & theme"], ["desk", "desktop", "Desktop"], ["studio", "video", "Studio"], ["keys", "keyboard", "Keyboard"], ["notes", "bell", "Notifications"], ["about", "info", "About"]];
+const PARTS = [["you", "user", "You"], ["look", "palette", "Look & theme"], ["desk", "desktop", "Desktop"], ["cc", "grid", "Command center"], ["studio", "video", "Studio"], ["keys", "keyboard", "Keyboard"], ["notes", "bell", "Notifications"], ["about", "info", "About"]];
 const THEMES = window.LAPPThemes || {};
 let ME = null, part = location.hash.slice(1) || "you";
 async function load() { ME = (await K.api("GET", "/me")).user; draw(); }
@@ -54,6 +54,15 @@ function draw() {
   if (part === "notes") h = `<h2>Notifications</h2><div class="sub">What may pop up while you work.</div><div class="card rows">
     <div class="opt"><div><b>Pop-ups (toasts)</b><small>notifications still collect under the bell</small></div>${sw("toasts", th.toasts !== false)}</div>
     <div class="opt"><div><b>Audio finished / stopped</b></div>${sw("jobnotes", th.jobnotes !== false)}</div></div>`;
+  if (part === "cc") { const C = { ai: true, learn: true, tiles: "calm", open: "center", ...(LS.get("lapp.cc", {}) || {}) }, seg = (k, cur, o) => `<div class="seg">${o.map(([v, l]) => `<button data-ccseg="${k}:${v}" class="${cur === v ? "on" : ""}">${E(l)}</button>`).join("")}</div>`;
+    h = `<h2>Command center</h2><div class="card rows">
+    <div class="opt"><div><b>Shortcut</b></div><button class="b" data-tell="keys">${I("keyboard", 14)} ${E(keyName(MAC ? "Cmd+K" : "Ctrl+K"))}</button></div>
+    <div class="opt"><div><b>Opens</b></div>${seg("open", C.open, [["center", "Centre"], ["full", "Full screen"]])}</div>
+    <div class="opt"><div><b>Arranged by the AI</b></div>${sw("cc-ai", C.ai)}</div>
+    <div class="opt"><div><b>Learns from “less like this”</b></div>${sw("cc-learn", C.learn)}</div>
+    <div class="opt"><div><b>Tiles</b></div>${seg("tiles", C.tiles, [["calm", "Calm"], ["colour", "Colour"]])}</div>
+    <div class="opt"><div><b>Cut · Copy · Paste row in every right-click</b></div>${sw("ctxSys", th.ctxSys !== false)}</div>
+    <div class="opt"><div><b>Line bar</b></div>${sw("ribbon", !LS.get("lapp.ribbon.off", false))}</div></div>`; }
   if (part === "about") h = `<h2>About</h2><div class="card rows"><div class="opt"><div><b>LAPP work desktop</b><small>Icons: Lucide (ISC licence)</small></div></div></div>`;
   $("#main").innerHTML = `<div class="top" data-chrome><h1>Settings</h1></div>` + h;
   LAPPFrame.sync();
@@ -61,6 +70,7 @@ function draw() {
 if (window.LAPPFrame) LAPPFrame.menus = () => [{ label: "Go", items: PARTS.map(([k, ic, l]) => ({ label: l, icon: ic, on: part === k, run: () => { part = k; draw(); } })) }];
 document.addEventListener("click", e => {
   const t = e.target;
+  const cs = t.closest("[data-ccseg]"); if (cs) { const [k, v] = cs.dataset.ccseg.split(":"); LS.set("lapp.cc", { ...(LS.get("lapp.cc", {}) || {}), [k]: v }); tell("cc", { [k]: v }); return draw(); }
   const p = t.closest("[data-p]"); if (p) { part = p.dataset.p; history.replaceState(null, "", "#" + part); return draw(); }
   const th = t.closest("button[data-theme]"); if (th) return tell("theme", th.dataset.theme);
   const ac = t.closest("[data-accent]"); if (ac) return tell("accent", ac.dataset.accent);
@@ -73,7 +83,10 @@ document.addEventListener("click", e => {
   const tlg = t.closest("[data-trlang]"); if (tlg) { K.LS.del("lapp.studio.tr"); return tell("trLang", tlg.dataset.trlang); }
   const gr = t.closest("[data-group]"); if (gr) return tell("groupBy", gr.dataset.group);
   const tl = t.closest("[data-tell]"); if (tl) return tell(tl.dataset.tell, true);
-  const sw = t.closest("[data-sw]"); if (sw) return tell(sw.dataset.sw, !sw.classList.contains("on"));
+  const sw = t.closest("[data-sw]"); if (sw) { const k = sw.dataset.sw, v = !sw.classList.contains("on");
+    if (/^cc-/.test(k)) LS.set("lapp.cc", { ...(LS.get("lapp.cc", {}) || {}), [k.slice(3)]: v });
+    if (k === "ribbon") LS.set("lapp.ribbon.off", !v);
+    tell(k, v); if (/^cc-|^ribbon$/.test(k)) draw(); return; }
   if (t.closest("#lang") && window.PanelI18N) PanelI18N.menu(t.closest("#lang"));
 });
 // the photo is made small here (128 px, webp) before it is saved

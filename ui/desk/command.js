@@ -4,7 +4,7 @@
 "use strict";
 (function () {
   const { $, $$, esc, I } = D;
-  const CC = { scope: "all", q: "", sel: 0, mode: "list", item: null, rows: [], people: null, peopleQ: "" };
+  const CC = { scope: "all", q: "", sel: 0, mode: "list", item: null, rows: [], people: null, peopleQ: "", view: "home" };
   const CHAT = D.CHAT = [];
   const SCOPES = [["all", "search", "Everything"], ["apps", "grid", "Apps"], ["files", "files", "Files & lessons"], ["people", "users", "People"], ["ai", "ai", "Ask the AI"]];
   const TOK = { apps: "Apps", files: "Files & lessons", people: "People" };
@@ -13,10 +13,10 @@
     D.closeMenus(); D.closeSheet && $("#sheet") && D.closeSheet();
     let c = $("#cc");
     if (c && ((scope === "ai") === (CC.mode === "chat")) && scope === CC.scope && !q) return D.ccClose();
-    CC.mode = scope === "ai" ? "chat" : "list"; CC.scope = scope === "ai" ? CC.scope : scope; CC.q = q; CC.sel = 0; CC.item = null;
+    CC.mode = scope === "ai" ? "chat" : "list"; CC.scope = scope === "ai" ? CC.scope : scope; CC.q = q; CC.sel = 0; CC.item = null; CC.view = scope === "settings" || scope === "widgets" ? scope : "home"; if (CC.view !== "home") CC.scope = "all";
     if (!c) {
       c = document.createElement("div"); c.id = "cc"; c.setAttribute("role", "dialog"); c.setAttribute("aria-label", "Command center");
-      document.body.append(c);
+      document.body.append(c); c.classList.toggle("full", PREF().open === "full");
       const p = D.DESK && D.DESK.ccpos; if (p && innerWidth > 760) { c.classList.add("moved"); c.style.left = Math.max(0, Math.min(p.x, innerWidth - 300)) + "px"; c.style.top = Math.max(0, Math.min(p.y, innerHeight - 200)) + "px"; }
     }
     frame(); $("#lb").classList.add("on");
@@ -35,10 +35,11 @@
       draw(); t.focus();
       return;
     }
-    c.innerHTML = `<div class="cch" title="Drag to move"><i></i></div><label class="ccs"><span style="color:var(--mu2)">${I("search", 17)}</span>${TOK[CC.scope] ? `<span class="tok">${esc(TOK[CC.scope])}<button data-cc="untok" aria-label="Search everything">${I("x", 12)}</button></span>` : ""}<input id="ccq" placeholder="${CC.scope === "people" ? "Find a person…" : CC.scope === "files" ? "Find a lesson or a file…" : CC.scope === "apps" ? "Find an app…" : "Search, open, or ask the AI…"}" autocomplete="off" aria-label="Search"><span class="scopes" role="tablist">${SCOPES.map(([k, ic, l]) => `<button role="tab" aria-selected="${CC.scope === k}" class="${CC.scope === k ? "on" : ""}" data-scope="${k}" title="${esc(l)}" aria-label="${esc(l)}">${I(ic, 15)}</button>`).join("")}</span></label>
-      <div class="ccb" id="ccb"></div><div class="ccf"><span>↵ open · → actions · Tab ask the AI</span><span style="flex:1"></span><span class="kbd">${esc(D.nice(D.BIND.cc))}</span></div>`;
+    c.innerHTML = `<div class="cch" title="Drag to move"><i></i></div><label class="ccs"><span style="color:var(--vi)">${I("ai", 17)}</span>${TOK[CC.scope] ? `<span class="tok">${esc(TOK[CC.scope])}<button data-cc="untok" aria-label="Search everything">${I("x", 12)}</button></span>` : ""}<input id="ccq" placeholder="Ask, search, or tell LAPP what to do…" autocomplete="off" aria-label="Ask or search"></label>
+      <div class="ccb" id="ccb"></div>
+      <div class="ccfoot">${D.avatar(26)}<span class="ws"><i style="background:${D.wsOf(D.CUR).color}"></i>${esc(D.wsOf(D.CUR).name)}</span><span style="flex:1"></span>${[["widgets", "puzzle", "Widgets", "cc"], ["lang", "globe", "Language", "go"], ["wall", "image", "Wallpaper", "go"], ["lock", "lock", "Lock the screen", "go"], ["settings", "settings", "Settings", "cc"], ["out", "log-out", "Sign out", "go"]].map(([k, ic, l, kind]) => `<button class="ib ${(k === "settings" || k === "widgets") && CC.view === k ? "on" : ""}" data-${kind}="${k}" title="${esc(l)}" aria-label="${esc(l)}">${I(ic, 17)}</button>`).join("")}</div>`;
     const i = $("#ccq"); i.value = CC.q;
-    i.oninput = () => { CC.q = i.value; CC.sel = 0; CC.moved = false; CC.item = null; CC.mode = "list"; draw(); };
+    i.oninput = () => { CC.q = i.value; CC.sel = 0; CC.moved = false; CC.item = null; CC.mode = "list"; if (CC.q) CC.view = "home"; draw(); };
     i.onkeydown = key;
     draw(); i.focus();
   }
@@ -82,7 +83,10 @@
       B.innerHTML = `<div class="actp"><div class="head"><button data-cc="unact" aria-label="Back">${I("back", 15)}</button>${I(CC.item.icon, 16) || D.IE(CC.item.icon)}<span>${esc(CC.item.name)}</span></div>${CC.rows.map((r, k) => rowHtml(r, k)).join("")}</div>`;
       return mark();
     }
-    if (S === "all" && !q) {
+    if (CC.view === "settings") return drawSettings(B);
+    if (CC.view === "widgets") return drawWidgets(B);
+    if (S === "all" && !q) return drawHome(B);
+    if (false) {
       sec("Suggested now", suggested());
       sec("Recent", recentRows());
       const pins = ((D.DESK.pins || {})[D.CUR] || D.APPS.filter(a => a.ws === D.CUR).slice(0, 4).map(a => a.id)).map(id => D.APPS.find(a => a.id === id)).filter(Boolean);
@@ -148,6 +152,119 @@
     }, 250);
   }
 
+  /* ---------- the home: what the AI arranged for this moment (a main task, three numbers, a short list) ---------- */
+  // The panel sends the AI a summary of the signals (time, window in front, waiting work…) and gets back a choice from a
+  // fixed catalogue, so the panel can't break. Without an AI (or with "arranged by the AI" off) simple rules choose.
+  const PREF = () => ({ ai: true, learn: true, tiles: "calm", open: "center", ...((D.DESK && D.DESK.cc) || {}) });
+  const setPref = (k, v) => { D.DESK.cc = { ...(D.DESK.cc || {}), [k]: v }; K.LS.set("lapp.cc", D.DESK.cc); D.save(); };
+  function signals() {
+    const ls = D.LESSONS || [], w = D.W(D.ACTW), h = new Date().getHours();
+    const wait = ls.filter(l => l.status !== "published" && l.lines && l.approved < l.lines), run = D.running(), un = D.NOTES.filter(n => !n.read);
+    const front = w && /\/studio/.test(w.url) && w.lesson ? ls.find(l => String(l.id) === String(w.lesson.id)) : null;
+    return { h, wait, run, un, front, w, recent: (D.DESK.recent || []).filter(r => !D.WN().some(x => x.url === r.url)), inwork: ls.filter(l => l.status !== "published"), pub: ls.filter(l => l.status === "published") };
+  }
+  // the catalogue: tiles (a number), main tasks and lists — each knows when it makes sense
+  const TILES = {
+    approve: s => ({ icon: "approve", tone: "#34D399", label: "To approve", value: s.wait.reduce((a, l) => a + (l.lines - l.approved), 0), sub: `lines in ${s.wait.length} lesson${s.wait.length === 1 ? "" : "s"}`, go: "open:" + (D.APPS.find(a => /content|library/i.test(a.id) && a.ws === D.CUR) || D.APPS[0] || {}).url }),
+    inwork: s => ({ icon: "pen", tone: "#8B5CF6", label: "In work", value: s.inwork.length, sub: "lessons", go: "open:/studio#home" }),
+    published: s => ({ icon: "lessonfile", tone: "#22D3EE", label: "Published", value: s.pub.length, sub: "lessons", go: "open:/studio#home" }),
+    running: s => ({ icon: "wave", tone: "#FF3D7F", label: "Running", value: s.run.length, sub: s.run[0] ? "audio · " + s.run[0].title : "nothing now", go: "running" }),
+    unread: s => ({ icon: "bell", tone: "#FBBF24", label: "Unread", value: s.un.length, sub: "notifications", go: "bell" }),
+    windows: s => ({ icon: "window", tone: "#60A5FA", label: "Windows", value: D.WN().filter(x => x.ws === D.CUR).length, sub: D.wsOf(D.CUR).name, go: "tasks" }),
+  };
+  const HEROES = {
+    front: s => s.front && { title: s.front.title, text: `${s.front.lines || 0} lines · ${Math.max(0, (s.front.lines || 0) - (s.front.approved || 0))} not approved`, acts: [["Open the voice desk", `lesson:${s.front.scope.q}:${s.front.id}:voice`, 1], ["Lesson settings", `lesson:${s.front.scope.q}:${s.front.id}:lesson`]] },
+    approve: s => s.wait.length && { title: `${s.wait.length} lesson${s.wait.length === 1 ? "" : "s"} wait for approval`, text: s.wait.slice(0, 3).map(l => l.title).join(" · "), acts: [["Review the first", `lesson:${s.wait[0].scope.q}:${s.wait[0].id}:script`, 1]] },
+    running: s => s.run.length && { title: `Audio for “${s.run[0].title}” is being made`, text: "You can keep working; it tells you when it's ready.", acts: [["Open the voice desk", `lesson:${s.run[0].scope.q}:${s.run[0].lesson}:voice`, 1]] },
+    notes: s => s.un.length && { title: `${s.un.length} new notification${s.un.length === 1 ? "" : "s"}`, text: s.un.slice(0, 2).map(n => n.text).join(" · "), acts: [["Read", "bell", 1]] },
+    continue: s => s.recent[0] && { title: `Continue: ${s.recent[0].title}`, text: D.ago(s.recent[0].at || Date.now()), acts: [["Open", "open:" + s.recent[0].url, 1]] },
+    start: () => ({ title: "A new lesson", text: "Start from a topic; the AI drafts it and you approve every line.", acts: [["New lesson", "open:/studio#home", 1]] }),
+  };
+  function rules(s) {
+    const hero = s.front ? "front" : s.run.length ? "running" : s.wait.length ? "approve" : s.un.length ? "notes" : s.recent.length ? "continue" : "start";
+    const tiles = (s.front ? ["approve", "running", "inwork"] : s.h >= 17 ? ["published", "inwork", "unread"] : ["approve", "inwork", "unread"]);
+    return { hero, tiles, list: s.wait.length || s.run.length || s.un.length ? "needs" : "recent", why: "simple rules" };
+  }
+  let PLAN = null;
+  async function arrange(s) {
+    const P = PREF(), base = rules(s);
+    if (!P.ai) return base;
+    const sig = { hour: s.h, front: s.w ? s.w.title : "", frontLesson: s.front ? s.front.title : "", toApprove: s.wait.length, running: s.run.length, unread: s.un.length, recent: s.recent.slice(0, 3).map(r => r.title), role: D.ME.role, workspace: D.wsOf(D.CUR).name };
+    const key = JSON.stringify(sig), less = Object.keys((D.DESK.cc || {}).less || {});
+    if (PLAN && PLAN.key === key) return PLAN.plan;
+    try {
+      const r = await D.api("POST", "/assist/arrange", { signals: sig, heroes: Object.keys(HEROES), tiles: Object.keys(TILES), lists: ["needs", "recent"], less: P.learn ? less : [] });
+      const plan = { hero: HEROES[r.hero] ? r.hero : base.hero, tiles: (r.tiles || []).filter(t => TILES[t]).slice(0, 3), list: ["needs", "recent"].includes(r.list) ? r.list : base.list, why: r.why || "", ai: 1 };
+      if (plan.tiles.length < 3) plan.tiles = [...new Set([...plan.tiles, ...base.tiles])].slice(0, 3);
+      PLAN = { key, plan }; return plan;
+    } catch { return base; }
+  }
+  async function drawHome(B) {
+    const s = signals(), P = PREF(), cc = D.DESK.cc || {}, less = cc.less || {}, pins = cc.pins || [];
+    const paint = plan => {
+      if (!$("#cc") || CC.mode !== "list" || CC.q || CC.view !== "home") return;
+      const tiles = [...new Set([...pins.filter(t => TILES[t]), ...plan.tiles.filter(t => !less[t])])].slice(0, 3);
+      const hero = (!less[plan.hero] && HEROES[plan.hero](s)) || HEROES[rules(s).hero](s) || HEROES.start(s);
+      CC.rows = [];
+      const sg = suggested(), list = plan.list === "needs" ? sg.concat(s.wait.filter(l => !sg.some(r => r.drag === `${l.scope.q}:${l.id}`)).slice(0, 2).map(l => ({ ...lessonRow(l), icon: "approve", name: `${l.lines - l.approved} lines wait in “${l.title}”` }))).slice(0, 3) : recentRows().slice(0, 3);
+      B.innerHTML = `<section class="cchero"><div class="hh"><b>${esc(hero.title)}</b><span class="sp"></span><button class="ib" data-why title="Why these?" aria-label="Why these?">${I("info", 14)}</button></div>${hero.text ? `<p>${esc(hero.text)}</p>` : ""}<div class="acts">${hero.acts.map(([l, g, pr]) => `<button class="b ${pr ? "pr" : ""}" data-go="${esc(g)}">${esc(l)}</button>`).join("")}</div>
+        <div class="why" hidden>${esc(plan.ai ? "Chosen by the AI" : "Chosen by rules")}${plan.ai && plan.why ? " · " + esc(plan.why) : ""} · ${[s.w ? s.w.title : "", s.wait.length ? s.wait.length + " waiting" : "", s.run.length ? s.run.length + " running" : "", s.un.length ? s.un.length + " unread" : ""].filter(Boolean).map(esc).join(" · ")}</div></section>
+        <div class="cctiles ${P.tiles === "colour" ? "colour" : ""}">${tiles.map(k => { const t = TILES[k](s); return `<button class="cctile" data-go="${esc(t.go)}" data-tile="${k}" style="--tone:${t.tone}"><span class="th">${I(t.icon, 14)}${esc(t.label)}${pins.includes(k) ? I("pin", 11) : ""}</span><b>${esc(String(t.value))}</b><small>${esc(t.sub)}</small></button>`; }).join("")}</div>
+        ${list.length ? `<div class="cclist">${list.map(r => rowHtml(r, CC.rows.push(r) - 1)).join("")}</div>` : ""}`;
+      mark();
+    };
+    paint(rules(s));
+    paint(await arrange(s));
+  }
+  function drawSettings(B) {
+    const P = PREF(), th = D.look(), sw = (k, on) => `<button class="sw ${on ? "on" : ""}" data-ccs="${k}" role="switch" aria-checked="${!!on}"></button>`;
+    const seg = (k, cur, opts) => `<div class="seg">${opts.map(([v, l]) => `<button data-ccseg="${k}:${v}" aria-pressed="${cur === v}" class="${cur === v ? "on" : ""}">${esc(l)}</button>`).join("")}</div>`;
+    const ribbonOn = !K.LS.get("lapp.ribbon.off", false), sysOn = th.ctxSys !== false;
+    B.innerHTML = `<div class="ccset"><div class="hh"><button class="ib" data-cc="home" aria-label="Back">${I("back", 15)}</button><b>Settings</b><span class="sp"></span><button class="b ghost" data-go="settings">${I("external", 13)} All settings</button></div>
+      <div class="grp"><h5>Command center</h5>
+        <div class="opt"><span>Shortcut</span><button class="b" data-go="keys">${esc(D.nice(D.BIND.cc))}</button></div>
+        <div class="opt"><span>Opens</span>${seg("open", P.open, [["center", "Centre"], ["full", "Full screen"]])}</div>
+        <div class="opt"><span>Arranged by the AI</span>${sw("ai", P.ai)}</div>
+        <div class="opt"><span>Learns from “less like this”</span>${sw("learn", P.learn)}</div>
+        <div class="opt"><span>Tiles</span>${seg("tiles", P.tiles, [["calm", "Calm"], ["colour", "Colour"]])}</div>
+        ${Object.keys((D.DESK.cc || {}).less || {}).length ? `<div class="opt"><span>Hidden: ${esc(Object.keys(D.DESK.cc.less).join(", "))}</span><button class="b" data-ccs="unless">Show again</button></div>` : ""}</div>
+      <div class="grp"><h5>Right-click and the line bar</h5>
+        <div class="opt"><span>Cut · Copy · Paste row</span>${sw("ctxSys", sysOn)}</div>
+        <div class="opt"><span>Line bar</span>${sw("ribbon", ribbonOn)}</div></div>
+      <div class="grp"><h5>Desktop</h5>
+        <div class="opt"><span>Wallpaper</span>${seg("wall", th.wall || "", [["", "Aurora"], ["dawn", "Dawn"], ["sea", "Sea"], ["plain", "Plain"]])}</div>
+        <div class="opt"><span>Language</span><button class="b" data-go="lang">${esc((window.PanelI18N ? PanelI18N.lang : "en").toUpperCase())}</button></div>
+        <div class="opt"><span>LAPP mouse pointer</span>${sw("cursor", D.LS.get("lapp.cursor", "") !== "system")}</div>
+        <div class="opt"><span>Group windows</span>${seg("groupBy", th.groupBy || "auto", [["auto", "Auto"], ["app", "App"], ["task", "Task"]])}</div></div></div>`;
+  }
+  function drawWidgets(B) {
+    B.innerHTML = `<div class="ccset"><div class="hh"><button class="ib" data-cc="home" aria-label="Back">${I("back", 15)}</button><b>Widgets</b></div><div class="galg">${Object.entries(D.WIDGET_TYPES || {}).map(([k, [i, t, d]]) => `<button data-add="${k}"><b>${I(i, 15)} ${esc(t)}</b><span class="mu">${esc(d)}</span></button>`).join("")}</div></div>`;
+  }
+  // the panel's own clicks: why, settings, pins and "less like this"
+  document.addEventListener("click", e => {
+    const t = e.target; if (!t.closest || !t.closest("#cc")) return;
+    if (t.closest("[data-why]")) { const w = $("#cc .cchero .why"); if (w) w.hidden = !w.hidden; return; }
+    const cs = t.closest("[data-ccs]"); if (cs) { const k = cs.dataset.ccs, P = PREF(), th = D.look();
+      if (k === "ai" || k === "learn") { setPref(k, !P[k]); PLAN = null; }
+      if (k === "unless") setPref("less", {});
+      if (k === "ribbon") K.LS.set("lapp.ribbon.off", !K.LS.get("lapp.ribbon.off", false));
+      if (k === "ctxSys") D.setLook("ctxSys", th.ctxSys === false);
+      if (k === "cursor") D.settings("cursor", D.LS.get("lapp.cursor", "") === "system");
+      return draw(); }
+    const sg = t.closest("[data-ccseg]"); if (sg) { const [k, v] = sg.dataset.ccseg.split(":");
+      if (k === "open") { setPref("open", v); $("#cc").classList.toggle("full", v === "full"); }
+      else if (k === "tiles") setPref("tiles", v); else D.setLook(k, v);
+      return draw(); }
+  });
+  // right-click a tile or the main task: pin, less like this
+  K.ctx(t => {
+    const tl = t.closest && t.closest("#cc [data-tile]"); if (!tl) return null;
+    const k = tl.dataset.tile, cc = D.DESK.cc || {}, pins = cc.pins || [], on = pins.includes(k);
+    return [{ label: on ? "Unpin" : "Pin: always here", icon: "pin", run: () => { setPref("pins", on ? pins.filter(x => x !== k) : [...pins, k]); draw(); } },
+      { label: "Less like this", icon: "eye", run: () => { setPref("less", { ...(cc.less || {}), [k]: 1 }); PLAN = null; draw(); } },
+      { label: "Put it on the desktop", icon: "desktop", run: () => D.addWidget && D.addWidget("needs") }];
+  });
+
   /* ---------- the AI chat (inside the panel; the box stays at the bottom) ---------- */
   function drawChat(B) {
     const w = D.W(D.ACTW), tries = /\/studio/.test(w ? w.url : "") ? ["Make line 4 simpler for A1", "Write a short homework for this lesson", "Show the voice desk next to the script"] : ["What can I do here?", "Open Users and Files side by side", "Plan 6 A1 lessons for a trip to Vienna"];
@@ -184,7 +301,7 @@
   document.addEventListener("click", e => {
     const t = e.target; if (!t.closest || !t.closest("#cc")) return;
     const sc = t.closest("[data-scope]"); if (sc) { const s = sc.dataset.scope; if (s === "ai") { CC.mode = "chat"; CC.q = $("#ccq") ? $("#ccq").value : ""; return frame(); } CC.scope = CC.scope === s && s !== "all" ? "all" : s; CC.item = null; CC.sel = 0; return frame(); }
-    const c = t.closest("[data-cc]"); if (c) { const k = c.dataset.cc; if (k === "untok") { CC.scope = "all"; return frame(); } if (k === "back") return back(); if (k === "new") { CHAT.length = 0; return frame(); } if (k === "send") { const v = $("#cci").value; if (v.trim()) D.ask(v); return; } if (k === "unact") { CC.item = null; CC.sel = 0; draw(); return $("#ccq")?.focus(); } }
+    const c = t.closest("[data-cc]"); if (c) { const k = c.dataset.cc; if (k === "home" || k === "settings" || k === "widgets") { CC.view = CC.view === k ? "home" : k; CC.q = ""; return frame(); } if (k === "untok") { CC.scope = "all"; return frame(); } if (k === "back") return back(); if (k === "new") { CHAT.length = 0; return frame(); } if (k === "send") { const v = $("#cci").value; if (v.trim()) D.ask(v); return; } if (k === "unact") { CC.item = null; CC.sel = 0; draw(); return $("#ccq")?.focus(); } }
     const g2 = t.closest("[data-go2]"); if (g2) { CC.item = CC.rows[+g2.dataset.go2]; CC.sel = 0; draw(); return $("#ccq")?.focus(); }
     const r = t.closest("[data-r]"); if (r) { const row = CC.rows[+r.dataset.r]; if (row) row.run(); return; }
     const tr = t.closest("[data-try]"); if (tr) return D.ask(tr.dataset.try);

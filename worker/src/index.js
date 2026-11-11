@@ -372,6 +372,23 @@ ${hist ? "Conversation so far:\n" + hist + "\n" : ""}Question: ${q}`;
     return json({ answer: s(r.value.answer, 4000), actions, provider: r.provider });
   }
 
+  /* ---- the command center's home: the AI chooses, from a fixed catalogue, what fits this moment ---- */
+  if (p === "/assist/arrange" && M === "POST") {
+    const u = await need(req, env);
+    if (!await worksHere(env, u)) throw fail("for staff and school teams", 403);
+    await aiLimit(env, H, u.id);
+    const b = await body(req), s = (v, k) => String(v ?? "").replace(/\s+/g, " ").trim().slice(0, k), list = (v, n) => (Array.isArray(v) ? v : []).slice(0, n).map(x => s(x, 24)).filter(Boolean);
+    const g = b.signals || {}, heroes = list(b.heroes, 10), tiles = list(b.tiles, 12), lists = list(b.lists, 4), less = list(b.less, 12);
+    const prompt = `You arrange the home of LAPP's command center for one person for this moment. Choose ONE main task (hero), THREE number tiles and ONE short list, only from the ids given.
+The moment: hour ${Number(g.hour) || 0}; window in front: ${s(g.front, 80) || "none"}${g.frontLesson ? ` (lesson “${s(g.frontLesson, 80)}”)` : ""}; lessons waiting for approval: ${Number(g.toApprove) || 0}; audio jobs running: ${Number(g.running) || 0}; unread notifications: ${Number(g.unread) || 0}; recently used: ${list(g.recent, 3).join(", ") || "nothing"}; role: ${s(g.role, 20)}; workspace: ${s(g.workspace, 60)}.
+Main tasks: ${heroes.join(", ")}. Tiles: ${tiles.join(", ")}. Lists: ${lists.join(", ")}.
+The person asked to see less of: ${less.join(", ") || "nothing"} — avoid those.
+Prefer what needs the person now; "front" only when a lesson is in front. "why" is one short reason in English (max 12 words).`;
+    let r; try { r = await aiAsk(env, "assist", { prompt, schema: { type: "object", required: ["hero", "tiles", "list"], properties: { hero: { type: "string" }, tiles: { type: "array", items: { type: "string" } }, list: { type: "string" }, why: { type: "string" } } }, max: 400 }); } catch (e) { if (e.status) throw e; throw fail("the AI is not reachable now", 503); }
+    const v = r.value || {};
+    return json({ hero: heroes.includes(v.hero) ? v.hero : "", tiles: (Array.isArray(v.tiles) ? v.tiles : []).filter(t => tiles.includes(t)).slice(0, 3), list: lists.includes(v.list) ? v.list : "", why: s(v.why, 100), provider: r.provider });
+  }
+
   /* ---- the AI groups the open windows of the work desktop by task / project ---- */
   if (p === "/assist/groups" && M === "POST") {
     const u = await need(req, env);
@@ -532,7 +549,7 @@ async function promote(env, u) {
 /* ================= pages for staff ================= */
 // every page of the panels starts with the same head: the shared kit, the language, icons, theme, pointer,
 // the form controls and the window bridge. One asset version (ASSET_V, set by tools/bump.js) for all of them.
-const ASSET_V = "mwc93qjd";
+const ASSET_V = "mwc9ao7v";
 const HEAD = `<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/ui/kit.css?v=${ASSET_V}">
