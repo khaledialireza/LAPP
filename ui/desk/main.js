@@ -62,7 +62,7 @@
   const bootTo = p => { if (BOOT.done || p <= BOOT.p) return; BOOT.p = p; const b = $("#bootBar"); if (b) b.style.width = p + "%"; };
   D.bootEnd = () => { if (BOOT.done) return; BOOT.done = true; const b = $("#boot"); if (!b) return; bootTo(100); BOOT.p = 100;
     const fast = Date.now() - BOOT.t0 < 300; if (fast) return b.remove(); setTimeout(() => { b.classList.add("out"); setTimeout(() => b.remove(), 700); }, 150); };
-  setTimeout(() => D.bootEnd(), 4000);
+  setTimeout(() => D.bootEnd(), 15000);   // never stuck behind the glass
   (async () => {
     bootTo(10);
     const m = await D.api("GET", "/me");
@@ -89,8 +89,8 @@
     else if (!D.WN().length) D.toast(`Press ${D.nice(D.BIND.cc)} or the L button: search, apps, lessons and the AI`, { kind: "info" });
     D.emit("ready"); bootTo(65);
     // the glass goes when every window that came back is ready
-    const wait = () => { const ws = D.WN(), n = ws.filter(w => w.ready).length; bootTo(65 + (ws.length ? 35 * n / ws.length : 35)); if (!ws.length || n === ws.length) D.bootEnd(); };
-    D.on("winready", wait); wait();
+    const wait = () => { const ws = D.WN(), n = ws.filter(w => w.ready).length; bootTo(65 + (ws.length ? 30 * n / ws.length : 30)); if (n === ws.length && K.net.busy === 0) D.bootEnd(); else if (n === ws.length) setTimeout(wait, 120); };
+    D.on("winready", wait); setTimeout(wait, 120);
     D.tick(); D.pollJobs(); D.lessons().then(() => D.emit("lessons")).catch(() => {});
   })();
 })();

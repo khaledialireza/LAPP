@@ -87,7 +87,9 @@
   // K.api(method, path, body, raw?) against /api; K.apiAt(base, o) makes one for another base (e.g. /api/studio)
   //   o.next: where to come back after signing in (signed out → the sign-in page); o.signin: false → just an error
   //   o.keepalive: true → a PUT still arrives when the page closes (small bodies only)
-  K.apiAt = (base, o = {}) => async (method, path, body, raw) => {
+  K.net = { busy: 0, done: 0 };
+  K.apiAt = (base, o = {}) => async (method, path, body, raw) => { K.net.busy++; try { return await call(base, o, method, path, body, raw); } finally { K.net.busy--; K.net.done++; } };
+  const call = async (base, o, method, path, body, raw) => {
     if (typeof o === "string") o = { next: o };
     const headers = raw ? { "X-LAPP": "1", ...(raw.headers || {}) } : { ...(body ? { "Content-Type": "application/json" } : {}), ...(method !== "GET" ? { "X-LAPP": "1" } : {}) };
     const r = await fetch(base + path, { method, credentials: "same-origin", headers, body: raw ? raw.body : body ? JSON.stringify(body) : undefined, keepalive: !!o.keepalive && method === "PUT" });

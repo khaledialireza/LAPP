@@ -14,6 +14,18 @@
   // the desktop decides the device: inside a window on a computer the page keeps its desktop layout, whatever the window's width
   if (q.get("device") !== "mobile") html.classList.add("desk");
 
+  /* ---------- ready: the first real content is on the screen ---------- */
+  // quiet = no request in flight (at least one made, or 1.2 s passed) and no "Loading…" left, twice in a row
+  { const t0 = Date.now(); let calm = 0;
+    const loading = () => !!document.querySelector("[data-loading], .k-loading, .spin:not(.job .spin)") || /\bLoading(…|\.\.\.)/.test(document.body ? document.body.innerText.slice(0, 4000) : "Loading…");
+    const tick = () => {
+      const quiet = K.net.busy === 0 && (K.net.done > 0 || Date.now() - t0 > 1200) && document.readyState !== "loading" && !loading();
+      calm = quiet ? calm + 1 : 0;
+      if (calm >= 2 || Date.now() - t0 > 15000) return up({ t: "ready" });
+      setTimeout(tick, 120);
+    };
+    setTimeout(tick, 150); }
+
   const st = document.createElement("style");
   st.textContent = `.cx-hide{display:none!important}`;
   (document.head || html).append(st);
