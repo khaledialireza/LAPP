@@ -135,7 +135,7 @@
   addEventListener("message", e => {
     if (e.origin !== location.origin || !e.data || !e.data.lapp) return;
     const w = WN.find(x => x.fr.contentWindow === e.source), d = e.data;
-    if (d.t === "key") { if (d.combo === "Escape") { D.ccClose && D.ccClose(); return D.closeMenus(); } const a = Object.keys(D.BIND).find(k => D.BIND[k] === d.combo); if (a) { if (w && w.id !== D.ACTW) D.focusWin(w); D.act(a); } return; }
+    if (d.t === "key") { if (d.combo === "Escape") { D.ccClose && D.ccClose(); return D.closeMenus(); } const a = Object.keys(D.BIND).find(k => D.BIND[k] === d.combo); if (a) { if (w && w.id !== D.ACTW) D.focusWin(w); D.act(a); } else if (D.ccKey) D.ccKey(d.combo); return; }
     if (d.t === "open" && typeof d.url === "string" && /^\/(admin|studio|files|settings|s\/|api\/desk\/files\/\d+$)/.test(d.url)) return D.openWin(d.url, d.title ? { title: String(d.title).slice(0, 120), icon: "file" } : {});
     if (d.t === "note") return D.note({ text: String(d.text || ""), kind: d.kind, from: w ? w.title : "", url: w ? w.url : "", lesson: w ? w.lesson : null });
     if (d.t === "alive") return;

@@ -13,7 +13,7 @@
     D.closeMenus(); D.closeSheet && $("#sheet") && D.closeSheet();
     let c = $("#cc");
     if (c && ((scope === "ai") === (CC.mode === "chat")) && scope === CC.scope && !q) return D.ccClose();
-    CC.mode = scope === "ai" ? "chat" : "list"; CC.scope = scope === "ai" ? CC.scope : scope; CC.q = q; CC.sel = 0; CC.item = null; CC.view = scope === "settings" || scope === "widgets" ? scope : "home"; if (CC.view !== "home") CC.scope = "all";
+    CC.mode = scope === "ai" ? "chat" : "list"; CC.scope = scope === "ai" ? CC.scope : scope; CC.q = q; CC.sel = 0; CC.item = null; CC.view = ["applist", "widgets", "walls"].includes(scope) ? scope : "home"; if (CC.view !== "home" || scope === "settings") CC.scope = "all";
     if (!c) {
       c = document.createElement("div"); c.id = "cc"; c.setAttribute("role", "dialog"); c.setAttribute("aria-label", "Command center");
       document.body.append(c); c.classList.toggle("full", PREF().open === "full");
@@ -35,11 +35,11 @@
       draw(); t.focus();
       return;
     }
-    c.innerHTML = `<div class="cch" title="Drag to move"><i></i></div><label class="ccs"><span style="color:var(--vi)">${I("ai", 17)}</span>${TOK[CC.scope] ? `<span class="tok">${esc(TOK[CC.scope])}<button data-cc="untok" aria-label="Search everything">${I("x", 12)}</button></span>` : ""}<input id="ccq" placeholder="Ask, search, or tell LAPP what to do…" autocomplete="off" aria-label="Ask or search"></label>
+    c.innerHTML = `<div class="cch" title="Drag to move"><i></i></div><label class="ccs"><span style="color:var(--vi)">${I("ai", 17)}</span>${TOK[CC.scope] ? `<span class="tok">${esc(TOK[CC.scope])}<button data-cc="untok" aria-label="Search everything">${I("x", 12)}</button></span>` : ""}${CC.view !== "home" ? `<button class="ib" data-cc="home" aria-label="Back">${I("back", 15)}</button>` : ""}<input id="ccq" placeholder="${CC.view === "applist" ? "Find an app…" : "Ask, search, or tell LAPP what to do…"}" autocomplete="off" aria-label="Ask or search"></label>
       <div class="ccb" id="ccb"></div>
-      <div class="ccfoot">${D.avatar(26)}<span class="ws"><i style="background:${D.wsOf(D.CUR).color}"></i>${esc(D.wsOf(D.CUR).name)}</span><span style="flex:1"></span>${[["widgets", "puzzle", "Widgets", "cc"], ["lang", "globe", "Language", "go"], ["wall", "image", "Wallpaper", "go"], ["lock", "lock", "Lock the screen", "go"], ["settings", "settings", "Settings", "cc"], ["out", "log-out", "Sign out", "go"]].map(([k, ic, l, kind]) => `<button class="ib ${(k === "settings" || k === "widgets") && CC.view === k ? "on" : ""}" data-${kind}="${k}" title="${esc(l)}" aria-label="${esc(l)}">${I(ic, 17)}</button>`).join("")}</div>`;
+      <div class="ccfoot">${D.ccFoot()}</div>`;
     const i = $("#ccq"); i.value = CC.q;
-    i.oninput = () => { CC.q = i.value; CC.sel = 0; CC.moved = false; CC.item = null; CC.mode = "list"; if (CC.q) CC.view = "home"; draw(); };
+    i.oninput = () => { CC.q = i.value; CC.sel = 0; CC.moved = false; CC.item = null; CC.mode = "list"; if (CC.q && CC.view !== "applist") CC.view = "home"; draw(); };
     i.onkeydown = key;
     draw(); i.focus();
   }
@@ -83,9 +83,8 @@
       B.innerHTML = `<div class="actp"><div class="head"><button data-cc="unact" aria-label="Back">${I("back", 15)}</button>${I(CC.item.icon, 16) || D.IE(CC.item.icon)}<span>${esc(CC.item.name)}</span></div>${CC.rows.map((r, k) => rowHtml(r, k)).join("")}</div>`;
       return mark();
     }
-    if (CC.view === "settings") return drawSettings(B);
-    if (CC.view === "widgets") return drawWidgets(B);
-    if (S === "all" && !q) return drawHome(B);
+    if (CC.view !== "home") return D.ccExtra(B, CC.view, CC.q);
+    if (S === "all" && !q) return D.ccBoard(B);
     if (false) {
       sec("Suggested now", suggested());
       sec("Recent", recentRows());
@@ -199,71 +198,9 @@
       PLAN = { key, plan }; return plan;
     } catch { return base; }
   }
-  async function drawHome(B) {
-    const s = signals(), P = PREF(), cc = D.DESK.cc || {}, less = cc.less || {}, pins = cc.pins || [];
-    const paint = plan => {
-      if (!$("#cc") || CC.mode !== "list" || CC.q || CC.view !== "home") return;
-      const tiles = [...new Set([...pins.filter(t => TILES[t]), ...plan.tiles.filter(t => !less[t])])].slice(0, 3);
-      const hero = (!less[plan.hero] && HEROES[plan.hero](s)) || HEROES[rules(s).hero](s) || HEROES.start(s);
-      CC.rows = [];
-      const sg = suggested(), list = plan.list === "needs" ? sg.concat(s.wait.filter(l => !sg.some(r => r.drag === `${l.scope.q}:${l.id}`)).slice(0, 2).map(l => ({ ...lessonRow(l), icon: "approve", name: `${l.lines - l.approved} lines wait in “${l.title}”` }))).slice(0, 3) : recentRows().slice(0, 3);
-      B.innerHTML = `<section class="cchero"><div class="hh"><b>${esc(hero.title)}</b><span class="sp"></span><button class="ib" data-why title="Why these?" aria-label="Why these?">${I("info", 14)}</button></div>${hero.text ? `<p>${esc(hero.text)}</p>` : ""}<div class="acts">${hero.acts.map(([l, g, pr]) => `<button class="b ${pr ? "pr" : ""}" data-go="${esc(g)}">${esc(l)}</button>`).join("")}</div>
-        <div class="why" hidden>${esc(plan.ai ? "Chosen by the AI" : "Chosen by rules")}${plan.ai && plan.why ? " · " + esc(plan.why) : ""} · ${[s.w ? s.w.title : "", s.wait.length ? s.wait.length + " waiting" : "", s.run.length ? s.run.length + " running" : "", s.un.length ? s.un.length + " unread" : ""].filter(Boolean).map(esc).join(" · ")}</div></section>
-        <div class="cctiles ${P.tiles === "colour" ? "colour" : ""}">${tiles.map(k => { const t = TILES[k](s); return `<button class="cctile" data-go="${esc(t.go)}" data-tile="${k}" style="--tone:${t.tone}"><span class="th">${I(t.icon, 14)}${esc(t.label)}${pins.includes(k) ? I("pin", 11) : ""}</span><b>${esc(String(t.value))}</b><small>${esc(t.sub)}</small></button>`; }).join("")}</div>
-        ${list.length ? `<div class="cclist">${list.map(r => rowHtml(r, CC.rows.push(r) - 1)).join("")}</div>` : ""}`;
-      mark();
-    };
-    paint(rules(s));
-    paint(await arrange(s));
-  }
-  function drawSettings(B) {
-    const P = PREF(), th = D.look(), sw = (k, on) => `<button class="sw ${on ? "on" : ""}" data-ccs="${k}" role="switch" aria-checked="${!!on}"></button>`;
-    const seg = (k, cur, opts) => `<div class="seg">${opts.map(([v, l]) => `<button data-ccseg="${k}:${v}" aria-pressed="${cur === v}" class="${cur === v ? "on" : ""}">${esc(l)}</button>`).join("")}</div>`;
-    const ribbonOn = !K.LS.get("lapp.ribbon.off", false), sysOn = th.ctxSys !== false;
-    B.innerHTML = `<div class="ccset"><div class="hh"><button class="ib" data-cc="home" aria-label="Back">${I("back", 15)}</button><b>Settings</b><span class="sp"></span><button class="b ghost" data-go="settings">${I("external", 13)} All settings</button></div>
-      <div class="grp"><h5>Command center</h5>
-        <div class="opt"><span>Shortcut</span><button class="b" data-go="keys">${esc(D.nice(D.BIND.cc))}</button></div>
-        <div class="opt"><span>Opens</span>${seg("open", P.open, [["center", "Centre"], ["full", "Full screen"]])}</div>
-        <div class="opt"><span>Arranged by the AI</span>${sw("ai", P.ai)}</div>
-        <div class="opt"><span>Learns from “less like this”</span>${sw("learn", P.learn)}</div>
-        <div class="opt"><span>Tiles</span>${seg("tiles", P.tiles, [["calm", "Calm"], ["colour", "Colour"]])}</div>
-        ${Object.keys((D.DESK.cc || {}).less || {}).length ? `<div class="opt"><span>Hidden: ${esc(Object.keys(D.DESK.cc.less).join(", "))}</span><button class="b" data-ccs="unless">Show again</button></div>` : ""}</div>
-      <div class="grp"><h5>Right-click and the line bar</h5>
-        <div class="opt"><span>Cut · Copy · Paste row</span>${sw("ctxSys", sysOn)}</div>
-        <div class="opt"><span>Line bar</span>${sw("ribbon", ribbonOn)}</div></div>
-      <div class="grp"><h5>Desktop</h5>
-        <div class="opt"><span>Wallpaper</span>${seg("wall", th.wall || "", [["", "Aurora"], ["dawn", "Dawn"], ["sea", "Sea"], ["plain", "Plain"]])}</div>
-        <div class="opt"><span>Language</span><button class="b" data-go="lang">${esc((window.PanelI18N ? PanelI18N.lang : "en").toUpperCase())}</button></div>
-        <div class="opt"><span>LAPP mouse pointer</span>${sw("cursor", D.LS.get("lapp.cursor", "") !== "system")}</div>
-        <div class="opt"><span>Group windows</span>${seg("groupBy", th.groupBy || "auto", [["auto", "Auto"], ["app", "App"], ["task", "Task"]])}</div></div></div>`;
-  }
-  function drawWidgets(B) {
-    B.innerHTML = `<div class="ccset"><div class="hh"><button class="ib" data-cc="home" aria-label="Back">${I("back", 15)}</button><b>Widgets</b></div><div class="galg">${Object.entries(D.WIDGET_TYPES || {}).map(([k, [i, t, d]]) => `<button data-add="${k}"><b>${I(i, 15)} ${esc(t)}</b><span class="mu">${esc(d)}</span></button>`).join("")}</div></div>`;
-  }
-  // the panel's own clicks: why, settings, pins and "less like this"
-  document.addEventListener("click", e => {
-    const t = e.target; if (!t.closest || !t.closest("#cc")) return;
-    if (t.closest("[data-why]")) { const w = $("#cc .cchero .why"); if (w) w.hidden = !w.hidden; return; }
-    const cs = t.closest("[data-ccs]"); if (cs) { const k = cs.dataset.ccs, P = PREF(), th = D.look();
-      if (k === "ai" || k === "learn") { setPref(k, !P[k]); PLAN = null; }
-      if (k === "unless") setPref("less", {});
-      if (k === "ribbon") K.LS.set("lapp.ribbon.off", !K.LS.get("lapp.ribbon.off", false));
-      if (k === "ctxSys") D.setLook("ctxSys", th.ctxSys === false);
-      if (k === "cursor") D.settings("cursor", D.LS.get("lapp.cursor", "") === "system");
-      return draw(); }
-    const sg = t.closest("[data-ccseg]"); if (sg) { const [k, v] = sg.dataset.ccseg.split(":");
-      if (k === "open") { setPref("open", v); $("#cc").classList.toggle("full", v === "full"); }
-      else if (k === "tiles") setPref("tiles", v); else D.setLook(k, v);
-      return draw(); }
-  });
-  // right-click a tile or the main task: pin, less like this
-  K.ctx(t => {
-    const tl = t.closest && t.closest("#cc [data-tile]"); if (!tl) return null;
-    const k = tl.dataset.tile, cc = D.DESK.cc || {}, pins = cc.pins || [], on = pins.includes(k);
-    return [{ label: on ? "Unpin" : "Pin: always here", icon: "pin", run: () => { setPref("pins", on ? pins.filter(x => x !== k) : [...pins, k]); draw(); } },
-      { label: "Less like this", icon: "eye", run: () => { setPref("less", { ...(cc.less || {}), [k]: 1 }); PLAN = null; draw(); } },
-      { label: "Put it on the desktop", icon: "desktop", run: () => D.addWidget && D.addWidget("needs") }];
-  });
+  // the board (ui/desk/ccboard.js) uses these
+  D.ccSignals = signals; D.ccTiles = TILES; D.ccHeroes = HEROES; D.ccRules = rules; D.ccArrange = arrange;
+  D.ccRedraw = () => { if ($("#cc") && CC.mode === "list") frame(); };
 
   /* ---------- the AI chat (inside the panel; the box stays at the bottom) ---------- */
   function drawChat(B) {
@@ -301,7 +238,7 @@
   document.addEventListener("click", e => {
     const t = e.target; if (!t.closest || !t.closest("#cc")) return;
     const sc = t.closest("[data-scope]"); if (sc) { const s = sc.dataset.scope; if (s === "ai") { CC.mode = "chat"; CC.q = $("#ccq") ? $("#ccq").value : ""; return frame(); } CC.scope = CC.scope === s && s !== "all" ? "all" : s; CC.item = null; CC.sel = 0; return frame(); }
-    const c = t.closest("[data-cc]"); if (c) { const k = c.dataset.cc; if (k === "home" || k === "settings" || k === "widgets") { CC.view = CC.view === k ? "home" : k; CC.q = ""; return frame(); } if (k === "untok") { CC.scope = "all"; return frame(); } if (k === "back") return back(); if (k === "new") { CHAT.length = 0; return frame(); } if (k === "send") { const v = $("#cci").value; if (v.trim()) D.ask(v); return; } if (k === "unact") { CC.item = null; CC.sel = 0; draw(); return $("#ccq")?.focus(); } }
+    const c = t.closest("[data-cc]"); if (c) { const k = c.dataset.cc; if (k === "home") { CC.view = "home"; CC.q = ""; return frame(); } if (k === "untok") { CC.scope = "all"; return frame(); } if (k === "back") return back(); if (k === "new") { CHAT.length = 0; return frame(); } if (k === "send") { const v = $("#cci").value; if (v.trim()) D.ask(v); return; } if (k === "unact") { CC.item = null; CC.sel = 0; draw(); return $("#ccq")?.focus(); } }
     const g2 = t.closest("[data-go2]"); if (g2) { CC.item = CC.rows[+g2.dataset.go2]; CC.sel = 0; draw(); return $("#ccq")?.focus(); }
     const r = t.closest("[data-r]"); if (r) { const row = CC.rows[+r.dataset.r]; if (row) row.run(); return; }
     const tr = t.closest("[data-try]"); if (tr) return D.ask(tr.dataset.try);

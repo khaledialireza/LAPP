@@ -40,8 +40,7 @@
     const ic = { id: "i" + Date.now() + Math.round(Math.random() * 1e4), x, y, ...c }; D.DESK.icons.push(ic); D.save(); D.drawDesk(); return ic;
   };
   D.addWidget = t => { const A = $("#desk").getBoundingClientRect(); D.DESK.widgets.push({ id: Date.now(), t, x: Math.max(0, Math.round(A.width / 2 - 140)), y: 40, w: 280 }); D.save(); D.drawDesk(); D.closeSheet(); D.toast("Widget added · drag it by ⋮⋮"); };
-  D.WIDGET_TYPES = WT;
-  D.gallery = () => { const s = D.sheet(`<h4>${I("puzzle")} Add a widget<button data-sx aria-label="Close">${I("x")}</button></h4><div class="galg">${Object.entries(WT).map(([k, [i, t, d]]) => `<button data-add="${k}"><b>${I(i, 15)} ${esc(t)}</b><span class="mu">${esc(d)}</span></button>`).join("")}</div><p class="mu sm" style="margin-top:10px">Drag widgets by ⋮⋮. Your desktop is saved with your account.</p>`); $("[data-add]", s).focus(); };
+  D.gallery = () => D.ccOpen("widgets");
   D.ACT.widget = D.gallery;
   // files from the computer become icons on the desktop (the shared K.upload)
   D.upload = files => K.upload(files, { max: 12,
@@ -72,7 +71,7 @@
     const ic = t.closest(".ico"), wd = t.closest(".wdg"), x = e.clientX, y = e.clientY;
     if (ic) { const c = D.DESK.icons.find(z => String(z.id) === ic.dataset.ico); if (!c) return; return D.cmenu(x, y, [["Open", "↵", () => D.openIcon(c), 0, "external"], ...(c.file ? [["Download", "", () => { const a = document.createElement("a"); a.href = `/api/desk/files/${c.file}`; a.download = c.n; a.click(); }, 0, "download"]] : []), ["Rename…", "", async () => { const n = await D.askName("Rename", c.n); if (n) { c.n = n; D.save(); D.drawDesk(); } }, 0, "rename"], "-", [c.file ? "Delete the file" : "Remove from the desktop", "", async () => { if (c.file) await D.api("DELETE", `/desk/files/${c.file}`).catch(() => {}); D.DESK.icons = D.DESK.icons.filter(z => z !== c); D.save(); D.drawDesk(); }, 1, "trash"]]); }
     if (wd) { const w = D.DESK.widgets.find(z => String(z.id) === wd.dataset.wdg); return D.cmenu(x, y, [["Wider / narrower", "", () => { w.w = w.w > 320 ? 280 : 420; D.save(); D.drawDesk(); }, 0, "columns"], ["Refresh", "", D.drawDesk, 0, "reload"], "-", ["Remove the widget", "", () => { D.DESK.widgets = D.DESK.widgets.filter(z => z !== w); D.save(); D.drawDesk(); }, 1, "trash"]]); }
-    D.cmenu(x, y, [["Add a widget…", D.nice(D.BIND.widget), D.gallery, 0, "puzzle"], ["New note", "", () => D.addWidget("note"), 0, "note"], ["Put files here…", "", () => { const i = document.createElement("input"); i.type = "file"; i.multiple = true; i.onchange = () => D.upload(i.files); i.click(); }, 0, "upload"], "-", ["Change the wallpaper", "", () => D.go("wall"), 0, "image"], ["Line up the icons", "", () => { const h = Math.max(1, Math.floor(($("#desk").clientHeight - 20) / 100)); D.DESK.icons.forEach((c, i) => { c.x = 16 + Math.floor(i / h) * 96; c.y = 16 + (i % h) * 100; }); D.save(); D.drawDesk(); }, 0, "grid"], ["Command center", D.nice(D.BIND.cc), () => D.ccOpen(), 0, "search"]]);
+    D.cmenu(x, y, [["Add a widget…", D.nice(D.BIND.widget), D.gallery, 0, "puzzle"], ["New note", "", () => D.addWidget("note"), 0, "note"], ["Put files here…", "", () => { const i = document.createElement("input"); i.type = "file"; i.multiple = true; i.onchange = () => D.upload(i.files); i.click(); }, 0, "upload"], "-", ["Wallpaper", "", () => D.ccOpen("walls"), 0, "image"], ["All apps", "", () => D.ccOpen("applist"), 0, "grid"], ["Line up the icons", "", () => { const h = Math.max(1, Math.floor(($("#desk").clientHeight - 20) / 100)); D.DESK.icons.forEach((c, i) => { c.x = 16 + Math.floor(i / h) * 96; c.y = 16 + (i % h) * 100; }); D.save(); D.drawDesk(); }, 0, "grid"], ["Command center", D.nice(D.BIND.cc), () => D.ccOpen(), 0, "search"]]);
   });
   // widgets move by their header, icons by themselves (after a few pixels, so a click stays a click)
   document.addEventListener("pointerdown", e => {
@@ -96,12 +95,13 @@
   document.addEventListener("dragstart", e => { const l = e.target.closest && e.target.closest("[data-lesson]"); if (l) { dragLesson = l.dataset.lesson; try { e.dataTransfer.setData("text/plain", l.dataset.lesson); } catch {} setTimeout(D.ccClose, 0); } });
   document.addEventListener("dragover", e => {
     const files = [...(e.dataTransfer ? e.dataTransfer.types : [])].includes("Files");
-    if (!files && !dragLesson) return; if (e.target.closest && e.target.closest(".wnd, #tb")) return;
+    if (!files && !dragLesson && !D.DRAGAPP) return; if (e.target.closest && e.target.closest(".wnd, #tb, #cc")) return;
     e.preventDefault(); hint(dragLesson ? "Drop: a shortcut to the lesson" : "Drop your files on the desktop");
   });
   document.addEventListener("dragleave", e => { if (!e.relatedTarget) $(".drop")?.remove(); });
   document.addEventListener("drop", async e => {
     $(".drop")?.remove(); if (e.target.closest && e.target.closest(".wnd, #tb")) return;
+    if (D.DRAGAPP && !(e.target.closest && e.target.closest("#cc"))) { e.preventDefault(); const a = D.APPS.find(x => x.id === D.DRAGAPP); D.DRAGAPP = null; if (a) { D.addIcon({ n: a.title, i: a.icon, url: a.url }); D.toast(`${a.title} is on the desktop`, { kind: "ok" }); } return; }
     if (!dragLesson && !(e.dataTransfer && e.dataTransfer.files.length)) return;
     e.preventDefault();
     if (dragLesson) { const [q, id] = dragLesson.split(":"); dragLesson = null; const l = (await D.lessons()).find(x => x.scope.q === q && String(x.id) === id); if (l) { D.addIcon({ n: l.title, i: "pen", url: D.studioUrl(l), lesson: { id: String(l.id), title: l.title } }); D.toast(`Shortcut to “${l.title}” on the desktop`); } return; }

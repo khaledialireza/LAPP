@@ -104,7 +104,7 @@
     const t = e.target; if (!t.closest) return;
     if (t.closest("#lb")) return D.ccOpen();
     if (t.closest("#wsb")) return $(".k-pop") ? D.closeMenus() : wsPop($("#wsb"));
-    const tr = t.closest("[data-tr]"); if (tr) { if (tr.classList.contains("open")) return D.closeMenus(); const k = tr.dataset.tr; if (k === "ai") return D.ccOpen("ai"); if (k === "running") return runPop(tr); if (k === "alerts") return bellPop(tr); if (k === "me") return D.ccOpen("settings"); }
+    const tr = t.closest("[data-tr]"); if (tr) { if (tr.classList.contains("open")) return D.closeMenus(); const k = tr.dataset.tr; if (k === "ai") return D.ccOpen("ai"); if (k === "running") return runPop(tr); if (k === "alerts") return bellPop(tr); if (k === "me") return D.ccOpen("all"); }
     const dk = t.closest("[data-dk]"); if (dk) { D.closeMenus(); const it = appItem(dk.dataset.dk); return it && openApp(it, dk); }
     const gw = t.closest("[data-gw]"); if (gw) { const w = D.W(gw.dataset.gw); return w.id === D.ACTW && !w.min ? D.minWin(w) : D.focusWin(w); }
     const cap = t.closest("[data-cap]"); if (cap) { const c = capOf(cap.dataset.cap); if (c) { c.wins.forEach(w => { w.min = false; D.place(w); }); c.wins.forEach(w => D.focusWin(w)); } return; }

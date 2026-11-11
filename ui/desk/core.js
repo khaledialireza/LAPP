@@ -26,7 +26,7 @@
   // a Mac has ⌘ Command, ⌥ Option and ⌃ Control: Command and Control are different keys there; elsewhere Ctrl (or the Windows key) is one
   D.combo = K.combo;
   D.nice = K.keyLabel;
-  D.shareKeys = () => D.LS.set("lapp.keys", D.BIND);      // the pages inside windows read this and pass the keys up
+  D.shareKeys = () => D.LS.set("lapp.keys", { ...D.BIND, ...Object.fromEntries((D.ccKeys ? D.ccKeys() : []).map((k, i) => ["cc" + i, k])) });      // the pages inside windows read this and pass the keys up
   D.ACT = {};                                             // action name → function (filled by the modules)
   D.act = a => D.ACT[a] && D.ACT[a]();
 

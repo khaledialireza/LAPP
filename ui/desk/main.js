@@ -49,7 +49,7 @@
   document.addEventListener("keydown", e => {
     if (D.REC) { e.preventDefault(); e.stopPropagation(); if (e.key === "Escape") { D.REC = null; return D.keysSheet(); } const c = D.combo(e); if (!c) return; if (!/^(Cmd|Ctrl|Alt)\+/.test(c) && !/^F\d+$/.test(c)) return D.toast(D.MAC ? "Use ⌘, ⌃ or ⌥ with a key, so typing still works" : "Use Ctrl or Alt with a key, so typing still works", { kind: "warn" }); D.BIND[D.REC] = c; D.REC = null; D.shareKeys(); D.save(); D.keysSheet(); return D.toast("Shortcut saved: " + D.nice(c)); }
     if (e.key === "Escape") { if ($(".k-menu, .k-pop")) return D.closeMenus(); if ($("#sheet")) return D.closeSheet(); }
-    const c = D.combo(e), a = Object.keys(D.BIND).find(k => D.BIND[k] === c); if (!a) return;
+    const c = D.combo(e), a = Object.keys(D.BIND).find(k => D.BIND[k] === c); if (!a) { if (c && D.ccKey && D.ccKey(c)) e.preventDefault(); return; }
     e.preventDefault(); D.act(a);
   }, true);
   addEventListener("panel:lang", () => { D.WN().forEach(w => w.fr.src = w.fr.src); D.drawDesk(); });
