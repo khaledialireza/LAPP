@@ -1528,5 +1528,21 @@
  "muted": "بی‌صدا",
  "Starting… (about a minute)": "در حال شروع… (حدود یک دقیقه)",
  "Making the line — about a minute": "ساخت خط — حدود یک دقیقه",
- "Record at least 10 seconds": "دست‌کم ۱۰ ثانیه ضبط کنید"
+ "Record at least 10 seconds": "دست‌کم ۱۰ ثانیه ضبط کنید",
+ "Cut": "برش",
+ "Copy": "کپی",
+ "Paste": "چسباندن",
+ "Select all": "انتخاب همه",
+ "Ask the AI about this…": "دربارهٔ این از AI بپرس…",
+ "Open the link": "باز کردن پیوند",
+ "Copy the link": "کپی پیوند",
+ "Open the picture": "باز کردن تصویر",
+ "Copy the picture's address": "کپی نشانی تصویر",
+ "Ribbon": "روبان",
+ "Hide the ribbon": "پنهان کردن روبان",
+ "Put it back at the bottom": "برگرداندن به پایین",
+ "Ribbon hidden — View › Ribbon brings it back": "روبان پنهان شد — از View › Ribbon برمی‌گردد",
+ "Drag to move · double-click to put it back": "برای جابه‌جایی بکشید · دوبار کلیک برای برگرداندن",
+ "Ask the AI to change it…": "از AI بخواه تغییرش دهد…",
+ "More": "بیشتر"
 }

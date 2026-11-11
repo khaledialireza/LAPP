@@ -1528,5 +1528,21 @@
  "muted": "без звука",
  "Starting… (about a minute)": "Запуск… (около минуты)",
  "Making the line — about a minute": "Озвучиваем реплику — около минуты",
- "Record at least 10 seconds": "Запишите не меньше 10 секунд"
+ "Record at least 10 seconds": "Запишите не меньше 10 секунд",
+ "Cut": "Вырезать",
+ "Copy": "Копировать",
+ "Paste": "Вставить",
+ "Select all": "Выделить всё",
+ "Ask the AI about this…": "Спросить ИИ об этом…",
+ "Open the link": "Открыть ссылку",
+ "Copy the link": "Копировать ссылку",
+ "Open the picture": "Открыть картинку",
+ "Copy the picture's address": "Копировать адрес картинки",
+ "Ribbon": "Лента",
+ "Hide the ribbon": "Скрыть ленту",
+ "Put it back at the bottom": "Вернуть вниз",
+ "Ribbon hidden — View › Ribbon brings it back": "Лента скрыта — View › Ribbon вернёт её",
+ "Drag to move · double-click to put it back": "Перетащите · двойной щелчок вернёт на место",
+ "Ask the AI to change it…": "Попросить ИИ изменить…",
+ "More": "Ещё"
 }

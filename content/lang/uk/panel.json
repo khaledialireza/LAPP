@@ -1528,5 +1528,21 @@
  "muted": "без звуку",
  "Starting… (about a minute)": "Запуск… (близько хвилини)",
  "Making the line — about a minute": "Озвучуємо репліку — близько хвилини",
- "Record at least 10 seconds": "Запишіть щонайменше 10 секунд"
+ "Record at least 10 seconds": "Запишіть щонайменше 10 секунд",
+ "Cut": "Вирізати",
+ "Copy": "Копіювати",
+ "Paste": "Вставити",
+ "Select all": "Виділити все",
+ "Ask the AI about this…": "Запитати ШІ про це…",
+ "Open the link": "Відкрити посилання",
+ "Copy the link": "Копіювати посилання",
+ "Open the picture": "Відкрити зображення",
+ "Copy the picture's address": "Копіювати адресу зображення",
+ "Ribbon": "Стрічка",
+ "Hide the ribbon": "Сховати стрічку",
+ "Put it back at the bottom": "Повернути вниз",
+ "Ribbon hidden — View › Ribbon brings it back": "Стрічку сховано — View › Ribbon поверне її",
+ "Drag to move · double-click to put it back": "Перетягніть · подвійний клік поверне на місце",
+ "Ask the AI to change it…": "Попросити ШІ змінити…",
+ "More": "Ще"
 }
