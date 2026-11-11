@@ -71,7 +71,9 @@ Then:
 - Abuse: we may suspend an account without consent, but still never see its data. We act on alerts built from
   reports and system signals (e.g. one account signed in from different countries at the same time → VPN or a
   break-in → alert → suspend).
-- Open: whether the finance app may keep a customer's e-mail for invoices.
+- Invoices are shown inside the system, to the person in their own account; we keep no e-mail for them.
+- Plans and subscriptions are not accounting: a simple subscriptions app tracks packages, plans and simple money
+  actions. Accounting is a separate app one installs; it connects to the data it needs.
 
 ## Users app: people, roles and permissions only (approved 2026-11-11)
 - Nothing about money in it: plans, subscriptions, invoices and payments live in the finance app.
