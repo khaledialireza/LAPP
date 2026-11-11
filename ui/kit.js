@@ -243,7 +243,8 @@
     try {
       speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(text); u.lang = SPEECH[o.lang] || o.lang || "de-DE";
-      const v = speechSynthesis.getVoices().find(x => x.lang.startsWith(u.lang.slice(0, 2))); if (v) u.voice = v;   // a voice of that language, when the device has one u.rate = o.rate || 1; u.pitch = o.pitch || 1; if (o.volume != null) u.volume = o.volume;
+      const v = speechSynthesis.getVoices().find(x => x.lang.startsWith(u.lang.slice(0, 2))); if (v) u.voice = v;   // a voice of that language, when the device has one
+      u.rate = o.rate || 1; u.pitch = o.pitch || 1; if (o.volume != null) u.volume = o.volume;
       if (o.onend) u.onend = o.onend;
       if (o.onerror) u.onerror = o.onerror;
       speechSynthesis.speak(u); return true;
@@ -284,6 +285,24 @@
     el.innerHTML = `<div class="ac-card ${o.cls || ""}" dir="${o.dir || "ltr"}"><button type="button" class="ac-x" data-sh="close" aria-label="${K.esc(o.close || "Close")}">✕</button>${html}</div>`;
     el.hidden = false;
     return el;
+  };
+
+  /* ---------- the microphone: const r = await K.record({ max: 120 }); r.level() 0…1; const { blob, dur } = await r.stop() ---------- */
+  K.record = async (o = {}) => {
+    if (!navigator.mediaDevices || !window.MediaRecorder) throw new Error("This browser can't record");
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
+    const chunks = [], rec = new MediaRecorder(stream), t0 = Date.now();
+    let ctx = null, an = null, buf = null;
+    try { ctx = new AudioContext(); an = ctx.createAnalyser(); an.fftSize = 512; ctx.createMediaStreamSource(stream).connect(an); buf = new Uint8Array(an.fftSize); } catch {}
+    rec.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
+    const done = new Promise(res => { rec.onstop = () => { stream.getTracks().forEach(t => t.stop()); if (ctx) ctx.close().catch(() => {}); res({ blob: new Blob(chunks, { type: rec.mimeType || "audio/webm" }), dur: (Date.now() - t0) / 1000 }); }; });
+    rec.start();
+    const cap = setTimeout(() => rec.state === "recording" && rec.stop(), (o.max || 120) * 1000);
+    return {
+      done, get secs() { return (Date.now() - t0) / 1000; }, get on() { return rec.state === "recording"; },
+      level() { if (!an) return 0; an.getByteTimeDomainData(buf); let m = 0; for (const v of buf) m = Math.max(m, Math.abs(v - 128)); return m / 128; },
+      stop() { clearTimeout(cap); if (rec.state === "recording") rec.stop(); return done; }
+    };
   };
 
   // sign out, everywhere the same

@@ -17,12 +17,10 @@ Source: lapp-desk / lapp-blueprint / studio-v3 mockups and their notes. Done ite
 - Access per lesson stricter than its folder's rule.
 - History: every change (also the assistant's) logged and reversible.
 
-## Studio · Voice desk (full audio studio)
-- Engines: Piper (fast), Chatterbox (natural, emotional), Azure later; voice library by gender.
-- Designed voice from a text description; cloned voice from 10 s with written consent.
-- Extra tracks: narrator, ambience, music, effects, microphone recording, subtitles with word timing.
-- Tools: cut, move, volume curve, fade; ambience ducks under speech.
-- Per line: pronunciation, emotion, speed, pitch, pause, several takes; mix versions; re-render only changed lines; right-click on clip / track / voice.
+## Studio · Voice desk (what is still open after section 4)
+- Volume curve (points along a clip); now each clip has a volume, fades and ducking.
+- Mix versions: keep earlier mixes and compare them (every line keeps its takes already).
+- Word timing is estimated from word lengths; real alignment (forced alignment) later.
 
 ## Studio · Cast
 - One voice per language (de / nl / pl) for each character; "AI" tag on characters the AI made; personality shapes how they speak (check what exists).
@@ -39,5 +37,10 @@ Source: lapp-desk / lapp-blueprint / studio-v3 mockups and their notes. Done ite
 - [x] 3 Lesson app — DONE (owner approved; wait until tokens reset):
   goals show target words + grammar; real homework inside the lesson (quiz / spoken / written, deadline "N days after class", generated from the lines);
   access per lesson stricter than the folder rule; history: log every change (also the assistant's) with restore (needs a lesson_versions table).
-- [ ] 4 Voice desk (engines, designed/cloned voices, tracks, tools, takes, render one line).
+- [x] 4 Voice desk: every line keeps takes (made or recorded with the microphone), "Make this line" / "Another take",
+  "Make audio" makes only the changed lines and mixes; tracks for music / ambience / effects with move, cut, volume, fades,
+  loop under the lesson and lowering under speech; pronunciation per word, feeling, speed, pitch, pause per line;
+  subtitles (VTT, word timing in the course language); engines Piper, Chatterbox (natural, on demand), Azure (with its key);
+  voice library: designed voices from a description (AI, or key words) and cloned voices with written consent + 10 s recording;
+  right-click on line clips, sound clips, tracks and speakers; a Voice menu in the window.
 - [ ] 5 Cast (voice per language, AI tag, personality shapes lines).

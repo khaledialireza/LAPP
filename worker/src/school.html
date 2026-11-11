@@ -300,17 +300,14 @@ document.addEventListener("submit", async e => {
     recBlob = null; toast(r.score != null ? `Handed in · ${r.score}%` : "Handed in"); show();
   } catch (x) { toast(x.message); }
 });
-let rec = null;
+let rec = null;   // the shared recorder (K.record)
 document.addEventListener("click", async e => {
   if (!e.target.closest("#rec")) return;
   const btn = $("#rec");
-  if (rec && rec.state === "recording") { rec.stop(); return; }
+  if (rec && rec.on) { rec.stop(); return; }
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const chunks = []; rec = new MediaRecorder(stream);
-    rec.ondataavailable = ev => chunks.push(ev.data);
-    rec.onstop = () => { stream.getTracks().forEach(t => t.stop()); recBlob = new Blob(chunks, { type: rec.mimeType }); const a = $("#recAudio"); a.src = URL.createObjectURL(recBlob); a.hidden = false; btn.textContent = "🎤 Record again"; };
-    rec.start(); btn.textContent = "⏹ Stop"; setTimeout(() => rec && rec.state === "recording" && rec.stop(), 120000);
+    rec = await K.record({ max: 120 }); btn.textContent = "⏹ Stop";
+    rec.done.then(({ blob }) => { recBlob = blob; const a = $("#recAudio"); a.src = URL.createObjectURL(blob); a.hidden = false; btn.textContent = "🎤 Record again"; });
   } catch { toast("The microphone isn't available"); }
 });
 

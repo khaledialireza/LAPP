@@ -8,6 +8,7 @@
 // Platform admins (users.role = admin) can open every school as its admin.
 // index.js hands in its helpers as H; the shared small helpers come from util.js.
 import { str, int, pick, LEVELS, COURSES, memberOf, fileResponse, uploadMeta } from "./util.js";
+import { lessonFilesGone } from "./voice.js";
 
 const ROLES = ["admin", "teacher", "finance", "student"];
 const SLUG = /^[a-z0-9][a-z0-9-]{1,30}$/;
@@ -163,8 +164,9 @@ export async function adminOrgs(req, env, H, p) {
       env.DB.prepare("DELETE FROM classes WHERE org_id = ?").bind(id),
       env.DB.prepare("DELETE FROM files WHERE org_id = ?").bind(id),
       env.DB.prepare("DELETE FROM org_members WHERE org_id = ?").bind(id),
-      env.DB.prepare("DELETE FROM blobs WHERE key IN (SELECT 'lesson/' || id || '/' || audio_rev FROM lessons WHERE org_id = ?)").bind(id),
-      env.DB.prepare("DELETE FROM studio_jobs WHERE lesson_id IN (SELECT id FROM lessons WHERE org_id = ?)").bind(id),
+      ...lessonFilesGone(env, "org_id = ?", id),
+      env.DB.prepare("DELETE FROM blobs WHERE key IN (SELECT 'voice/' || id FROM studio_voices WHERE org_id = ?)").bind(id),
+      env.DB.prepare("DELETE FROM studio_voices WHERE org_id = ?").bind(id),
       env.DB.prepare("DELETE FROM lessons WHERE org_id = ?").bind(id),
       env.DB.prepare("DELETE FROM characters WHERE org_id = ?").bind(id),
       env.DB.prepare("DELETE FROM orgs WHERE id = ?").bind(id)

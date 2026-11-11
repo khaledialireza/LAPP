@@ -174,7 +174,7 @@ const S = { scope: null, lessons: [], L: null, dirty: false, saving: null, tr: "
 const toast = (m, o) => K.toast(m, o);
 // the studio's API: /api/studio, for the school (?org=) the window was opened for
 const studioApi = K.apiAt("/api/studio");
-const api = (m, p, b) => studioApi(m, p + (ORG ? (p.includes("?") ? "&" : "?") + "org=" + encodeURIComponent(ORG) : ""), b);
+const api = (m, p, b, raw) => studioApi(m, p + (ORG ? (p.includes("?") ? "&" : "?") + "org=" + encodeURIComponent(ORG) : ""), b, raw);
 const rows = L => (L || S.L).data.scenes.flatMap(s => s.lines);
 const speakerColor = who => { const c = S.L && S.L.data.cast[who]; if (c && c.color) return c.color; const names = Object.keys(S.L ? S.L.data.cast : {}); return COLORS[Math.max(0, names.indexOf(who)) % COLORS.length]; };
 const words = K.words;
@@ -629,6 +629,8 @@ ACT.settings = () => {
 };
 
 /* ---------- saving: a moment after the last change ---------- */
+// every line has its own id (a new or copied line gets one), so its takes in the voice desk stay with it
+function lineIds(d) { const seen = new Set(); for (const s of d.scenes || []) for (const ln of s.lines || []) { if (!ln.id || seen.has(ln.id)) ln.id = Math.random().toString(36).slice(2, 8); seen.add(ln.id); } return d; }
 let saveT;
 function changed() { S.dirty = true; S.L.audio = S.L.audioRev ? "old" : "none"; const s = $("#saved"); if (s) s.textContent = "…"; clearTimeout(saveT); saveT = setTimeout(flush, 1200); }
 async function flush() {
@@ -637,6 +639,7 @@ async function flush() {
   if (!S.dirty || !S.L) return;
   S.dirty = false;
   const L = S.L;
+  lineIds(L.data);
   S.saving = api("PUT", `/lessons/${L.id}`, { rev: L.rev, data: L.data }).then(r => { L.rev = r.rev; if (L.status === "draft" && L.data.scenes.length) L.status = "review"; const s = $("#saved"); if (s) s.textContent = "Saved ✓"; })
     .catch(e => { S.dirty = true; toast(e.code === "rev" ? "Someone else changed this lesson — reload the page" : "Not saved: " + e.message); })
     .finally(() => { S.saving = null; });
@@ -644,134 +647,8 @@ async function flush() {
 }
 addEventListener("beforeunload", e => { if (S.dirty) { flush(); e.preventDefault(); } });
 
-/* ================= 〰 voice desk ================= */
-let pollT, vSel = -1;
-V.voice = async () => {
-  const L = S.L, all = rows();
-  await flush();
-  const fresh = await api("GET", `/lessons/${L.id}`);
-  Object.assign(L, { audio: fresh.audio, audioRev: fresh.audioRev, timings: fresh.timings, job: fresh.job, rev: fresh.rev, status: fresh.status });
-  const real = L.audio !== "none" && L.timings.length === all.length;
-  // where each line sits: the real timings, or an estimate from the number of words
-  const pos = [];
-  if (real) L.timings.forEach(t => pos.push(t));
-  else { let t = 0.4; L.data.scenes.forEach((sc, si) => { if (si) t += L.data.scenePause ?? 1.4; sc.lines.forEach(r => { const d = Math.max(0.8, words(r.de).length * 0.42 / (r.speed || 0.95)); pos.push([t, t + d]); t += d + (r.pause ?? L.data.pause ?? 0.6); }); }); }
-  const total = Math.max(5, (pos[pos.length - 1] || [0, 5])[1] + 0.6);
-  S.vpos = pos; S.vtotal = total;
-  const speakers = Object.keys(L.data.cast).filter(w => all.some(r => r.who === w));
-  const job = L.job && ["queued", "running"].includes(L.job.status) && Date.now() - L.job.updated_at < 20 * 6e4 ? L.job : null;
-  bar(lessonCrumb("voice"), `<span class="chip">⚡ ${all.length} lines · ≈ ${fmtT(total)}</span>
-    ${L.audio === "ready" ? `<span class="chip ok">🎧 audio up to date</span>` : L.audio === "old" ? `<span class="chip warn">🎧 audio is older than the text</span>` : `<span class="chip">no audio yet</span>`}
-    ${job ? `<span class="chip on job"><span class="spin"></span> ${esc(job.status === "queued" ? "starting… (about a minute)" : job.log || "making…")}</span>` : L.job && L.job.status === "failed" ? `<span class="chip bad" title="${esc(L.job.log)}">last try failed</span>` : ""}
-    <button class="btn ${L.audio === "ready" ? "" : "pr"}" data-act="voiceMake" ${job || !all.length || !S.scope.voice ? "disabled" : ""}>🎙 ${L.audio === "none" ? "Make audio" : "Make audio again"}</button>
-    <button class="btn ${L.audio === "ready" ? "pr" : ""}" data-act="publish" ${L.audio === "none" ? "disabled" : ""}>🚀 ${L.status === "published" ? "Publish again" : "Publish"}</button>`);
-  if (!all.length) { $("#view").innerHTML = `<div class="empty"><b>No text yet</b><a class="btn" href="#script/${L.id}">✎ Write the text first</a></div>`; return; }
-  const W = 100 / total;
-  $("#view").innerHTML = `<div class="vd">
-    <div class="pn daw">
-      <div class="ruler" style="margin-left:170px">${(st => Array.from({ length: Math.floor(total / st) + 1 }, (_, k) => `<span style="left:${k * st * W}%">${fmtT(k * st)}</span>`).join(""))(total <= 20 ? 2 : total <= 60 ? 5 : total <= 180 ? 15 : 30)}</div>
-      <div class="tracks">${speakers.map(w => { const c = L.data.cast[w], col = speakerColor(w); return `<div class="trk">
-        <div class="th"><div class="fc" style="background:${col}33;color:${col}">${esc(c.emoji || w.charAt(0))}</div><div style="min-width:0"><b>${esc(w)}</b><span>${esc(voiceName(c.voice))} · ${c.speed || 0.95}×</span></div></div>
-        <div class="lane">${all.map((r, i) => r.who !== w ? "" : `<div class="clip ${real ? "" : "est"} ${vSel === i ? "sel" : ""}" data-clip="${i}" style="left:${pos[i][0] * W}%;width:${(pos[i][1] - pos[i][0]) * W}%;background:linear-gradient(135deg,${col},${col}99)">${r.speed && r.speed !== c.speed ? `<span class="emo">${r.speed}×</span>` : ""}<span>${i + 1}</span><div class="wf">${wave(Math.max(3, Math.round((pos[i][1] - pos[i][0]) * 5)), i)}</div></div>`).join("")}</div></div>`; }).join("")}
-        <div class="ph" id="ph" style="left:170px"></div></div>
-    </div>
-    <div class="pn" id="insp"></div>
-    <div class="pn transport">
-      <button class="tp" id="play" aria-label="Play" title="${L.audio === "none" ? "Preview with the browser's voice" : "Play"}">▶</button><span class="de" style="font:700 15px Inter" id="clock">0:00 <span class="mu">/ ${fmtT(total)}</span></span>
-      <button class="chip" id="loop">🔁 Line</button><button class="chip" id="slow">🐢 Slow</button><span style="flex:1"></span>
-      <span class="chip">⏸ between lines <input type="range" min="0.2" max="2" step="0.1" value="${L.data.pause ?? 0.6}" id="gp" style="width:80px;accent-color:var(--vi)"> <b id="gpv">${L.data.pause ?? 0.6}s</b></span>
-      <span class="chip">⏸ between scenes <input type="range" min="0.5" max="4" step="0.1" value="${L.data.scenePause ?? 1.4}" id="spz" style="width:80px;accent-color:var(--vi)"> <b id="spv">${L.data.scenePause ?? 1.4}s</b></span>
-      ${real ? "" : `<span class="chip warn">positions are estimated until the audio is made</span>`}
-      ${S.scope.voice ? "" : `<span class="chip bad">the voice service is not set up</span>`}
-    </div></div>`;
-  inspector();
-  const pl = $("#player");
-  if (L.audio !== "none") pl.src = `/api/studio/lessons/${L.id}/audio?r=${L.audioRev}${ORG ? "&org=" + encodeURIComponent(ORG) : ""}`;
-  $("#play").onclick = () => {
-    if (L.audio === "none") return preview(pos);
-    if (!pl.paused) return pl.pause();
-    pl.play().catch(e => toast("The audio could not be played: " + (e.message || e.name)));
-  };
-  pl.onerror = () => { if (L.audio !== "none") toast("The audio could not be loaded — make it again"); };
-  $("#loop").onclick = e => { S.loop = !S.loop; e.currentTarget.classList.toggle("on", S.loop); };
-  $("#slow").onclick = e => { pl.playbackRate = pl.playbackRate === 1 ? 0.8 : 1; e.currentTarget.classList.toggle("on", pl.playbackRate !== 1); };
-  $("#gp").oninput = e => { L.data.pause = Number(e.target.value); $("#gpv").textContent = L.data.pause + "s"; changed(); };
-  $("#spz").oninput = e => { L.data.scenePause = Number(e.target.value); $("#spv").textContent = L.data.scenePause + "s"; changed(); };
-  $$("[data-clip]").forEach(c => c.onclick = () => { vSel = Number(c.dataset.clip); $$(".clip").forEach(x => x.classList.toggle("sel", x === c)); inspector(); if (real && pl.src) pl.currentTime = pos[vSel][0]; });
-  clearInterval(pollT);
-  if (job) pollT = setInterval(async () => {
-    if (!/^#voice/.test(location.hash)) return clearInterval(pollT);
-    const f = await api("GET", `/lessons/${L.id}`).catch(() => null);
-    if (f && (!f.job || !["queued", "running"].includes(f.job.status) || f.job.log !== (L.job || {}).log)) {
-      if (f.job && f.job.status === "done") toast("Audio ready ✓");
-      if (f.job && f.job.status === "failed") toast("Making the audio failed: " + f.job.log);
-      V.voice();
-    }
-  }, 5000);
-};
-// no real audio yet: read the lines with the browser's voice and move the playhead along
-let pv = null;
-function preview(pos) {
-  if (pv) { pv.stop = true; speechSynthesis.cancel(); pv = null; $("#play").textContent = "▶"; return; }
-  const all = rows(), me = pv = { stop: false };
-  let k = Math.max(0, vSel);
-  $("#play").textContent = "❚❚";
-  const next = () => {
-    if (me.stop || k >= all.length || !/^#voice/.test(location.hash)) { if (pv === me) { pv = null; const b = $("#play"); if (b) b.textContent = "▶"; } return; }
-    const i = k++, r = all[i], c = S.L.data.cast[r.who] || {};
-    $$(".clip").forEach(x => x.classList.toggle("sel", Number(x.dataset.clip) === i));
-    const ph = $("#ph"); if (ph) ph.style.left = `calc(170px + (100% - 170px) * ${pos[i][0] / S.vtotal})`;
-    $("#clock").innerHTML = `${fmtT(pos[i][0])} <span class="mu">/ ${fmtT(S.vtotal)}</span> <span class="chip">browser voice</span>`;
-    // a lower pitch for male speakers, so two people sound different even in the preview
-    K.speak(r.de, { lang: S.L.course, rate: r.speed || c.speed || 0.95, pitch: c.gender === "m" ? 0.8 : 1.15,
-      onend: () => setTimeout(next, (r.pause ?? S.L.data.pause ?? 0.6) * 1000), onerror: () => { pv = null; toast("This browser cannot speak"); } });
-  };
-  next();
-}
-function wave(n, seed) { return Array.from({ length: Math.min(n, 60) }, (_, i) => `<i style="height:${18 + Math.abs(Math.sin(i * .9 + seed) * 60 + Math.sin(i * .31 + seed * 2) * 22)}%"></i>`).join(""); }
-function inspector() {
-  const L = S.L, all = rows(), el = $("#insp"); if (!el) return;
-  const voices = S.scope.courses[L.course].voices;
-  const vopts = () => voices.map(v => ({ value: v.id, label: voiceName(v.id), sub: v.g === "f" ? "female" : "male", icon: v.g === "f" ? "♀" : "♂" }));
-  if (vSel < 0 || !all[vSel]) {
-    el.innerHTML = `<h3>Voices</h3>${Object.keys(L.data.cast).map(w => `<div style="margin-bottom:10px"><div class="sm" style="margin-bottom:4px"><b style="color:${speakerColor(w)}">${esc(w)}</b></div><l-select data-voice="${esc(w)}"></l-select></div>`).join("")}
-      <div class="mu sm" style="margin-top:12px">Click a clip to change one line: its speed and the pause after it. Changes are heard after 🎙 Make audio (free, a few minutes).</div>`;
-    $$("[data-voice]").forEach(s => { opts(s, vopts(), L.data.cast[s.dataset.voice].voice); s.addEventListener("change", () => { L.data.cast[s.dataset.voice].voice = s.value; changed(); }); });
-    return;
-  }
-  const r = all[vSel], c = L.data.cast[r.who] || {};
-  el.innerHTML = `<h3>Line ${vSel + 1} · <span style="color:${speakerColor(r.who)}">${esc(r.who)}</span><button class="r btn sm" id="insClose">✕</button></h3>
-    <div class="de" style="font:600 15px Inter">${esc(r.de)}</div><div class="mu sm">${esc(r[S.tr] || "")}</div>
-    <div class="words">${words(r.de).map(w => `<span>${esc(w)}</span>`).join("")}</div>
-    <h3 style="margin-top:14px">Delivery</h3>
-    <div class="slider">Speed<input type="range" min="0.7" max="1.3" step="0.05" value="${r.speed || c.speed || 0.95}" id="lsp"><b id="lspv">${r.speed || c.speed || 0.95}×</b></div>
-    <div class="slider">Pause after<input type="range" min="0" max="3" step="0.1" value="${r.pause ?? L.data.pause ?? 0.6}" id="lpa"><b id="lpav">${r.pause ?? L.data.pause ?? 0.6}s</b></div>
-    <h3 style="margin-top:12px">Voice of ${esc(r.who)}</h3><l-select id="lvo"></l-select>
-    <div class="acts" style="justify-content:flex-start"><button class="btn sm" id="lsay">🔊 Quick listen</button><a class="btn sm" href="#script/${L.id}" id="ledit">✎ Edit text</a></div>
-    <div class="mu2 sm" style="margin-top:8px">Quick listen uses the browser's voice; 🎙 Make audio uses the real one.</div>`;
-  $("#insClose").onclick = () => { vSel = -1; $$(".clip").forEach(x => x.classList.remove("sel")); inspector(); };
-  $("#lsp").oninput = e => { r.speed = Number(e.target.value); $("#lspv").textContent = r.speed + "×"; changed(); };
-  $("#lpa").oninput = e => { r.pause = Number(e.target.value); $("#lpav").textContent = r.pause + "s"; changed(); };
-  opts($("#lvo"), vopts(), c.voice).addEventListener("change", e => { c.voice = e.target.value; changed(); });
-  $("#lsay").onclick = () => say(r.de, L.course, r.speed || c.speed || 0.95);
-  $("#ledit").onclick = () => { S.focusLine = vSel; };
-}
-function stopPlayer() { if (typeof pv !== "undefined" && pv) { pv.stop = true; pv = null; } const p = $("#player"); try { p.pause(); } catch {} try { speechSynthesis.cancel(); } catch {} }
-$("#player").addEventListener("timeupdate", () => {
-  const p = $("#player"), ph = $("#ph"); if (!ph || !S.vpos) return;
-  ph.style.left = `calc(170px + (100% - 170px) * ${Math.min(1, p.currentTime / S.vtotal)})`;
-  $("#clock").innerHTML = `${fmtT(p.currentTime)} <span class="mu">/ ${fmtT(S.vtotal)}</span>`;
-  if (S.loop && vSel >= 0 && p.currentTime > S.vpos[vSel][1] + 0.2) p.currentTime = S.vpos[vSel][0];
-  const i = S.vpos.findIndex(t => p.currentTime >= t[0] && p.currentTime < t[1] + 0.3);
-  $$(".clip").forEach(c => c.classList.toggle("sel", Number(c.dataset.clip) === (S.loop && vSel >= 0 ? vSel : i)));
-});
-["play", "pause"].forEach(ev => $("#player").addEventListener(ev, () => { const b = $("#play"); if (b) b.textContent = $("#player").paused ? "▶" : "❚❚"; }));
-ACT.voiceMake = async btn => {
-  btn.disabled = true; await flush();
-  try { await api("POST", `/lessons/${S.L.id}/voice`); toast("Started — the audio is ready in a few minutes"); }
-  catch (e) { toast(e.message); }
-  V.voice();
-};
+/* ================= 〰 voice desk: ui/studio-voice.js ================= */
+const stopPlayer = () => { try { $("#player").pause(); } catch {} if (window.VoiceDesk) VoiceDesk.stop(); else K.stopSpeaking(); };
 ACT.publish = async () => {
   await flush();
   const L = S.L;
@@ -899,4 +776,5 @@ const closeForm = () => K.closeDialogs();
 <script src="/ui/studio-lesson.js?v={{V}}"></script>
 <script src="/ui/studio-menu.js?v={{V}}"></script>
 <script src="/ui/studio-script.js?v={{V}}"></script>
+<script src="/ui/studio-voice.js?v={{V}}"></script>
 </body></html>

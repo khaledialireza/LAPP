@@ -18,8 +18,9 @@ A piece of content is a draft in _studio/drafts/<slug>/draft.json. It moves:
     publish  → writes content/lessons/<NN-slug>/ and adds it to content/index.json
 
 Voices: "piper:<name>" runs offline (downloaded once into _studio/.voices);
-"azure:<voice>" uses Azure Speech when AZURE_SPEECH_KEY and AZURE_SPEECH_REGION
-are set.
+"chatterbox:default" (or "chatterbox:v<id>", a voice cloned from a recording in REFS) is natural and
+emotional, slower, and installed when first needed; "azure:<voice>" uses Azure Speech when
+AZURE_SPEECH_KEY and AZURE_SPEECH_REGION are set.
 
     python3 _studio/studio.py new im-hotel --course de --type talk --level A1 --title "Im Hotel"
 
@@ -273,6 +274,40 @@ def piper(name):
 
 
 _engines = {}
+REFS = {}   # "v<id>" → the recording of a cloned voice (a wav file)
+LOCALE = {"de": "de-DE", "nl": "nl-NL", "pl": "pl-PL"}
+
+
+def chatterbox():
+    if "chatterbox" not in _engines:
+        from chatterbox.mtl_tts import ChatterboxMultilingualTTS
+        _engines["chatterbox"] = ChatterboxMultilingualTTS.from_pretrained(device="cpu")
+    return _engines["chatterbox"]
+
+
+def tempo(x, factor):
+    """faster or slower without changing the pitch (ffmpeg's atempo)"""
+    import av, numpy as np
+    if abs(factor - 1) < 0.01 or not len(x): return x
+    g = av.filter.Graph()
+    src = g.add_abuffer(sample_rate=RATE, format="flt", layout="mono")
+    at = g.add("atempo", str(max(0.5, min(2.0, factor)))); sink = g.add("abuffersink")
+    src.link_to(at); at.link_to(sink); g.configure()
+    fr = av.AudioFrame.from_ndarray(x.reshape(1, -1).astype(np.float32), format="flt", layout="mono"); fr.sample_rate = RATE; fr.pts = 0
+    g.push(fr); g.push(None); out = []
+    while True:
+        try: out.append(g.pull().to_ndarray().reshape(-1))
+        except (av.error.BlockingIOError, av.error.EOFError, EOFError): break
+    return np.concatenate(out).astype(np.float32) if out else x
+
+
+def pitched(x, semis):
+    """higher or lower by semitones, same length (played faster/slower, then stretched back)"""
+    import numpy as np
+    if not semis or not len(x): return x
+    f = 2 ** (semis / 12); n = int(len(x) / f)
+    y = np.interp(np.linspace(0, len(x) - 1, n), np.arange(len(x)), x).astype(np.float32)
+    return tempo(y, 1 / f)
 
 
 FEEL = {  # how a feeling changes a voice that has no styles of its own: [pitch in semitones, pace]
@@ -280,11 +315,12 @@ FEEL = {  # how a feeling changes a voice that has no styles of its own: [pitch 
 AZURE_STYLE = {"happy": "cheerful", "excited": "excited", "sad": "sad", "tired": "sad", "angry": "angry", "polite": "friendly", "whisper": "whispering"}
 
 
-def synth(voice, text, speed, pitch=0.0, feel=""):
-    """float32 mono samples at RATE for one line; pitch in semitones"""
+def synth(voice, text, speed, pitch=0.0, feel="", lang="de", exag=None):
+    """float32 mono samples at RATE for one line; pitch in semitones; exag: how expressive (Chatterbox)"""
     import numpy as np
     kind, name = voice.split(":", 1)
     if kind == "piper":
+        if feel in FEEL: pitch += FEEL[feel][0]; speed = speed * FEEL[feel][1]   # Piper has no feelings of its own
         eng = _engines.get(voice) or _engines.setdefault(voice, piper(name))
         f = 2 ** (pitch / 12) if pitch else 1.0
         a = eng.generate(text, sid=0, speed=speed / f)
@@ -292,6 +328,13 @@ def synth(voice, text, speed, pitch=0.0, feel=""):
         if f != 1.0:   # higher or lower without changing the length: made slower above, played faster here
             n = int(len(x) / f); x = np.interp(np.linspace(0, len(x) - 1, n), np.arange(len(x)), x).astype(np.float32)
         return x
+    if kind == "chatterbox":
+        import numpy as np
+        m = chatterbox()
+        e = exag if exag is not None else {"excited": 0.85, "happy": 0.7, "angry": 0.8, "sad": 0.6, "tired": 0.35, "whisper": 0.3, "polite": 0.45}.get(feel, 0.5)
+        wav = m.generate(text, language_id=lang, audio_prompt_path=REFS.get(name), exaggeration=e, cfg_weight=0.3 if e > 0.6 else 0.5)
+        x = resample(wav.squeeze().cpu().numpy().astype(np.float32), m.sr)
+        return pitched(tempo(x, speed), pitch)
     if kind == "azure":
         key, region = os.environ.get("AZURE_SPEECH_KEY"), os.environ.get("AZURE_SPEECH_REGION")
         if not key: sys.exit("AZURE_SPEECH_KEY / AZURE_SPEECH_REGION not set")
@@ -299,7 +342,7 @@ def synth(voice, text, speed, pitch=0.0, feel=""):
         esc = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
         body = f'<prosody rate="{rate}" pitch="{pitch:+.1f}st">{esc}</prosody>'
         if AZURE_STYLE.get(feel): body = f'<mstts:express-as style="{AZURE_STYLE[feel]}">{body}</mstts:express-as>'
-        ssml = f'<speak version="1.0" xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="de-DE"><voice name="{name}">{body}</voice></speak>'
+        ssml = f'<speak version="1.0" xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="{LOCALE.get(lang, "de-DE")}"><voice name="{name}">{body}</voice></speak>'
         req = urllib.request.Request(f"https://{region}.tts.speech.microsoft.com/cognitiveservices/v1", ssml.encode("utf-8"), {
             "Ocp-Apim-Subscription-Key": key, "Content-Type": "application/ssml+xml",
             "X-Microsoft-OutputFormat": "raw-24khz-16bit-mono-pcm", "User-Agent": "lapp-studio"})
@@ -330,12 +373,11 @@ def clip(d, ln):
     speed = ln.get("speed") or c.get("speed", 0.95)          # a line may have its own speed
     feel = ln.get("feel") or ""
     pitch = float(ln.get("pitch") or 0)
-    if feel in FEEL and not c["voice"].startswith("azure:"): pitch += FEEL[feel][0]; speed = speed * FEEL[feel][1]
     key = hashlib.sha1(f"{c['voice']}|{speed}|{pitch}|{feel}|{ln['de']}".encode()).hexdigest()[:16]
     f = CACHE / f"{key}.npy"
     if f.exists(): return np.load(f)
     CACHE.mkdir(parents=True, exist_ok=True)
-    x = trim(synth(c["voice"], ln["de"], speed, pitch, feel))
+    x = trim(synth(c["voice"], ln["de"], speed, pitch, feel, lang=course(d)))
     np.save(f, x); return x
 
 

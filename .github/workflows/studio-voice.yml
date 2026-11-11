@@ -1,6 +1,7 @@
 # LAPP Studio: makes the audio of one lesson kept in the site's database.
 # The site starts this with a job id and a one-time token (worker/src/lessons.js → voice);
-# _studio/job.py fetches the script, speaks it with Piper and sends the MP3 back.
+# _studio/job.py asks the site what to do: make some lines (new takes), or make what changed and mix the lesson.
+# Voices: Piper (always), Chatterbox (installed when a line uses it), Azure (with the AZURE_SPEECH_* secrets).
 name: studio-voice
 run-name: "studio voice · job ${{ inputs.job }}"
 
@@ -19,7 +20,7 @@ concurrency: { group: "studio-voice-${{ inputs.job }}", cancel-in-progress: true
 jobs:
   voice:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - name: hide the token in the log
         run: echo "::add-mask::${{ inputs.token }}"
@@ -28,9 +29,16 @@ jobs:
         with: { python-version: "3.12" }
       - uses: actions/cache@v4
         with: { path: _studio/.voices, key: piper-voices-v1 }
+      - uses: actions/cache@v4   # the Chatterbox model, once downloaded
+        with: { path: ~/.cache/huggingface, key: chatterbox-mtl-v1 }
       - run: pip install "sherpa-onnx<2" av numpy   # 2.x has no built-in phonemizer for Piper voices
       - name: voice
-        env: { JOB: "${{ inputs.job }}", TOKEN: "${{ inputs.token }}", API: "${{ inputs.api }}" }
+        env:
+          JOB: "${{ inputs.job }}"
+          TOKEN: "${{ inputs.token }}"
+          API: "${{ inputs.api }}"
+          AZURE_SPEECH_KEY: "${{ secrets.AZURE_SPEECH_KEY }}"
+          AZURE_SPEECH_REGION: "${{ secrets.AZURE_SPEECH_REGION }}"
         run: |
           [[ "$JOB" =~ ^[0-9]+$ ]] || { echo "bad job"; exit 1; }
           [[ "$API" =~ ^https://[a-z0-9.-]+$ ]] || { echo "bad api"; exit 1; }

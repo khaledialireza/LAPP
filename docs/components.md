@@ -84,6 +84,14 @@ Tests: scratchpad k1–k5 (desktop, admin, school, files, settings, drag, server
 | 60 | Dead code | admin + school staff sidebars, studio rail, school's old lessons list, desk's ⓘ text | removed |
 | 61 | Server: error, pick, hashing, team check (one copy missed "school disabled"), member check, file download (two safe-type lists), upload name header (X-Name vs X-File-Name; school names kept slashes) | index · ai · lessons · school · desk | `util.js` |
 
+## Section 4 (voice desk) — built on shared pieces
+| # | What | Where | Shared piece |
+|---|------|-------|--------------|
+| 62 | Microphone recording with a level meter | school homework recorder · voice desk (line takes, cloned voice) | `K.record({ max })` → `{ done, secs, on, level(), stop() }` |
+| 63 | Line ids (takes hang on them) | studio save · server save · server read | `lineIds()` (same rule in studio.html and worker/src/voice.js) |
+| 64 | The voice desk | studio | `ui/studio-voice.js` (uses `K.menu`, `K.form`, `K.dialog`, `K.drag`, `K.sendFile`, `K.record`, `K.speak`) |
+| 65 | Uploads of sound files, takes, voice recordings | voice desk | `K.sendFile` (X-Name) → `uploadMeta` on the server |
+
 ## Not merged — the owner decides (two features that do the same job)
 - **Two lesson explorers**: the *Lesson library* (drive.js inside admin/school: folders with rules, map, board, AI ideas) and the *Files* app (lessons + files). Files was meant to replace "Content".
 - **Two curriculum maps**: the studio's home (topic × level with gaps) and the library's Map view.

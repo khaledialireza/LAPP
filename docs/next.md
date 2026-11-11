@@ -3,7 +3,8 @@ Rule: only items the owner approved are recorded as agreed; anything else is mar
 
 ## PRIORITY ORDER v2 (approved; building steps 1+2 now)
 DONE (approved): the whole system is modular — every part that exists twice becomes one shared component (full list and plan: docs/components.md: ui/kit.js, ui/menu.js, ui/kit.css, worker/src/util.js; every page switches to them and its own copies are deleted). Rule from now on: anything new is built as a shared component first.
-Then: the forgotten sections 4 (voice desk) and 5 (cast), see docs/missing.md.
+Then: the forgotten sections 4 (voice desk — DONE) and 5 (cast — next, only with the owner's OK), see docs/missing.md.
+Voice desk setup (owner, when wanted): Azure voices need the secrets AZURE_SPEECH_KEY + AZURE_SPEECH_REGION in GitHub and AZURE_TTS=1 on the Worker; Chatterbox installs itself on the first job that uses it (slow the first time, then cached).
 
 Steps 1+2 (approved to build), split into parts in this order:
  1a. Foundation: modular window/app components; standard window (title bar = name + menus + app buttons, no inner top bar); device detection → desktop layout inside windows; one state-coloured border; no place tag; own SVG icon layer.

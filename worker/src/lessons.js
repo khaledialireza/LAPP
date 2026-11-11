@@ -11,6 +11,7 @@
 // by default LAPP's own, an open-source model on our Cloudflare account). The voice is made
 // with Piper in .github/workflows/studio-voice.yml (_studio/job.py), so it costs nothing.
 import * as AI from "./ai.js";
+import { voiceApi, voicesFor, jobApi, withIds, lineIds, lessonFilesGone } from "./voice.js";
 import { str, int, pick, aiLimit, revConflict, blobPut, blobGet, LEVELS, STAFF, COURSES, sha, enc, memberOf } from "./util.js";
 
 export const TR = ["en", "fa", "ru", "uk"];                       // translation languages
@@ -38,7 +39,7 @@ async function scope(req, env, H, url) {
 async function lessonIn(env, H, sc, id) {
   const l = await env.DB.prepare("SELECT * FROM lessons WHERE id = ? AND org_id = ?").bind(id, sc.org).first();
   if (!l) throw H.fail("no such lesson", 404);
-  l.data = JSON.parse(l.data || "{}");
+  l.data = await withIds(env, l, JSON.parse(l.data || "{}"));
   return l;
 }
 // keep the version a change replaces: every AI change, and a hand-made one at most every 10 minutes; 40 per lesson
@@ -136,64 +137,6 @@ Rules:
 - "de" holds the ${lang} text of each line; scene titles and phrases are ${lang} too (no translations)
 - "cast": every speaker once, with gender "f" (female) or "m" (male), matching the name
 - "phrases": 6–10 key phrases from the text a learner should keep`;
-}
-
-/* ================= the voice job (GitHub Actions) ================= */
-async function startVoice(env, H, req, sc, l) {
-  if (!env.GITHUB_TOKEN) throw H.fail("the voice service is not set up (GITHUB_TOKEN)", 503);
-  const rows = (l.data.scenes || []).flatMap(s => s.lines);
-  if (!rows.length) throw H.fail("write the text first");
-  const missing = rows.find(r => !l.data.cast[r.who]);
-  if (missing) throw H.fail(`${missing.who} has no voice yet`);
-  const running = await env.DB.prepare("SELECT id FROM studio_jobs WHERE lesson_id = ? AND status IN ('queued','running') AND updated_at > ?").bind(l.id, H.now() - 20 * 60e3).first();
-  if (running) throw H.fail("the audio is already being made", 409);
-  const token = H.b64url(H.rand(24));
-  const job = await env.DB.prepare("INSERT INTO studio_jobs (lesson_id, kind, token_hash, rev, created_by, created_at, updated_at) VALUES (?, 'voice', ?, ?, ?, ?, ?) RETURNING id")
-    .bind(l.id, await sha(token), l.rev, sc.u.id, H.now(), H.now()).first();
-  const r = await fetch(`https://api.github.com/repos/${env.REPO}/actions/workflows/studio-voice.yml/dispatches`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${env.GITHUB_TOKEN}`, Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28", "User-Agent": "lapp-studio", "Content-Type": "application/json" },
-    body: JSON.stringify({ ref: env.BRANCH || "main", inputs: { job: String(job.id), token, api: H.appUrl(env, req) } })
-  });
-  if (!r.ok) {
-    await env.DB.prepare("UPDATE studio_jobs SET status = 'failed', log = ? WHERE id = ?").bind(`GitHub ${r.status}`, job.id).run();
-    throw H.fail(`the voice service did not start (GitHub ${r.status})`, 502);
-  }
-  return job.id;
-}
-async function jobApi(req, env, H, id, rest) {
-  const job = await env.DB.prepare("SELECT * FROM studio_jobs WHERE id = ?").bind(id).first();
-  const tok = (req.headers.get("Authorization") || "").replace(/^Bearer /, "");
-  if (!job || !tok || job.token_hash !== await sha(tok) || job.created_at < H.now() - 3 * 3600e3) throw H.fail("not allowed", 403);
-  if (["done", "failed"].includes(job.status)) throw H.fail("this job is over", 409);
-  const l = await env.DB.prepare("SELECT * FROM lessons WHERE id = ?").bind(job.lesson_id).first();
-  if (!l) throw H.fail("no such lesson", 404);
-  const M = req.method;
-  if (rest === "" && M === "GET") {
-    const d = JSON.parse(l.data);
-    return H.json({ course: l.course, cast: d.cast, scenes: d.scenes, pause: d.pause ?? 0.6, scenePause: d.scenePause ?? 1.4 });
-  }
-  if (rest === "/status" && M === "POST") {
-    const b = await H.body(req);
-    await env.DB.prepare("UPDATE studio_jobs SET status = ?, log = ?, updated_at = ? WHERE id = ?").bind(pick(b.status, ["running", "failed"], "running"), str(b.log, 4000), H.now(), id).run();
-    return H.json({ ok: true });
-  }
-  if (rest === "/audio" && M === "PUT") {
-    const buf = new Uint8Array(await req.arrayBuffer());
-    if (buf.length < 100 || buf.length > 40e6) throw H.fail("bad audio", 400);
-    let timings = [];
-    try { timings = JSON.parse(new URL(req.url).searchParams.get("timings") || "[]"); } catch {}
-    const key = `lesson/${l.id}/${job.rev}`;
-    const st = [env.DB.prepare("DELETE FROM blobs WHERE key LIKE ?").bind(`lesson/${l.id}/%`)];
-    st.push(...blobPut(env, key, buf));
-    // the published lesson keeps playing its own audio, so only drafts lose the old one
-    if (l.status === "published") st.shift();
-    st.push(env.DB.prepare("UPDATE lessons SET audio_rev = ?, audio_size = ?, timings = ?, status = CASE WHEN status = 'draft' THEN 'review' ELSE status END WHERE id = ?").bind(job.rev, buf.length, JSON.stringify(timings), l.id));
-    st.push(env.DB.prepare("UPDATE studio_jobs SET status = 'done', log = ?, updated_at = ? WHERE id = ?").bind(`${timings.length} lines`, H.now(), id));
-    await env.DB.batch(st);
-    return H.json({ ok: true });
-  }
-  throw H.fail("not found", 404);
 }
 
 /* ================= audio from D1, with byte ranges ================= */
@@ -323,7 +266,7 @@ async function settleAccess(env, org, F) {
 async function dropLesson(env, id) {
   await env.DB.batch([
     env.DB.prepare("DELETE FROM blobs WHERE key LIKE ?").bind(`lesson/${id}/%`),
-    env.DB.prepare("DELETE FROM studio_jobs WHERE lesson_id = ?").bind(id),
+    ...lessonFilesGone(env, "id = ?", id),
     env.DB.prepare("DELETE FROM materials WHERE kind = 'lesson' AND url = ?").bind(`s-${id}`),
     env.DB.prepare("DELETE FROM lessons WHERE id = ?").bind(id)
   ]);
@@ -332,7 +275,7 @@ async function dropLesson(env, id) {
 export async function lessonsApi(req, env, H, p, url, ctx) {
   const M = req.method;
   let m;
-  if ((m = p.match(/^\/jobs\/(\d+)(\/[a-z]+)?$/))) return jobApi(req, env, H, int(m[1]), m[2] || "");
+  if ((m = p.match(/^\/jobs\/(\d+)(\/[a-z]+(?:\/[\w-]+)?)?$/))) return jobApi(req, env, H, int(m[1]), m[2] || "");
 
   const sc = await scope(req, env, H, url);
   const t = H.now();
@@ -341,7 +284,7 @@ export async function lessonsApi(req, env, H, p, url, ctx) {
     const schools = (await env.DB.prepare("SELECT o.slug, o.name FROM org_members m JOIN orgs o ON o.id = m.org_id WHERE m.user_id = ? AND m.active = 1 AND m.role IN ('admin','teacher') AND o.disabled = 0").bind(sc.u.id).all()).results;
     return H.json({ scope: { kind: sc.kind, name: sc.name, slug: sc.slug, color: sc.color || "" }, me: { id: sc.u.id, name: sc.u.name, username: sc.u.username, role: sc.u.role },
       staff: STAFF.includes(sc.u.role), schools, ai: await AI.available(env), voice: !!env.GITHUB_TOKEN,
-      courses: Object.fromEntries(Object.entries(COURSES).map(([k, v]) => [k, { name: v.name, voices: [...v.female.map(x => ({ id: x, g: "f" })), ...v.male.map(x => ({ id: x, g: "m" }))] }])),
+      courses: Object.fromEntries(await Promise.all(Object.entries(COURSES).map(async ([k, v]) => [k, { name: v.name, voices: await voicesFor(env, sc.org, k) }]))),
       topics: TOPICS, levels: LEVELS, types: TYPES, maxWords: MAX_WORDS });
   }
 
@@ -483,6 +426,7 @@ export async function lessonsApi(req, env, H, p, url, ctx) {
     if (b.topic !== undefined) { sets.push("topic = ?"); vals.push(pick(b.topic, TOPICS, l.topic)); }
     if (b.access !== undefined && !sc.org) { sets.push("access_own = ?"); vals.push(b.access === "plus" ? "plus" : ""); }
     if (b.data !== undefined) {
+      if (b.data && Array.isArray(b.data.scenes)) lineIds(b.data);   // every line keeps an id (its takes hang on it)
       const text = JSON.stringify(b.data);
       if (text.length > 600_000) throw H.fail("the script is too long", 413);
       if (!b.data || !Array.isArray(b.data.scenes) || typeof b.data.cast !== "object") throw H.fail("bad script");
@@ -654,10 +598,9 @@ Plan 1–8 lessons. "title" in the course language, "brief" in English: the situ
   }
 
   /* ---- voice ---- */
-  if ((m = p.match(/^\/lessons\/(\d+)\/voice$/)) && M === "POST") {
-    const l = await lessonIn(env, H, sc, int(m[1]));
-    return H.json({ job: await startVoice(env, H, req, sc, l) });
-  }
+  // the voice desk: takes, sound files, subtitles, the voice library (voice.js)
+  const vr = await voiceApi(req, env, H, sc, p, url, { lessonIn });
+  if (vr) return vr;
   if ((m = p.match(/^\/lessons\/(\d+)\/audio$/)) && M === "GET") {
     const l = await env.DB.prepare("SELECT id, audio_rev, audio_size FROM lessons WHERE id = ? AND org_id = ?").bind(int(m[1]), sc.org).first();
     if (!l || !l.audio_rev) return new Response("no audio yet", { status: 404 });

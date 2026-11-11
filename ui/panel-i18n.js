@@ -7,6 +7,8 @@
 //   - PanelI18N.t("English text", { n: 3 }) translates in code
 //   - PanelI18N.locale is the date/number locale for toLocale…() calls
 (() => {
+  // the translations change with every release: fetched with this script's own version (?v=…)
+  const VER = (() => { try { return new URL(document.currentScript.src).searchParams.get("v"); } catch { return null; } })();
   const LANGS = [
     { code: "en", name: "English", dir: "ltr", locale: "en-GB" },
     { code: "fa", name: "فارسی", dir: "rtl", locale: "fa-IR-u-ca-gregory-nu-latn" },
@@ -122,7 +124,7 @@
   const dicts = {};
   async function load(l) {
     if (l === "en") return {};
-    if (!dicts[l]) dicts[l] = fetch(`/content/lang/${l}/panel.json?v=${window.PANEL_V || 12}`).then(r => r.ok ? r.json() : {}).catch(() => ({}));
+    if (!dicts[l]) dicts[l] = fetch(`/content/lang/${l}/panel.json?v=${VER || window.PANEL_V || 12}`).then(r => r.ok ? r.json() : {}).catch(() => ({}));
     return dicts[l];
   }
   async function use(l, save) {
