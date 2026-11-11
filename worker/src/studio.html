@@ -42,8 +42,6 @@ textarea.in{resize:vertical;min-height:70px}
 button.cell:hover{outline:2px solid rgba(255,255,255,.35)}
 .c0{background:rgba(255,255,255,.03);border:1px dashed rgba(255,255,255,.12);color:var(--mu2)}
 .c1{background:rgba(139,92,246,.22)}.c2{background:rgba(139,92,246,.45)}.c3{background:rgba(139,92,246,.75)}
-.cell.hot{box-shadow:0 0 0 2px var(--pk),0 0 18px rgba(255,61,127,.45)}
-.cell.hot::after{content:"✨";position:absolute;top:-8px;inset-inline-start:-6px;font-size:12px}
 .kp.three{grid-template-columns:repeat(3,1fr);margin-bottom:12px}
 .feed{display:flex;flex-direction:column;gap:9px}
 .fi{display:flex;gap:10px;align-items:center;background:var(--p3);border:1px solid var(--ln);border-radius:12px;padding:10px}
@@ -274,11 +272,11 @@ V.home = async () => {
     </div>
     <div class="pn">
       <h3>Curriculum map · topic × level <span class="r"><l-select id="mapCourse" style="width:150px"></l-select></span></h3>
-      <div class="map">
-        <span></span>${S.scope.levels.map(l => `<span class="h">${l}</span>`).join("")}
-        ${S.scope.topics.map(tp => `<span class="rl">${esc(K.TOPICS[tp])}</span>${S.scope.levels.map(lv => { const n = count(tp, lv); return `<button class="cell c${Math.min(3, n)} ${hot(tp, lv) ? "hot" : ""}" data-cell="${tp}|${lv}" title="${esc(K.TOPICS[tp])} · ${lv}">${n || "—"}</button>`; }).join("")}`).join("")}
-      </div>
-      <div class="mu sm" style="margin-top:8px">✨ = a gap next to lessons you already have · click a cell to make a lesson there</div>
+      ${(() => { // only the topics and levels that have lessons
+        const tps = S.scope.topics.filter(tp => mine.some(l => l.topic === tp)), lvs = S.scope.levels.filter(lv => mine.some(l => l.level === lv));
+        if (!tps.length) return `<div class="empty"><b>No lessons in this course yet</b></div>`;
+        return `<div class="map" style="grid-template-columns:110px repeat(${lvs.length},1fr)"><span></span>${lvs.map(l => `<span class="h">${l}</span>`).join("")}
+          ${tps.map(tp => `<span class="rl">${esc(K.TOPICS[tp])}</span>${lvs.map(lv => { const n = count(tp, lv); return `<button class="cell c${Math.min(3, n)}" data-cell="${tp}|${lv}" title="${esc(K.TOPICS[tp])} · ${lv}">${n || "—"}</button>`; }).join("")}`).join("")}</div>`; })()}
     </div>
     <div class="pn">
       <div class="kp three"><div><b>${ov.learners}</b><span>${S.scope.kind === "school" ? "students active this week" : "learners active this week"}</span></div><div><b style="color:var(--gr)">${ov.says}</b><span>sentences spoken this week</span></div><div><b>${published}</b><span>lessons published</span></div></div>
