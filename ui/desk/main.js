@@ -31,7 +31,7 @@
     if (k === "cursor") { D.LS.set("lapp.cursor", D.LS.get("lapp.cursor", "") === "system" ? "" : "system"); return D.applyLook(); }
     if (k === "wall") { const L = ["", "dawn", "sea", "plain"]; return D.setLook("wall", L[(L.indexOf(D.DESK.wall || "") + 1) % L.length]); }
     if (k === "site") return window.open("/", "_blank", "noopener");
-    if (k === "out") return D.api("POST", "/auth/logout").finally(() => location.href = "/");
+    if (k === "out") return K.signOut();
   };
 
   document.addEventListener("click", e => {

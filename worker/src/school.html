@@ -1,25 +1,13 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<html lang="en"><head><!--LAPP:HEAD-->
 <title>LAPP School</title>
-<meta name="robots" content="noindex">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/ui/kit.css?v=1">
-<script src="/ui/kit.js?v=1"></script>
-<script src="/ui/menu.js?v=1"></script>
-<script src="/ui/lapp-ui.js?v=5"></script>
-<script src="/ui/panel-i18n.js?v=12"></script>
-<script src="/ui/cursor.js?v=2"></script>
-<script src="/ui/theme.js?v=2"></script>
-<script src="/ui/frame.js?v=4"></script>
-<script src="/ui/shell.js?v=6"></script>
-<script src="/ui/drive.js?v=5"></script>
+<script src="/ui/shell.js?v={{V}}"></script>
+<script src="/ui/drive.js?v={{V}}"></script>
 <style>
 /* the school portal — same look as the studio and the admin panel */
 :root{--org:#8B5CF6;
 }
-*{box-sizing:border-box;margin:0}[hidden]{display:none!important}
 body{background:var(--bg);color:var(--tx);font:14px/1.5 Inter,system-ui,sans-serif;min-height:100vh;display:grid;grid-template-columns:240px 1fr}
-button,input,select,textarea{font:inherit;color:inherit}button{cursor:pointer;border:0;background:none}a{color:inherit}
 aside{background:var(--p1);border-inline-end:1px solid var(--ln);padding:16px;display:flex;flex-direction:column;gap:5px;height:100vh;position:sticky;top:0;overflow:auto;z-index:2}
 .lg{display:flex;align-items:center;gap:10px;font-weight:800;font-size:15px}.lg i{width:36px;height:36px;border-radius:11px;background:var(--org);display:grid;place-items:center;font-style:normal;font-weight:800;flex:none}
 .org{font-size:11.5px;color:var(--mu);margin:2px 0 12px 46px}
@@ -28,12 +16,12 @@ aside{background:var(--p1);border-inline-end:1px solid var(--ln);padding:16px;di
 .sp{flex:1}.me{border-top:1px solid var(--ln);padding-top:12px;font-size:12px;color:var(--mu);display:flex;flex-direction:column;gap:8px}
 main{padding:22px 26px 80px;display:flex;flex-direction:column;gap:14px;min-width:0;max-width:1300px}
 
-.crumb{font-size:12.5px;color:var(--mu);text-decoration:none}.crumb:hover{color:var(--tx)}
+
 .b.ok{background:rgba(52,211,153,.16);color:var(--gr);border-color:rgba(52,211,153,.4)}.b.sm{height:30px;padding:0 10px;font-size:12.5px}.b:disabled{opacity:.4;cursor:default}
 
 .card h3{font-size:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:8px}
-.g2{display:grid;grid-template-columns:1.4fr 1fr;gap:14px}.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.r{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--ln)}.r:last-child{border:0}.r>span:first-child{min-width:0}
+
+.r>span:first-child{min-width:0}
 .mu{color:var(--mu);font-size:12.5px}.c{text-align:center}
 
 .live-dot{background:var(--rd);color:#fff;font-weight:800;font-size:11px;padding:2px 8px;border-radius:6px}
@@ -72,13 +60,12 @@ canvas.board{position:absolute;inset:0;width:100%;height:100%;border-radius:16px
 .tl{min-width:42px;height:42px;border-radius:12px;background:var(--p3);display:grid;place-items:center;font-size:17px;padding:0 8px;flex:none}.tl.on{background:rgba(139,92,246,.4)}.tl.red{background:rgba(248,113,113,.25)}
 .swatch{width:22px;height:22px;border-radius:50%;border:2px solid transparent;flex:none}.swatch.on{border-color:#fff}
 .hand{display:flex;justify-content:space-between;align-items:center;background:rgba(251,191,36,.12);border-radius:10px;padding:6px 10px;font-size:13px}
-:focus-visible{outline:2px solid var(--cy);outline-offset:2px}
-@media (max-width:1000px){html:not(.desk) .g2,html:not(.desk) .g3{grid-template-columns:1fr}html:not(.desk) .week{grid-template-columns:repeat(2,minmax(0,1fr))}html:not(.desk) .lv{grid-template-columns:1fr;grid-template-rows:56px auto 1fr 62px}html:not(.desk) .lv-side{border-inline-start:0;border-top:1px solid var(--ln);max-height:34vh}html:not(.desk) .lv-tools{grid-column:1}html:not(.desk) .lv-top{grid-column:1}}
+@media (max-width:1000px){html:not(.desk) .week{grid-template-columns:repeat(2,minmax(0,1fr))}html:not(.desk) .lv{grid-template-columns:1fr;grid-template-rows:56px auto 1fr 62px}html:not(.desk) .lv-side{border-inline-start:0;border-top:1px solid var(--ln);max-height:34vh}html:not(.desk) .lv-tools{grid-column:1}html:not(.desk) .lv-top{grid-column:1}}
 @media (max-width:760px){html:not(.desk) body{grid-template-columns:1fr}html:not(.desk) aside{position:sticky;height:auto;flex-direction:row;flex-wrap:nowrap;overflow-x:auto;gap:4px;padding:10px 12px}html:not(.desk) .lg span,html:not(.desk) .org,html:not(.desk) .sp,html:not(.desk) .me{display:none}html:not(.desk) .nv{white-space:nowrap}html:not(.desk) main{padding:16px 16px 60px}html:not(.desk) .week{grid-template-columns:1fr}html:not(.desk) .f2{grid-template-columns:1fr}html:not(.desk) .top h1{font-size:22px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 
 /* ===== students: the LAPP app's look ===== */
-body.student{--bg:#F2F2F7;--p1:#FFFFFF;--p2:#FFFFFF;--p3:rgba(120,120,128,.12);--ln:rgba(60,60,67,.12);--ln2:rgba(60,60,67,.18);--tx:#000;--mu:rgba(60,60,67,.6);--mu2:rgba(60,60,67,.35);
+body.student{--pop:var(--p1);--bg:#F2F2F7;--p1:#FFFFFF;--p2:#FFFFFF;--p3:rgba(120,120,128,.12);--ln:rgba(60,60,67,.12);--ln2:rgba(60,60,67,.18);--tx:#000;--mu:rgba(60,60,67,.6);--mu2:rgba(60,60,67,.35);
   --accent:#FF2D55;--accent2:#5856D6;--g:linear-gradient(135deg,#FF2D55,#5856D6);--ui-accent:#5856D6;color-scheme:light;
   display:block;font-family:Inter,system-ui,-apple-system,sans-serif}
 @media (prefers-color-scheme:dark){body.student{--bg:#000;--p1:#1C1C1E;--p2:#1C1C1E;--p3:rgba(120,120,128,.24);--ln:rgba(84,84,88,.5);--ln2:rgba(84,84,88,.7);--tx:#FFF;--mu:rgba(235,235,245,.6);--mu2:rgba(235,235,245,.35);
@@ -95,7 +82,7 @@ body.student .card{border:0;border-radius:22px;padding:16px 18px;box-shadow:0 1p
 body.student .kp>div{border:0;border-radius:18px}
 body.student .b{background:var(--p3);border:0;color:var(--tx)}body.student .b.pr{background:var(--g);color:#fff}
 body.student .chip{background:var(--p2);border:0}body.student .chip.on{background:var(--tx);color:var(--bg)}
-body.student .r{border-color:var(--ln)}
+body.student .li{border-color:var(--ln)}
 body.student .hero{border-radius:28px;padding:22px;background:var(--g);color:#fff;min-height:170px;align-items:flex-end;box-shadow:0 18px 40px color-mix(in srgb,var(--accent) 25%,transparent)}
 body.student .hero b{font-size:26px;line-height:1.15;margin:6px 0 4px}body.student .hero .b{background:#fff;color:#111;height:44px;padding:0 20px;border-radius:14px;font-size:15px}
 body.student .hero .tag{font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;opacity:.9}
@@ -112,8 +99,6 @@ body.student .hw .ic{width:40px;height:40px;border-radius:12px;background:var(--
 body.student .hw .tx{flex:1;min-width:0}body.student .hw .tx b{display:block}body.student .hw .tx small{color:var(--mu);font-size:12.5px}
 body.student .rings{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center}
 body.student .rings div{background:var(--p3);border-radius:18px;padding:14px 8px}body.student .rings b{display:block;font-size:24px;font-weight:800;font-variant-numeric:tabular-nums}body.student .rings span{font-size:12px;color:var(--mu)}
-body.student .menu{position:absolute;right:max(16px,calc((100vw - 760px)/2));top:60px;background:var(--p1);border-radius:16px;box-shadow:0 14px 40px rgba(0,0,0,.18);padding:6px;display:flex;flex-direction:column;min-width:200px;z-index:30}
-body.student .menu a,body.student .menu button{padding:10px 12px;border-radius:10px;text-align:start;text-decoration:none;color:var(--tx);font-size:14px}body.student .menu a:hover,body.student .menu button:hover{background:var(--p3)}
 body.student.live main{max-width:none;padding:0}body.student.live aside,body.student.live .tabbar{display:none}
 </style></head><body>
 <aside id="side"></aside>
@@ -128,9 +113,8 @@ const fmtDay = ms => K.date(ms, { weekday: "short", day: "numeric", month: "shor
 const fmtTime = ms => K.time(ms);
 const fmtDate = s => K.date(s) || "—";
 const ago = ms => K.ago(ms);
-const COURSE = { de: "German", nl: "Dutch", pl: "Polish" };
-const FLAG = { de: "🇩🇪", nl: "🇳🇱", pl: "🇵🇱" };
-const courseOpts = () => Object.entries(COURSE).map(([k, l]) => [k, l, { icon: FLAG[k], sub: { de: "Deutsch", nl: "Nederlands", pl: "Polski" }[k] }]);
+const COURSE = Object.fromEntries(Object.entries(K.COURSES).map(([k, c]) => [k, c.name])), FLAG = K.flag;
+const courseOpts = K.opt.courses;
 const ROLE_ICON = { admin: "🛠", teacher: "👩‍🏫", finance: "💶", student: "🎓" };
 const roleOpts = () => Object.entries(ROLE).map(([k, l]) => [k, l, { icon: ROLE_ICON[k] }]);
 const personOpt = m => [m.id, nameOf(m), { icon: (nameOf(m) || "?").charAt(0).toUpperCase(), sub: m.email || "@" + m.username }];
@@ -163,25 +147,11 @@ function side() {
     const ICONS = { home: "🏠", calendar: "📅", classes: "📚", homework: "📝", fees: "💶" };
     let bar = $("#tabbar"); if (!bar) { bar = document.createElement("nav"); bar.id = "tabbar"; bar.className = "tabbar"; bar.setAttribute("aria-label", "Sections"); document.body.append(bar); }
     bar.innerHTML = nav.map(([k, l]) => `<a href="#${k}" data-v="${k}" class="nv"><span>${ICONS[k]}</span>${esc(l.replace(/^\S+\s/, "").replace(/^My (.)/, (m, c) => c.toUpperCase()))}</a>`).join("");
-    $("#meBtn").onclick = e => {
-      e.stopPropagation();
-      let m = $("#meMenu"); if (m) return m.remove();
-      m = document.createElement("div"); m.id = "meMenu"; m.className = "menu";
-      m.innerHTML = `<a href="/">🎧 Practise in the LAPP app</a><button id="lng">🌐 Language</button><button id="out">↩ Sign out</button>`;
-      $("#side").append(m);
-      $("#out").onclick = async () => { await fetch("/api/auth/logout", { method: "POST", headers: { "X-LAPP": "1" } }); location.href = "/"; };
-      $("#lng").onclick = ev => { ev.stopPropagation(); PanelI18N.menu($("#meBtn")); m.remove(); };
-      document.addEventListener("click", () => m.remove(), { once: true });
-    };
+    $("#meBtn").onclick = e => K.menuAt(e.currentTarget, [{ label: "Practise in the LAPP app", icon: "🎧", run: () => { location.href = "/"; } },
+      { label: "Language", icon: "🌐", run: () => PanelI18N.menu($("#meBtn")) }, "-", { label: "Sign out", icon: "↩", run: K.signOut }], { end: true });
     return;
   }
-  if (window.Shell && !Shell.active) return startShell(nav);
-  if (window.Shell && Shell.active) return;
-  $("#side").innerHTML = `<div class="lg"><i style="background:${esc(S.org.color)}">${esc(S.org.name.charAt(0))}</i><span>${esc(S.org.name)}</span></div><div class="org">${ROLE[S.role]}</div>
-    ${nav.map(([k, l]) => `<a class="nv" href="#${k}" data-v="${k}">${l}</a>`).join("")}
-    <div class="sp"></div><div class="me"><span>@${esc(S.me.username)}</span><a class="b sm" href="/">Open the LAPP app</a><button class="b sm" id="lng">🌐 Language</button><button class="b sm" id="out">Sign out</button></div>`;
-  $("#lng").onclick = e => { e.stopPropagation(); PanelI18N.menu(e.currentTarget); };
-  $("#out").onclick = async () => { await fetch("/api/auth/logout", { method: "POST", headers: { "X-LAPP": "1" } }); location.href = "/"; };
+  if (!Shell.active) startShell(nav);
 }
 
 function startShell(nav) {
@@ -189,7 +159,7 @@ function startShell(nav) {
   const NAVS = [...nav.map(([k, l]) => ({ route: k, label: label(l), icon: icon(l), group: { overview: "School", classes: "School", people: "School", timetable: "School", week: "Teaching", homework: "Teaching", lessons: "Content", finance: "Money", settings: "System" }[k] || "School" })),
     { route: "class", label: "Class", icon: "🏫", hidden: true }, { route: "hw", label: "Homework", icon: "📝", hidden: true }, { route: "live", label: "Live class", icon: "🔴", hidden: true }];
   Shell.init({
-    side: $("#side"), main: $("#view"), key: `lapp.school.${SLUG}.${S.me.id}`, name: S.org.name, home: nav[0][0], nav: NAVS,
+    main: $("#view"), name: S.org.name, home: nav[0][0], nav: NAVS,
     brand: `<div class="lg" style="margin-bottom:10px"><i style="background:${esc(S.org.color)}">${esc(S.org.name.charAt(0))}</i><span>${esc(S.org.name)}</span></div>`,
     title: r => { const [v, a] = r.split("/"); if (v === "class" && CLASSES) { const c = CLASSES.find(x => String(x.id) === a); return c ? c.name : "Class"; } return null; },
     render: async r => { const [v, arg] = r.split("/"); AFTER = null; return await (V[v] || V[nav[0][0]])(arg); },
@@ -220,17 +190,17 @@ V.overview = async () => {
   const due = hw.assignments.filter(a => a.due_at && a.due_at > now - DAYMS && a.due_at < now + 7 * DAYMS);
   return `<div class="top"><h1>Overview</h1><button class="b" data-go="import">⬆ Import people (CSV)</button><button class="b pr" data-go="invite">＋ Add a person</button></div>
   <div class="kp"><div><b>${c.students}</b><span>Students</span></div><div><b>${cl.filter(k => !k.archived).length}</b><span>Classes</span></div><div><b>${c.teachers}</b><span>Teachers</span></div><div><b>${c.staff}</b><span>Admins & finance</span></div>${fees ? `<div><b>${money(fees.summary.open)}</b><span>Open fees · ${money(fees.summary.overdue)} overdue</span></div>` : ""}</div>
-  <div class="g2"><div class="card"><h3>Classes <a class="b sm" href="#classes">All classes</a></h3>${cl.filter(k => !k.archived).slice(0, 8).map(k => `<div class="r"><span><a href="#class/${k.id}"><b>${esc(k.name)}</b></a> <span class="mu">${COURSE[k.course]} ${esc(k.level)} · ${esc(k.place)}</span></span>
+  <div class="split"><div class="card"><h3>Classes <a class="b sm" href="#classes">All classes</a></h3>${cl.filter(k => !k.archived).slice(0, 8).map(k => `<div class="li"><span><a href="#class/${k.id}"><b>${esc(k.name)}</b></a> <span class="mu">${COURSE[k.course]} ${esc(k.level)} · ${esc(k.place)}</span></span>
     <span class="mu">${k.teacher_name || k.teacher_username ? "👤 " + esc(k.teacher_name || k.teacher_username) : `<span class="pl bad">No teacher</span>`} · ${k.students} students</span>${k.live_event ? `<a class="pl bad" href="#live/${k.live_event}">LIVE</a>` : `<span class="pl ok">${k.next_at ? fmtDay(k.next_at) : "no lessons planned"}</span>`}</div>`).join("") || `<div class="empty">No classes yet. <button class="b sm" data-go="newclass">Create the first class</button></div>`}</div>
-  <div class="card"><h3>Today</h3>${today.map(e => `<div class="r"><span>${e.status === "live" ? `<span class="live-dot">LIVE</span> ` : ""}<b>${esc(e.class_name)}</b> <span class="mu">${fmtTime(e.starts_at)}–${fmtTime(e.ends_at)}</span></span>${liveBtn(e) || `<span class="mu">${e.status}</span>`}</div>`).join("") || `<div class="r mu">No lessons today</div>`}
-    <div class="r"><span>📝 Homework due this week</span><span class="mu">${due.length}</span></div>${fees ? `<div class="r"><span>💶 Overdue payments</span><a class="mu" href="#finance">${fees.fees.filter(f => f.overdue > 0).length} students</a></div>` : ""}</div></div>`;
+  <div class="card"><h3>Today</h3>${today.map(e => `<div class="li"><span>${e.status === "live" ? `<span class="live-dot">LIVE</span> ` : ""}<b>${esc(e.class_name)}</b> <span class="mu">${fmtTime(e.starts_at)}–${fmtTime(e.ends_at)}</span></span>${liveBtn(e) || `<span class="mu">${e.status}</span>`}</div>`).join("") || `<div class="li mu">No lessons today</div>`}
+    <div class="li"><span>📝 Homework due this week</span><span class="mu">${due.length}</span></div>${fees ? `<div class="li"><span>💶 Overdue payments</span><a class="mu" href="#finance">${fees.fees.filter(f => f.overdue > 0).length} students</a></div>` : ""}</div></div>`;
 };
 
 /* ---- classes ---- */
 V.classes = async () => {
   const cl = await classes(true);
   return `<div class="top"><h1>${can("student") ? "My classes" : can("teacher") ? "My classes" : "Classes"}</h1>${can("admin") ? `<button class="b pr" data-go="newclass">＋ New class</button>` : ""}</div>
-  <div class="g3">${cl.map(k => `<a class="card" href="#class/${k.id}" style="text-decoration:none;display:flex;flex-direction:column;gap:6px;${k.archived ? "opacity:.5" : ""}">
+  <div class="cols3">${cl.map(k => `<a class="card" href="#class/${k.id}" style="text-decoration:none;display:flex;flex-direction:column;gap:6px;${k.archived ? "opacity:.5" : ""}">
     <span class="mu">${COURSE[k.course]} · ${esc(k.level)} · ${esc(k.place)}</span><b style="font-size:17px">${esc(k.name)}</b>
     <span class="mu">${k.teacher_name || k.teacher_username ? "👤 " + esc(k.teacher_name || k.teacher_username) : "No teacher yet"} · ${k.students} students</span>
     <span>${k.live_event ? `<span class="live-dot">LIVE NOW</span>` : k.next_at ? `<span class="pl cy">Next: ${fmtDay(k.next_at)} ${fmtTime(k.next_at)}</span>` : `<span class="pl ">No lessons planned</span>`}${k.archived ? ` <span class="pl ">archived</span>` : ""}</span></a>`).join("") || `<div class="card empty">No classes yet</div>`}</div>`;
@@ -238,42 +208,9 @@ V.classes = async () => {
 // the school's own lessons, made in the studio (only its students see them)
 const studioApi = K.apiAt("/api/studio");
 const studio = (p, m = "GET", b) => studioApi(m, `${p}${p.includes("?") ? "&" : "?"}org=${SLUG}`, b);
-const LTYPE = { talk: ["💬", "Conversation"], lesson: ["🎧", "Lesson"], story: ["📖", "Story"] };
-const LTOPIC = { daily: "Daily life", travel: "Travel & hotel", food: "Food & shopping", health: "Health & doctor", work: "Work & office", home: "Home & family", city: "City & transport", school: "School & study", story: "Stories", other: "Other" };
 V.lessons = async () => {
-  if (window.Drive && window.Shell && Shell.active) {
-    Drive.setup({ api: (p, m = "GET", b) => studio(p, m, b), lapp: false, studioUrl: (id, part) => `/studio?org=${SLUG}#${part || "script"}/${id}`, refresh: () => Shell.refresh("lessons"), newLesson: (f, r) => newLessonForm(f, r) });
-    await Drive.load(); return Drive.html();
-  }
-  const { lessons } = await studio("/lessons");
-  return `<div class="top"><h1>Lessons</h1><button class="b pr" data-go="newlesson">＋ New lesson</button></div>
-  <p class="mu">Your school's own audio lessons. Make one, then the studio opens: write it (with AI or by hand), make the audio, publish. Published lessons can be added to a class as material — only your students see them.</p>
-  ${lessons.length ? `<div class="g3">${lessons.map(l => `<a class="card" href="/studio?org=${SLUG}#script/${l.id}" target="_blank" rel="noopener" title="Opens the studio in a new browser tab" style="text-decoration:none;display:flex;flex-direction:column;gap:6px">
-    <span class="mu">${FLAG[l.course] || ""} ${COURSE[l.course] || ""} · ${esc(l.level)} · ${LTYPE[l.type][0]} ${esc(LTOPIC[l.topic] || "")}</span><b style="font-size:17px">${esc(l.title)}</b>
-    <span class="mu">${l.lines ? `${l.approved}/${l.lines} lines approved` : "no text yet"} · ${{ ready: "🎧 audio", old: "🎧 audio older than text", none: "no audio" }[l.audio]}</span>
-    <span>${K.lessonState(l.status)}</span></a>`).join("")}</div>`
-    : `<div class="card empty">No lessons yet. Make the first one with ＋ New lesson.</div>`}`;
-};
-function newLessonForm(folder = 0, rules = {}) {
-  form("New lesson", [
-    { name: "title", label: "Title (in the course language)", required: true, ph: "Am Bahnhof" },
-    { type: "html", html: `<div class="cols2">` },
-    { name: "course", label: "Language", type: "select", options: courseOpts(), value: S.org.course || "de" },
-    { name: "level", label: "Level", type: "select", options: ["A1", "A2", "B1", "B2", "C1", "C2"].map(x => [x, x]), value: rules.level || "A1" },
-    { type: "html", html: `</div><div class="cols2">` },
-    { name: "type", label: "Type", type: "select", options: Object.entries(LTYPE).map(([k, [i, l]]) => [k, l, { icon: i }]) },
-    { name: "topic", label: "Topic", type: "select", options: Object.entries(LTOPIC).map(([k, l]) => [k, l]) },
-    { type: "html", html: `</div>` },
-    { name: "brief", label: "What should it be about? (the AI writes from this)", type: "textarea", ph: "Buying a ticket, finding the platform, a delay…" }
-  ], async v => {
-    const w = window.open("about:blank", "_blank");
-    try {
-      const l = await studio("/lessons", "POST", { ...v, folder }), url = `/studio?org=${SLUG}#script/${l.id}`;
-      if (window.Drive) Drive.reload().catch(() => {});
-      if (w) { w.location = url; toast("Lesson created · the studio opened in a new tab"); } else toast("Lesson created", { action: "Open the studio", run: () => window.open(url, "_blank") });
-      show();
-    } catch (e) { if (w) w.close(); throw e; }
-  }, "Create and open the studio ↗");
+  Drive.setup({ api: (p, m = "GET", b) => studio(p, m, b), lapp: false, org: SLUG, refresh: () => Shell.refresh("lessons") });
+  await Drive.load(); return Drive.html();
 };
 
 let CT = "material";
@@ -287,11 +224,11 @@ V.class = async id => {
     ${mats.materials.map(m => matRow(m, canTeach)).join("") || `<div class="empty">${canTeach ? "Add texts, links, files or LAPP lessons for this class" : "Nothing shared yet"}</div>`}</div>`;
   if (CT === "homework") body = `<div class="card"><h3>Homework ${canTeach ? `<button class="b sm pr" data-go="newhw" data-k="${k.id}">＋ New homework</button>` : ""}</h3>${hwRows(hw.assignments)}</div>`;
   if (CT === "lessons") body = `<div class="card"><h3>Lessons ${canTeach ? `<button class="b sm pr" data-go="newevents" data-k="${k.id}">＋ Plan lessons</button>` : ""}</h3>
-    ${ev.map(e => `<div class="r"><span><b>${fmtDay(e.starts_at)}</b> <span class="mu">${fmtTime(e.starts_at)}–${fmtTime(e.ends_at)}${e.title ? " · " + esc(e.title) : ""}</span></span><span style="display:flex;gap:6px;align-items:center">
+    ${ev.map(e => `<div class="li"><span><b>${fmtDay(e.starts_at)}</b> <span class="mu">${fmtTime(e.starts_at)}–${fmtTime(e.ends_at)}${e.title ? " · " + esc(e.title) : ""}</span></span><span style="display:flex;gap:6px;align-items:center">
       <span class="pl ${e.status === "live" ? "bad" : e.status === "done" ? "ok" : e.status === "cancelled" ? "" : "cy"}">${e.status}</span>
       ${canTeach && e.status !== "cancelled" ? `<button class="b sm" data-go="attend" data-e="${e.id}">✅ Attendance</button>${e.status === "planned" ? `<button class="b sm pr" data-go="startlive" data-e="${e.id}">▶ Start</button><button class="b sm" data-go="cancelev" data-e="${e.id}">Cancel</button>` : liveBtn(e)}` : liveBtn(e)}</span></div>`).join("") || `<div class="empty">No lessons planned</div>`}</div>`;
-  if (CT === "students") body = `<div class="card"><h3>Students ${can("admin") ? `<button class="b sm" data-go="classstudents" data-k="${k.id}">Choose students</button>` : ""}</h3>${st.map(s => `<div class="r"><span><b>${esc(nameOf(s))}</b> <span class="mu">@${esc(s.username)}</span></span></div>`).join("") || `<div class="empty">No students in this class yet</div>`}</div>`;
-  return `<a class="crumb" href="#classes">← Classes</a><div class="top"><h1>${esc(k.name)}</h1>
+  if (CT === "students") body = `<div class="card"><h3>Students ${can("admin") ? `<button class="b sm" data-go="classstudents" data-k="${k.id}">Choose students</button>` : ""}</h3>${st.map(s => `<div class="li"><span><b>${esc(nameOf(s))}</b> <span class="mu">@${esc(s.username)}</span></span></div>`).join("") || `<div class="empty">No students in this class yet</div>`}</div>`;
+  return `<nav class="k-crumbs"><a href="#classes">← Classes</a></nav><div class="top"><h1>${esc(k.name)}</h1>
     ${can("admin") ? `<button class="b" data-go="editclass" data-k="${k.id}">✎ Edit class</button>` : ""}
     ${live ? `<a class="b pr" href="#live/${live.id}">${canTeach ? "Open live class" : "Join class"}</a>` : canTeach ? (next ? `<button class="b pr" data-go="startlive" data-e="${next.id}">▶ Start live class</button>` : `<button class="b pr" data-go="startnow" data-k="${k.id}">▶ Start a live class now</button>`) : ""}</div>
   <div class="mu">${COURSE[k.course]} ${esc(k.level)} · ${esc(k.place)} · ${teacher ? "👤 " + esc(nameOf(teacher)) : "no teacher yet"}${k.starts_on ? ` · ${fmtDate(k.starts_on)} – ${fmtDate(k.ends_on)}` : ""}</div>
@@ -306,7 +243,7 @@ function matRow(m, teach) {
 }
 function hwRows(list) {
   if (!list.length) return `<div class="empty">No homework yet</div>`;
-  return list.map(a => `<div class="r"><span><a href="#hw/${a.id}"><b>${esc(a.title)}</b></a> <span class="mu">${esc(a.class_name)} · ${{ quiz: "auto-graded quiz", write: "writing", speak: "speaking" }[a.kind]}</span></span>
+  return list.map(a => `<div class="li"><span><a href="#hw/${a.id}"><b>${esc(a.title)}</b></a> <span class="mu">${esc(a.class_name)} · ${{ quiz: "auto-graded quiz", write: "writing", speak: "speaking" }[a.kind]}</span></span>
     <span style="display:flex;gap:8px;align-items:center">${a.due_at ? `<span class="mu">due ${fmtDay(a.due_at)}</span>` : ""}
     ${can("student") ? (a.my_at ? `<span class="pl ${a.my_score == null ? "cy" : a.my_score >= 60 ? "ok" : "warn"}">${a.my_score == null ? "handed in" : a.my_score + "%"}</span>` : `<span class="pl ${a.due_at && a.due_at < Date.now() ? "bad" : "warn"}">${a.due_at && a.due_at < Date.now() ? "late" : "to do"}</span>`)
       : `<span class="pl ">${a.submitted}/${a.students} handed in</span>${a.avg != null ? `<span class="pl ok">avg ${a.avg}%</span>` : ""}`}</span></div>`).join("");
@@ -330,7 +267,7 @@ V.hw = async id => {
       ${submissions.map(s => `<tr><td>${esc(nameOf(s))}</td><td class="mu">${s.submitted_at ? ago(s.submitted_at) : "—"}</td><td class="num">${s.score == null ? (s.submitted_at ? `<span class="pl cy">to grade</span>` : "—") : s.score + "%"}</td>
         <td class="mu" style="max-width:340px">${s.answers && a.kind !== "quiz" ? esc(Object.values(JSON.parse(s.answers || "{}")).join(" ").slice(0, 200)) : ""}${s.file_id ? ` <a href="/api/org/${SLUG}/files/${s.file_id}" target="_blank">▶ recording</a>` : ""}${s.feedback ? `<br>💬 ${esc(s.feedback)}` : ""}</td>
         <td>${s.submitted_at ? `<button class="b sm" data-go="grade" data-a="${a.id}" data-u="${s.id}" data-s="${s.score ?? ""}" data-f="${esc(s.feedback || "")}">Grade</button>` : ""}</td></tr>`).join("")}</table></div></div>
-      ${items.length ? `<div class="card"><h3>Questions</h3>${items.map((it, i) => `<div class="r"><span>${i + 1}. ${esc(it.q)}</span><span class="pl ok">${esc(it.answer)}</span></div>`).join("")}</div>` : ""}`;
+      ${items.length ? `<div class="card"><h3>Questions</h3>${items.map((it, i) => `<div class="li"><span>${i + 1}. ${esc(it.q)}</span><span class="pl ok">${esc(it.answer)}</span></div>`).join("")}</div>` : ""}`;
   } else {
     const ans = mine ? JSON.parse(mine.answers || "{}") : {};
     const done = !!mine;
@@ -345,7 +282,7 @@ V.hw = async id => {
       : `<div class="q"><span class="mu">Record yourself (up to 2 minutes), listen, then hand it in.</span><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button type="button" class="b" id="rec">🎤 Record</button><audio id="recAudio" controls hidden></audio></div>${mine && mine.file_id ? `<span class="mu">Your last recording: <a href="/api/org/${SLUG}/files/${mine.file_id}" target="_blank">▶ play</a></span>` : ""}</div>`}
       <button class="b pr" type="submit" style="align-self:flex-start">${done ? "Hand in again" : "Hand in"}</button></form></div>`;
   }
-  return `<a class="crumb" href="#class/${k.id}">← ${esc(k.name)}</a><div class="top"><h1>${esc(a.title)}</h1>${canTeach ? `<button class="b d" data-go="hwdel" data-a="${a.id}">Delete</button>` : ""}</div>
+  return `<nav class="k-crumbs"><a href="#class/${k.id}">← ${esc(k.name)}</a></nav><div class="top"><h1>${esc(a.title)}</h1>${canTeach ? `<button class="b d" data-go="hwdel" data-a="${a.id}">Delete</button>` : ""}</div>
     <div class="mu">${{ quiz: "Auto-graded quiz", write: "Writing", speak: "Speaking" }[a.kind]}${a.due_at ? " · due " + fmtDay(a.due_at) + " " + fmtTime(a.due_at) : ""}</div>
     ${a.instructions ? `<div class="card"><p style="white-space:pre-wrap">${esc(a.instructions)}</p></div>` : ""}${body}`;
 };
@@ -358,7 +295,7 @@ document.addEventListener("submit", async e => {
   for (const [k, v] of fd) answers[k.startsWith("q") ? k.slice(1) : k] = v;
   try {
     let fileId;
-    if (recBlob) fileId = (await api("POST", "/files", null, { headers: { "Content-Type": recBlob.type || "audio/webm", "X-File-Name": "recording.webm" }, body: recBlob })).id;
+    if (recBlob) fileId = (await K.sendFile(recBlob, { api, path: "/files", name: "recording.webm" })).id;
     const r = await api("POST", `/assignments/${id}/submit`, { answers, fileId });
     recBlob = null; toast(r.score != null ? `Handed in · ${r.score}%` : "Handed in"); show();
   } catch (x) { toast(x.message); }
@@ -411,7 +348,7 @@ V.home = async () => {
     : `<div class="hero"><span><span class="tag">${esc(S.org.name)}</span><b>No lessons planned</b><span>Your teacher will add them soon.</span></span><a class="b" href="/">Practise in the app</a></div>`}
   <div class="rings"><div><b>${prog.attendance == null ? "—" : prog.attendance + "%"}</b><span>Attendance</span></div><div><b>${prog.handedIn}/${prog.homework}</b><span>Homework</span></div><div><b>${prog.average == null ? "—" : prog.average + "%"}</b><span>Average</span></div></div>
   <div class="card"><h3>📝 Homework <a class="b sm" href="#homework">All</a></h3>${todo.length ? hwTiles(todo.slice(0, 5)) : `<div class="empty">Nothing to do — all handed in ✓</div>`}</div>
-  ${upcoming.length ? `<div class="card"><h3>📅 Coming up <a class="b sm" href="#calendar">Calendar</a></h3>${upcoming.map(e => `<div class="hw"><span class="ic">${FLAG[e.course] || "📚"}</span><span class="tx"><b>${esc(e.class_name)}</b><small>${fmtDay(e.starts_at)} · ${fmtTime(e.starts_at)} · ${esc(e.place)}</small></span></div>`).join("")}</div>` : ""}
+  ${upcoming.length ? `<div class="card"><h3>📅 Coming up <a class="b sm" href="#calendar">Calendar</a></h3>${upcoming.map(e => `<div class="hw"><span class="ic">${FLAG(e.course) || "📚"}</span><span class="tx"><b>${esc(e.class_name)}</b><small>${fmtDay(e.starts_at)} · ${fmtTime(e.starts_at)} · ${esc(e.place)}</small></span></div>`).join("")}</div>` : ""}
   ${nextPay ? `<a class="card" href="#fees" style="text-decoration:none;display:flex;justify-content:space-between;align-items:center"><span><b>💶 Next payment</b><br><span class="mu">${fmtDate(nextPay.due_on)}</span></span><b style="font-size:20px">${money(nextPay.amount - nextPay.paid)}</b></a>` : ""}`;
 };
 
@@ -420,7 +357,7 @@ V.fees = async () => {
   const { fees } = await api("GET", "/fees?mine=1");
   const t = new Date().toISOString().slice(0, 10);
   return `<div class="top"><h1>Fees</h1></div>${fees.map(f => `<div class="card"><h3>${esc(f.title)} <span class="mu">${money(f.paid)} of ${money(f.total)} paid</span></h3>
-    ${f.installments.map(i => `<div class="r"><span>${fmtDate(i.due_on)}</span><b>${money(i.amount)}</b><span class="pl ${i.paid >= i.amount ? "ok" : i.due_on < t ? "bad" : "warn"}">${i.paid >= i.amount ? "paid " + fmtDate(i.paid_on) : i.due_on < t ? "overdue" : "open"}</span></div>`).join("")}</div>`).join("")
+    ${f.installments.map(i => `<div class="li"><span>${fmtDate(i.due_on)}</span><b>${money(i.amount)}</b><span class="pl ${i.paid >= i.amount ? "ok" : i.due_on < t ? "bad" : "warn"}">${i.paid >= i.amount ? "paid " + fmtDate(i.paid_on) : i.due_on < t ? "overdue" : "open"}</span></div>`).join("")}</div>`).join("")
     || `<div class="card empty">No fees</div>`}<p class="mu">Payments are made to your school. Ask the office if something looks wrong.</p>`;
 };
 
@@ -472,7 +409,7 @@ document.addEventListener("submit", async e => {
 
 /* ================= actions ================= */
 const ACT = {};
-ACT.newlesson = () => newLessonForm();
+ACT.newlesson = () => K.newLesson({ org: SLUG, pre: { course: S.org.course || "de" }, create: v => studio("/lessons", "POST", v), after: l => { if (window.Drive) Drive.reload().catch(() => {}); K.openStudio(l.id, "script", SLUG); } });
 // a password a person can read out and type: no 0/O or 1/l/I
 function newPassword() {
   const A = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789", r = crypto.getRandomValues(new Uint32Array(10));
@@ -497,7 +434,7 @@ ACT.invite = async () => {
     { name: "username", label: "Username", required: true, ph: "sara.mueller", attrs: `pattern="[a-zA-Z0-9_.]{3,20}" autocomplete="off"` },
     { name: "password", label: "Password", value: pw, required: true, attrs: `minlength="8" autocomplete="off"` },
     { type: "html", html: `</div>` },
-    { name: "classIds", label: "Classes (students join them, teachers teach them)", type: "multi", options: cl.map(k => [k.id, k.name, { icon: FLAG[k.course], sub: `${COURSE[k.course]} ${k.level} · ${k.place}` }]) },
+    { name: "classIds", label: "Classes (students join them, teachers teach them)", type: "multi", options: cl.map(k => [k.id, k.name, { icon: FLAG(k.course), sub: `${COURSE[k.course]} ${k.level} · ${k.place}` }]) },
     { name: "email", label: "E-mail (optional — only if they want password resets by e-mail)", type: "email" }
   ], async v => {
     const r = await api("POST", "/members", { name: v.name, role: v.role, username: v.username, password: v.password, email: v.email || undefined, classIds: v.classIds, notify: false });
@@ -579,7 +516,7 @@ ACT.newevents = async btn => {
   const d = new Date(); d.setDate(d.getDate() + 1); d.setHours(9, 0, 0, 0);
   const local = new Date(d.getTime() - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 16);
   form("Plan lessons", [
-    { name: "classId", label: "Class", type: "select", options: cl.map(k => [k.id, k.name, { icon: FLAG[k.course], sub: `${COURSE[k.course]} ${k.level}` }]), value: btn.dataset.k || (cl[0] && cl[0].id) },
+    { name: "classId", label: "Class", type: "select", options: cl.map(k => [k.id, k.name, { icon: FLAG(k.course), sub: `${COURSE[k.course]} ${k.level}` }]), value: btn.dataset.k || (cl[0] && cl[0].id) },
     { type: "html", html: `<div class="cols2">` }, { name: "start", label: "First lesson", type: "datetime-local", value: local, required: true },
     { name: "minutes", label: "Length (minutes)", type: "number", value: 90, attrs: `min="15" max="600"` }, { type: "html", html: `</div>` },
     { name: "weekdays", label: "Repeat on (empty = once a week on the same day)", type: "multi", ph: "Same day each week", options: [["1", "Monday"], ["2", "Tuesday"], ["3", "Wednesday"], ["4", "Thursday"], ["5", "Friday"], ["6", "Saturday"], ["0", "Sunday"]] },
@@ -614,7 +551,7 @@ ACT["mat-file"] = btn => form("Add a file (PDF, image or audio, up to 2 MB)", [{
   async v => {
     const file = $("#f_file").files[0]; if (!file) throw new Error("Choose a file");
     if (file.size > 2 * 1024 * 1024) throw new Error("The file is larger than 2 MB — add it as a link instead");
-    const f = await api("POST", "/files", null, { headers: { "Content-Type": file.type || "application/octet-stream", "X-File-Name": encodeURIComponent(file.name) }, body: file });
+    const f = await K.sendFile(file, { api, path: "/files" });
     await api("POST", "/materials", { classId: btn.dataset.k, kind: "file", title: v.title, fileId: f.id }); show();
   });
 ACT["mat-lesson"] = async btn => {
@@ -684,7 +621,7 @@ ACT.newfee = async () => {
   const t = new Date().toISOString().slice(0, 10);
   form("New fee", [
     { name: "studentId", label: "Student", type: "select", search: true, options: st.map(personOpt) },
-    { name: "classId", label: "Class (optional)", type: "select", options: [["", "No class", { icon: "—" }], ...cl.map(k => [k.id, k.name, { icon: FLAG[k.course] }])] },
+    { name: "classId", label: "Class (optional)", type: "select", options: [["", "No class", { icon: "—" }], ...cl.map(k => [k.id, k.name, { icon: FLAG(k.course) }])] },
     { name: "title", label: "What for", value: "Course fee" },
     { type: "html", html: `<div class="cols2">` }, { name: "total", label: `Amount (${S.org.currency})`, type: "number", attrs: `min="1" step="0.01" required` },
     { name: "installments", label: "Installments", type: "number", value: 1, attrs: `min="1" max="24"` }, { type: "html", html: `</div>` },
@@ -706,7 +643,7 @@ ACT.remind = async btn => { const r = await api("POST", "/reminders", { feeIds: 
 ACT["remind-all"] = async () => { const { fees } = await api("GET", "/fees"); const ids = fees.filter(f => f.overdue > 0).map(f => f.id); if (!ids.length) return toast("Nobody is overdue"); const r = await api("POST", "/reminders", { feeIds: ids }); toast(`${r.sent} reminders sent`); };
 ACT.feedetail = async btn => {
   const f = await feeById(btn.dataset.f);
-  form(`${f.title} · ${f.student_name || f.student_username}`, [{ type: "html", html: `${f.note ? `<p class="mu">${esc(f.note)}</p>` : ""}<div>${f.installments.map(i => `<div class="r"><span>${fmtDate(i.due_on)}</span><span>${money(i.paid)} / ${money(i.amount)}</span><span class="mu">${i.paid_on ? `${fmtDate(i.paid_on)} · ${esc(i.method)}` : i.reminded_at ? "reminded " + ago(i.reminded_at) : ""}</span></div>`).join("")}</div>
+  form(`${f.title} · ${f.student_name || f.student_username}`, [{ type: "html", html: `${f.note ? `<p class="mu">${esc(f.note)}</p>` : ""}<div>${f.installments.map(i => `<div class="li"><span>${fmtDate(i.due_on)}</span><span>${money(i.paid)} / ${money(i.amount)}</span><span class="mu">${i.paid_on ? `${fmtDate(i.paid_on)} · ${esc(i.method)}` : i.reminded_at ? "reminded " + ago(i.reminded_at) : ""}</span></div>`).join("")}</div>
     <button type="button" class="b d" data-go="delfee" data-f="${f.id}" style="align-self:flex-start">Delete this fee</button>` }], async () => {}, "Close");
 };
 ACT.delfee = async btn => { if (!await sure(btn, "Delete this payment?", "It disappears from the student's fees and from the totals.", "Click again to delete")) return; await api("DELETE", `/fees/${btn.dataset.f}`); K.closeDialogs(); show(); };
@@ -720,7 +657,7 @@ ACT["export-fees"] = async () => {
 let LV = null;
 V.live = async id => {
   const info = await api("GET", `/live/${id}`);
-  if (!info.canTeach && !info.live) return `<a class="crumb" href="#home">← Back</a><div class="card empty">This class hasn't started yet. This page opens it as soon as your teacher starts.</div>`;
+  if (!info.canTeach && !info.live) return `<nav class="k-crumbs"><a href="#home">← Back</a></nav><div class="card empty">This class hasn't started yet. This page opens it as soon as your teacher starts.</div>`;
   const T = info.canTeach;
   AFTER = () => liveStart(id, info);
   return `<div class="lv"><div class="lv-top"><span class="live-dot">● LIVE</span><b>${esc(info.class.name)}</b><span class="mu" id="lvCount"></span><span style="margin-inline-start:auto;display:flex;gap:6px">

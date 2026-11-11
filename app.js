@@ -13,8 +13,8 @@
   const store = {
     // progress belongs to the course (COURSE.prefix); a few settings are the same for every course
     key: k => (/^(name|dockSide|saveBannerOff|showFa|bgVideo|vidOnly)$/.test(k) ? "lapp:" : COURSE.prefix) + k,
-    get(k, d) { try { const v = localStorage.getItem(store.key(k)); return v ? JSON.parse(v) : d; } catch { return d; } },
-    set(k, v) { try { localStorage.setItem(store.key(k), JSON.stringify(v)); } catch {} }
+    get: (k, d) => K.LS.get(store.key(k), d),
+    set: (k, v) => K.LS.set(store.key(k), v)
   };
 
   const state = {
@@ -343,7 +343,7 @@
   $("#nightBtn").onclick = () => nightOpen();
   // time bar: drag to any point; swipe on the text for the next/previous sentence
   const ntBar = $("#ntSeek"); let ntDrag = false;
-  const fmtT = x => `${Math.floor(x / 60)}:${String(Math.floor(x % 60)).padStart(2, "0")}`;
+  const fmtT = K.clock;
   const ntTime = v => { $("#ntCur").textContent = fmtT(v); $("#ntDur").textContent = fmtT(player.duration || 0); ntBar.style.setProperty("--p", (player.duration ? v / player.duration * 100 : 0) + "%"); };
   ntBar.addEventListener("input", () => { ntDrag = true; ntTime(Number(ntBar.value)); const i = lineAt(Number(ntBar.value)); if (i >= 0) nightShow(i); });
   ntBar.addEventListener("change", () => { ntDrag = false; player.currentTime = Number(ntBar.value); });
@@ -876,7 +876,7 @@
     return d[b.length];
   };
   const posGroup = p => (p || "").split(/[\s(]/)[0];
-  const bareDe = v => v.de.replace(/^(der|die|das) /, "");
+  const bareDe = baseWord;
   function closeDistractor(v, dir) {
     const scored = fc.list.filter(c => c.key !== v.key && c.fa !== v.fa && c.de !== v.de).map(c => {
       let sc = (c.p === v.p ? 4 : posGroup(c.p) === posGroup(v.p) ? 2 : 0);
@@ -1016,7 +1016,7 @@
   const ex = { list: [], i: 0, filter: "all" };
   const exKey = () => "ex" + LESSONS[state.idx].id;
   const exResults = () => store.get(exKey(), {});
-  const shuffleArr = a => a.map(x => [Math.random(), x]).sort((p, q) => p[0] - q[0]).map(x => x[1]);
+  const shuffleArr = a => K.shuffle(a);
   let clipStop = null, clipDone = null;
   // plays one dialog line from the lesson audio; resolves when it ends
   function playClip(i) {
@@ -1312,7 +1312,7 @@
     return Array.from({ length: n }, (_, k) => s + k);
   }
   function blanksFor(text, level = "light") {
-    const cands = window.Practice.words(text).filter(w => w.length >= 3 && !NAMES[w] && DICT[dictKey(w)] && !/^(der|die|das|und|ich|du|wir|ihr|sie|es|ein|eine)$/i.test(w));
+    const cands = window.Practice.words(text).filter(w => w.length >= 3 && !NAMES[w] && DICT[dictKey(w)] && !window.Practice.filler(w));
     const n = level === "hard" ? (wcount(text) > 8 ? 3 : 2) : wcount(text) > 10 ? 2 : 1;
     const pick = shuffleArr([...new Set(cands)]).slice(0, n);
     return pick;

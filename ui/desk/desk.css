@@ -1,14 +1,12 @@
 /* LAPP work desktop — one look for every window, the taskbar, the command center and the desktop.
    Change a window here and every window changes. Colours are tokens (a theme can swap them). */
-*{box-sizing:border-box;margin:0}[hidden]{display:none!important}
 html,body{height:100%;overflow:hidden}
 body{color:var(--tx);font:14px/1.5 Inter,Vazirmatn,system-ui,sans-serif;position:relative;
   background:radial-gradient(1100px 600px at 90% -10%,rgba(255,61,127,.2),transparent 60%),radial-gradient(900px 600px at 0% 110%,rgba(34,211,238,.16),transparent 60%),radial-gradient(800px 500px at 40% 50%,rgba(139,92,246,.16),transparent 70%),#0A0A12}
 body[data-wall=dawn]{background:radial-gradient(1100px 600px at 80% 0%,rgba(251,191,36,.24),transparent 60%),radial-gradient(900px 600px at 0% 100%,rgba(255,61,127,.2),transparent 60%),#120A0C}
 body[data-wall=sea]{background:radial-gradient(1100px 600px at 80% 0%,rgba(34,211,238,.24),transparent 60%),radial-gradient(900px 600px at 0% 100%,rgba(52,211,153,.2),transparent 60%),#06111A}
 body[data-wall=plain]{background:#0B0B12}
-button,input,textarea,select{font:inherit;color:inherit}button{cursor:pointer;border:0;background:none}a{color:inherit}
-:focus-visible{outline:2px solid var(--cy);outline-offset:2px}
+
 .sm{font-size:12px}
 
 /* ---------- the desktop ---------- */
@@ -121,7 +119,6 @@ body.dragging iframe{pointer-events:none}
 
 /* popovers (taskbar lists, notifications, running, account) */
 .pempty{padding:14px;color:var(--mu2);text-align:center;font-size:12.5px}
-.bar{height:4px;border-radius:3px;background:var(--p1);margin-top:4px;overflow:hidden}.bar i{display:block;height:100%;background:var(--g)}
 
 /* ---------- the command center ---------- */
 #cc{position:absolute;z-index:600;left:50%;top:9%;transform:translateX(-50%);width:min(580px,calc(100% - 24px));height:min(560px,calc(100% - 90px));display:flex;flex-direction:column;border-radius:calc(var(--r) + 8px);overflow:hidden;background:rgba(19,19,30,.97);backdrop-filter:blur(26px);box-shadow:0 0 0 1.5px rgba(139,92,246,.5),0 40px 110px rgba(0,0,0,.8);animation:k-pop .14s ease-out}

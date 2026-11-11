@@ -9,15 +9,15 @@
   const SKIP = /^lapp:(session|sync|cfg)$/;           // never synced
   const { $, esc } = K;
   const t = (k, v) => window.I18N ? I18N.t(k, v) : k;
-  const ls = { get(k) { try { return localStorage.getItem(k); } catch { return null; } }, keys() { try { return Object.keys(localStorage); } catch { return []; } } };
+  const ls = { get: K.LS.raw, keys: K.LS.keys };
   const rawSet = Storage.prototype.setItem, rawRemove = Storage.prototype.removeItem;
-  const jget = (k, d) => { try { return JSON.parse(ls.get(k)) ?? d; } catch { return d; } };
+  const jget = K.LS.get;
+  // written with the browser's own setter, so our own bookkeeping never counts as "progress changed"
   const jset = (k, v) => { try { rawSet.call(localStorage, k, JSON.stringify(v)); } catch {} };
 
   let cfg = null;          // /api/config, or null when there is no API
   let plan = { tier: "free", why: "" };
-  const listeners = new Set();
-  const emit = () => listeners.forEach(f => { try { f(); } catch (e) { console.error(e); } });
+  const changes = K.events(), emit = () => changes.emit("change");
 
   // the server: the shared kit's api; a signed-out person stays here as a guest
   const call = K.apiAt(API, { signin: false, keepalive: true });
@@ -120,8 +120,8 @@
     email: t("acErrEmail"), password: t("acErrPassword"), wrong: t("acErrWrong"), nouser: t("acErrNoUser"), username: t("acErrUsername"), taken: t("acErrTaken"), exists: t("acErrExists"),
     rate: t("acErrRate"), code: t("acErrCode"), expired: t("acErrExpired"), disabled: t("acErrDisabled"), current: t("acErrCurrent"), billing: t("acErrBilling")
   })[e.code] || (e.status ? e.message : t("acErrNet"));
-  const localWords = () => { try { return (JSON.parse(ls.get("lapp:known")) || []).length; } catch { return 0; } };
-  const localDays = () => { try { return Object.keys(JSON.parse(ls.get("lapp:daily")) || {}).length; } catch { return 0; } };
+  const localWords = () => (jget("lapp:known", []) || []).length;
+  const localDays = () => Object.keys(jget("lapp:daily", {}) || {}).length;
 
   /* ---------- the sign-in card: email → password (known) or sign-up (new) → code ---------- */
   const W = { step: "email", email: "", name: "", closable: false, token: "", busy: false };
@@ -344,13 +344,7 @@
   });
 
   /* ---------- sheets: plans, password, verify banner ---------- */
-  function sheet(html, cls = "") {
-    let el = $("#acSheet");
-    if (!el) { el = document.createElement("div"); el.id = "acSheet"; el.className = "ac-sheet"; document.body.append(el); el.addEventListener("click", e => { if (e.target === el || e.target.closest("[data-sh=close]")) el.hidden = true; }); }
-    el.innerHTML = `<div class="ac-card ${cls}" dir="${I18N.info().dir}"><button type="button" class="ac-x" data-sh="close" aria-label="${esc(t("close"))}">✕</button>${html}</div>`;
-    el.hidden = false;
-    return el;
-  }
+  const sheet = (html, cls = "") => K.sheet(html, { cls, dir: I18N.info().dir, close: t("close") });
   function plans(reason) {
     if (!cfg) return;
     if (!isAccount()) { open("email"); toast(t("acPlusNeedsAccount")); return; }
@@ -460,6 +454,6 @@
     ready, open, close, render, plans, paywall, canOpen, isLocked, profileCard, fromLink, toast,
     get api() { return !!cfg; }, get plan() { return plan; }, get config() { return cfg; },
     get isAccount() { return isAccount(); }, get isPlus() { return isPlus(); },
-    onChange(f) { listeners.add(f); return () => listeners.delete(f); }
+    onChange: f => changes.on("change", f)
   };
 })();

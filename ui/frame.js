@@ -5,7 +5,7 @@
 // a page may add its own menus with LAPPFrame.menus = () => [{ label, items: [{ label, icon, key, run, on, disabled } | "-"] }].
 (function () {
   const q = new URLSearchParams(location.search);
-  const EMBED = q.has("embed") && window.parent !== window;
+  const EMBED = K.embed;   // needs /ui/kit.js first
   const up = m => { try { parent.postMessage({ lapp: 1, ...m }, location.origin); } catch {} };
   const F = window.LAPPFrame = { embed: EMBED, up, menus: null, state: s => up({ t: "state", state: s || "" }), sync: () => {} };
   if (!EMBED) return;
@@ -15,15 +15,13 @@
   if (q.get("device") !== "mobile") html.classList.add("desk");
 
   const st = document.createElement("style");
-  st.textContent = `.cx-hide{display:none!important}html.in-win .crumb.cx-hide{display:none!important}`;
+  st.textContent = `.cx-hide{display:none!important}`;
   (document.head || html).append(st);
 
   /* ---------- the person's keys go to the desktop ---------- */
-  const KEYS = () => { try { return Object.values(JSON.parse(localStorage.getItem("lapp.keys")) || {}); } catch { return []; } };
+  const KEYS = () => Object.values(K.LS.get("lapp.keys", {}) || {});
   document.addEventListener("keydown", e => {
-    const k = ["Control", "Alt", "Shift", "Meta"].includes(e.key) ? "" : e.code && /^Key[A-Z]$/.test(e.code) ? e.code.slice(3) : e.code === "Backquote" ? "`" : e.key === " " ? "Space" : e.key.length === 1 ? e.key.toUpperCase() : e.key;
-    const MAC = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
-    const c = k && (MAC ? [e.metaKey && "Cmd", e.ctrlKey && "Ctrl", e.altKey && "Alt", e.shiftKey && "Shift", k] : [(e.ctrlKey || e.metaKey) && "Ctrl", e.altKey && "Alt", e.shiftKey && "Shift", k]).filter(Boolean).join("+");
+    const c = K.combo(e);   // the same keys as the desktop reads
     if (c && KEYS().includes(c)) { e.preventDefault(); e.stopPropagation(); up({ t: "key", combo: c }); }
     else if (e.key === "Escape" && !document.querySelector("dialog[open]")) up({ t: "key", combo: "Escape" });
   }, true);
@@ -61,7 +59,7 @@
   const iconOf = t => { const m = String(t || "").trim().match(/^([\p{Extended_Pictographic}←-⯿＋+✎〰✦✓✕⟳▦▤▶⬇⬆]️?)\s*/u); return m ? m[1] : ""; };
   const label = el => (el.getAttribute("aria-label") || el.title || el.textContent || "").replace(/\s+/g, " ").trim();
   function header() {
-    for (const el of document.querySelectorAll("[data-chrome], .top, .dv-top, #top")) if (visible(el) || el.dataset.cxDone) return el;
+    for (const el of document.querySelectorAll("[data-chrome], .top, #top")) if (visible(el) || el.dataset.cxDone) return el;
     return null;
   }
   function collect() {
@@ -70,9 +68,10 @@
     if (h) {
       h.dataset.cxDone = 1;
       const t = h.querySelector("h1"); if (t) { out.title = t.textContent.replace(/\s+/g, " ").trim(); t.classList.add("cx-hide"); }
-      let prev = h.previousElementSibling; if (prev && prev.matches("a.crumb")) { out.back = label(prev); ACTS.push(prev); prev.classList.add("cx-hide"); out.backI = ACTS.length - 1; }
+      // a back link just above the heading (<nav class="k-crumbs"><a>…</a></nav>) becomes the window's back button
+      const prev = h.previousElementSibling, bk = prev && prev.matches(".k-crumbs") && prev.querySelectorAll("a").length === 1 ? prev.querySelector("a") : null; if (bk) { out.back = label(bk); ACTS.push(bk); prev.classList.add("cx-hide"); out.backI = ACTS.length - 1; }
       h.querySelectorAll("button, a.b, a.btn").forEach(b => {
-        if (b.closest("[data-cx-keep], .dv-crumb, form, dialog")) return;
+        if (b.closest("[data-cx-keep], .k-crumbs, form, dialog")) return;
         // the button's own text is its label; a button with only an icon uses its tooltip
         const own = (b.textContent || "").replace(/\s+/g, " ").trim(), ic = iconOf(own), rest = ic ? own.slice(ic.length).trim() : own;
         const txt = rest || b.getAttribute("aria-label") || b.title || own;

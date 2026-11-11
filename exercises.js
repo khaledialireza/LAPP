@@ -17,7 +17,9 @@
   const LETTERS = /[A-Za-zÄÖÜäöüß]/;
 
   const rng = seed => () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
-  const words = s => s.split(/\s+/).map(w => w.replace(/^[^A-Za-zÄÖÜäöüß0-9]+|[^A-Za-zÄÖÜäöüß0-9'-]+$/g, "")).filter(Boolean);
+  const words = K.words;   // any language's letters (Polish ł, Dutch ĳ …)
+  // small words a "find the word" task never asks for
+  const filler = w => /^(der|die|das|ein|eine|und|ich|du|wir|ihr|sie|es|mit|aus|in|zu)$/i.test(w);
   const isGerman = s => words(s).every(w => !EN.has(w.toLowerCase()));
   const cleanSentence = s => s.replace(/^[\s"„“(]+|[\s")“]+$/g, "").replace(/\s+/g, " ").trim();
   const norm = s => s.toLowerCase().replace(/ae/g, "ä").replace(/oe/g, "ö").replace(/ue/g, "ü").replace(/ss/g, "ß").replace(/[^a-zäöüß0-9 ]/g, "").replace(/\s+/g, " ").trim();
@@ -25,7 +27,7 @@
   function build(L, lines, dictLookup) {
     const R = rng(L.id * 7919 + 17);
     const pick = a => a[Math.floor(R() * a.length)];
-    const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(R() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+    const shuffle = a => K.shuffle(a, R);
 
     // sentence pool from the whole transcript
     const sents = [];
@@ -49,7 +51,7 @@
       fill() {
         const pool = uniq(sents.filter(x => wc(x.s) >= 4 && wc(x.s) <= 12));
         return shuffle(pool).map(x => {
-          const cands = words(x.s).filter(w => w.length >= 3 && !/^(der|die|das|ein|eine|und|ich|du|wir|ihr|sie|es|mit|aus|in|zu)$/i.test(w) && dictLookup(w).p);
+          const cands = words(x.s).filter(w => w.length >= 3 && !filler(w) && dictLookup(w).p);
           if (!cands.length) return null;
           const w = pick(cands), d = dictLookup(w);
           const k = x.s.indexOf(w);
@@ -114,5 +116,5 @@
     return mixed.slice(0, TOTAL).map((e, i) => ({ ...e, id: i }));
   }
 
-  window.Practice = { build, TYPE_LABEL, norm, words, isGerman };
+  window.Practice = { build, TYPE_LABEL, norm, words, isGerman, filler };
 })();

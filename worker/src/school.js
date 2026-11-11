@@ -7,26 +7,17 @@
 //   student  their classes, calendar, material, homework, fees
 // Platform admins (users.role = admin) can open every school as its admin.
 // index.js hands in its helpers as H; the shared small helpers come from util.js.
-import { str, int } from "./util.js";
+import { str, int, pick, LEVELS, COURSES, memberOf, fileResponse, uploadMeta } from "./util.js";
 
 const ROLES = ["admin", "teacher", "finance", "student"];
 const SLUG = /^[a-z0-9][a-z0-9-]{1,30}$/;
-const COURSES = ["de", "nl", "pl"];
-const LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2"];
-const MAX_FILE = 2 * 1024 * 1024;
+const SCHOOL_FILE = 2 * 1024 * 1024;   // a school file lives in its row, so it stays small
 const today = () => new Date().toISOString().slice(0, 10);
 
 /* ---------------- who is asking, in which school ---------------- */
 async function ctx(req, env, H, slug) {
   const u = await H.need(req, env);
-  const org = await env.DB.prepare("SELECT * FROM orgs WHERE slug = ?").bind(slug).first();
-  if (!org) throw H.fail("no such school", 404);
-  const m = await env.DB.prepare("SELECT role, active FROM org_members WHERE org_id = ? AND user_id = ?").bind(org.id, u.id).first();
-  let role = m && m.active ? m.role : null;
-  if (!role && u.role === "admin") role = "admin";             // the platform's admins can step in
-  if (!role) throw H.fail("you are not a member of this school", 403);
-  if (org.disabled && u.role !== "admin") throw H.fail("this school is disabled", 403);
-  return { u, org, role };
+  return { u, ...(await memberOf(env, u, slug)) };
 }
 const allow = (c, ...roles) => { if (!roles.includes(c.role)) throw Object.assign(new Error("not allowed for your role"), { status: 403 }); };
 
@@ -287,7 +278,7 @@ export async function orgApi(req, env, H, slug, p, url) {
     const b = await H.body(req);
     const name = str(b.name, 80); if (!name) throw H.fail("the class needs a name");
     const k = await DB.prepare("INSERT INTO classes (org_id, name, course, level, teacher_id, place, starts_on, ends_on, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *")
-      .bind(c.org.id, name, COURSES.includes(b.course) ? b.course : "de", LEVELS.includes(b.level) ? b.level : "A1", b.teacherId ? int(b.teacherId) : null, str(b.place, 60) || "Online", str(b.startsOn, 10), str(b.endsOn, 10), H.now()).first();
+      .bind(c.org.id, name, pick(b.course, Object.keys(COURSES), "de"), pick(b.level, LEVELS, "A1"), b.teacherId ? int(b.teacherId) : null, str(b.place, 60) || "Online", str(b.startsOn, 10), str(b.endsOn, 10), H.now()).first();
     return H.json({ class: k });
   }
   if ((m = p.match(/^\/classes\/(\d+)$/))) {
@@ -303,7 +294,7 @@ export async function orgApi(req, env, H, slug, p, url) {
       const b = await H.body(req);
       await DB.prepare(`UPDATE classes SET name = COALESCE(?, name), course = COALESCE(?, course), level = COALESCE(?, level), teacher_id = ?, place = COALESCE(?, place),
           starts_on = COALESCE(?, starts_on), ends_on = COALESCE(?, ends_on), archived = COALESCE(?, archived) WHERE id = ?`)
-        .bind(b.name ? str(b.name, 80) : null, COURSES.includes(b.course) ? b.course : null, LEVELS.includes(b.level) ? b.level : null,
+        .bind(b.name ? str(b.name, 80) : null, pick(b.course, Object.keys(COURSES), null), pick(b.level, LEVELS, null),
           b.teacherId === undefined ? k.teacher_id : (b.teacherId ? int(b.teacherId) : null), b.place !== undefined ? str(b.place, 60) : null,
           b.startsOn !== undefined ? str(b.startsOn, 10) : null, b.endsOn !== undefined ? str(b.endsOn, 10) : null, b.archived === undefined ? null : (b.archived ? 1 : 0), k.id).run();
       return H.json({ ok: true });
@@ -394,17 +385,15 @@ export async function orgApi(req, env, H, slug, p, url) {
   if (p === "/files" && M === "POST") {
     const buf = await req.arrayBuffer();
     if (!buf.byteLength) throw H.fail("empty file");
-    if (buf.byteLength > MAX_FILE) throw H.fail("files can be at most 2 MB — use a link for bigger ones", 413);
-    const name = str(decodeURIComponent(req.headers.get("X-File-Name") || "file"), 120);
-    const type = str(req.headers.get("Content-Type") || "application/octet-stream", 100);
+    if (buf.byteLength > SCHOOL_FILE) throw H.fail("files can be at most 2 MB — use a link for bigger ones", 413);
+    const { name, type } = uploadMeta(req);
     const f = await DB.prepare("INSERT INTO files (org_id, name, type, size, data, created_by, created_at) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id").bind(c.org.id, name, type, buf.byteLength, buf, c.u.id, H.now()).first();
     return H.json({ id: f.id, name, type, size: buf.byteLength });
   }
   if ((m = p.match(/^\/files\/(\d+)$/)) && M === "GET") {
     const f = await DB.prepare("SELECT * FROM files WHERE id = ? AND org_id = ?").bind(int(m[1]), c.org.id).first();
     if (!f) throw H.fail("no such file", 404);
-    const safe = /^(image\/(png|jpeg|gif|webp)|audio\/|video\/|application\/pdf$|text\/plain$)/.test(f.type) ? f.type : "application/octet-stream";
-    return new Response(f.data, { headers: { "Content-Type": safe, "Content-Disposition": `${safe === "application/octet-stream" ? "attachment" : "inline"}; filename="${encodeURIComponent(f.name)}"`, "Cache-Control": "private, max-age=3600", "X-Content-Type-Options": "nosniff" } });
+    return fileResponse(f.data, f);
   }
 
   /* ---- material ---- */

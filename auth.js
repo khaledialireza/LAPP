@@ -4,10 +4,9 @@
 // and the welcome screen shows a button for every registered provider.
 (() => {
   const KEY = "lapp:session";
-  const read = () => { try { return JSON.parse(localStorage.getItem(KEY)) || null; } catch { return null; } };
-  const write = s => { try { s ? localStorage.setItem(KEY, JSON.stringify(s)) : localStorage.removeItem(KEY); } catch {} };
-  const listeners = new Set();
-  const emit = () => listeners.forEach(f => f(read()));
+  const read = () => K.LS.get(KEY, null) || null;
+  const write = s => s ? K.LS.set(KEY, s) : K.LS.del(KEY);
+  const changes = K.events(), emit = () => changes.emit("change", read());
   window.Auth = {
     providers: {},
     // add a sign-in method; its button then shows on the welcome screen, profile and home banner
@@ -29,6 +28,6 @@
     },
     // progress stays in this browser; only the sign-in is forgotten
     signOut() { write(null); emit(); },
-    onChange(f) { listeners.add(f); return () => listeners.delete(f); }
+    onChange(f) { return changes.on("change", f); }
   };
 })();

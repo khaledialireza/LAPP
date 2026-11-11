@@ -14,7 +14,7 @@
 //
 // Every task asks for JSON: the prompt carries an example of the shape, the answer is read
 // leniently (code fences, text around it) and checked; one retry if it isn't usable.
-import { str } from "./util.js";
+import { str, fail } from "./util.js";
 
 export const KINDS = {
   workers: { name: "LAPP AI (built in)", key: false, url: "", models: ["@cf/meta/llama-3.3-70b-instruct-fp8-fast", "@cf/google/gemma-3-12b-it", "@cf/mistralai/mistral-small-3.1-24b-instruct", "@cf/qwen/qwq-32b", "@cf/meta/llama-4-scout-17b-16e-instruct"] },
@@ -25,7 +25,6 @@ export const KINDS = {
 };
 export const TASKS = { write: "Write a lesson", translate: "Translate", rewrite: "Rewrite a line", check: "Check the level", plan: "Plan a series", assist: "Assistant in the panel" };
 
-const fail = (m, status = 502, extra) => Object.assign(new Error(m), { status, extra });
 
 /* ================= which provider ================= */
 export async function setting(env) {

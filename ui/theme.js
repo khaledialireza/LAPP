@@ -8,7 +8,7 @@
     graphite: { name: "Graphite", vars: { "--bg": "#0C0C0D", "--p1": "#141415", "--p2": "#1B1B1D", "--p3": "#232326", "--p4": "#2E2E32", "--ln": "rgba(255,255,255,.07)", "--ln2": "rgba(255,255,255,.13)", "--tx": "#F2F2F3", "--mu": "rgba(240,240,242,.6)", "--mu2": "rgba(240,240,242,.38)", "--pop": "#1F1F22" }, scheme: "dark" },
     light: { name: "Daylight (beta)", vars: { "--bg": "#F6F6FA", "--p1": "#FFFFFF", "--p2": "#F0F0F6", "--p3": "#E8E8F0", "--p4": "#DCDCE8", "--ln": "rgba(20,20,40,.09)", "--ln2": "rgba(20,20,40,.16)", "--tx": "#16161D", "--mu": "rgba(22,22,29,.62)", "--mu2": "rgba(22,22,29,.42)", "--pop": "#FFFFFF" }, scheme: "light" }
   };
-  const get = () => { try { return JSON.parse(localStorage.getItem("lapp.theme")) || {}; } catch { return {}; } };
+  const get = () => K.LS.get("lapp.theme", {}) || {};   // needs /ui/kit.js first
   function apply(look) {
     look = look || get();
     const t = T[look.theme] || T.aurora, r = document.documentElement;
@@ -21,6 +21,5 @@
   }
   window.LAPPTheme = { apply, get, themes: T };
   apply();
-  addEventListener("storage", e => { if (e.key === "lapp.theme") apply(); });
-  addEventListener("message", e => { if (e.origin === location.origin && e.data && e.data.lapp && e.data.t === "theme") apply(); });
+  K.onLook(() => apply());
 })();

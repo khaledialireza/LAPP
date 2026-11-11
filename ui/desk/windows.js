@@ -11,7 +11,7 @@
   const device = () => matchMedia("(pointer:coarse)").matches && innerWidth < 760 ? "mobile" : "desktop";
   const embed = url => { const u = new URL(url, location.origin); if (!u.pathname.startsWith("/api/")) { u.searchParams.set("embed", "1"); u.searchParams.set("device", device()); } return u.pathname + u.search + u.hash; };
   const norm = D.norm = url => { const u = new URL(url, location.origin); u.searchParams.delete("embed"); u.searchParams.delete("device"); return u.pathname + u.search + u.hash; };
-  const post = (w, m) => { try { w.fr.contentWindow.postMessage({ lapp: 1, ...m }, location.origin); } catch {} };
+  const post = D.post = (w, m) => { try { w.fr.contentWindow.postMessage({ lapp: 1, ...m }, location.origin); } catch {} };   // a message to the page in a window
 
   D.openWin = (url, o = {}) => {
     url = norm(url);

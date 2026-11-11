@@ -14,9 +14,8 @@ input,textarea,[contenteditable]{cursor:text}
 [draggable=true]:active,.dragging,.dragging *{cursor:${grab} 13 13,grabbing}
 :disabled{cursor:${arrow} 3 2,not-allowed}`;
   (document.head || document.documentElement).append(st);
-  const on = () => { try { st.disabled = localStorage.getItem("lapp.cursor") === "system"; } catch {} };
+  const on = () => { st.disabled = K.LS.get("lapp.cursor", "") === "system"; };   // needs /ui/kit.js first
   on();
-  addEventListener("storage", e => { if (e.key === "lapp.cursor") on(); });
-  addEventListener("message", e => { if (e.origin === location.origin && e.data && e.data.lapp && e.data.t === "theme") on(); });
+  K.onLook(on);
   window.LAPPCursor = { refresh: on };
 })();

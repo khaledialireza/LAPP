@@ -6,7 +6,7 @@
   const { $, esc } = K;
   const t = (k, v) => I18N.t(k, v);
   const prefixOf = c => c.code === COURSES[0].code ? "lapp:" : `lapp:${c.code}:`;
-  const words = c => { try { return (JSON.parse(localStorage.getItem(prefixOf(c) + "known")) || []).length; } catch { return 0; } };
+  const words = c => (K.LS.get(prefixOf(c) + "known", []) || []).length;
 
   function row(c, sel) {
     const n = words(c);
@@ -17,7 +17,7 @@
       <span><b>${esc(c.name)}</b><small>${esc(sub)}</small></span><span class="cr-code">${c.code.toUpperCase()}</span></button>`;
   }
   function choose(code) {
-    try { localStorage.setItem("lapp:course", JSON.stringify(code)); } catch {}
+    K.LS.set("lapp:course", code);
     if (code !== COURSE.code) { location.replace(location.pathname); return true; }
     COURSE.chosen = true;
     return false;
@@ -40,16 +40,8 @@
   }
   // later: a sheet from the home pill
   function sheet() {
-    let el = $("#crSheet");
-    if (!el) { el = document.createElement("div"); el.id = "crSheet"; el.className = "ac-sheet"; document.body.append(el); }
-    el.innerHTML = `<div class="ac-card" dir="${I18N.info().dir}"><button type="button" class="ac-x" data-crx aria-label="${esc(t("close"))}">✕</button>
-      <h3 class="ac-h">${esc(t("crCourse"))}</h3>${COURSES.map(c => row(c, "switch")).join("")}<p class="wc-note">${esc(t("crOwn"))}</p></div>`;
-    el.hidden = false;
-    el.onclick = e => {
-      if (e.target === el || e.target.closest("[data-crx]")) { el.hidden = true; return; }
-      const b = e.target.closest("[data-cr]");
-      if (b && !b.disabled) { if (!choose(b.dataset.cr)) el.hidden = true; }
-    };
+    const el = K.sheet(`<h3 class="ac-h">${esc(t("crCourse"))}</h3>${COURSES.map(c => row(c, "switch")).join("")}<p class="wc-note">${esc(t("crOwn"))}</p>`, { dir: I18N.info().dir, close: t("close") });
+    el.onclick = e => { const b = e.target.closest("[data-cr]"); if (b && !b.disabled && !choose(b.dataset.cr)) el.hidden = true; };
   }
   document.addEventListener("click", e => { if (e.target.closest("[data-course]")) sheet(); });
   const paint = () => document.querySelectorAll("[data-course]").forEach(b => b.textContent = COURSE.code.toUpperCase() + " ▾");

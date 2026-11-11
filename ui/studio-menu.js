@@ -11,15 +11,8 @@
 .wcard .tag{display:inline-block;margin-top:6px;font-size:11px;padding:1px 8px;border-radius:99px;border:1px solid rgba(255,255,255,.14)}.wcard .tag.nw{color:#22D3EE}.wcard .tag.hw{color:#FBBF24}`;
   document.head.append(st);
 
-  /* ---------- the dictionary, for the word card ---------- */
-  const DICT = {};
-  async function dictFor(course, lang) {
-    const k = course + ":" + lang; if (DICT[k]) return DICT[k];
-    const [base, mean] = await Promise.all([fetch(`/content/lang/${course}/dict.json`).then(r => r.json()).catch(() => ({})), fetch(`/content/lang/${lang}/dict.${course}.json`).then(r => r.ok ? r.json() : fetch(`/content/lang/en/dict.${course}.json`).then(x => x.json())).catch(() => ({}))]);
-    const forms = new Map();
-    for (const [key, v] of Object.entries(base)) { const b = key.split("_")[0]; forms.set(b.toLowerCase(), key); for (const f of v.f || []) if (!forms.has(f.toLowerCase())) forms.set(f.toLowerCase(), key); }
-    return DICT[k] = { base, mean, forms };
-  }
+  /* ---------- the dictionary, for the word card: the shared one (K.dict, K.meanings) ---------- */
+  const dictFor = async (course, lang) => { const [d, mean] = await Promise.all([K.dict(course), K.meanings(course, lang)]); return { base: d.base, forms: d.forms, mean }; };
   function wordAt(x, y) {
     const r = document.caretRangeFromPoint ? document.caretRangeFromPoint(x, y) : null; if (!r || r.startContainer.nodeType !== 3) return "";
     const t = r.startContainer.textContent, i = r.startOffset; let a = i, b = i;
@@ -113,13 +106,12 @@
     const word = tg.closest(".txt .d") ? through(() => wordAt(e.clientX, e.clientY)) : "", i = Number(dl.dataset.i);
     open(e.clientX, e.clientY, i, word, word && window.wordIndexAt ? wordIndexAt(rows()[i].de, word, e.clientX, e.clientY) : -1);
   });
-  const relayout = () => { try { const v = (JSON.parse(localStorage.getItem("lapp.theme")) || {}).trLang; if (v && v !== S.tr && !localStorage.getItem("lapp.studio.tr")) S.tr = v; } catch {} if (S.L && $("#doc") && !document.querySelector(".txt [contenteditable]:focus")) renderDoc(); };
-  addEventListener("message", e => { if (e.origin === location.origin && e.data && e.data.lapp && e.data.t === "theme") setTimeout(relayout, 0); });
-  addEventListener("storage", e => { if (e.key === "lapp.theme") relayout(); });
+  const relayout = () => { const v = (K.LS.get("lapp.theme", {}) || {}).trLang; if (v && v !== S.tr && !K.LS.get("lapp.studio.tr")) S.tr = v; if (S.L && $("#doc") && !document.querySelector(".txt [contenteditable]:focus")) renderDoc(); };
+  K.onLook(relayout);
   // the keyboard: the menu for the chosen line
   document.addEventListener("keydown", e => {
     if (e.key === "ContextMenu" || (e.shiftKey && e.key === "F10")) { if (S.L && S.sel >= 0) { const el = $(`.dl[data-i="${S.sel}"]`); if (el) { e.preventDefault(); const r = el.getBoundingClientRect(); open(r.left + 60, r.top + 30, S.sel, ""); } } }
   });
   // a hint the first time
-  if (!localStorage.getItem("lapp.studio.ctxhint")) setTimeout(() => { if (S.L && $("#doc") && typeof toast === "function") { toast("Tip: right-click a line or a word for every action"); try { localStorage.setItem("lapp.studio.ctxhint", "1"); } catch {} } }, 4000);
+  if (!K.LS.get("lapp.studio.ctxhint")) setTimeout(() => { if (S.L && $("#doc")) { toast("Tip: right-click a line or a word for every action"); K.LS.set("lapp.studio.ctxhint", 1); } }, 4000);
 })();

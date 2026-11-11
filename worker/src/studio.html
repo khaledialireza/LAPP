@@ -1,45 +1,17 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="robots" content="noindex">
+<html data-desk lang="en"><head><!--LAPP:HEAD-->
 <title>LAPP Studio</title>
-<link rel="stylesheet" href="/ui/kit.css?v=1">
-<script src="/ui/kit.js?v=1"></script>
-<script src="/ui/menu.js?v=1"></script>
-<script src="/ui/lapp-ui.js?v=5"></script>
-<script src="/ui/panel-i18n.js?v=12"></script>
-<script src="/ui/cursor.js?v=2"></script>
-<script src="/ui/theme.js?v=2"></script>
-<script src="/ui/frame.js?v=4"></script>
-<script src="/ui/icons.js?v=1"></script>
-<script>
-// the studio lives inside the management environment; opened on its own, it goes there
-const EMBED = K.embed; K.inDesk();
-const up = m => LAPPFrame.up(m);
-</script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 /* LAPP Studio: ⌘ command centre · ✎ live script · 〰 voice desk · 🎭 universe · 📈 insights */
-*{box-sizing:border-box;margin:0}[hidden]{display:none!important}
 html,body{height:100%}
-body{background:var(--bg);color:var(--tx);font:13.5px/1.55 Inter,system-ui,sans-serif;display:grid;grid-template-columns:64px 1fr;overflow:hidden}
-html.in-win #top .crumb{display:none}body.embed{grid-template-columns:1fr}body.embed .rail{display:none}
+body{background:var(--bg);color:var(--tx);font:13.5px/1.55 Inter,system-ui,sans-serif;overflow:hidden}
+html.in-win #top .k-crumbs{display:none}
 body::before{content:"";position:fixed;inset:-35% -10% auto auto;width:760px;height:760px;background:radial-gradient(closest-side,rgba(139,92,246,.15),transparent);pointer-events:none}
 body::after{content:"";position:fixed;inset:auto auto -45% -5%;width:700px;height:700px;background:radial-gradient(closest-side,rgba(255,61,127,.10),transparent);pointer-events:none}
-button,input,textarea,select{font:inherit;color:inherit}button{cursor:pointer;background:none;border:0}
-a{color:inherit}
 .de{font-family:Inter,system-ui,sans-serif;direction:ltr;text-align:left;unicode-bidi:isolate}
-/* rail */
-.rail{background:var(--p1);border-inline-end:1px solid var(--ln);display:flex;flex-direction:column;align-items:center;padding:14px 0;gap:8px;z-index:2;height:100vh}
-.lg{width:38px;height:38px;border-radius:12px;background:var(--g);display:grid;place-items:center;font:800 18px Inter;margin-bottom:10px;box-shadow:0 8px 24px rgba(255,61,127,.35);text-decoration:none}
-.ri{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;color:var(--mu);font-size:17px;position:relative;text-decoration:none}
-.ri:hover{background:var(--p2);color:var(--tx)}.ri.on{background:var(--p3);color:var(--tx);box-shadow:inset 0 0 0 1px var(--ln2)}
-.ri.off{opacity:.35}
-.rail .sp{flex:1}.me{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#F59E0B,#EF4444);display:grid;place-items:center;font-weight:800;font-size:13px}
 /* main */
 .main{display:flex;flex-direction:column;min-width:0;height:100vh;z-index:1}
 .top{min-height:56px;display:flex;align-items:center;gap:10px;padding:8px 18px;border-bottom:1px solid var(--ln);flex-wrap:wrap}
-.crumb{color:var(--mu);font-size:13px;display:flex;gap:6px;align-items:center;min-width:0}.crumb b{color:var(--tx);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:320px}
-.crumb a{text-decoration:none}.crumb a:hover{color:var(--tx)}
 .top .sp{flex:1}
 button.chip:hover{color:var(--tx);border-color:var(--ln2)}
 .view{flex:1;min-height:0;overflow:auto;padding:16px}
@@ -161,7 +133,7 @@ button.cell:hover{outline:2px solid rgba(255,255,255,.35)}
 
 /* ===== 🎭 universe ===== */
 .uv{display:grid;grid-template-columns:1fr 1.35fr;gap:14px;align-items:start}
-.cast{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
 .cc2{background:var(--p3);border:1px solid var(--ln);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px;text-align:start}
 button.cc2:hover{border-color:var(--ln2)}
 .cc2 .hd{display:flex;gap:10px;align-items:center}
@@ -169,7 +141,7 @@ button.cc2:hover{border-color:var(--ln2)}
 .cc2 b{font:700 14px Inter}.cc2 .t{font-size:11.5px;color:var(--mu)}
 .traits{display:flex;gap:5px;flex-wrap:wrap}.traits span{font-size:11px;padding:2px 7px;border-radius:6px;background:rgba(255,255,255,.06)}
 .cc2.add{border-style:dashed;align-items:center;justify-content:center;color:var(--mu);min-height:140px}
-.board{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+
 .fr{border-radius:14px;overflow:hidden;border:1px solid var(--ln);background:var(--p3)}
 .img{height:130px;position:relative;display:flex;align-items:flex-end;padding:8px}
 .img .lb{font:700 10px Inter;background:rgba(0,0,0,.5);padding:2px 7px;border-radius:6px}
@@ -184,32 +156,17 @@ button.cc2:hover{border-color:var(--ln2)}
 .hl .m{font:700 12px Inter;text-align:end}.hl.bad .m{color:var(--rd)}.hl.mid .m{color:var(--am)}.hl.ok .m{color:var(--gr)}
 
 @media (max-width:1100px){html:not(.desk) .ed{grid-template-columns:1fr}html:not(.desk) .ed>.pn.outl{display:none}html:not(.desk) .cc,html:not(.desk) .uv,html:not(.desk) .ins{grid-template-columns:1fr}html:not(.desk) .vd{grid-template-columns:1fr}}
-@media (max-width:700px){html:not(.desk) body{grid-template-columns:1fr;grid-template-rows:1fr auto}html:not(.desk) .rail{flex-direction:row;height:auto;order:2;padding:6px;justify-content:space-around}html:not(.desk) .rail .lg,html:not(.desk) .rail .sp,html:not(.desk) .rail .me{display:none}html:not(.desk) .main{height:calc(100vh - 56px)}html:not(.desk) .map{grid-template-columns:80px repeat(6,1fr)}html:not(.desk) .board{grid-template-columns:1fr 1fr}html:not(.desk) .cast{grid-template-columns:1fr}html:not(.desk) .row3{grid-template-columns:1fr}}
+@media (max-width:700px){html:not(.desk) .map{grid-template-columns:80px repeat(6,1fr)}html:not(.desk) .row3{grid-template-columns:1fr}}
 </style></head><body>
-<nav class="rail" aria-label="Studio">
-  <a class="lg" href="/" title="LAPP">L</a>
-  <a class="ri" href="#home" data-v="home" data-tip-side="end" data-tip="Command centre">⌘</a>
-  <a class="ri" href="#script" data-v="script" data-tip-side="end" data-tip="Live script">✎</a>
-  <a class="ri" href="#voice" data-v="voice" data-tip-side="end" data-tip="Voice desk">〰</a>
-  <a class="ri" href="#universe" data-v="universe" data-tip-side="end" data-tip="Universe">🎭</a>
-  <a class="ri" href="#insights" data-v="insights" data-tip-side="end" data-tip="Insights">📈</a>
-  <div class="sp"></div>
-  <button class="ri" id="lng" data-tip-side="end" data-tip="Language">🌐</button>
-  <a class="ri" id="back" href="/admin" data-tip-side="end" data-tip="Back to the panel">↩</a>
-  <div class="me" id="me" title=""></div>
-</nav>
 <div class="main">
   <div class="top" id="top"></div>
   <div class="view" id="view"><div class="empty">Loading…</div></div>
 </div>
 <audio id="player" preload="none"></audio>
 <script>
-const { $, $$, esc, opts } = K;
+const { $, $$, esc, opts } = K, EMBED = K.embed, up = m => LAPPFrame.up(m);
 const ORG = new URLSearchParams(location.search).get("org") || "";
 const TRL = ["en", "fa", "ru", "uk"];
-const FLAG = { de: "🇩🇪", nl: "🇳🇱", pl: "🇵🇱" };
-const TYPE = { talk: ["💬", "Conversation"], lesson: ["🎧", "Lesson"], story: ["📖", "Story"] };
-const TOPIC = { daily: "Daily life", travel: "Travel & hotel", food: "Food & shopping", health: "Health & doctor", work: "Work & office", home: "Home & family", city: "City & transport", school: "School & study", story: "Stories", other: "Other" };
 const COLORS = ["#38BDF8", "#FF3D7F", "#8B5CF6", "#F59E0B", "#10B981", "#EF4444", "#22D3EE", "#A3E635"];
 const S = { scope: null, lessons: [], L: null, dirty: false, saving: null, tr: "en", sel: -1, chars: null, dicts: {}, ov: null };
 
@@ -220,12 +177,13 @@ const studioApi = K.apiAt("/api/studio");
 const api = (m, p, b) => studioApi(m, p + (ORG ? (p.includes("?") ? "&" : "?") + "org=" + encodeURIComponent(ORG) : ""), b);
 const rows = L => (L || S.L).data.scenes.flatMap(s => s.lines);
 const speakerColor = who => { const c = S.L && S.L.data.cast[who]; if (c && c.color) return c.color; const names = Object.keys(S.L ? S.L.data.cast : {}); return COLORS[Math.max(0, names.indexOf(who)) % COLORS.length]; };
-const words = t => (t.match(/[\p{L}\p{M}'’-]+/gu) || []);
-const fmtT = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
-const levelOpts = () => S.scope.levels.map(l => ({ value: l, label: l }));
-const courseOpts = () => Object.entries(S.scope.courses).map(([k, c]) => ({ value: k, label: c.name, icon: FLAG[k] }));
-const typeOpts = () => Object.entries(TYPE).map(([k, [i, l]]) => ({ value: k, label: l, icon: i }));
-const topicOpts = () => S.scope.topics.map(k => ({ value: k, label: TOPIC[k] || k }));
+const words = K.words;
+const fmtT = K.clock;
+// the shared choices (K.opt), only those this scope may use
+const levelOpts = () => K.opt.levels().filter(o => S.scope.levels.includes(o.value));
+const courseOpts = () => K.opt.courses().filter(o => S.scope.courses[o.value]);
+const typeOpts = K.opt.types;
+const topicOpts = () => K.opt.topics().filter(o => S.scope.topics.includes(o.value));
 const voiceName = v => (v || "").replace(/^piper:/, "").replace(/^[a-z]{2}_[A-Z]{2}-/, "").replace(/-(x_low|low|medium|high)$/, "").replace(/^./, c => c.toUpperCase());
 
 // the browser's own voice, for a quick listen before the real audio is made
@@ -234,13 +192,8 @@ const say = (text, course, rate = 1) => K.speak(text, { lang: course, rate });
 // the words LAPP's dictionary knows (anything else is new for learners)
 async function dictOf(course) {
   if (S.dicts[course]) return S.dicts[course];
-  const forms = new Set();
-  try {
-    const [d, n] = await Promise.all([fetch(`/content/lang/${course}/dict.json`).then(r => r.json()), fetch(`/content/lang/${course}/names.json`).then(r => r.json()).catch(() => [])]);
-    for (const [k, v] of Object.entries(d)) { const b = k.split("_")[0]; forms.add(b.toLowerCase()); for (const f of v.f || []) forms.add(f.toLowerCase()); }
-    for (const x of n) forms.add(String(x).toLowerCase());
-  } catch {}
-  return (S.dicts[course] = forms);
+  const d = await K.dict(course);
+  return (S.dicts[course] = new Set([...d.forms.keys(), ...d.names]));
 }
 function known(w, forms) {
   if (!forms || !forms.size) return true;
@@ -251,11 +204,11 @@ function known(w, forms) {
 }
 
 /* ---------- top bar ---------- */
-function bar(crumb, right = "") { $("#top").innerHTML = `<span class="crumb">${crumb}</span><span class="sp"></span>${right}`; }
+function bar(crumb, right = "") { $("#top").innerHTML = `<nav class="k-crumbs">${crumb}</nav><span class="sp"></span>${right}`; }
 function scopeCrumb() { return S.scope.kind === "school" ? `<a href="/s/${esc(ORG)}">🏫 ${esc(S.scope.name)}</a> ›` : `<a href="#home">LAPP library</a> ›`; }
 function lessonCrumb(part) {
   const L = S.L;
-  return `${scopeCrumb()} ${L.series ? `<span>${esc(L.series)}</span> ›` : ""} <b class="de">${FLAG[L.course] || ""} ${esc(L.title)}</b> ${K.lessonState(L.status)}${part ? ` › <span>${part}</span>` : ""}`;
+  return `${scopeCrumb()} ${L.series ? `<span>${esc(L.series)}</span> ›` : ""} <b class="de">${K.flag(L.course) || ""} ${esc(L.title)}</b> ${K.lessonState(L.status)}${part ? ` › <span>${part}</span>` : ""}`;
 }
 
 /* ---------- router ---------- */
@@ -270,13 +223,11 @@ if (window.LAPPFrame) LAPPFrame.menus = () => {
 async function show() {
   const seq = ++SEQ;
   const [v, id] = (location.hash.slice(1) || "home").split("/");
-  $$(".ri[data-v]").forEach(a => a.classList.toggle("on", a.dataset.v === v));
   stopPlayer();
   try {
     if (id && (!S.L || S.L.id !== Number(id))) await openLesson(Number(id));
     if (seq !== SEQ) return;
     if ((v === "script" || v === "voice" || v === "lesson") && !S.L) { location.hash = "home"; toast("Open a lesson first"); return; }
-    $$(".ri[data-v=script],.ri[data-v=voice]").forEach(a => { a.classList.toggle("off", !S.L); if (S.L) a.href = `#${a.dataset.v}/${S.L.id}`; });
     await (V[v] || V.home)();
     const part = { home: "Studio", script: "Script", voice: "Voice desk", universe: "Characters", insights: "Insights", lesson: "Lesson" }[v] || "Studio";
     up({ t: "title", title: S.L && v !== "home" && v !== "universe" ? `${part} · ${S.L.title}` : part, icon: { home: "⌘", script: "✎", voice: "〰", universe: "🎭", insights: "📈", lesson: "⚙" }[v] || "🎬", url: location.pathname + location.search.replace(/[?&]embed=1/, "").replace(/^&/, "?") + location.hash, lesson: S.L ? { id: S.L.id, title: S.L.title } : null });
@@ -286,7 +237,7 @@ async function openLesson(id) {
   await flush();
   const L = await api("GET", `/lessons/${id}`);
   S.L = L; S.sel = -1;
-  S.tr = (() => { try { const v = localStorage.getItem("lapp.studio.tr") || (JSON.parse(localStorage.getItem("lapp.theme")) || {}).trLang; if (TRL.includes(v)) return v; } catch {} return TRL.includes(window.PanelI18N && PanelI18N.lang) ? PanelI18N.lang : "en"; })();
+  S.tr = (() => { const v = K.LS.get("lapp.studio.tr") || (K.LS.get("lapp.theme", {}) || {}).trLang; if (TRL.includes(v)) return v; return TRL.includes(window.PanelI18N && PanelI18N.lang) ? PanelI18N.lang : "en"; })();
   dictOf(L.course).then(() => { if (/^#script/.test(location.hash) && $("#doc") && !$(".txt .d:focus")) renderDoc(); });
 }
 const V = {};
@@ -316,7 +267,7 @@ V.home = async () => {
       <div class="opts"><l-select id="askCourse"></l-select><l-select id="askLevel" placeholder="Any level"></l-select>
         ${S.scope.ai ? "" : `<span class="chip warn">No AI is switched on — an admin picks one in /admin → AI. You can still write by hand.</span>`}</div>
       <div class="sug">
-        ${gaps.slice(0, 2).map(([tp, lv]) => `<button class="chip" data-ask="${esc(`${lv} lessons about ${TOPIC[tp]}`)}">↳ Fill the ${lv} gap in ${esc(TOPIC[tp])}</button>`).join("")}
+        ${gaps.slice(0, 2).map(([tp, lv]) => `<button class="chip" data-ask="${esc(`${lv} lessons about ${K.TOPICS[tp]}`)}">↳ Fill the ${lv} gap in ${esc(K.TOPICS[tp])}</button>`).join("")}
         <button class="chip" data-ask="A short bedtime story for B1 with a surprising ending">↳ A bedtime story for B1</button>
         <button class="chip" data-ask="Three A1 conversations for the first day in a new city: bakery, bus ticket, asking the way">↳ First day in a new city (A1)</button>
         ${ov.hard.length ? `<button class="chip" data-act="hard">↳ Rewrite the lines learners find hardest</button>` : ""}
@@ -327,7 +278,7 @@ V.home = async () => {
       <h3>Curriculum map · topic × level <span class="r"><l-select id="mapCourse" style="width:150px"></l-select></span></h3>
       <div class="map">
         <span></span>${S.scope.levels.map(l => `<span class="h">${l}</span>`).join("")}
-        ${S.scope.topics.map(tp => `<span class="rl">${esc(TOPIC[tp])}</span>${S.scope.levels.map(lv => { const n = count(tp, lv); return `<button class="cell c${Math.min(3, n)} ${hot(tp, lv) ? "hot" : ""}" data-cell="${tp}|${lv}" title="${esc(TOPIC[tp])} · ${lv}">${n || "—"}</button>`; }).join("")}`).join("")}
+        ${S.scope.topics.map(tp => `<span class="rl">${esc(K.TOPICS[tp])}</span>${S.scope.levels.map(lv => { const n = count(tp, lv); return `<button class="cell c${Math.min(3, n)} ${hot(tp, lv) ? "hot" : ""}" data-cell="${tp}|${lv}" title="${esc(K.TOPICS[tp])} · ${lv}">${n || "—"}</button>`; }).join("")}`).join("")}
       </div>
       <div class="mu sm" style="margin-top:8px">✨ = a gap next to lessons you already have · click a cell to make a lesson there</div>
     </div>
@@ -338,14 +289,14 @@ V.home = async () => {
         ${ov.hard.slice(0, 3).map(h => `<div class="fi"><span class="ic" style="background:rgba(248,113,113,.16)">🎯</span><div><b>${h.avg}% say “<span class="de">${esc(h.text)}</span>” right</b><div class="t">${esc(h.title)} · line ${h.line + 1} · ${h.n} tries</div></div><a class="btn sm pr" href="#script/${h.lesson}" data-line="${h.line}">✦ Rewrite</a></div>`).join("")}
         ${noText.length ? `<div class="fi"><span class="ic" style="background:rgba(139,92,246,.18)">✎</span><div><b>${noText.length} lesson${noText.length > 1 ? "s have" : " has"} no text yet</b><div class="t">Open one and write it, with AI or by hand</div></div><a class="btn sm" href="#script/${noText[0].id}">Open</a></div>` : ""}
         ${noAudio.length ? `<div class="fi"><span class="ic" style="background:rgba(34,211,238,.14)">〰</span><div><b>${noAudio.length} lesson${noAudio.length > 1 ? "s need" : " needs"} audio</b><div class="t">The voice desk makes it in a few minutes</div></div><a class="btn sm" href="#voice/${noAudio[0].id}">Voice desk</a></div>` : ""}
-        ${gaps.length ? `<div class="fi"><span class="ic" style="background:rgba(255,61,127,.14)">🧩</span><div><b>${gaps.length} gap${gaps.length > 1 ? "s" : ""} in the map</b><div class="t">e.g. ${esc(TOPIC[gaps[0][0]])} at ${gaps[0][1]}</div></div><button class="btn sm" data-cell="${gaps[0][0]}|${gaps[0][1]}">Make it</button></div>` : ""}
+        ${gaps.length ? `<div class="fi"><span class="ic" style="background:rgba(255,61,127,.14)">🧩</span><div><b>${gaps.length} gap${gaps.length > 1 ? "s" : ""} in the map</b><div class="t">e.g. ${esc(K.TOPICS[gaps[0][0]])} at ${gaps[0][1]}</div></div><button class="btn sm" data-cell="${gaps[0][0]}|${gaps[0][1]}">Make it</button></div>` : ""}
         ${!ov.hard.length && !noText.length && !noAudio.length && !gaps.length ? `<div class="mu sm">Nothing waiting. Plan something new above ✦</div>` : ""}
       </div>
     </div>
     <div class="pn" style="grid-column:1/-1">
       <h3>Lessons <span class="r mu2">${ov.lessons.length}</span></h3>
       ${ov.lessons.length ? `<div class="lsgrid">${ov.lessons.map(l => `<a class="lc" href="#script/${l.id}">
-        <div class="t1">${FLAG[l.course] || ""} ${l.level} · ${TYPE[l.type][0]} ${esc(TOPIC[l.topic] || "")}<span style="flex:1"></span>${K.lessonState(l.status)}</div>
+        <div class="t1">${K.flag(l.course) || ""} ${l.level} · ${K.TYPES[l.type][0]} ${esc(K.TOPICS[l.topic] || "")}<span style="flex:1"></span>${K.lessonState(l.status)}</div>
         <b class="de">${esc(l.title)}</b>
         <div class="t1">${l.lines ? `${l.approved}/${l.lines} lines approved` : "no text yet"} · ${{ ready: "🎧 audio", old: "🎧 audio is older than the text", none: "no audio" }[l.audio]}</div>
         <div class="bar"><i style="width:${l.lines ? Math.round(l.approved / l.lines * 100) : 0}%"></i></div>
@@ -366,19 +317,7 @@ document.addEventListener("click", e => {
 });
 ACT.new = () => newLesson({});
 function newLesson(pre) {
-  form("New lesson", `
-    <label>Title (in the course language)</label><input class="in de" name="title" required placeholder="Am Bahnhof" maxlength="80">
-    <div class="cols3"><div><label>Course</label><l-select name="course" id="nCourse"></l-select></div><div><label>Level</label><l-select name="level" id="nLevel"></l-select></div><div><label>Type</label><l-select name="type" id="nType"></l-select></div></div>
-    <label>Topic</label><l-select name="topic" id="nTopic"></l-select>
-    <label>What should it be about? (the AI writes from this)</label><textarea class="in" name="brief" placeholder="Buying a ticket, finding the platform, a delay… words and grammar it should practise"></textarea>
-    ${S.chars && S.chars.length ? `<label>Characters (optional)</label><l-select name="characters" id="nChars" multiple></l-select>` : ""}`,
-    async f => {
-      const l = await api("POST", "/lessons", { ...f, characters: f.characters ? f.characters.split(",").map(Number) : [] });
-      location.hash = `script/${l.id}`;
-    }, "Create lesson");
-  opts($("#nCourse"), courseOpts(), pre.course || "de"); opts($("#nLevel"), levelOpts(), pre.level || "A1");
-  opts($("#nType"), typeOpts(), pre.type || "talk"); opts($("#nTopic"), topicOpts(), pre.topic || "daily");
-  if ($("#nChars")) opts($("#nChars"), S.chars.map(c => ({ value: String(c.id), label: c.name, icon: c.emoji, sub: c.bio })));
+  K.newLesson({ pre: { ...pre, course: pre.course || Object.keys(S.scope.courses)[0] }, chars: S.chars, create: v => api("POST", "/lessons", v), after: l => { location.hash = `script/${l.id}`; } });
 }
 ACT.hard = () => { const h = S.ov.hard[0]; S.focusLine = h.line; S.focusRewrite = true; location.hash = `script/${h.lesson}`; };
 ACT.plan = async () => {
@@ -393,7 +332,7 @@ function drawPlan() {
   $("#planOut").innerHTML = `<div style="margin-top:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><b>📚 ${esc(P.series)}</b><span class="mu sm">${esc(P.summary)}</span><span style="flex:1"></span>
     <button class="btn sm" data-act="planClear">✕</button><button class="btn" data-act="planCreate" ${n ? "" : "disabled"}>Create ${n} lessons</button><button class="btn pr" data-act="planWrite" ${n && S.scope.ai ? "" : "disabled"}>✦ Create and write ${n}</button></div>
     <div class="plan">${P.lessons.map((l, i) => `<button class="pc ${l.on ? "" : "off"}" data-plan="${i}" style="text-align:start">
-      <div class="h"><span class="chip">${FLAG[l.course] || ""} ${l.level}</span><span class="chip">${TYPE[l.type][0]} ${esc(TOPIC[l.topic] || l.topic)}</span><span style="flex:1"></span>${l.on ? "☑" : "☐"}</div>
+      <div class="h"><span class="chip">${K.flag(l.course) || ""} ${l.level}</span><span class="chip">${K.TYPES[l.type][0]} ${esc(K.TOPICS[l.topic] || l.topic)}</span><span style="flex:1"></span>${l.on ? "☑" : "☐"}</div>
       <b class="de">${esc(l.title)}</b><div class="t">${esc(l.brief)}</div></button>`).join("")}</div><div id="planFeed" class="feed" style="margin-top:10px"></div>`;
   $$("[data-plan]").forEach(b => b.onclick = () => { const l = P.lessons[b.dataset.plan]; l.on = !l.on; drawPlan(); });
 }
@@ -478,7 +417,7 @@ function hiDe(text, i) {
   return esc(text).replace(/[\p{L}\p{M}'’-]+/gu, w => hard.has(w) ? `<span class="hw" title="above ${S.L.level}">${w}</span>` : !known(w, forms) ? `<span class="nw" title="new word for LAPP">${w}</span>` : w);
 }
 // how translations show under the lines (Settings → Studio): a = one line + tag (default), b = all four folded, c = side by side
-function trMode() { try { return (JSON.parse(localStorage.getItem("lapp.theme")) || {}).trMode || "a"; } catch { return "a"; } }
+function trMode() { return (K.LS.get("lapp.theme", {}) || {}).trMode || "a"; }
 S.trOpen = new Set();
 function trLine(ln, i, l) { return `<div class="trl"><button class="ttag" data-ttag="${i}" title="Language · click to change">${l.toUpperCase()}</button><div class="f" contenteditable data-f="${l}" data-i="${i}" dir="${l === "fa" ? "rtl" : "ltr"}">${esc(ln[l] || "")}</div></div>`; }
 function trHtml(ln, i) {
@@ -576,7 +515,7 @@ document.addEventListener("keydown", e => {
 document.addEventListener("click", e => {
   if (!S.L || !$("#doc")) return;
   const t = e.target;
-  const tg = t.closest("[data-ttag]"); if (tg) { S.tr = TRL[(TRL.indexOf(S.tr) + 1) % TRL.length]; try { localStorage.setItem("lapp.studio.tr", S.tr); } catch {} renderDoc(); return; }
+  const tg = t.closest("[data-ttag]"); if (tg) { S.tr = TRL[(TRL.indexOf(S.tr) + 1) % TRL.length]; K.LS.set("lapp.studio.tr", S.tr); renderDoc(); return; }
   const tf = t.closest("[data-trfold]"); if (tf) { const i = Number(tf.dataset.trfold); S.trOpen.has(i) ? S.trOpen.delete(i) : S.trOpen.add(i); renderDoc(); return; }
   const dl = t.closest(".dl"); if (dl && !t.closest(".float, .sugg, [data-ok], [data-who]")) selLine(Number(dl.dataset.i));
   const okb = t.closest("[data-ok]"); if (okb) { const r = rows()[okb.dataset.ok]; r.ok = !r.ok; okb.classList.toggle("on", r.ok); changed(); renderSide(); return; }
@@ -854,9 +793,9 @@ V.universe = async () => {
   const L = S.L;
   $("#view").innerHTML = `<div class="uv">
     <div class="pn"><h3>Characters <span class="r mu2">${S.chars.length}</span></h3>
-      <div class="cast">${S.chars.map(c => `<button class="cc2" data-char="${c.id}"><div class="hd"><div class="port" style="background:linear-gradient(135deg,${esc(c.color)},${esc(c.color)}55)">${esc(c.emoji)}</div><div><b>${esc(c.name)}${c.age ? `, ${c.age}` : ""}</b><div class="t">${esc(c.bio)}</div></div></div>
+      <div class="cols2">${S.chars.map(c => `<button class="cc2" data-char="${c.id}"><div class="hd"><div class="port" style="background:linear-gradient(135deg,${esc(c.color)},${esc(c.color)}55)">${esc(c.emoji)}</div><div><b>${esc(c.name)}${c.age ? `, ${c.age}` : ""}</b><div class="t">${esc(c.bio)}</div></div></div>
         <div class="traits">${c.traits.map(t => `<span>${esc(t)}</span>`).join("")}</div>
-        <div class="t">🎙 ${Object.entries(c.voices).map(([k, v]) => `${FLAG[k]} ${esc(voiceName(v))}`).join(" · ") || "voice chosen per lesson"} · in ${c.lessons} lessons</div></button>`).join("")}
+        <div class="t">🎙 ${Object.entries(c.voices).map(([k, v]) => `${K.flag(k)} ${esc(voiceName(v))}`).join(" · ") || "voice chosen per lesson"} · in ${c.lessons} lessons</div></button>`).join("")}
         <button class="cc2 add" data-act="charNew"><span style="font-size:22px">＋</span>New character</button></div>
       <div class="mu sm" style="margin-top:10px">Characters picked for a lesson come back with the same personality and the same voice — learners get to know them.</div>
     </div>
@@ -877,7 +816,7 @@ function board(L) {
       <div class="cap">${esc(sc.title[S.tr] || sc.title.en || "")} · ${sc.lines.length} lines</div></div>`;
   }).join("");
   return `<h3>Storyboard · <span class="de">${esc(L.title)}</span><span class="r chip">${d.scenes.length} scenes</span></h3>
-    ${d.scenes.length ? `<div class="board">${frames}</div>` : `<div class="empty"><b>No scenes yet</b><a class="btn" href="#script/${L.id}">✎ Write the text</a></div>`}
+    ${d.scenes.length ? `<div class="cols3">${frames}</div>` : `<div class="empty"><b>No scenes yet</b><a class="btn" href="#script/${L.id}">✎ Write the text</a></div>`}
     <h3 style="margin-top:14px">Characters in this lesson</h3>
     <div class="picks">${(d.characters || []).map(id => S.chars.find(c => c.id === id)).filter(Boolean).map(c => `<span class="chip on">${esc(c.emoji)} ${esc(c.name)}</span>`).join("") || `<span class="mu2 sm">none picked — the AI invents the speakers</span>`}</div>
     <div class="mu2 sm" style="margin-top:6px">Picked characters are used the next time the AI writes this lesson.</div>`;
@@ -900,7 +839,7 @@ function charForm(c) {
     <label>Who are they?</label><input class="in" name="bio" value="${esc(c.bio || "")}" maxlength="400" placeholder="graphic designer from Hamburg, a bit chaotic">
     <label>Traits (comma)</label><input class="in" name="traits" value="${esc((c.traits || []).join(", "))}" placeholder="curious, funny, loves coffee">
     <div class="cols3"><div><label>Emoji</label><input class="in" name="emoji" value="${esc(c.emoji || "🙂")}" maxlength="8"></div><div><label>Colour</label><input class="in" name="color" type="color" value="${esc(c.color || "#8B5CF6")}" style="height:40px;padding:4px"></div><div><label>Voice</label><l-select name="gender" id="cg"></l-select></div></div>
-    ${courses.map(k => `<label>${FLAG[k]} ${esc(S.scope.courses[k].name)} voice</label><div style="display:flex;gap:6px"><l-select name="v_${k}" id="cv_${k}" style="flex:1"></l-select><button type="button" class="btn sm" data-tryvoice="${k}">🔊</button></div>`).join("")}
+    ${courses.map(k => `<label>${K.flag(k)} ${esc(S.scope.courses[k].name)} voice</label><div style="display:flex;gap:6px"><l-select name="v_${k}" id="cv_${k}" style="flex:1"></l-select><button type="button" class="btn sm" data-tryvoice="${k}">🔊</button></div>`).join("")}
     ${c.id ? `<div class="acts" style="justify-content:flex-start"><button type="button" class="btn danger" id="cdel">🗑 Delete</button></div>` : ""}`, async f => {
     const body = { name: f.name, age: f.age, bio: f.bio, traits: f.traits.split(",").map(x => x.trim()).filter(Boolean), emoji: f.emoji, color: f.color, gender: f.gender, voices: Object.fromEntries(courses.map(k => [k, f["v_" + k]]).filter(x => x[1])) };
     if (c.id) await api("PUT", `/characters/${c.id}`, body); else await api("POST", "/characters", body);
@@ -920,7 +859,7 @@ V.insights = async () => {
   if (!L && pub[0]) { await openLesson(pub[0].id); L = S.L; }
   bar(`${scopeCrumb()} <b>Insights</b>`, `${pub.length ? `<l-select id="insL" style="width:240px"></l-select>` : ""}${[7, 30, 90].map(d => `<button class="chip ${(S.days || 30) === d ? "on" : ""}" data-days="${d}">${d} days</button>`).join("")}`);
   if (!L) { $("#view").innerHTML = `<div class="empty"><b>Nothing published yet</b>Insights start when learners use a published lesson: which sentences are hard to say, and where they stop listening.</div>`; return; }
-  opts($("#insL"), pub.map(l => ({ value: String(l.id), label: l.title, icon: FLAG[l.course], sub: `${l.level} · ${l.type}` })), String(L.id)).addEventListener("change", e => { location.hash = `insights/${e.target.value}`; });
+  opts($("#insL"), pub.map(l => ({ value: String(l.id), label: l.title, icon: K.flag(l.course), sub: `${l.level} · ${l.type}` })), String(L.id)).addEventListener("change", e => { location.hash = `insights/${e.target.value}`; });
   const ins = await api("GET", `/lessons/${L.id}/insights?days=${S.days || 30}`);
   const all = rows(L), said = ins.say.slice().sort((a, b) => a.avg - b.avg);
   const top = ins.reach[0] || 0, pct = ins.reach.map(n => top ? Math.round(n / top * 100) : 0);
@@ -951,18 +890,13 @@ const closeForm = () => K.closeDialogs();
   document.body.classList.add("embed");
   try { const r = await api("GET", "/scope"); S.scope = { ...r, ...r.scope }; }
   catch (e) { $("#view").innerHTML = `<div class="empty"><b>${esc(e.message)}</b><a class="btn" href="/">Back to LAPP</a></div>`; return; }
-  const me = S.scope.me;
-  $("#me").textContent = (me.name || me.username || "?").charAt(0).toUpperCase(); $("#me").title = "@" + me.username;
-  $("#back").href = S.scope.kind === "school" ? `/s/${ORG}` : ["manager", "admin"].includes(me.role) ? "/admin" : "/";
-  $("#back").dataset.tip = S.scope.kind === "school" ? "Back to the school" : ["manager", "admin"].includes(me.role) ? "Back to the admin panel" : "Back to the app";
-  $("#lng").onclick = e => { e.stopPropagation(); PanelI18N.menu(e.currentTarget); };
   addEventListener("panel:lang", () => show());
   api("GET", "/characters").then(r => { S.chars = r.characters; }).catch(() => {});
   addEventListener("hashchange", show);
   show();
 })();
 </script>
-<script src="/ui/studio-lesson.js?v=6"></script>
-<script src="/ui/studio-menu.js?v=5"></script>
-<script src="/ui/studio-script.js?v=2"></script>
+<script src="/ui/studio-lesson.js?v={{V}}"></script>
+<script src="/ui/studio-menu.js?v={{V}}"></script>
+<script src="/ui/studio-script.js?v={{V}}"></script>
 </body></html>

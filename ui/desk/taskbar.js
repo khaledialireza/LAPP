@@ -74,7 +74,7 @@
   /* ---------- tray: running work, notifications, you ---------- */
   function runPop(anchor) {
     const js = D.JOBS.slice(0, 12);
-    D.pop(anchor, `<h6>Working in the background</h6>` + (js.map(j => `<button class="pi" data-go="lesson:${esc(j.scope.q)}:${j.lesson}:voice"><span class="ri">${I(j.status === "done" ? "check" : j.status === "failed" ? "x" : "wave", 15)}</span><span class="tx"><b>${esc(j.title)}</b><small>Audio · ${esc(D.JOBTXT[j.status] || j.status)} · ${D.ago(j.at)}</small>${["queued", "running"].includes(j.status) ? `<div class="bar"><i style="width:${j.status === "running" ? 55 : 8}%"></i></div>` : ""}</span></button>`).join("") || `<div class="pempty">Nothing is running. Audio keeps being made here while you do other things.</div>`));
+    D.pop(anchor, `<h6>Working in the background</h6>` + (js.map(j => `<button class="pi" data-go="lesson:${esc(j.scope.q)}:${j.lesson}:voice"><span class="ri">${I(j.status === "done" ? "check" : j.status === "failed" ? "x" : "wave", 15)}</span><span class="tx"><b>${esc(j.title)}</b><small>Audio · ${esc(D.JOBTXT[j.status] || j.status)} · ${D.ago(j.at)}</small>${["queued", "running"].includes(j.status) ? `<div class="bar thin" style="margin-top:4px"><i style="width:${j.status === "running" ? 55 : 8}%"></i></div>` : ""}</span></button>`).join("") || `<div class="pempty">Nothing is running. Audio keeps being made here while you do other things.</div>`));
   }
   function bellPop(anchor) {
     const ns = D.NOTES.slice(0, 20);

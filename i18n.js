@@ -6,7 +6,7 @@
 // The list of languages (name, direction, locale, speech code) is content/index.json.
 // In HTML: data-i18n / data-i18n-ph / data-i18n-aria; in code: t("key") or t("key", { n: 3 }).
 (() => {
-  const store = { get(k) { try { return localStorage.getItem("lapp:" + k); } catch { return null; } }, set(k, v) { try { localStorage.setItem("lapp:" + k, v); } catch {} } };
+  const store = { get: k => K.LS.raw("lapp:" + k), set: (k, v) => K.LS.setRaw("lapp:" + k, v) };   // plain text (the panels read "lapp:lang" too)
   const FALLBACK = "en";
   let langs = [], lang = store.get("lang") || FALLBACK, str = {}, fb = {}, posMap = {};
 

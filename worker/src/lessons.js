@@ -11,27 +11,16 @@
 // by default LAPP's own, an open-source model on our Cloudflare account). The voice is made
 // with Piper in .github/workflows/studio-voice.yml (_studio/job.py), so it costs nothing.
 import * as AI from "./ai.js";
-import { str, int, aiLimit, revConflict, blobPut, blobGet } from "./util.js";
+import { str, int, pick, aiLimit, revConflict, blobPut, blobGet, LEVELS, STAFF, COURSES, sha, enc, memberOf } from "./util.js";
 
 export const TR = ["en", "fa", "ru", "uk"];                       // translation languages
 const LANG_NAME = { en: "English", fa: "Persian", ru: "Russian", uk: "Ukrainian" };
-const COURSES = {
-  // the best Piper voices per language, best first (Piper has German women only in "low" quality)
-  de: { name: "German", male: ["piper:thorsten-high", "piper:thorsten_emotional-medium", "piper:karlsson-low", "piper:pavoque-low"], female: ["piper:kerstin-low", "piper:ramona-low", "piper:eva_k-x_low"] },
-  nl: { name: "Dutch", male: ["piper:nl_NL-ronnie-medium", "piper:nl_BE-rdh-medium", "piper:nl_NL-pim-medium"], female: ["piper:nl_BE-nathalie-medium"] },
-  pl: { name: "Polish", male: ["piper:pl_PL-darkman-medium", "piper:pl_PL-mc_speech-medium"], female: ["piper:pl_PL-gosia-medium"] }
-};
 const TYPES = ["talk", "lesson", "story"];
-const LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2"];
 export const TOPICS = ["daily", "travel", "food", "health", "work", "home", "city", "school", "story", "other"];
 const NARRATOR = /^(erzähler|erzählerin|verteller|vertelster|narrator|narratorka|narrador)$/i;
 const MAX_WORDS = { A1: 10, A2: 14, B1: 20, B2: 26, C1: 32, C2: 40 };
-const STAFF = ["designer", "manager", "admin"];
 export const APP_ID = id => 100000 + id;                        // the id the app uses (static lessons stay below)
 
-const pick = (v, list, d) => list.includes(v) ? v : d;
-const enc = new TextEncoder();
-const sha = async s => btoa(String.fromCharCode(...new Uint8Array(await crypto.subtle.digest("SHA-256", enc.encode(s)))));
 
 /* ================= who may do what ================= */
 // LAPP library: platform staff. A school: its admins and teachers (and platform admins).
@@ -42,11 +31,8 @@ async function scope(req, env, H, url) {
     if (!STAFF.includes(u.role)) throw H.fail("not allowed", 403);
     return { u, org: 0, name: "LAPP", slug: "", kind: "lapp" };
   }
-  const org = await env.DB.prepare("SELECT * FROM orgs WHERE slug = ? AND disabled = 0").bind(slug).first();
-  if (!org) throw H.fail("no such school", 404);
-  const m = await env.DB.prepare("SELECT role FROM org_members WHERE org_id = ? AND user_id = ? AND active = 1").bind(org.id, u.id).first();
-  const role = m ? m.role : u.role === "admin" ? "admin" : "";
-  if (!["admin", "teacher"].includes(role)) throw H.fail("only the school's admins and teachers make lessons", 403);
+  const { org, role } = await memberOf(env, u, slug);
+  if (org.disabled || !["admin", "teacher"].includes(role)) throw H.fail("only the school's admins and teachers make lessons", 403);
   return { u, org: org.id, name: org.name, slug: org.slug, kind: "school", color: org.color };
 }
 async function lessonIn(env, H, sc, id) {

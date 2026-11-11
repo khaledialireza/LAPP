@@ -4,6 +4,10 @@
 :root{--bg:#07070B;--p1:#0F0F16;--p2:#15151F;--p3:#1C1C29;--p4:#26263C;--ln:rgba(255,255,255,.08);--ln2:rgba(255,255,255,.14);--tx:#F4F4F8;--mu:rgba(235,235,245,.6);--mu2:rgba(235,235,245,.38);
 --pk:#FF3D7F;--vi:#8B5CF6;--acc:#8B5CF6;--cy:#22D3EE;--gr:#34D399;--am:#FBBF24;--rd:#F87171;--g:linear-gradient(135deg,#FF3D7F,#8B5CF6 55%,#22D3EE);--pop:#1A1A27;--r:12px;color-scheme:dark;
 --ui-surface:var(--p2);--ui-surface-2:var(--p3);--ui-line:var(--ln2);--ui-text:var(--tx);--ui-muted:var(--mu);--ui-accent:var(--vi);--ui-radius:10px}
+/* the same start for every page */
+*{box-sizing:border-box;margin:0}[hidden]{display:none!important}
+button,input,textarea,select{font:inherit;color:inherit}button{cursor:pointer;border:0;background:none}a{color:inherit}
+:focus-visible{outline:2px solid var(--cy);outline-offset:2px}
 .ic{flex:none;display:block}
 .mu{color:var(--mu)}.mu2{color:var(--mu2)}
 .spark{background:var(--g);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800}
@@ -59,13 +63,19 @@ button.chip{cursor:pointer;font-family:inherit}button.chip:hover{color:var(--tx)
 .opt{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 0;border-top:1px solid var(--ln)}
 .card.rows>.opt:first-child,.card.rows>h3+.opt{border-top:0}
 .opt b{display:block;font-weight:600}.opt small{display:block;color:var(--mu2);font-size:12px}
+.opt.box{border:1px solid var(--ln);border-radius:12px;background:var(--p2);padding:10px 12px}
+.li.kv{padding:6px 0;font-size:13px}
+/* a list of sections down the side: <nav class="k-nav"><button class="on">…</button></nav> */
+.k-nav{display:flex;flex-direction:column;gap:2px}
+.k-nav>button,.k-nav>a{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:9px;text-align:start;color:var(--mu);text-decoration:none;white-space:nowrap;overflow:hidden}
+.k-nav>button:hover,.k-nav>a:hover{background:var(--p3);color:var(--tx)}.k-nav>.on{background:color-mix(in srgb,var(--vi) 22%,transparent);color:var(--tx)}
 .empty{padding:32px 16px;text-align:center;color:var(--mu)}
 .empty b{display:block;color:var(--tx);font-size:15px;margin:10px 0 4px}
 .empty.tight{padding:14px;font-size:13px;color:var(--mu2)}
 
 /* ---------- spinners, progress bars, keys ---------- */
 .spin{width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,.2);border-top-color:var(--cy);animation:k-sp 1s linear infinite;flex:none;display:inline-block}
-.bar{height:6px;border-radius:4px;background:var(--p3);overflow:hidden}.bar>i,.bar>span{display:block;height:100%;background:var(--g);border-radius:inherit}
+.bar{display:block;height:6px;border-radius:4px;background:var(--p3);overflow:hidden}.bar.thin{height:4px}.bar>i,.bar>span{display:block;height:100%;background:var(--g);border-radius:inherit}
 .kbd,kbd.k{direction:ltr;unicode-bidi:isolate;font:600 10.5px Inter,system-ui;border:1px solid var(--ln2);border-bottom-width:2px;border-radius:5px;padding:0 5px;color:var(--mu);white-space:nowrap;background:none}
 
 /* ---------- pills (a state, a plan, a score): <span class="pl ok">published</span> · tones ok warn bad vi cy g ---------- */
@@ -107,6 +117,17 @@ dialog.k-dlg::backdrop{background:rgba(0,0,0,.55);backdrop-filter:blur(3px)}
 .k-dlg .checks{display:flex;flex-wrap:wrap;gap:6px 14px;max-height:180px;overflow:auto;font-size:13px}.k-dlg .checks label{display:flex;align-items:center;gap:6px;cursor:pointer;margin:0;font-weight:500;color:var(--tx)}
 .k-dlg .err{color:var(--rd);font-size:12.5px}.k-dlg .err:empty{display:none}
 .k-acts{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}.k-dlg form>.k-acts{margin-top:18px}
+
+/* layouts: two columns (.cols2), three (.cols3), a wide one and a narrow one (.split) */
+.split{display:grid;grid-template-columns:1.4fr 1fr;gap:14px}
+@container (max-width:900px){.split{grid-template-columns:1fr}}
+@media (max-width:900px){html:not(.desk) .split{grid-template-columns:1fr}}
+/* a list row: label on the start, value or buttons on the end */
+.li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--ln)}.li:last-child{border:0}
+/* the way back up: <nav class="k-crumbs"><button>Files</button>›<b>Here</b></nav> */
+.k-crumbs{display:flex;align-items:center;gap:4px;flex-wrap:wrap;color:var(--mu);font-size:13px;min-width:0}
+.k-crumbs button,.k-crumbs a{padding:3px 7px;border-radius:7px;color:var(--mu);text-decoration:none}.k-crumbs button:hover,.k-crumbs a:hover{background:var(--p3);color:var(--tx)}
+.k-crumbs b{color:var(--tx);padding:3px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* columns inside a form */
 .cols2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.cols3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}

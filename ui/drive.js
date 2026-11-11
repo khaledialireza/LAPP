@@ -4,14 +4,13 @@
    a bin that keeps things 30 days, the curriculum map (topic × level) and a board by stage,
    and ✦ ideas from the AI that become lessons with one click. The studio opens in its own browser tab.
 
-   Drive.setup({ api(path, method, body), studioUrl(id, part), lapp: bool, refresh(), newLesson(folderId), extraRoot: html })
+   Drive.setup({ api(path, method, body), org: "<school slug or empty>", lapp: bool, refresh(), extraRoot: html })
    Drive.html() → page markup (after Drive.load())  */
 (() => {
   "use strict";
   const CSS = `
-.dv-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.dv-top h1{font-size:28px;font-weight:800;margin-inline-end:6px}
-.dv-crumb{display:flex;gap:4px;align-items:center;flex-wrap:wrap;color:var(--mu);font-size:13px;margin-inline-end:auto}
-.dv-crumb button{padding:3px 7px;border-radius:7px;color:var(--mu)}.dv-crumb button:hover{background:var(--p3);color:var(--tx)}.dv-crumb b{color:var(--tx);padding:3px 4px}
+.dv-top h1{margin-inline-end:6px}
+.dv-top .k-crumbs{margin-inline-end:auto}
 .dv-cmd{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:14px;background:linear-gradient(var(--p2),var(--p2)) padding-box,var(--g) border-box;border:1px solid transparent}
 .dv-cmd input{flex:1;background:none;border:0;outline:none;font-size:14px;min-width:0}
 .dv-cmd .s{background:var(--g);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800;font-size:17px}
@@ -35,8 +34,6 @@
 .dv-f small{font-size:11px;color:var(--mu2)}
 .dv-f.idea{border:1px dashed rgba(139,92,246,.7);background:rgba(139,92,246,.06)}
 .dv-f.idea .ic{background:rgba(139,92,246,.12);color:#C4B5FD}
-.dv-tag{font:700 9.5px Inter,system-ui;padding:1px 6px;border-radius:5px;letter-spacing:.3px;text-transform:uppercase;display:inline-block}
-.t-published{background:rgba(52,211,153,.16);color:var(--gr)}.t-review{background:rgba(251,191,36,.16);color:var(--am)}.t-draft{background:rgba(255,255,255,.08);color:var(--mu)}.t-plus{background:rgba(255,61,127,.16);color:#FF9DBD}.t-bin{background:rgba(248,113,113,.15);color:var(--rd)}
 .dv-rule{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--ln);font-size:12.5px}
 .dv-rule:last-child{border:0}.dv-rule small{display:block;color:var(--mu2);font-size:11px}
 .dv-rule l-select{width:160px;flex:none}
@@ -48,7 +45,7 @@
 .dv-cell{min-height:56px;border-radius:9px;background:rgba(255,255,255,.025);border:1px dashed rgba(255,255,255,.1);padding:4px;display:flex;flex-direction:column;gap:3px}
 .dv-cell.has{border-style:solid;border-color:var(--ln)}.dv-cell.gap{border-color:rgba(255,61,127,.5)}
 .dv-chip{font:600 11px Inter,system-ui;padding:3px 6px;border-radius:6px;text-align:start;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.dv-chip.published{background:rgba(52,211,153,.16);color:#A7F3D0}.dv-chip.review{background:rgba(251,191,36,.14);color:#FDE68A}.dv-chip.draft{background:rgba(255,255,255,.07);color:var(--mu)}
+
 .dv-board{display:grid;grid-template-columns:repeat(4,minmax(160px,1fr));gap:8px;overflow-x:auto}
 .dv-col{background:var(--p1);border:1px solid var(--ln);border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:6px;min-height:240px}
 .dv-col h4{margin:0 0 2px;font-size:12px;color:var(--mu);display:flex;justify-content:space-between}
@@ -57,10 +54,7 @@
 @container (max-width:1050px){.dv{grid-template-columns:200px minmax(0,1fr)}.dv-ins{grid-column:1/-1}}
 @container (max-width:680px){.dv{grid-template-columns:1fr}.dv-tree{position:static;flex-direction:row;overflow-x:auto}.dv-tree .dv-node{width:auto;flex:none}.dv-sep,.dv-tree h3{display:none}}`;
   const esc = K.esc;
-  const LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2"];
-  const TOPIC = { daily: "Daily life", travel: "Travel & hotel", food: "Food & shopping", health: "Health & doctor", work: "Work & office", home: "Home & family", city: "City & transport", school: "School & study", story: "Stories", other: "Other" };
-  const TYPE = { talk: "💬", lesson: "🎧", story: "📖" }, FLAG = { de: "🇩🇪", nl: "🇳🇱", pl: "🇵🇱" };
-  const STATUS = { draft: "Draft", review: "In work", published: "Published" };
+  const LEVELS = K.LEVELS, TOPIC = K.TOPICS, TYPE = t => (K.TYPES[t] || ["🎧"])[0], FLAG = K.flag;
   let C = null, D = { folders: [], lessons: [], binDays: 30 }, S = { cur: 0, sel: new Set(), view: "files", q: "", ideas: [], series: "", busy: false };
   const F = id => D.folders.find(f => f.id === id);
   const kids = id => D.folders.filter(f => f.parent === id).sort((a, b) => a.name.localeCompare(b.name));
@@ -99,8 +93,8 @@
       + `<div class="dv-sep"></div><h3>Smart folders</h3>` + Object.entries(smart).map(([k, [i, l, fn]]) => `<button class="dv-node ${S.cur === k ? "on" : ""}" data-dv-go="${k}" ${k === "bin" ? 'data-dv-drop="bin"' : ""}><span>${i}</span><span class="n">${l}</span><em>${fn ? live().filter(fn).length || "" : D.lessons.filter(x => x.binned).length || ""}</em></button>`).join("");
   }
   const fileCard = l => `<div class="dv-f ${S.sel.has("l" + l.id) ? "sel" : ""}" draggable="${!l.binned}" data-dv-l="${l.id}" tabindex="0" title="${l.binned ? "In the bin" : "Double-click to open in the studio"}">
-      <div class="ic">${TYPE[l.type] || "🎧"}${l.access === "plus" && C.lapp ? `<span class="lk" title="Plus only">🔒</span>` : ""}</div>
-      <b>${FLAG[l.course] || ""} ${esc(l.title)}</b><small>${esc(l.level)} · <span class="dv-tag t-${l.binned ? "bin" : l.status}">${l.binned ? "bin" : STATUS[l.status]}</span>${l.audio === "ready" ? " · 🎧" : ""}</small></div>`;
+      <div class="ic">${TYPE(l.type)}${l.access === "plus" && C.lapp ? `<span class="lk" title="Plus only">🔒</span>` : ""}</div>
+      <b>${FLAG(l.course)} ${esc(l.title)}</b><small>${esc(l.level)} · ${K.lessonState(l.status, l.binned)}${l.audio === "ready" ? " · 🎧" : ""}</small></div>`;
   const folderCard = f => `<div class="dv-f folder ${S.sel.has("f" + f.id) ? "sel" : ""}" draggable="true" data-dv-f="${f.id}" data-dv-drop="${f.id}" tabindex="0" title="Double-click to open">
       <div class="ic">📁${f.rules.access === "plus" ? `<span class="lk">🔒</span>` : ""}</div><b>${esc(f.name)}</b><small>${countIn(f.id)} lessons${f.rules.level ? " · " + f.rules.level : ""}</small></div>`;
   function files() {
@@ -115,13 +109,13 @@
     const ls = S.cur === 0 ? live() : shown().lessons;
     const topics = Object.keys(TOPIC).filter(t => ls.some(l => l.topic === t) || ["daily", "travel", "food", "health", "work"].includes(t));
     return `<h3>Curriculum map · topic × level</h3><div class="dv-map"><span></span>${LEVELS.map(l => `<span class="h">${l}</span>`).join("")}
-      ${topics.map(t => `<span class="rl">${esc(TOPIC[t])}</span>${LEVELS.map(lv => { const xs = ls.filter(l => l.topic === t && l.level === lv); const gap = !xs.length && lv <= "A2"; return `<div class="dv-cell ${xs.length ? "has" : ""} ${gap ? "gap" : ""}" title="${gap ? "Nothing here yet" : ""}">${xs.map(l => `<button class="dv-chip ${l.status}" data-dv-l="${l.id}" title="${esc(l.title)}">${esc(l.title)}</button>`).join("")}</div>`; }).join("")}`).join("")}</div>
+      ${topics.map(t => `<span class="rl">${esc(TOPIC[t])}</span>${LEVELS.map(lv => { const xs = ls.filter(l => l.topic === t && l.level === lv); const gap = !xs.length && lv <= "A2"; return `<div class="dv-cell ${xs.length ? "has" : ""} ${gap ? "gap" : ""}" title="${gap ? "Nothing here yet" : ""}">${xs.map(l => `<button class="dv-chip pl ${K.lessonTone(l.status)}" data-dv-l="${l.id}" title="${esc(l.title)}">${esc(l.title)}</button>`).join("")}</div>`; }).join("")}`).join("")}</div>
       <p class="mu" style="margin-top:8px">Pink edges: A1–A2 gaps with no lesson yet. Double-click a lesson to open it in the studio.</p>`;
   }
   function board() {
     const ls = S.cur === 0 ? live() : shown().lessons;
     const cols = [["Draft", l => !l.lines], ["Text in work", l => l.lines && l.status !== "published" && l.audio === "none"], ["Audio", l => l.lines && l.status !== "published" && l.audio !== "none"], ["Published", l => l.status === "published"]];
-    return `<h3>Board · where each lesson stands</h3><div class="dv-board">${cols.map(([n, fn]) => { const xs = ls.filter(fn); return `<div class="dv-col"><h4><span>${n}</span><span>${xs.length}</span></h4>${xs.map(l => `<button class="dv-card" data-dv-l="${l.id}">${FLAG[l.course] || ""} <b>${esc(l.title)}</b><small>${esc(l.level)} · ${l.lines ? `${l.approved}/${l.lines} lines approved` : "no text yet"}${l.audio === "old" ? " · audio older than text" : ""}</small></button>`).join("")}</div>`; }).join("")}</div>`;
+    return `<h3>Board · where each lesson stands</h3><div class="dv-board">${cols.map(([n, fn]) => { const xs = ls.filter(fn); return `<div class="dv-col"><h4><span>${n}</span><span>${xs.length}</span></h4>${xs.map(l => `<button class="dv-card" data-dv-l="${l.id}">${FLAG(l.course)} <b>${esc(l.title)}</b><small>${esc(l.level)} · ${l.lines ? `${l.approved}/${l.lines} lines approved` : "no text yet"}${l.audio === "old" ? " · audio older than text" : ""}</small></button>`).join("")}</div>`; }).join("")}</div>`;
   }
   function inspector() {
     const sel = [...S.sel];
@@ -129,16 +123,16 @@
     if (sel.length === 1 && sel[0][0] === "l") {
       const l = D.lessons.find(x => x.id === +sel[0].slice(1)); if (!l) return "";
       const fr = rulesHere(l.folder);
-      return `<h3>${FLAG[l.course] || ""} ${esc(l.title)}</h3>
-        <div class="dv-ck"><span>Status</span><span class="dv-tag t-${l.binned ? "bin" : l.status}">${l.binned ? "in the bin" : STATUS[l.status]}</span></div>
-        <div class="dv-ck"><span>Level · type</span><b>${esc(l.level)} · ${TYPE[l.type] || ""}</b></div>
+      return `<h3>${FLAG(l.course)} ${esc(l.title)}</h3>
+        <div class="dv-ck"><span>Status</span>${K.lessonState(l.status, l.binned)}</div>
+        <div class="dv-ck"><span>Level · type</span><b>${esc(l.level)} · ${TYPE(l.type)}</b></div>
         <div class="dv-ck"><span>Lines approved</span><b>${l.approved} / ${l.lines}</b></div>
         <div class="dv-ck"><span>Audio</span><b>${{ ready: "ready", old: "older than the text", none: "not made yet" }[l.audio]}</b></div>
         <div class="dv-ck"><span>Folder</span><b>${esc(F(l.folder) ? F(l.folder).name : "All content")}</b></div>
         ${C.lapp && !l.binned ? `<div class="dv-rule"><span>Who can open it<small>${fr.access === "plus" ? `“${esc(fr.from.access)}” makes it Plus` : "the folder lets everyone in"}</small></span><l-select data-dv-own="${l.id}" aria-label="Who can open it"><option value="" ${!l.own ? "selected" : ""}>${fr.access === "plus" ? "Plus (from the folder)" : "Same as the folder · free"}</option><option value="plus" ${l.own === "plus" ? "selected" : ""}>Plus only</option></l-select></div>` : ""}
         ${fr.approved ? `<p class="mu" style="font-size:12px;margin-top:6px">✅ “${esc(fr.from.approved)}”: every line approved before publishing.</p>` : ""}
         <div class="dv-acts">${l.binned ? `<button class="b sm pr" data-dv-a="restore">Restore</button><button class="b sm d" data-dv-a="forever">Delete for good</button>`
-          : `<a class="b sm pr" href="${esc(C.studioUrl(l.id))}" target="_blank" rel="noopener">🎬 Open in the studio ↗</a>${l.status === "published" ? `<button class="b sm" data-dv-a="unpub">Unpublish</button>` : ""}<button class="b sm" data-dv-a="move">Move to…</button><button class="b sm d" data-dv-a="bin">🗑</button>`}</div>`;
+          : `<a class="b sm pr" href="${esc(K.studioUrl(l.id, "script", C.org))}" target="_blank" rel="noopener">🎬 Open in the studio ↗</a>${l.status === "published" ? `<button class="b sm" data-dv-a="unpub">Unpublish</button>` : ""}<button class="b sm" data-dv-a="move">Move to…</button><button class="b sm d" data-dv-a="bin">🗑</button>`}</div>`;
     }
     const fid = sel.length === 1 && sel[0][0] === "f" ? +sel[0].slice(1) : typeof S.cur === "number" ? S.cur : null;
     if (fid === null) return `<h3>${smart[S.cur][0]} ${smart[S.cur][1]}</h3><p class="mu">${S.cur === "bin" ? `Lessons in the bin are hidden from learners and removed after ${D.binDays} days. Right-click one to restore it.` : "A live view of every folder. Select a lesson to see it here."}</p>`;
@@ -153,7 +147,7 @@
   }
   function html() {
     const crumbs = inSmart() ? `<b>${smart[S.cur][1]}</b>` : [`<button data-dv-go="0">All content</button>`, ...path(S.cur).map((f, i, a) => i === a.length - 1 ? `<b>${esc(f.name)}</b>` : `<button data-dv-go="${f.id}">${esc(f.name)}</button>`)].join(" › ");
-    return `<div class="dv-top"><h1>Lesson library</h1><div class="dv-crumb">${crumbs}</div>
+    return `<div class="top dv-top"><h1>Lesson library</h1><nav class="k-crumbs">${crumbs}</nav>
         <div class="seg" role="tablist">${[["files", "▦ Files"], ["map", "🗺 Map"], ["board", "▥ Board"]].map(([k, l]) => `<button class="${S.view === k ? "on" : ""}" data-dv-view="${k}">${l}</button>`).join("")}</div>
         <button class="b" data-dv-a="newfolder">📁 New folder</button><button class="b pr" data-dv-a="newlesson">＋ New lesson</button></div>
       <form class="dv-cmd" data-dv-plan><span class="s">✦</span><input name="q" placeholder="Describe lessons to plan, e.g. “6 A1 lessons for a trip to Vienna”" aria-label="Describe lessons for the AI to plan" maxlength="400"><button class="b sm pr" ${S.busy ? "disabled" : ""}>${S.busy ? "Thinking…" : "✦ Suggest"}</button></form>
@@ -173,7 +167,7 @@
   const move = to => act(() => C.api("/move", "POST", { lessons: lessonIds(), folders: folderIds(), to }), "Moved");
   async function run(a, el) {
     if (a === "newfolder") { const name = await Shell.ask({ title: "New folder", label: "Name", placeholder: "A1 · Travel", ok: "Create" }); if (name) act(() => C.api("/folders", "POST", { name, parent: typeof S.cur === "number" ? S.cur : 0 }), "Folder created"); }
-    if (a === "newlesson") C.newLesson(typeof S.cur === "number" ? S.cur : 0, rulesHere(typeof S.cur === "number" ? S.cur : 0));
+    if (a === "newlesson") { const f = typeof S.cur === "number" ? S.cur : 0; K.newLesson({ org: C.org, pre: { level: rulesHere(f).level }, create: v => C.api("/lessons", "POST", { ...v, folder: f }), after: l => { reload().catch(() => {}); K.openStudio(l.id, "script", C.org); } }); }
     if (a === "move") Shell.menu(el, [{ head: "Move to" }, ...moveTargets(move)]);
     if (a === "bin") act(() => C.api("/bin", "POST", { lessons: lessonIds() }), `In the bin for ${D.binDays} days`).then(() => S.sel.clear());
     if (a === "restore") act(() => C.api("/bin", "POST", { lessons: lessonIds(), restore: true }), "Restored");
@@ -202,7 +196,7 @@
     if (l.binned) return Shell.menu(at, [{ icon: "↩", label: "Restore", run: () => run("restore") }, { icon: "✕", label: "Delete for good", danger: true, run: () => run("forever") }], { search: false });
     const many = S.sel.size > 1;
     Shell.menu(at, [
-      ...(many ? [] : [{ icon: "🎬", label: "Open in the studio ↗", kbd: "Enter", run: () => window.open(C.studioUrl(l.id), "_blank") }, { icon: "〰", label: "Open its voice desk ↗", run: () => window.open(C.studioUrl(l.id, "voice"), "_blank") }]),
+      ...(many ? [] : [{ icon: "🎬", label: "Open in the studio ↗", kbd: "Enter", run: () => K.openStudio(l.id, "script", C.org) }, { icon: "〰", label: "Open its voice desk ↗", run: () => K.openStudio(l.id, "voice", C.org) }]),
       { icon: "↪", label: "Move to", sub: moveTargets(move) },
       ...(C.lapp && !many ? [{ icon: "🔒", label: "Who can open it", sub: [{ label: "Same as the folder", run: () => own(l, "") }, { label: "Plus only", run: () => own(l, "plus") }] }] : []),
       ...(!many && l.status === "published" ? [{ icon: "⏸", label: "Unpublish", run: () => run("unpub") }] : []),
@@ -233,7 +227,7 @@
     document.addEventListener("dblclick", e => {
       if (!inDrive(e)) return;
       const f = e.target.closest("[data-dv-f]"); if (f) return go(f.dataset.dvF);
-      const l = e.target.closest("[data-dv-l]"); if (l) { const x = D.lessons.find(y => y.id === +l.dataset.dvL); if (x && !x.binned) window.open(C.studioUrl(x.id), "_blank"); }
+      const l = e.target.closest("[data-dv-l]"); if (l) { const x = D.lessons.find(y => y.id === +l.dataset.dvL); if (x && !x.binned) K.openStudio(x.id, "script", C.org); }
     });
     document.addEventListener("contextmenu", e => {
       if (!inDrive(e)) return;
@@ -265,7 +259,7 @@
       if (!document.querySelector(".dv").offsetParent) return;
       if (e.key === "Delete" || e.key === "Backspace") { if (lessonIds().length && S.cur !== "bin") { e.preventDefault(); run("bin"); } }
       if (e.key === "F2" && folderIds().length === 1) { e.preventDefault(); run("rename"); }
-      if (e.key === "Enter") { const id = lessonIds()[0]; if (id) window.open(C.studioUrl(id), "_blank"); else if (folderIds()[0]) go(folderIds()[0]); }
+      if (e.key === "Enter") { const id = lessonIds()[0]; if (id) K.openStudio(id, "script", C.org); else if (folderIds()[0]) go(folderIds()[0]); }
       if (e.key === "Escape") { S.sel.clear(); C.refresh(); }
     });
     // drag lessons and folders onto a folder (in the tree or the grid), or onto the bin

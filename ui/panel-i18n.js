@@ -14,7 +14,7 @@
     { code: "uk", name: "Українська", dir: "ltr", locale: "uk-UA" }
   ];
   const info = c => LANGS.find(l => l.code === c) || LANGS[0];
-  const ls = { get() { try { return localStorage.getItem("lapp:lang"); } catch { return null; } }, set(v) { try { localStorage.setItem("lapp:lang", v); } catch {} } };
+  const ls = { get: () => K.LS.raw("lapp:lang"), set: v => K.LS.setRaw("lapp:lang", v) };   // plain text: the learner app reads it too (needs /ui/kit.js first)
   let lang = info(ls.get()).code, exact = new Map(), pats = [];
   const orig = new WeakMap();                 // node → its English text
   const origAttr = new WeakMap();             // element → { attr: English }

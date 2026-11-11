@@ -1,13 +1,11 @@
-import { cleanName, blobPut, blobGet } from "./util.js";
+import { cleanName, blobPut, blobGet, teamOf, fileResponse, uploadMeta, STAFF } from "./util.js";
 // The work desktop of /manage: a person's layout (windows, icons, widgets, wallpaper, shortcuts)
 // and the files they drop on it. Only people who work in /manage have one.
 const MAX_FILE = 10_000_000, MAX_FILES = 60, MAX_TOTAL = 100_000_000;
-// shown in the browser; anything else is downloaded, so a dropped page or SVG can't run as ours
-const INLINE = /^(image\/(png|jpeg|gif|webp|avif)|application\/pdf|audio\/[a-z0-9.+-]+|video\/(mp4|webm|quicktime)|text\/plain)$/;
 
-export async function worksHere(env, u, STAFF) {
-  if (STAFF.includes(u.role)) return true;
-  return !!(await env.DB.prepare("SELECT 1 FROM org_members m JOIN orgs o ON o.id = m.org_id WHERE m.user_id = ? AND m.active = 1 AND m.role IN ('admin','teacher','finance') AND o.disabled = 0").bind(u.id).first());
+// who works in /manage: LAPP's team, and the teams of schools
+export async function worksHere(env, u) {
+  return STAFF.includes(u.role) || (await teamOf(env, u.id)).length > 0;
 }
 
 export async function deskApi(req, env, H, p, u) {
@@ -28,8 +26,7 @@ export async function deskApi(req, env, H, p, u) {
     return H.json({ ok: true });
   }
   if (p === "/files" && M === "POST") {
-    const name = cleanName(decodeURIComponent(req.headers.get("X-Name") || ""), 120) || "file";
-    const type = String(req.headers.get("Content-Type") || "application/octet-stream").split(";")[0].trim().toLowerCase().slice(0, 100);
+    const { name, type } = uploadMeta(req);
     const buf = new Uint8Array(await req.arrayBuffer());
     if (!buf.length) throw H.fail("the file is empty");
     if (buf.length > MAX_FILE) throw H.fail("files can be up to 10 MB", 413);
@@ -63,11 +60,7 @@ export async function deskApi(req, env, H, p, u) {
     }
     if (M === "GET") {
       const all = await blobGet(env, `ufile/${f.id}`, f.size) || new Uint8Array(0);
-      const inline = INLINE.test(f.type);
-      return new Response(all, { headers: {
-        "Content-Type": inline ? f.type : "application/octet-stream", "Content-Length": String(f.size), "Cache-Control": "private, max-age=3600",
-        "Content-Disposition": `${inline ? "inline" : "attachment"}; filename*=UTF-8''${encodeURIComponent(f.name)}`,
-        "X-Content-Type-Options": "nosniff", "Content-Security-Policy": "sandbox; default-src 'none'; img-src 'self'; media-src 'self'; style-src 'unsafe-inline'" } });
+      return fileResponse(all, f);
     }
   }
   /* ---- folders of the Files app ---- */

@@ -22,7 +22,7 @@ import MANAGE from "./manage.html";
 import FILES from "./files.html";
 import SETTINGS from "./settings.html";
 import { deskApi, worksHere } from "./desk.js";
-import { aiLimit } from "./util.js";
+import { aiLimit, fail, enc, sha, b64, b64url, STAFF, teamOf } from "./util.js";
 import SCHOOL from "./school.html";
 import { orgApi, orgsList, adminOrgs } from "./school.js";
 export { Room } from "./room.js";
@@ -33,7 +33,6 @@ const COOKIE = "__Host-lapp";
 const ITER = 100000;                 // the most PBKDF2 iterations Workers allow
 const ROLES = ["user", "designer", "manager", "admin"];
 const UI_LANGS = ["en", "fa", "ru", "uk"];
-const STAFF = ["designer", "manager", "admin"];
 const USERNAME = /^[a-z0-9_.]{3,20}$/;
 const RESERVED = new Set(["admin", "administrator", "studio", "lapp", "root", "support", "help", "api", "system", "staff", "moderator", "official"]);
 const EMAIL = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,}$/;
@@ -43,7 +42,6 @@ const DEFAULT_ACCESS = { locked: [], iranFree: true, trialDays: 7 };   // locked
 
 const SECURE = { "X-Content-Type-Options": "nosniff", "Referrer-Policy": "same-origin" };
 const json = (v, status = 200, headers = {}) => new Response(JSON.stringify(v), { status, headers: { "Content-Type": "application/json", "Cache-Control": "no-store", ...SECURE, ...headers } });
-const fail = (message, status = 400, extra) => Object.assign(new Error(message), { status, extra });
 
 export default {
   async fetch(req, env, ctx) {
@@ -73,11 +71,7 @@ export default {
 };
 
 /* ================= helpers ================= */
-const enc = new TextEncoder();
-const b64 = buf => btoa(String.fromCharCode(...new Uint8Array(buf)));
-const b64url = buf => b64(buf).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 const rand = n => crypto.getRandomValues(new Uint8Array(n));
-const sha = async s => b64url(await crypto.subtle.digest("SHA-256", enc.encode(s)));
 function same(a, b) {               // constant-time compare of two strings
   if (a.length !== b.length) return false;
   let d = 0; for (let i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i);
@@ -163,7 +157,7 @@ const DESK_PAGES = { "/manage": [MANAGE, "/manage"], "/files": [FILES, "/files"]
 async function deskPage(req, env, url, [html, path]) {
   const u = env.DB ? await currentUser(req, env) : null;
   if (!u) return Response.redirect(`${url.origin}/?login=1&next=/manage`, 302);
-  if (!await worksHere(env, u, STAFF)) return Response.redirect(`${url.origin}/`, 302);
+  if (!await worksHere(env, u)) return Response.redirect(`${url.origin}/`, 302);
   return await page(req, env, html, ROLES, path);
 }
 
@@ -346,14 +340,14 @@ async function api(req, env, url, ctx) {
   /* ---- the work desktop of /manage ---- */
   if (p === "/desk" || p.startsWith("/desk/")) {
     const u = await need(req, env);
-    if (!await worksHere(env, u, STAFF)) throw fail("the desktop is for staff and school teams", 403);
+    if (!await worksHere(env, u)) throw fail("the desktop is for staff and school teams", 403);
     return deskApi(req, env, H, p.slice(5), u);
   }
 
   /* ---- the assistant in the management panel: answers with what the person is looking at ---- */
   if (p === "/assist" && M === "POST") {
     const u = await need(req, env);
-    const orgs = (await env.DB.prepare("SELECT o.name, m.role FROM org_members m JOIN orgs o ON o.id = m.org_id WHERE m.user_id = ? AND m.active = 1 AND m.role IN ('admin','teacher','finance') AND o.disabled = 0").bind(u.id).all()).results;
+    const orgs = await teamOf(env, u.id);
     if (!STAFF.includes(u.role) && !orgs.length) throw fail("the assistant is for staff and school teams", 403);
     await aiLimit(env, H, u.id);
     const b = await body(req), s = (v, k) => String(v ?? "").replace(/\s+/g, " ").trim().slice(0, k);
@@ -381,8 +375,7 @@ ${hist ? "Conversation so far:\n" + hist + "\n" : ""}Question: ${q}`;
   /* ---- the AI groups the open windows of the work desktop by task / project ---- */
   if (p === "/assist/groups" && M === "POST") {
     const u = await need(req, env);
-    const orgs = (await env.DB.prepare("SELECT 1 FROM org_members m WHERE m.user_id = ? AND m.active = 1 AND m.role IN ('admin','teacher','finance')").bind(u.id).all()).results;
-    if (!STAFF.includes(u.role) && !orgs.length) throw fail("for staff and school teams", 403);
+    if (!await worksHere(env, u)) throw fail("for staff and school teams", 403);
     await aiLimit(env, H, u.id);
     const b = await body(req), s = (v, k) => String(v ?? "").replace(/\s+/g, " ").trim().slice(0, k);
     const wins = (Array.isArray(b.windows) ? b.windows : []).slice(0, 30).map(x => ({ id: s(x.id, 12), label: s(x.label, 100) })).filter(x => x.id && x.label);
@@ -537,11 +530,20 @@ async function promote(env, u) {
 }
 
 /* ================= pages for staff ================= */
+// every page of the panels starts with the same head: the shared kit, the language, icons, theme, pointer,
+// the form controls and the window bridge. One asset version (ASSET_V, set by tools/bump.js) for all of them.
+const ASSET_V = "mwbyamzy";
+const HEAD = `<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/ui/kit.css?v=${ASSET_V}">
+${["kit", "menu", "panel-i18n", "icons", "theme", "cursor", "lapp-ui", "frame"].map(f => `<script src="/ui/${f}.js?v=${ASSET_V}"></script>`).join("\n")}`;
+const pageHtml = html => html.replace("<!--LAPP:HEAD-->", HEAD).replaceAll("{{V}}", ASSET_V);
+
 async function page(req, env, html, roles, path) {
   const u = env.DB ? await currentUser(req, env) : null;
   if (!u) return Response.redirect(`${new URL(req.url).origin}/?login=1&next=${encodeURIComponent(path)}`, 302);
   if (!roles.includes(u.role)) return new Response("Forbidden", { status: 403, headers: { "Content-Type": "text/plain" } });
-  return new Response(html, {
+  return new Response(pageHtml(html), {
     headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store", "X-Frame-Options": "SAMEORIGIN", "Content-Security-Policy": "frame-ancestors 'self'", ...SECURE }
   });
 }

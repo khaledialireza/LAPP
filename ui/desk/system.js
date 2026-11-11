@@ -1,5 +1,5 @@
 // LAPP work desktop · system: the look (theme, accent, wallpaper) for every window, what the Settings app asks for,
-// the Guide and the ⓘ ("What is this?") of every window.
+// the Guide and "About" in every window's Help menu.
 "use strict";
 (function () {
   const { $, esc, I } = D;
@@ -12,7 +12,7 @@
     document.body.dataset.wall = l.wall || "";
     if (window.LAPPCursor) LAPPCursor.refresh();
     const me = D.WS.find(w => w.key === "me"); if (me) { me.color = l.accent || "#8B5CF6"; D.APPS.forEach(a => { if (a.ws === "me") a.color = me.color; }); D.WN().forEach(D.dress); D.drawTask && D.drawTask(); }
-    D.WN().forEach(w => { try { w.fr.contentWindow.postMessage({ lapp: 1, t: "theme" }, location.origin); } catch {} });
+    D.WN().forEach(w => D.post(w, { t: "theme" }));
   };
   D.setLook = (k, v) => {
     if (k === "wall") D.DESK.wall = v; else if (k === "groupBy") { D.DESK.groupBy = v; D.drawTask(); } else D.DESK.look = { ...(D.DESK.look || {}), [k]: v };
@@ -20,7 +20,7 @@
   };
   // what the Settings app asks for
   D.settings = (key, value) => {
-    if (["theme", "accent", "radius", "wall", "groupBy", "restore", "toasts", "jobnotes", "trMode", "trLang", "lockAfter"].includes(key)) return D.setLook(key, value);
+    if (LOOK_KEYS.includes(key)) return D.setLook(key, value);
     if (key === "avatar") return D.api("GET", "/me").then(m => { D.ME = m.user; D.drawMe(); });
     if (key === "lock") return D.lock();
     if (key === "cursor") { D.LS.set("lapp.cursor", value ? "" : "system"); return D.applyLook(); }

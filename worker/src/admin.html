@@ -1,33 +1,14 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="stylesheet" href="/ui/kit.css?v=1">
-<script src="/ui/kit.js?v=1"></script>
-<script src="/ui/menu.js?v=1"></script>
-<script src="/ui/panel-i18n.js?v=12"></script>
-<script src="/ui/lapp-ui.js?v=5"></script>
-<script src="/ui/cursor.js?v=2"></script>
-<script src="/ui/theme.js?v=2"></script>
-<script src="/ui/frame.js?v=4"></script>
-<script src="/ui/shell.js?v=6"></script>
-<script src="/ui/drive.js?v=5"></script>
+<html lang="en"><head><!--LAPP:HEAD-->
 <title>LAPP Admin</title>
-<meta name="robots" content="noindex">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="/ui/shell.js?v={{V}}"></script>
+<script src="/ui/drive.js?v={{V}}"></script>
 <style>
 /* same look as the studio (studio.html) */
-*{box-sizing:border-box;margin:0}
-body{background:var(--bg);color:var(--tx);font:14px/1.5 Inter,system-ui,sans-serif;min-height:100vh;display:grid;grid-template-columns:240px 1fr}
-body::before{content:"";position:fixed;inset:-30% auto auto -10%;width:720px;height:720px;background:radial-gradient(closest-side,rgba(139,92,246,.12),transparent);pointer-events:none}
-button,input,select{font:inherit;color:inherit}button{cursor:pointer;border:0;background:none}
-aside{background:var(--p1);border-inline-end:1px solid var(--ln);padding:16px;display:flex;flex-direction:column;gap:6px;height:100vh;position:sticky;top:0;z-index:1}
-.lg{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px;margin-bottom:14px}.lg i{width:36px;height:36px;border-radius:11px;background:var(--g);display:grid;place-items:center;font-style:normal;font-weight:800;box-shadow:0 8px 24px rgba(255,61,127,.35)}
-.nv{padding:10px 12px;border-radius:12px;color:var(--mu);display:flex;justify-content:space-between;align-items:center;text-decoration:none;border:1px solid transparent}.nv:hover{background:var(--p2);color:var(--tx)}
-.nv.on{background:var(--p3);color:var(--tx);border-color:var(--ln2)}.nv em{font-style:normal;font-size:11px;background:rgba(255,255,255,.08);padding:0 7px;border-radius:6px}
-.sp{flex:1}.me{border-top:1px solid var(--ln);padding-top:12px;font-size:12px;color:var(--mu);display:flex;justify-content:space-between;align-items:center;gap:8px}
+body{background:var(--bg);color:var(--tx);font:14px/1.5 Inter,Vazirmatn,system-ui,sans-serif;min-height:100vh}
 main{padding:22px 26px 60px;display:flex;flex-direction:column;gap:14px;min-width:0;z-index:1}
 
 .card h3{font-size:14px;margin-bottom:10px}
-.two{display:grid;grid-template-columns:1.4fr 1fr;gap:14px}
 .flt{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .flt .k-search{flex:1;min-width:220px}
 .row{display:grid;grid-template-columns:44px 1.6fr 1fr 1fr 90px 110px;gap:12px;align-items:center;padding:10px 12px;border-radius:12px;border:1px solid var(--ln);background:rgba(21,21,31,.8);cursor:pointer}
@@ -35,20 +16,17 @@ main{padding:22px 26px 60px;display:flex;flex-direction:column;gap:14px;min-widt
 .row.hd{background:none;border:0;padding:0 12px;color:var(--mu2);font-size:12px;cursor:default}
 .u{min-width:0}.u b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.u small{color:var(--mu);font-size:12px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .mu{color:var(--mu);font-size:12.5px}
-.role{font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:7px;display:inline-block}.r-admin{background:#fff;color:#111}.r-manager{background:rgba(139,92,246,.22);color:#C4B5FD}.r-designer{background:rgba(34,211,238,.16);color:var(--cy)}.r-user{background:rgba(255,255,255,.07);color:var(--mu)}
 .dr{background:var(--p1);border-inline-start:1px solid var(--ln2);padding:20px;display:flex;flex-direction:column;gap:12px;height:100vh;position:fixed;inset-inline-end:0;top:0;width:min(400px,100%);overflow:auto;z-index:50;box-shadow:-20px 0 60px rgba(0,0,0,.55)}
 .dh{display:flex;gap:12px;align-items:center}.dh b{font-size:18px;display:block}
 .x{margin-inline-start:auto;width:30px;height:30px;border-radius:50%;background:var(--p3);color:var(--mu)}
-.tg{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--ln);border-radius:12px;background:var(--p2)}.tg small{display:block;color:var(--mu);font-size:11.5px}
 .acts{display:flex;gap:8px;flex-wrap:wrap}.foot{margin-top:auto;display:flex;gap:8px;padding-top:8px}
-.list .r{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--ln)}.list .r:last-child{border:0}
+
 
 .grp{font-size:12px;font-weight:800;color:var(--mu);margin:8px 0 2px;letter-spacing:.4px;text-transform:uppercase}
-@media (max-width:1100px){html:not(.desk) .two{grid-template-columns:1fr}}
-@container (max-width:900px){.two{grid-template-columns:1fr}.row{grid-template-columns:40px 1fr auto}.row>:nth-child(n+4){display:none}.row.hd{display:none}}
+@media (max-width:1100px){html:not(.desk) }
+@container (max-width:900px){.row{grid-template-columns:40px 1fr auto}.row>:nth-child(n+4){display:none}.row.hd{display:none}}
 @media (max-width:760px){html:not(.desk) .row{grid-template-columns:40px 1fr auto}html:not(.desk) .row>:nth-child(n+4){display:none}html:not(.desk) .row.hd{display:none}}
 </style></head><body>
-<aside id="side"></aside>
 <main id="view"></main>
 
 <dialog id="addDlg" class="k-dlg"><form method="dialog" id="addForm">
@@ -57,18 +35,8 @@ main{padding:22px 26px 60px;display:flex;flex-direction:column;gap:14px;min-widt
   <div class="f"><label>Username</label><input class="in" name="username" required pattern="[a-zA-Z0-9_.]{3,20}" maxlength="20"></div></div>
   <div class="f"><label>E-mail</label><input class="in" name="email" type="email" required></div>
   <div class="f"><label>Role</label><div class="seg fill" id="addRole"></div></div>
-  <div class="tg"><div>Send an invitation e-mail<small>They choose their own password from the link (valid 7 days)</small></div><button type="button" class="sw on" id="addInvite" aria-pressed="true"></button></div>
+  <div class="opt box"><div>Send an invitation e-mail<small>They choose their own password from the link (valid 7 days)</small></div><button type="button" class="sw on" id="addInvite" aria-pressed="true"></button></div>
   <div class="k-acts"><button class="b" value="cancel" formnovalidate>Cancel</button><button class="b pr" value="ok">Create</button></div>
-</form></dialog>
-
-<dialog id="lessonDlg" class="k-dlg wide"><form method="dialog" id="lessonForm">
-  <h3>New lesson</h3>
-  <div class="f"><label>Title (in the course language)</label><input class="in" name="title" required maxlength="80" placeholder="Am Bahnhof"></div>
-  <div class="cols3"><div class="f"><label>Course</label><l-select name="course" id="lCourse"></l-select></div><div class="f"><label>Level</label><l-select name="level" id="lLevel"></l-select></div><div class="f"><label>Type</label><l-select name="type" id="lType"></l-select></div></div>
-  <div class="f"><label>Topic</label><l-select name="topic" id="lTopic"></l-select></div>
-  <div class="f"><label>What should it be about? (the AI writes from this)</label><textarea class="in" name="brief" rows="3" placeholder="Buying a ticket, finding the platform, a delay…"></textarea></div>
-  <p class="mu">The studio opens with the new lesson: write it (with AI or by hand), make the audio, publish.</p>
-  <div class="k-acts"><button class="b" value="cancel" formnovalidate>Cancel</button><button class="b pr" value="ok">Create and open the studio ↗</button></div>
 </form></dialog>
 
 <dialog id="aiDlg" class="k-dlg wide"><form method="dialog" id="aiForm">
@@ -97,7 +65,7 @@ const { $, esc } = K;
 const flag = c => c && /^[A-Z]{2}$/.test(c) ? String.fromCodePoint(...[...c].map(x => 127397 + x.charCodeAt(0))) + " " + c : "—";
 const day = ms => K.date(ms) || "—";
 const ago = ms => K.ago(ms);
-const ROLE = { user: "Learner", designer: "Designer", manager: "Manager", admin: "Admin" };
+const ROLE = { user: "Learner", designer: "Designer", manager: "Manager", admin: "Admin" }, ROLE_TONE = { admin: "g", manager: "vi", designer: "cy" };
 const avatar = u => K.avatar(u, 36);
 let ME = null;
 const toast = (t, o) => Shell.toast(t, o);
@@ -121,9 +89,9 @@ V.dash = async () => {
   return `<div class="top"><h1>Dashboard</h1></div>
   <div class="kp"><div><b>${s.users}</b><span>Users · ${s.verified} verified</span></div><div><b>${s.activeWeek}</b><span>Active this week</span></div><div><b>${s.newWeek}</b><span>New this week</span></div>
    <div><b>${s.plus}</b><span>Plus subscribers</span></div><div><b>${s.trial}</b><span>In trial</span></div><div><b>${s.iran}</b><span>Iran · free</span></div><div><b>${s.schools}</b><span>Schools · ${s.seats} people</span></div><div><b>${s.staff}</b><span>Team</span></div></div>
-  <div class="two"><div class="card"><h3>Sign-ups · last 30 days</h3><div class="k-bars">${bars.map(n => `<i style="height:${n / max * 100}%" title="${n}"></i>`).join("")}</div></div>
-   <div class="card"><h3>Countries</h3><div class="list">${s.countries.map(c => `<div class="r"><span>${flag(c.country)}</span><b>${c.n}</b></div>`).join("") || `<div class="empty">No users yet</div>`}</div></div></div>
-  <div class="card"><h3>Newest users</h3><div class="list">${s.recent.map(u => `<div class="r"><span><b>@${esc(u.username)}</b> <span class="mu">${esc(u.email)}</span></span><span class="mu">${flag(u.country)} · ${ago(u.created_at)}</span></div>`).join("") || `<div class="empty">No users yet</div>`}</div></div>`;
+  <div class="split"><div class="card"><h3>Sign-ups · last 30 days</h3><div class="k-bars">${bars.map(n => `<i style="height:${n / max * 100}%" title="${n}"></i>`).join("")}</div></div>
+   <div class="card"><h3>Countries</h3><div class="list">${s.countries.map(c => `<div class="li"><span>${flag(c.country)}</span><b>${c.n}</b></div>`).join("") || `<div class="empty">No users yet</div>`}</div></div></div>
+  <div class="card"><h3>Newest users</h3><div class="list">${s.recent.map(u => `<div class="li"><span><b>@${esc(u.username)}</b> <span class="mu">${esc(u.email)}</span></span><span class="mu">${flag(u.country)} · ${ago(u.created_at)}</span></div>`).join("") || `<div class="empty">No users yet</div>`}</div></div>`;
 };
 
 /* ---- users: list + edit drawer ---- */
@@ -139,18 +107,18 @@ V.users = async () => {
   const s = STATS, F = [["all", "All"], ["free", "Free"], ["plus", "Plus"], ["schools", "Schools"], ["staff", "Team"], ["iran", "Iran"], ["unverified", "Unverified"], ["disabled", "Disabled"]];
   const orgRow = o => `<div class="row ${o.disabled ? "off" : ""}" data-org="${o.id}" title="A school account: its own people are managed by the school">
     <div class="av" style="background:${esc(o.color)};border-radius:11px">${esc(o.name.charAt(0))}</div><div class="u"><b>${esc(o.name)}</b><small>/s/${esc(o.slug)} · ${esc(o.admin_email || "no admin yet")}</small></div>
-    <div><span class="role r-manager">School</span></div><div><span class="pl g">${o.students} students</span></div><div class="mu">${o.teachers} teachers</div><div class="acts"><a class="b sm" href="/s/${esc(o.slug)}" target="_blank" rel="noopener">Open ↗</a></div></div>`;
+    <div><span class="pl vi">School</span></div><div><span class="pl g">${o.students} students</span></div><div class="mu">${o.teachers} teachers</div><div class="acts"><a class="b sm" href="/s/${esc(o.slug)}" target="_blank" rel="noopener">Open ↗</a></div></div>`;
   return `<div class="top"><h1>Users</h1><button class="b" id="export">⬇ Export</button>${isAdmin() ? `<button class="b" id="addSchool">🏫 New school</button>` : ""}<button class="b pr" id="add">＋ Add user</button></div>
   <div class="kp"><div><b>${s.users}</b><span>Your users</span></div><div><b>${s.plus + s.trial + s.grants}</b><span>Plus · paying or gift</span></div><div><b>${s.schools}</b><span>School accounts · ${s.seats} people</span></div><div><b>${s.staff}</b><span>Team</span></div></div>
   <div class="flt"><label class="k-search">${K.I("search", 15)}<input id="q" placeholder="Name, e-mail, username, school…" value="${esc(U.q)}"></label>${F.filter(([k]) => k !== "schools" || isAdmin()).map(([k, l]) => `<button class="chip ${U.filter === k ? "on" : ""}" data-f="${k}">${l}</button>`).join("")}</div>
   ${plusF ? `<div class="card"><h3>💳 Subscriptions ${cust.stripe ? `<a class="b sm" style="float:inline-end" href="https://dashboard.stripe.com/" target="_blank" rel="noopener">Stripe ↗</a>` : `<span class="pl warn">Stripe is not connected yet</span>`}</h3><div class="list">
-     ${cust.subscriptions.map(x => `<div class="r"><span><b>@${esc(x.username)}</b> <span class="mu">${esc(x.status)} · ${x.interval === "year" ? "yearly" : x.interval === "month" ? "monthly" : "—"}</span></span><span class="mu">${x.cancel_at_end ? "ends" : "renews"} ${day(x.period_end)}</span></div>`).join("") || `<div class="r mu">No subscriptions yet</div>`}
-     ${cust.grants.map(g => `<div class="r"><span><b>🎁 @${esc(g.username)}</b> <span class="mu">gift</span></span><span class="mu">until ${day(g.plus_until)}</span></div>`).join("")}</div></div>` : ""}
+     ${cust.subscriptions.map(x => `<div class="li"><span><b>@${esc(x.username)}</b> <span class="mu">${esc(x.status)} · ${x.interval === "year" ? "yearly" : x.interval === "month" ? "monthly" : "—"}</span></span><span class="mu">${x.cancel_at_end ? "ends" : "renews"} ${day(x.period_end)}</span></div>`).join("") || `<div class="r mu">No subscriptions yet</div>`}
+     ${cust.grants.map(g => `<div class="li"><span><b>🎁 @${esc(g.username)}</b> <span class="mu">gift</span></span><span class="mu">until ${day(g.plus_until)}</span></div>`).join("")}</div></div>` : ""}
   <div class="row hd"><span></span><span>${sch ? "School" : "User"}</span><span>Type</span><span>Plan</span><span>${sch ? "Teachers" : "Country"}</span><span>${sch ? "" : "Last seen"}</span></div>
   ${os.map(orgRow).join("")}
   ${U.rows.map(u => `<div class="row ${u.id === U.sel ? "sel" : ""} ${u.disabled ? "off" : ""}" data-u="${u.id}">${avatar(u)}
     <div class="u"><b>@${esc(u.username)}${u.name ? ` · ${esc(u.name)}` : ""}</b><small>${esc(u.email)}${u.verified ? "" : ` · <span style="color:var(--am)">unverified</span>`}</small></div>
-    <div><span class="role r-${u.role}">${ROLE[u.role]}</span></div><div>${plan(u)}</div><div>${flag(u.country)}</div><div class="mu">${ago(u.last_seen)}</div></div>`).join("")}
+    <div><span class="pl ${ROLE_TONE[u.role] || ""}">${ROLE[u.role]}</span></div><div>${plan(u)}</div><div>${flag(u.country)}</div><div class="mu">${ago(u.last_seen)}</div></div>`).join("")}
   ${!os.length && !U.rows.length ? `<div class="empty">Nobody here</div>` : ""}
   <div class="acts">${U.page ? `<button class="b" data-pg="-1">‹ Newer</button>` : ""}${r.more ? `<button class="b" data-pg="1">Older ›</button>` : ""}</div>
   <p class="mu">🔒 Students and teachers a school created themselves belong to that school and are not listed here: only its admins see them. You see the school as one account.</p>`;
@@ -168,9 +136,9 @@ function drawer() {
     <div class="f"><label>Username</label><input class="in" data-e="username" value="${esc(E.username)}" maxlength="20" ${can ? "" : "disabled"}></div></div>
     <div class="f"><label>E-mail ${u.verified ? `<span style="color:var(--gr)">✓ verified</span>` : `<span style="color:var(--am)">not verified</span>`}</label><input class="in" data-e="email" type="email" value="${esc(E.email)}" ${can ? "" : "disabled"}></div>
     <div class="f"><label>Role${isAdmin() && !self ? "" : " · only an admin can change it"}</label><div class="seg fill">${Object.entries(ROLE).map(([k, l]) => `<button type="button" data-role="${k}" class="${E.role === k ? "on" : ""}" ${isAdmin() && !self ? "" : "disabled"}>${l}</button>`).join("")}</div></div>
-    <div class="tg"><div>${stripe ? `💳 ${stripe}<small>${u.period_end ? "Until " + day(u.period_end) : ""}</small>` : gift ? `🎁 Plus gift<small>Until ${day(u.plus_until)}</small>` : `No Plus<small>${u.country === "IR" ? "Free full access from Iran" : "Free plan"}</small>`}</div>
+    <div class="opt box"><div>${stripe ? `💳 ${stripe}<small>${u.period_end ? "Until " + day(u.period_end) : ""}</small>` : gift ? `🎁 Plus gift<small>Until ${day(u.plus_until)}</small>` : `No Plus<small>${u.country === "IR" ? "Free full access from Iran" : "Free plan"}</small>`}</div>
       ${can ? `<span class="acts">${gift ? `<button class="b sm" data-act="ungift">Remove</button>` : ""}<button class="b sm" data-act="gift">${gift ? "Change" : "Gift Plus"}</button></span>` : ""}</div>
-    <div class="tg"><div>Account active<small>Off = signed out everywhere and can't sign in</small></div><button class="sw ${E.disabled ? "" : "on"}" id="active" ${can && !self ? "" : "disabled"}></button></div>
+    <div class="opt box"><div>Account active<small>Off = signed out everywhere and can't sign in</small></div><button class="sw ${E.disabled ? "" : "on"}" id="active" ${can && !self ? "" : "disabled"}></button></div>
     ${can ? `<div class="acts"><button class="b" data-act="reset">📧 Send reset link</button>${u.verified ? "" : `<button class="b" data-act="verify">✓ Mark verified</button>`}<button class="b" data-act="progress">↻ Reset progress</button></div>` : `<p class="mu">Only an admin can change team accounts.</p>`}
     <div class="foot">${can ? `<button class="b pr" style="flex:1" id="save">Save changes</button>` : ""}${isAdmin() && !self ? `<button class="b d" id="del">🗑 Delete</button>` : ""}</div>`;
 }
@@ -206,35 +174,7 @@ async function lessons() {
   LESSONS = await Promise.all(all.map(async x => { const L = await (await fetch(`/content/lessons/${x.dir}/lesson.json`)).json(); return { ...x, title: L.title, level: L.level }; }));
   return LESSONS;
 }
-/* ---- lessons made in the studio (the LAPP library) ---- */
-const LFLAG = { de: "🇩🇪", nl: "🇳🇱", pl: "🇵🇱" }, LTYPE = { talk: "💬 Conversation", lesson: "🎧 Lesson", story: "📖 Story" };
-const LTOPIC = { daily: "Daily life", travel: "Travel & hotel", food: "Food & shopping", health: "Health & doctor", work: "Work & office", home: "Home & family", city: "City & transport", school: "School & study", story: "Stories", other: "Other" };
-let NEWLEVEL = "";
-function openLessonDlg() {
-  const o = (el, list, v) => { el.options = list; el.value = v; };
-  o($("#lCourse"), [["de", "German", "🇩🇪"], ["nl", "Dutch", "🇳🇱"], ["pl", "Polish", "🇵🇱"]].map(([value, label, icon]) => ({ value, label, icon })), "de");
-  o($("#lLevel"), ["A1", "A2", "B1", "B2", "C1", "C2"].map(x => ({ value: x, label: x })), NEWLEVEL || "A1");
-  o($("#lType"), Object.entries(LTYPE).map(([value, t]) => ({ value, label: t.slice(3), icon: t.slice(0, 2) })), "talk");
-  o($("#lTopic"), Object.entries(LTOPIC).map(([value, label]) => ({ value, label })), "daily");
-  $("#lessonDlg").showModal();
-}
-document.addEventListener("click", e => { if (e.target.closest("#addLesson")) { NEWFOLDER = 0; NEWLEVEL = ""; openLessonDlg(); } });
-document.addEventListener("submit", async e => {
-  if (e.target.id !== "lessonForm") return;
-  if (e.submitter && e.submitter.value === "cancel") return;
-  e.preventDefault();
-  const w = window.open("about:blank", "_blank");
-  try {
-    const l = await api("POST", "/studio/lessons", { ...Object.fromEntries(new FormData(e.target)), folder: NEWFOLDER });
-    $("#lessonDlg").close(); Shell.refresh("content"); Drive.reload().catch(() => {});
-    const url = `/studio#script/${l.id}`;
-    if (w) { w.location = url; toast("Lesson created · the studio opened in a new tab"); }
-    else toast("Lesson created", { action: "Open the studio", run: () => window.open(url, "_blank") });
-  } catch (x) { if (w) w.close(); toast(x.message, { kind: "err" }); }
-});
-
 /* ---- content: the drive ---- */
-let NEWFOLDER = 0;
 V.content = async () => { await Drive.load(); return Drive.html(); };
 
 /* ---- AI: which models the studio may use ---- */
@@ -249,8 +189,8 @@ V.ai = async () => {
     : x.kind === "workers" ? (AIS.builtin ? "no key needed" : `<span style="color:var(--rd)">not available on this server</span>`) : x.hasKey ? `🔑 ••••${esc(x.keyEnd)}` : "no key";
   return `<div class="top"><h1>AI</h1><button class="b pr" id="aiAdd">＋ Add an AI</button></div>
   <p class="mu">The studio's AI writes, translates, rewrites and checks lessons. <b>LAPP AI</b> is our own: an open-source model on our Cloudflare account — no key and no outside AI company. Add GPT, Gemini, Claude or a model on your own server whenever you want, and pick which one does what.</p>
-  <div class="two"><div class="card"><h3>🤖 AIs</h3><div class="list">
-    ${P.map(x => `<div class="r" style="align-items:flex-start;${x.enabled ? "" : "opacity:.5"}"><span style="flex:1;min-width:0"><b>${AI_ICON[x.kind]} ${esc(x.name)}</b> <span class="mu">${esc(K[x.kind].name)}</span><br>
+  <div class="split"><div class="card"><h3>🤖 AIs</h3><div class="list">
+    ${P.map(x => `<div class="li" style="align-items:flex-start;${x.enabled ? "" : "opacity:.5"}"><span style="flex:1;min-width:0"><b>${AI_ICON[x.kind]} ${esc(x.name)}</b> <span class="mu">${esc(K[x.kind].name)}</span><br>
       <span class="mu" style="word-break:break-all">${esc(x.model)}${x.base_url ? " · " + esc(x.base_url) : ""}</span><br>
       <span class="mu">${keyText(x)} · ${x.uses} uses${x.used_at ? " · last " + ago(x.used_at) : ""}</span>
       <span class="mu" id="aiRes${x.id}" style="display:block"></span></span>
@@ -258,8 +198,8 @@ V.ai = async () => {
       <button class="sw ${x.enabled ? "on" : ""}" data-ai-on="${x.id}" title="On / off"></button>${x.id !== 1 ? `<button class="b sm d" data-ai-del="${x.id}">✕</button>` : ""}</span></div>`).join("")}
   </div></div>
   <div class="card"><h3>⚙️ Which AI does what</h3><div class="list">
-    <div class="r"><span><b>Default</b><br><span class="mu">used for everything that says “same as default”</span></span><l-select id="aiDef" style="width:260px" aria-label="Default AI">${opt(st.default)}</l-select></div>
-    ${Object.entries(T).map(([k, label]) => `<div class="r"><span>${esc(label)}</span><l-select data-ai-task="${k}" style="width:260px" aria-label="${esc(label)}">${opt(st.tasks[k] || 0, "Same as default")}</l-select></div>`).join("")}
+    <div class="li"><span><b>Default</b><br><span class="mu">used for everything that says “same as default”</span></span><l-select id="aiDef" style="width:260px" aria-label="Default AI">${opt(st.default)}</l-select></div>
+    ${Object.entries(T).map(([k, label]) => `<div class="li"><span>${esc(label)}</span><l-select data-ai-task="${k}" style="width:260px" aria-label="${esc(label)}">${opt(st.tasks[k] || 0, "Same as default")}</l-select></div>`).join("")}
   </div><p class="mu" style="margin-top:10px">If a chosen AI is switched off or removed, LAPP AI takes over.</p></div></div>`;
 };
 const AI_HINT = {
@@ -271,15 +211,15 @@ const AI_HINT = {
 };
 function aiDialog(x) {
   AI_EDIT = x || null;
-  const K = AIS.kinds, f = $("#aiForm");
+  const KINDS = AIS.kinds, f = $("#aiForm");
   f.reset();
   $("#aiTitle").textContent = x ? `Edit ${x.name}` : "Add an AI";
   $("#aiOk").textContent = x ? "Save" : "Add";
   const kind = $("#aiKind");
-  kind.options = Object.entries(K).filter(([k]) => x || k !== "workers").map(([k, v]) => ({ value: k, label: v.name, icon: AI_ICON[k] }));
+  kind.options = Object.entries(KINDS).filter(([k]) => x || k !== "workers").map(([k, v]) => ({ value: k, label: v.name, icon: AI_ICON[k] }));
   kind.value = x ? x.kind : "openai";
   const fill = () => {
-    const k = kind.value, v = K[k];
+    const k = kind.value, v = KINDS[k];
     $("#aiModels").innerHTML = v.models.map(m => `<option value="${esc(m)}">`).join("");
     $("#aiUrlF").hidden = k === "workers";
     $("#aiUrl").placeholder = v.url || "https://…/v1";
@@ -346,20 +286,21 @@ V.access = async () => {
   A = access;
   const sw = (on, attrs) => `<button class="sw ${on ? "on" : ""}" ${attrs} ${isAdmin() ? "" : "disabled"}></button>`;
   return `<div class="top"><h1>Content & access</h1>${isAdmin() ? "" : `<span class="mu">Only an admin can change these.</span>`}</div>
-  <div class="two"><div class="card"><h3>📚 Free or Plus — per lesson</h3><p class="mu" style="margin:-4px 0 6px">On = free for everyone. Off = Plus only (the lesson shows a lock and its audio is refused).</p>
-   ${COURSES.map(c => `<div class="grp">${esc(c.name)}</div><div class="list">${ls.filter(L => L.course === c.code).map(L => `<div class="r"><span><b>${esc(L.title)}</b> <span class="mu">${esc(L.level)}</span></span>${sw(!A.locked.includes(L.dir), `data-lock="${esc(L.dir)}"`)}</div>`).join("") || `<div class="r mu">No lessons yet — make them in the studio</div>`}</div>`).join("")}</div>
+  <div class="split"><div class="card"><h3>📚 Free or Plus — per lesson</h3><p class="mu" style="margin:-4px 0 6px">On = free for everyone. Off = Plus only (the lesson shows a lock and its audio is refused).</p>
+   ${COURSES.map(c => `<div class="grp">${esc(c.name)}</div><div class="list">${ls.filter(L => L.course === c.code).map(L => `<div class="li"><span><b>${esc(L.title)}</b> <span class="mu">${esc(L.level)}</span></span>${sw(!A.locked.includes(L.dir), `data-lock="${esc(L.dir)}"`)}</div>`).join("") || `<div class="r mu">No lessons yet — make them in the studio</div>`}</div>`).join("")}</div>
    <div class="card"><h3>⚙️ Rules</h3><div class="list">
-    <div class="r"><span><b>Full access, free, from Iran</b><br><span class="mu">By connection country (Cloudflare); on a VPN, the VPN's country counts.</span></span>${sw(A.iranFree, `data-k="iranFree"`)}</div>
-    <div class="r"><span><b>Free trial</b><br><span class="mu">Days before the first payment, once per person.</span></span><input class="in" type="number" min="0" max="30" value="${A.trialDays}" id="trialDays" style="width:76px" ${isAdmin() ? "" : "disabled"}></div>
+    <div class="li"><span><b>Full access, free, from Iran</b><br><span class="mu">By connection country (Cloudflare); on a VPN, the VPN's country counts.</span></span>${sw(A.iranFree, `data-k="iranFree"`)}</div>
+    <div class="li"><span><b>Free trial</b><br><span class="mu">Days before the first payment, once per person.</span></span><input class="in" type="number" min="0" max="30" value="${A.trialDays}" id="trialDays" style="width:76px" ${isAdmin() ? "" : "disabled"}></div>
    </div></div></div>`;
 };
 async function saveAccess(patch) {
   try { const r = await api("PUT", "/admin/settings", { access: { ...A, ...patch } }); A = r.access; toast("Saved"); show(); } catch (x) { toast(x.message); }
 }
 
-/* ================= the shell: tabs, two pages, ⌘K ================= */
+/* ================= start: the page router (ui/shell.js) ================= */
 function show() { Shell.refresh(); }
-function newLesson(folder, rules) { NEWFOLDER = folder || 0; NEWLEVEL = rules && rules.level || ""; openLessonDlg(); }
+// a new lesson in the LAPP library: the shared form, then the studio opens in a window
+const newLesson = () => K.newLesson({ create: v => api("POST", "/studio/lessons", v), after: l => { Drive.reload().catch(() => {}); K.openStudio(l.id); } });
 const NAV = [
   { route: "dash", label: "Dashboard", icon: "📊", group: "Manage", key: "d" },
   { route: "users", label: "Users", icon: "👥", group: "Manage", badge: "nU", key: "u" },
@@ -465,19 +406,17 @@ async function exportCsv() {
   ME = m.user;
   Drive.setup({
     api: (p, m = "GET", b) => api(m, "/studio" + p, b), lapp: true,
-    studioUrl: (id, part) => `/studio#${part || "script"}/${id}`,
     refresh: () => Shell.refresh("content"),
-    newLesson,
     extraRoot: `<div class="dv-acts"><button class="b sm" onclick="Shell.open('access')">📚 Built-in lessons · Iran · free trial</button></div>`
   });
   Shell.init({
-    side: $("#side"), main: $("#view"), key: "lapp.admin.tabs." + ME.id, name: "LAPP Admin", home: "dash", nav: NAV,
+    main: $("#view"), name: "LAPP Admin", home: "dash", nav: NAV,
     render: async r => { const v = r.split("/")[0]; return await (V[v] || V.dash)(); },
     after: r => { if (r === "users") drawer(); },
     onShow: r => { if (r !== "users" && U.sel) { U.sel = null; drawer(); } },
     commands: () => [
       { icon: "＋", label: "Add a user", run: () => { Shell.open("users"); openAdd(); } },
-      { icon: "🎬", label: "New lesson", run: () => newLesson(0, {}) },
+      { icon: "🎬", label: "New lesson", run: newLesson },
       ...(isAdmin() ? [{ icon: "🏫", label: "New school", run: () => $("#orgDlg").showModal() }, { icon: "🤖", label: "Add an AI", run: () => { Shell.open("ai"); setTimeout(() => $("#aiAdd")?.click(), 400); } }] : []),
       { icon: "⬇", label: "Export the user list", run: exportCsv }]
   });

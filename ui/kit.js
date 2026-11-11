@@ -11,11 +11,31 @@
   K.$ = (s, r = document) => r.querySelector(s);
   K.$$ = (s, r = document) => [...r.querySelectorAll(s)];
   K.esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
-  K.LS = { get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }, del(k) { try { localStorage.removeItem(k); } catch {} } };
+  // this browser's storage: values as JSON (a plain string stored by older code is read as it is);
+  // raw / setRaw for keys other code reads as plain text (e.g. "lapp:lang")
+  K.LS = {
+    get(k, d) { let v; try { v = localStorage.getItem(k); } catch { return d; } if (v == null) return d; try { return JSON.parse(v) ?? d; } catch { return v; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+    del(k) { try { localStorage.removeItem(k); } catch {} },
+    raw(k) { try { return localStorage.getItem(k); } catch { return null; } },
+    setRaw(k, v) { try { localStorage.setItem(k, v); } catch {} },
+    keys() { try { return Object.keys(localStorage); } catch { return []; } }
+  };
+  // a small event channel: const ch = K.events(); ch.on("change", f) → off(); ch.emit("change", …)
+  K.events = () => { const L = {}; return {
+    on(e, f) { (L[e] = L[e] || new Set()).add(f); return () => L[e].delete(f); },
+    emit(e, ...a) { (L[e] || []).forEach(f => { try { f(...a); } catch (x) { console.error(x); } }); } }; };
+  // the look changed (theme, accent, pointer) — in this window or another one
+  K.onLook = f => {
+    addEventListener("storage", e => { if (e.key === "lapp.theme" || e.key === "lapp.cursor") f(); });
+    addEventListener("message", e => { if (e.origin === location.origin && e.data && e.data.lapp && e.data.t === "theme") setTimeout(f, 0); });
+  };
   K.loc = () => window.PanelI18N ? PanelI18N.locale : (navigator.language || "en-GB");
   K.embed = new URLSearchParams(location.search).has("embed") && window.parent !== window;
   // keys: a Mac has ⌘ Command, ⌥ Option and ⌃ Control (Command and Control are different keys); elsewhere Ctrl
   K.MAC = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+  // the keys of a keydown as one text: "Cmd+K", "Ctrl+Alt+ArrowLeft" ("" for a lone modifier)
+  K.combo = e => { if (["Control", "Alt", "Shift", "Meta"].includes(e.key)) return ""; const k = e.code && /^Key[A-Z]$/.test(e.code) ? e.code.slice(3) : e.code === "Backquote" ? "`" : e.key === " " ? "Space" : e.key.length === 1 ? e.key.toUpperCase() : e.key; return (K.MAC ? [e.metaKey && "Cmd", e.ctrlKey && "Ctrl", e.altKey && "Alt", e.shiftKey && "Shift", k] : [(e.ctrlKey || e.metaKey) && "Ctrl", e.altKey && "Alt", e.shiftKey && "Shift", k]).filter(Boolean).join("+"); };
   K.keyLabel = c => { let t = String(c || "").replace("ArrowLeft", "←").replace("ArrowRight", "→").replace("ArrowUp", "↑").replace("ArrowDown", "↓").replace("Escape", "Esc"); if (K.MAC) t = t.replace(/Cmd\+/g, "⌘").replace(/Ctrl\+/g, "⌃").replace(/Alt\+/g, "⌥").replace(/Shift\+/g, "⇧"); return t; };
   // our icons (ui/icons.js); a page still written with an emoji gets the icon for it
   K.I = (n, s = 16) => window.Icon ? Icon(n, s) : "";
@@ -30,6 +50,38 @@
   K.money = (cents, currency = "EUR") => new Intl.NumberFormat(K.loc(), { style: "currency", currency }).format((cents || 0) / 100);
   K.size = n => n < 1024 ? n + " B" : n < 1048576 ? Math.round(n / 1024) + " KB" : (n / 1048576).toFixed(1) + " MB";
   K.fileIcon = (name = "", type = "") => /^image\//.test(type) ? "image" : /pdf/.test(type) ? "file-text" : /^audio\//.test(type) ? "music" : /^video\//.test(type) ? "video" : /sheet|excel|csv/i.test(type + name) ? "sheet" : /word|document|text|\.docx?$/i.test(type + name) ? "file-text" : "file";
+
+  K.clock = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;   // seconds → m:ss
+  // the words of a text, in any language (letters, marks, apostrophes, hyphens)
+  K.words = t => String(t || "").match(/[\p{L}\p{M}\d'’-]+/gu) || [];
+  // a shuffled copy (rnd: a seeded random for the same order every time)
+  K.shuffle = (a, rnd = Math.random) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+  /* ---------- LAPP's own words: courses, levels, topics, lesson types (one list for every page) ---------- */
+  K.COURSES = { de: { name: "German", native: "Deutsch", flag: "🇩🇪", speech: "de-DE" }, nl: { name: "Dutch", native: "Nederlands", flag: "🇳🇱", speech: "nl-NL" }, pl: { name: "Polish", native: "Polski", flag: "🇵🇱", speech: "pl-PL" } };
+  K.LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2"];
+  K.TOPICS = { daily: "Daily life", travel: "Travel & hotel", food: "Food & shopping", health: "Health & doctor", work: "Work & office", home: "Home & family", city: "City & transport", school: "School & study", story: "Stories", other: "Other" };
+  K.TYPES = { talk: ["💬", "Conversation"], lesson: ["🎧", "Lesson"], story: ["📖", "Story"] };
+  K.flag = c => (K.COURSES[c] || {}).flag || "";
+  // choices for l-select
+  K.opt = {
+    courses: () => Object.entries(K.COURSES).map(([value, c]) => ({ value, label: c.name, icon: c.flag, sub: c.native })),
+    levels: () => K.LEVELS.map(value => ({ value, label: value })),
+    topics: () => Object.entries(K.TOPICS).map(([value, label]) => ({ value, label })),
+    types: () => Object.entries(K.TYPES).map(([value, [icon, label]]) => ({ value, label, icon }))
+  };
+  // LAPP's dictionary of a course (cached): base entries, every form → its entry, and names
+  const DICTS = {}, MEANS = {};
+  K.dict = course => DICTS[course] || (DICTS[course] = Promise.all([
+    fetch(`/content/lang/${course}/dict.json`).then(r => r.json()).catch(() => ({})),
+    fetch(`/content/lang/${course}/names.json`).then(r => r.ok ? r.json() : []).catch(() => [])
+  ]).then(([base, names]) => {
+    const forms = new Map();
+    for (const [key, v] of Object.entries(base)) { const b = key.split("_")[0].toLowerCase(); if (!forms.has(b)) forms.set(b, key); for (const f of v.f || []) if (!forms.has(f.toLowerCase())) forms.set(f.toLowerCase(), key); }
+    return { base, forms, names: new Set((Array.isArray(names) ? names : Object.keys(names)).map(x => String(x).toLowerCase())) };
+  }));
+  // what its words mean in a language (English when that language has none)
+  K.meanings = (course, lang) => MEANS[course + lang] || (MEANS[course + lang] = fetch(`/content/lang/${lang}/dict.${course}.json`).then(r => r.ok ? r.json() : fetch(`/content/lang/en/dict.${course}.json`).then(x => x.json())).catch(() => ({})));
 
   /* ---------- talking to the server ---------- */
   // K.api(method, path, body, raw?) against /api; K.apiAt(base, o) makes one for another base (e.g. /api/studio)
@@ -46,8 +98,34 @@
   };
   K.api = K.apiAt("/api");
 
+  /* ---------- a lesson: its state, opening it, making a new one — the same everywhere ---------- */
+  // the studio, in a window of the desktop (or a new tab when there is none)
+  K.studioUrl = (id, part = "script", org = "") => `/studio${org ? "?org=" + encodeURIComponent(org) : ""}#${part}/${id}`;
+  K.openStudio = (id, part, org) => { const url = K.studioUrl(id, part, org); if (K.embed && window.LAPPFrame) LAPPFrame.up({ t: "open", url }); else window.open(url, "_blank"); };
+  // the one "New lesson" form. o: create(values) → the lesson · pre { course, level, type, topic } · chars [{ id, name, emoji, bio }] · after(lesson)
+  K.newLesson = (o = {}) => {
+    const pre = o.pre || {};
+    return K.form("New lesson", [
+      { name: "title", label: "Title (in the course language)", required: true, ph: "Am Bahnhof", attrs: 'maxlength="80"' },
+      { type: "html", html: `<div class="cols2">` },
+      { name: "course", label: "Language", type: "select", options: K.opt.courses(), value: pre.course || "de" },
+      { name: "level", label: "Level", type: "select", options: K.opt.levels(), value: pre.level || "A1" },
+      { type: "html", html: `</div><div class="cols2">` },
+      { name: "type", label: "Type", type: "select", options: K.opt.types(), value: pre.type || "talk" },
+      { name: "topic", label: "Topic", type: "select", options: K.opt.topics(), value: pre.topic || "daily" },
+      { type: "html", html: `</div>` },
+      { name: "brief", label: "What should it be about? (the AI writes from this)", type: "textarea", ph: "Buying a ticket, finding the platform, a delay… words and grammar it should practise" },
+      ...(o.chars && o.chars.length ? [{ name: "characters", label: "Characters (optional)", type: "multi", options: o.chars.map(c => ({ value: String(c.id), label: c.name, icon: c.emoji, sub: c.bio })) }] : [])
+    ], async v => {
+      const l = await o.create({ ...v, characters: (v.characters || []).map(Number) });
+      K.toast("Lesson created");
+      if (o.after) o.after(l); else K.openStudio(l.id, "script", o.org);
+    }, "Create lesson");
+  };
+
   /* ---------- a lesson's state, the same everywhere ---------- */
-  K.lessonState = st => { const [tone, label] = { draft: ["", "draft"], review: ["warn", "in work"], published: ["ok", "published"] }[st] || ["", st || ""]; return `<span class="pl ${tone}">${K.esc(label)}</span>`; };
+  K.lessonTone = st => ({ review: "warn", published: "ok", bin: "bad" })[st] || "";
+  K.lessonState = (st, binned) => { if (binned) st = "bin"; const label = { draft: "draft", review: "in work", published: "published", bin: "in the bin" }[st] || st || ""; return `<span class="pl ${K.lessonTone(st)}">${K.esc(label)}</span>`; };
 
   /* ---------- toasts ---------- */
   const KIND = { ok: ["check", "rgba(52,211,153,.2)"], info: ["info", "rgba(96,165,250,.2)"], warn: ["alert", "rgba(251,191,36,.2)"], err: ["x", "rgba(248,113,113,.2)"] };
@@ -184,20 +262,38 @@
   };
 
   /* ---------- files: put files from the computer into the person's files ---------- */
+  // one file to the server (the same headers everywhere: X-Name, Content-Type, X-Folder). o: api, path, name, folder
+  K.sendFile = (f, o = {}) => (o.api || K.api)("POST", o.path || "/desk/files", null, { headers: { "Content-Type": f.type || "application/octet-stream", "X-Name": encodeURIComponent(o.name || f.name || "file"), ...(o.folder ? { "X-Folder": String(o.folder) } : {}) }, body: f });
   // o: folder · max · before(file) → a value handed to each/failed (e.g. a placeholder) · each(saved, file, value) · failed(file, error, value)
   K.upload = async (files, o = {}) => {
     const out = [];
     for (const f of [...files].slice(0, o.max || 20)) {
       if (f.size > 10e6) { K.toast(`${f.name}: files can be up to 10 MB`, { kind: "err" }); continue; }
       const v = o.before ? o.before(f) : null;
-      try { const r = await K.api("POST", "/desk/files", null, { headers: { "Content-Type": f.type || "application/octet-stream", "X-Name": encodeURIComponent(f.name), "X-Folder": String(o.folder || 0) }, body: f }); out.push(r); if (o.each) o.each(r, f, v); }
+      try { const r = await K.sendFile(f, { folder: o.folder }); out.push(r); if (o.each) o.each(r, f, v); }
       catch (x) { K.toast(`${f.name}: ${x.message}`, { kind: "err" }); if (o.failed) o.failed(f, x, v); }
     }
     return out;
   };
 
+  // a sheet over the learner app (its look: .ac-sheet / .ac-card in style.css); a click outside or on ✕ closes it
+  K.sheet = (html, o = {}) => {
+    let el = K.$("#kSheet");
+    if (!el) { el = document.createElement("div"); el.id = "kSheet"; el.className = "ac-sheet"; document.body.append(el); el.addEventListener("click", e => { if (e.target === el || e.target.closest("[data-sh=close]")) el.hidden = true; }); }
+    el.onclick = null;   // each sheet sets its own
+    el.innerHTML = `<div class="ac-card ${o.cls || ""}" dir="${o.dir || "ltr"}"><button type="button" class="ac-x" data-sh="close" aria-label="${K.esc(o.close || "Close")}">✕</button>${html}</div>`;
+    el.hidden = false;
+    return el;
+  };
+
+  // sign out, everywhere the same
+  K.signOut = () => K.api("POST", "/auth/logout").catch(() => {}).finally(() => { location.href = "/"; });
+
   /* ---------- pages of the work desktop: opened on their own, they go into it ---------- */
   K.inDesk = () => { if (!K.embed) { location.replace("/manage#open=" + encodeURIComponent(location.pathname + location.search + location.hash)); return false; } return true; };
+
+  // <html data-desk>: this page belongs in the work desktop
+  if (document.documentElement.hasAttribute("data-desk")) K.inDesk();
 
   // inside a window, problems also go to the desktop's notifications
   if (K.embed) K.toastHooks.push((text, kind) => { if (kind !== "ok" && window.LAPPFrame) LAPPFrame.up({ t: "note", text: String(text), kind }); });

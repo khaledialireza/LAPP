@@ -24,7 +24,7 @@
   if (D.MAC) Object.assign(D.DEF, { cc: "Cmd+K", ai: "Cmd+J" });   // ⌘K and ⌘J, as on every Mac app; the rest use ⌃ ⌥ so they never clash with the browser
   D.BIND = { ...D.DEF }; D.REC = null;
   // a Mac has ⌘ Command, ⌥ Option and ⌃ Control: Command and Control are different keys there; elsewhere Ctrl (or the Windows key) is one
-  D.combo = e => { if (["Control", "Alt", "Shift", "Meta"].includes(e.key)) return ""; const k = e.code && /^Key[A-Z]$/.test(e.code) ? e.code.slice(3) : e.code === "Backquote" ? "`" : e.key === " " ? "Space" : e.key.length === 1 ? e.key.toUpperCase() : e.key; return (D.MAC ? [e.metaKey && "Cmd", e.ctrlKey && "Ctrl", e.altKey && "Alt", e.shiftKey && "Shift", k] : [(e.ctrlKey || e.metaKey) && "Ctrl", e.altKey && "Alt", e.shiftKey && "Shift", k]).filter(Boolean).join("+"); };
+  D.combo = K.combo;
   D.nice = K.keyLabel;
   D.shareKeys = () => D.LS.set("lapp.keys", D.BIND);      // the pages inside windows read this and pass the keys up
   D.ACT = {};                                             // action name → function (filled by the modules)
@@ -35,10 +35,8 @@
   D.toast = (text, o = {}) => K.toast(text, o);
   D.note = n => { D.NOTES.unshift({ id: String(Date.now() + Math.random()), at: Date.now(), ...n }); D.NOTES.length = Math.min(D.NOTES.length, 50); D.emit("notes"); };
 
-  /* ---------- tiny event bus between modules ---------- */
-  const L = {};
-  D.on = (e, f) => (L[e] = L[e] || []).push(f);
-  D.emit = (e, ...a) => (L[e] || []).forEach(f => { try { f(...a); } catch (x) { console.error(x); } });
+  /* ---------- the event channel between modules (the shared K.events) ---------- */
+  const BUS = K.events(); D.on = BUS.on; D.emit = BUS.emit;
 
   /* ---------- menus and popovers: the shared ones (K.menu, K.pop) ---------- */
   D.closeMenus = () => { K.closeMenu(); K.closePops(); D.$$(".snapfly, .prev").forEach(x => x.remove()); D.$$(".wmenu button.open, .tr.open").forEach(b => b.classList.remove("open")); };

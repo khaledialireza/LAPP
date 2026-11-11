@@ -23,7 +23,7 @@
     I18N.init(idx.languages);
     for (const c of idx.courses) c.lessons = [...c.lessons, ...lib.lessons.filter(l => l.course === c.code).map(l => l.dir)];
     window.COURSES = idx.courses.map(c => ({ ...c, ready: c.lessons.length > 0 }));
-    let want = null; try { want = JSON.parse(localStorage.getItem("lapp:course")); } catch {}
+    const want = K.LS.get("lapp:course", null);
     const C = COURSES.find(c => c.code === want && c.ready) || COURSES.find(c => c.ready);
     // the first course keeps the original "lapp:" keys; the others get their own
     window.COURSE = { ...C, chosen: !!want, prefix: C.code === COURSES[0].code ? "lapp:" : `lapp:${C.code}:` };
