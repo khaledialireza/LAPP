@@ -47,10 +47,10 @@
 
   /* ---------- rows: one shape for everything ---------- */
   // { icon, color, name, place, k, run, acts: [[label, icon, run]] }
-  const winRow = w => ({ icon: w.icon, name: w.title, place: D.wsOf(w.ws).name + (w.min ? " · minimised" : ""), k: "switch", run: () => { D.ccClose(); D.focusWin(w); },
+  const winRow = w => ({ icon: w.icon, name: w.title, place: [w.ws !== D.CUR ? D.wsOf(w.ws).name : "", w.min ? "minimised" : ""].filter(Boolean).join(" · "), k: "switch", run: () => { D.ccClose(); D.focusWin(w); },
     acts: [["Switch to it", "window", () => D.focusWin(w)], ["Left half", "sidebar", () => D.snap(w, "left")], ["Right half", "sidebar", () => D.snap(w, "right")], ["Shortcut on the desktop", "desktop", () => D.addIcon({ n: w.title, i: w.icon, url: w.url, lesson: w.lesson })], ["Close", "x", () => D.closeWin(w)]] });
   const appRow = a => { const pins = (D.DESK.pins || {})[a.ws] || [], pinned = pins.includes(a.id);
-    return { icon: a.icon, color: a.color, name: a.title, place: D.wsOf(a.ws).name, run: () => { D.ccClose(); D.openWin(a.url); },
+    return { icon: a.icon, color: a.color, name: a.title, place: a.ws !== D.CUR ? D.wsOf(a.ws).name : "", run: () => { D.ccClose(); D.openWin(a.url); },
       acts: [["Open", "external", () => D.openWin(a.url)], [pinned ? "Unpin from the taskbar" : "Pin to the taskbar", "pin", () => { const cur = (D.DESK.pins || {})[a.ws] || D.APPS.filter(x => x.ws === a.ws).slice(0, 4).map(x => x.id); D.DESK.pins = { ...(D.DESK.pins || {}), [a.ws]: pinned ? cur.filter(x => x !== a.id) : [...cur, a.id] }; D.save(); D.drawTask(); }], ["Shortcut on the desktop", "desktop", () => D.addIcon({ n: a.title, i: a.icon, url: a.url })]] }; };
   const lessonRow = l => ({ icon: "lessonfile", name: `${D.FLAG(l.course)} ${l.title}`.trim(), place: `${l.level || ""} · ${l.scope.name} · ${({ draft: "draft", review: "in work", published: "published" })[l.status] || ""}`, k: "", run: () => { D.ccClose(); D.openLesson(l, "script"); }, drag: `${l.scope.q}:${l.id}`,
     acts: [["Script", "pen", () => D.openLesson(l, "script")], ["Lesson settings", "settings", () => D.openLesson(l, "lesson")], ["Voice desk", "wave", () => D.openLesson(l, "voice")], ["Insights", "insights", () => D.openLesson(l, "insights")], ["Shortcut on the desktop", "desktop", () => D.addIcon({ n: l.title, i: "pen", url: D.studioUrl(l), lesson: { id: String(l.id), title: l.title } })], ["Ask the AI about it", "ai", () => D.ask(`Tell me about the lesson “${l.title}” and what it still needs`)]] });
