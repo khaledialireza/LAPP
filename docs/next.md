@@ -60,6 +60,16 @@ Then:
   - Lesson rows lose the 3 buttons: ↵ opens the script; → (or hover) opens an action panel (Script, Voice, Insights, pin, share, ask AI) — the same action panel for every item type.
   - Footer: only "↵ open · → actions · Tab ask AI"; settings and shortcuts go to the avatar menu / a small ⚙ in the search bar.
 
+## The platform gets its own name: KixVix (approved 2026-11-12, for now)
+- The management system is no longer "LAPP": it is a standalone platform (an OS for organisations), named KixVix
+  for now, on kixvix.com (a domain we already own). The name may change later, so it must live in one setting,
+  never hard-coded.
+- LAPP becomes one organisation on the platform (a language-learning company) with its own apps
+  (Lesson library, Studio, Characters, the learner site at lapp.khaledi.eu) — not part of the platform's admin.
+- [PROPOSAL, NOT CONFIRMED] Three layers: platform core (accounts, organisations, roles, desk, generic apps) →
+  platform owner (an organisation with only platform apps: organisations by name/ID, alerts, support access,
+  plan catalogue) → organisations (LAPP, schools, companies, clinics), each with installable app modules.
+
 ## Privacy: nobody sees other people's data, not even the root (approved 2026-11-11)
 - LAPP itself is one organisation like any other; its admins see only their own organisation (the LAPP team).
 - Of every other person or organisation we see only the name and its unique 10-character ID.
