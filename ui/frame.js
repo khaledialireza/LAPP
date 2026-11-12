@@ -39,6 +39,8 @@
   }, true);
 
   let aliveT = 0;
+  // a click inside a window that sits under another one brings it to the front (clicks inside a page never reach the desk)
+  addEventListener("pointerdown", () => up({ t: "focus" }), { passive: true, capture: true });
   ["pointerdown", "keydown", "wheel", "pointermove"].forEach(ev => addEventListener(ev, () => { const n = Date.now(); if (n - aliveT > 30000) { aliveT = n; up({ t: "alive" }); } }, { passive: true, capture: true }));
 
   /* ---------- other apps open as windows of the desktop, never as browser tabs ---------- */
