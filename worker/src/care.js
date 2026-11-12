@@ -142,6 +142,31 @@ export async function careApi(req, env, H, p, url) {
   }
 
   const me = await owner(req, env, H);
+  let m0;
+  // the list of our customers (every root outside our team): who they are, never what is inside their space
+  if (p === "/customers" && M === "GET") {
+    const q = `%${(url.searchParams.get("q") || "").trim().toLowerCase()}%`, kind = url.searchParams.get("kind") === "org" ? "org" : "user", page = Math.max(0, +url.searchParams.get("page") || 0);
+    const qid = String(url.searchParams.get("q") || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+    let rows;
+    if (kind === "user") rows = (await DB.prepare(`SELECT id, name, username, CASE WHEN email LIKE '@%' THEN '' ELSE email END email, disabled, created_at, last_seen, pub_id FROM users
+        WHERE managed_by = 0 AND role = 'user' AND (LOWER(name) LIKE ?1 OR username LIKE ?1 OR email LIKE ?1 OR pub_id = ?2) ORDER BY id DESC LIMIT 51 OFFSET ?3`).bind(q, qid, page * 50).all()).results;
+    else rows = (await DB.prepare(`SELECT o.id, o.name, o.slug, o.disabled, o.created_at, o.pub_id, (SELECT COUNT(*) FROM org_members m WHERE m.org_id = o.id AND m.active = 1) members,
+        (SELECT u.email FROM org_members m JOIN users u ON u.id = m.user_id WHERE m.org_id = o.id AND m.role = 'admin' AND m.active = 1 LIMIT 1) admin_email
+        FROM orgs o WHERE (LOWER(o.name) LIKE ?1 OR o.slug LIKE ?1 OR o.pub_id = ?2) ORDER BY o.id DESC LIMIT 51 OFFSET ?3`).bind(q, qid, page * 50).all()).results;
+    const out = await Promise.all(rows.slice(0, 50).map(async r => ({ ...r, pub: r.pub_id || await pubId(env, kind === "org" ? "orgs" : "users", r.id), pub_id: undefined, kind })));
+    const n = (await DB.prepare(kind === "user" ? "SELECT COUNT(*) n FROM users WHERE managed_by = 0 AND role = 'user'" : "SELECT COUNT(*) n FROM orgs").first()).n;
+    return H.json({ customers: out, more: rows.length > 50, total: n });
+  }
+  // suspend or lift a customer (an account or a whole organisation) without seeing inside
+  if ((m0 = p.match(/^\/customers\/(user|org)\/(\d+)$/)) && M === "PATCH") {
+    if (me.role !== "admin") throw H.fail("only an admin can do this", 403);
+    const b = await H.body(req), off = b.disabled ? 1 : 0, id = +m0[2];
+    if (m0[1] === "user") {
+      const t = await DB.prepare("SELECT role, managed_by FROM users WHERE id = ?").bind(id).first(); if (!t || t.role !== "user" || t.managed_by) throw H.fail("not a customer", 403);
+      await DB.batch([DB.prepare("UPDATE users SET disabled = ? WHERE id = ?").bind(off, id), ...(off ? [DB.prepare("DELETE FROM sessions WHERE user_id = ?").bind(id)] : []), DB.prepare("INSERT INTO account_log (user_id, kind, at) VALUES (?, ?, ?)").bind(id, off ? "suspended" : "lifted", H.now())]);
+    } else await DB.prepare("UPDATE orgs SET disabled = ? WHERE id = ?").bind(off, id).run();
+    return H.json({ ok: true });
+  }
   if (p === "/find" && M === "GET") { const w = await byPub(env, url.searchParams.get("id")); if (!w) throw H.fail("no account with this ID", 404); return H.json({ who: w }); }
   if (p === "/requests" && M === "GET") {
     await DB.prepare("UPDATE care_requests SET status = 'ended' WHERE status = 'approved' AND expires <= ?").bind(H.now()).run();

@@ -303,7 +303,6 @@ function show() { Shell.refresh(); }
 const newLesson = () => K.newLesson({ create: v => api("POST", "/studio/lessons", v), after: l => { Drive.reload().catch(() => {}); K.openStudio(l.id); } });
 const NAV = [
   { route: "dash", label: "Dashboard", icon: "📊", group: "Manage", key: "d" },
-  { route: "users", label: "Users", icon: "👥", group: "Manage", badge: "nU", key: "u" },
   { route: "content", label: "Lesson library", icon: "📚", group: "Manage", key: "c" },
   { route: "access", label: "Built-in lessons & access", icon: "📚", hidden: true },
   { route: "ai", label: "AI", icon: "🤖", group: "System", key: "i" }
@@ -411,14 +410,12 @@ async function exportCsv() {
   });
   Shell.init({
     main: $("#view"), name: "LAPP Admin", home: "dash", nav: NAV,
-    render: async r => { const v = r.split("/")[0]; return await (V[v] || V.dash)(); },
+    render: async r => { const v = r.split("/")[0]; return await (V[v === "users" ? "content" : v] || V.dash)(); },
     after: r => { if (r === "users") drawer(); },
     onShow: r => { if (r !== "users" && U.sel) { U.sel = null; drawer(); } },
     commands: () => [
-      { icon: "＋", label: "Add a user", run: () => { Shell.open("users"); openAdd(); } },
       { icon: "🎬", label: "New lesson", run: newLesson },
-      ...(isAdmin() ? [{ icon: "🏫", label: "New school", run: () => $("#orgDlg").showModal() }, { icon: "🤖", label: "Add an AI", run: () => { Shell.open("ai"); setTimeout(() => $("#aiAdd")?.click(), 400); } }] : []),
-      { icon: "⬇", label: "Export the user list", run: exportCsv }]
+      ...(isAdmin() ? [{ icon: "🤖", label: "Add an AI", run: () => { Shell.open("ai"); setTimeout(() => $("#aiAdd")?.click(), 400); } }] : [])]
   });
   stats().catch(() => {});
 })();
