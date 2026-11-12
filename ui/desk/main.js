@@ -52,7 +52,7 @@
     const c = D.combo(e), a = Object.keys(D.BIND).find(k => D.BIND[k] === c); if (!a) { if (c && D.ccKey && D.ccKey(c)) e.preventDefault(); return; }
     e.preventDefault(); D.act(a);
   }, true);
-  addEventListener("panel:lang", () => { D.WN().forEach(w => w.fr.src = w.fr.src); D.drawDesk(); });
+  addEventListener("panel:lang", () => { D.WN().forEach(w => w.fr.src = w.fr.src); D.drawDesk(); });   // (a chosen language reloads the whole page: panel-i18n)
 
   // the tray's avatars: one per signed-in account, overlapping; the account you work in now sits on top with a ring
   D.drawMe = () => { const a = $("#av"); if (!a) return; const cur = (D.wsOf(D.CUR) || {}).as || 0, many = D.ACCTS.length > 1;

@@ -252,9 +252,12 @@ export async function careApi(req, env, H, p, url) {
   if ((m = p.match(/^\/rules\/(\d+)$/)) && (M === "PATCH" || M === "DELETE")) {
     if (me.role !== "admin") throw H.fail("only an admin can do this", 403);
     if (M === "DELETE") { await DB.batch([DB.prepare("DELETE FROM care_rules WHERE id = ?").bind(+m[1]), DB.prepare("DELETE FROM care_flags WHERE rule_id = ?").bind(+m[1])]); return H.json({ ok: true }); }
-    const b = await H.body(req);
+    const b = await H.body(req), cur = await DB.prepare("SELECT * FROM care_rules WHERE id = ?").bind(+m[1]).first(); if (!cur) throw H.fail("not found", 404);
     if (b.on !== undefined) await DB.prepare("UPDATE care_rules SET on_ = ? WHERE id = ?").bind(b.on ? 1 : 0, +m[1]).run();
-    if (b.action !== undefined && ACTIONS.includes(b.action)) await DB.prepare("UPDATE care_rules SET action = ? WHERE id = ?").bind(b.action, +m[1]).run();
+    if (["name", "signal", "amount", "minutes", "action"].some(k => b[k] !== undefined)) {
+      const r = clean({ name: cur.name, signal: cur.signal, amount: cur.amount, minutes: cur.minutes, action: cur.action, ...b });
+      await DB.prepare("UPDATE care_rules SET name = ?, signal = ?, amount = ?, minutes = ?, action = ? WHERE id = ?").bind(r.name, r.signal, r.amount, r.minutes, r.action, +m[1]).run();
+    }
     return H.json({ ok: true });
   }
   throw H.fail("not found", 404);

@@ -142,6 +142,7 @@
     if (d.t === "ask" && typeof d.text === "string") return D.ask(d.text.slice(0, 1200), w);
     if (!w) return;
     if (d.t === "settings" && /^\/settings/.test(w.url)) return D.settings(String(d.key), d.value);
+    if (d.t === "lang") { D.save && D.save(); return setTimeout(() => location.reload(), 150); }   // a new language: the whole system again
     if (d.t === "apps" && /^\/store/.test(w.url)) return D.reloadAccounts && D.reloadAccounts();   // an app was installed or removed
     if (d.t === "state") return D.setState(w, ["busy", "ai", "dirty", "error", "ok", "rec"].includes(d.state) ? d.state : "");
     if (d.t === "ready") return ready(w);

@@ -162,7 +162,8 @@
   document.addEventListener("click", e => {
     const t = e.target; if (!t.closest || !t.closest("#cc")) return;
     if (t.closest("[data-ccedit]")) { ST.edit = !ST.edit; return redraw(); }
-    const pw = t.closest("[data-pw]"); if (pw) return K.menuAt(pw, [{ label: "Lock", icon: "lock", run: () => D.lock() }, { label: "Sign out", icon: "log-out", run: () => K.signOut() }], { above: true, end: true });
+    // the desk closes open menus on every click: open this one just after that
+    const pw = t.closest("[data-pw]"); if (pw) return setTimeout(() => K.menuAt(pw, [{ label: "Lock", icon: "lock", run: () => D.lock() }, { label: "Sign out", icon: "log-out", run: () => K.signOut() }], { above: true, end: true }));
     const lg = t.closest("[data-lang]"); if (lg) { e.stopPropagation(); if (window.PanelI18N) PanelI18N.use(lg.dataset.lang, true); return; }
     const rm = t.closest("[data-rm]"); if (rm) { setTiles(tiles().filter(x => x[0] !== rm.dataset.rm)); return redraw(); }
     const frm = t.closest("[data-frm]"); if (frm) { CCS().foot = foot().filter(x => x[0] !== frm.dataset.frm); save(); return redraw(); }

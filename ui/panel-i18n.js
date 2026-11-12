@@ -144,6 +144,8 @@
     document.title = tr(document.title);
     if (save) { try { await fetch("/api/me", { method: "PATCH", credentials: "same-origin", headers: { "Content-Type": "application/json", "X-LAPP": "1" }, body: JSON.stringify({ lang: l }) }); } catch {} }
     window.dispatchEvent(new CustomEvent("panel:lang", { detail: l }));
+    // a new language chosen by the person: the whole system starts again in it (from a window, the desk does it)
+    if (save) { if (window.LAPPFrame && LAPPFrame.embed) LAPPFrame.up({ t: "lang" }); else location.reload(); }
   }
 
   // the language list, next to a button
