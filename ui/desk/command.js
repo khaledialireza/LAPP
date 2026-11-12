@@ -156,15 +156,10 @@
   // fixed catalogue, so the panel can't break. Without an AI (or with "arranged by the AI" off) simple rules choose.
   const PREF = () => ({ ai: true, learn: true, tiles: "calm", open: "center", ...((D.DESK && D.DESK.cc) || {}) });
   const setPref = (k, v) => { D.DESK.cc = { ...(D.DESK.cc || {}), [k]: v }; K.LS.set("lapp.cc", D.DESK.cc); D.save(); };
-  function signals() {
-    const ls = D.LESSONS || [], w = D.W(D.ACTW), h = new Date().getHours();
-    const wait = ls.filter(l => l.status !== "published" && l.lines && l.approved < l.lines), run = D.running(), un = D.NOTES.filter(n => !n.read);
-    const front = w && /\/studio/.test(w.url) && w.lesson ? ls.find(l => String(l.id) === String(w.lesson.id)) : null;
-    return { h, wait, run, un, front, w, recent: (D.DESK.recent || []).filter(r => !D.WN().some(x => x.url === r.url)), inwork: ls.filter(l => l.status !== "published"), pub: ls.filter(l => l.status === "published") };
-  }
+  const signals = () => D.live();
   // the catalogue: tiles (a number), main tasks and lists — each knows when it makes sense
   const TILES = {
-    approve: s => ({ icon: "approve", tone: "#34D399", label: "To approve", value: s.wait.reduce((a, l) => a + (l.lines - l.approved), 0), sub: `lines in ${s.wait.length} lesson${s.wait.length === 1 ? "" : "s"}`, go: "open:" + (D.APPS.find(a => /content|library/i.test(a.id) && a.ws === D.CUR) || D.APPS[0] || {}).url }),
+    approve: s => ({ icon: "approve", tone: "#34D399", label: "To approve", value: s.wait.length, sub: `lesson${s.wait.length === 1 ? "" : "s"} · ${s.lines} lines`, go: "open:" + (D.APPS.find(a => /content|library/i.test(a.id) && a.ws === D.CUR) || D.APPS[0] || {}).url }),
     inwork: s => ({ icon: "pen", tone: "#8B5CF6", label: "In work", value: s.inwork.length, sub: "lessons", go: "open:/studio#home" }),
     published: s => ({ icon: "lessonfile", tone: "#22D3EE", label: "Published", value: s.pub.length, sub: "lessons", go: "open:/studio#home" }),
     running: s => ({ icon: "wave", tone: "#FF3D7F", label: "Running", value: s.run.length, sub: s.run[0] ? "audio · " + s.run[0].title : "nothing now", go: "running" }),
@@ -251,6 +246,6 @@
     K.drag(e, { move: (dx, dy) => { c.classList.add("moved"); c.style.left = Math.max(0, Math.min(r.left + dx, innerWidth - 120)) + "px"; c.style.top = Math.max(0, Math.min(r.top + dy, innerHeight - 80)) + "px"; },
       end: () => { const b = c.getBoundingClientRect(); D.DESK.ccpos = { x: Math.round(b.left), y: Math.round(b.top) }; D.save(); } });
   });
-  D.on("notes", () => $("#cc") && CC.mode === "list" && !CC.q && draw());
-  D.on("jobs", () => $("#cc") && CC.mode === "list" && !CC.q && draw());
+  // the same moment the taskbar changes, the open command center shows it too (not while editing or typing)
+  D.on("live", () => $("#cc") && CC.mode === "list" && !CC.q && !CC.item && !$("#cc.editing") && !$("#cc.acclogin") && draw());
 })();

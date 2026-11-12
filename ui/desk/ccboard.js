@@ -56,7 +56,10 @@
     if (kind === "cal") { const n = new Date(), y = n.getFullYear(), m = n.getMonth(), first = (new Date(y, m, 1).getDay() + 6) % 7, days = new Date(y, m + 1, 0).getDate();
       return `<b class="ml">${esc(n.toLocaleDateString(D.loc(), { month: "long" }))}</b><div class="cal">${["M", "T", "W", "T", "F", "S", "S"].map(x => `<i class="h">${x}</i>`).join("")}${"<i></i>".repeat(first)}${Array.from({ length: days }, (_, k) => `<i class="${k + 1 === n.getDate() ? "t" : ""}">${k + 1}</i>`).join("")}</div>`; }
     if (kind === "kpi") { const k = D.ccTiles[d] ? D.ccTiles[d](s) : null; return k ? `<span class="th">${I(k.icon, 13)}${esc(k.label)}</span><b>${esc(String(k.value))}</b>` : ""; }
-    if (kind === "app" || kind === "allapps") { const a = kind === "app" ? app(d) : { icon: "grid", title: "All apps", color: "var(--p4)" }; return `<span class="g" style="background:${a.color}">${I(a.icon, 19)}</span><span class="an">${esc(a.title)}</span>`; }
+    if (kind === "app" || kind === "allapps") { const a = kind === "app" ? app(d) : { icon: "grid", title: "All apps", color: "var(--p4)" };
+      // the same badge and the same "open" mark the taskbar shows for this app
+      const n = kind === "app" && a.id ? D.waiting()[a.id] || 0 : 0, open = kind === "app" && a.id && D.WN().some(w => (D.appOf(w.url) || {}).id === a.id);
+      return `<span class="g" style="background:${a.color}">${I(a.icon, 19)}${n ? `<span class="wk">${n > 99 ? "99+" : n}</span>` : ""}</span><span class="an">${esc(a.title)}</span>${open ? `<i class="runs"></i>` : ""}`; }
     if (kind === "lang") { const L = window.PanelI18N ? PanelI18N.lang : "en"; return `<span class="th">${I("globe", 14)}Language</span><div class="langs" translate="no">${["en", "fa", "ru", "uk"].map(x => `<button data-lang="${x}" class="${x === L ? "on" : ""}">${x.toUpperCase()}</button>`).join("")}</div>`; }
     if (kind === "q") { const q = Q[d]; return q ? `<span class="qi">${I(q.icon(), 15)}</span><b>${esc(q.label())}</b>` : ""; }
     if (kind === "wid") { const w = D.WT[d]; return w ? `<span class="th">${I(w[0], 14)}${esc(w[1])}</span><span class="mu">${esc(w[2])}</span>` : ""; }

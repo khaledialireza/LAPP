@@ -86,6 +86,25 @@
   D.appOf = url => { const k = D.appKey(url), base = k.replace(/:(script|voice|insights)(@|$)/, ":home$2"); return D.APPS.find(a => a.id === k) || D.APPS.find(a => D.appKey(a.url) === k) || D.APPS.find(a => D.appKey(a.url) === base) || null; };
   D.STUDIO_PART = { lesson: ["settings", "Lesson"], script: ["pen", "Script"], voice: ["wave", "Voice desk"], insights: ["insights", "Insights"], home: ["video", "Studio"], universe: ["cast", "Characters"] };
 
+  /* ---------- one picture of what is going on: the taskbar and the command center both read only this ---------- */
+  // wait: lessons with lines to approve · lines: how many lines · run: audio being made · un: unread notifications
+  D.live = () => {
+    // numbers are for the workspace you are in, like the taskbar's apps
+    const ls = (D.LESSONS || []).filter(l => !l.scope || !l.scope.ws || l.scope.ws === D.CUR), w = D.W && D.W(D.ACTW), wait = ls.filter(l => l.status !== "published" && l.lines && l.approved < l.lines);
+    const front = w && /\/studio/.test(w.url) && w.lesson ? ls.find(l => String(l.id) === String(w.lesson.id)) : null;
+    return { h: new Date().getHours(), wait, lines: wait.reduce((a, l) => a + (l.lines - l.approved), 0), run: D.running(), un: D.NOTES.filter(n => !n.read), front, w,
+      recent: ((D.DESK && D.DESK.recent) || []).filter(r => !D.WN().some(x => x.url === r.url)), inwork: ls.filter(l => l.status !== "published"), pub: ls.filter(l => l.status === "published") };
+  };
+  // waiting work per app (the badge on the taskbar and the count on the app's tile are this one number)
+  D.waiting = () => {
+    const n = {}, add = (id, k) => { if (id) n[id] = (n[id] || 0) + k; }, L = D.live();
+    (D.LESSONS || []).filter(l => l.status !== "published" && l.lines && l.approved < l.lines).forEach(l => { const at = l.scope && l.scope.q ? "@" + l.scope.q : ""; add("studio:home" + at, 1); add("studio:library" + at, 1); });
+    L.un.filter(x => x.url).forEach(x => { const a = D.appOf(x.url); add(a && a.id, 1); });
+    return n;
+  };
+  // any change to windows, workspace, jobs, notifications or lessons → one "live" event for everyone who shows it
+  let liveT = 0; ["wins", "ws", "state", "jobs", "notes", "lessons"].forEach(e => D.on(e, () => { clearTimeout(liveT); liveT = setTimeout(() => D.emit("live"), 30); }));
+
   /* ---------- lessons (for the studio) ---------- */
   D.LESSONS = null;
   D.lessons = async () => {

@@ -31,14 +31,7 @@
     wins.filter(w => !inCap.has(w.id)).forEach(w => { const id = winApp(w); if (!apps.has(id)) apps.set(id, { app: D.APPS.find(x => x.id === id) || { id, title: w.title, icon: w.icon, url: w.url }, wins: [], pinned: false }); apps.get(id).wins.push(w); });
     return { apps: [...apps.values()], caps };
   }
-  // waiting work per app: lines to approve (studio), unread notifications that belong to the app
-  function counts() {
-    const n = {};
-    const add = (id, k) => { if (id) n[id] = (n[id] || 0) + k; };
-    (D.LESSONS || []).filter(l => l.status !== "published" && l.lines && l.approved < l.lines).forEach(l => { const at = l.scope.q ? "@" + l.scope.q : ""; add("studio:home" + at, 1); add("studio:library" + at, 1); });
-    D.NOTES.filter(x => !x.read && x.url).forEach(x => { const a = D.appOf(x.url); add(a && a.id, 1); });
-    return n;
-  }
+  const counts = () => D.waiting();
   D.counts = counts;
   function draw() {
     if (!D.DESK) return;

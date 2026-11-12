@@ -93,7 +93,9 @@ body.dragging iframe{pointer-events:none}
 .dk.run::after{content:"";position:absolute;left:50%;bottom:3px;width:5px;height:3px;margin-left:-2.5px;border-radius:2px;background:var(--mu2)}
 .dk.on::after{width:18px;margin-left:-9px;background:var(--c,#8B5CF6)}
 .dk .n{position:absolute;top:3px;inset-inline-end:3px;min-width:15px;height:15px;border-radius:99px;background:var(--p4);border:1px solid var(--ln2);color:var(--tx);font:800 9.5px/13px Inter,system-ui;padding:0 3px;text-align:center}
-.dk .wk{position:absolute;top:1px;inset-inline-end:1px;min-width:16px;height:16px;border-radius:99px;background:var(--rd);color:#fff;font:800 9.5px/16px Inter,system-ui;padding:0 4px;text-align:center;box-shadow:0 0 0 2px #0D0D14}
+/* the "waiting work" badge: one look on the taskbar and on the command center's app tiles */
+.wk{position:absolute;min-width:16px;height:16px;border-radius:99px;background:var(--rd);color:#fff;font:800 9.5px/16px Inter,system-ui;padding:0 4px;text-align:center;box-shadow:0 0 0 2px var(--p1)}
+.dk .wk{top:1px;inset-inline-end:1px}
 .dk .n+.wk{inset-inline-end:auto;inset-inline-start:1px}
 .dk .sd{position:absolute;top:5px;inset-inline-start:5px;width:8px;height:8px;border-radius:50%}
 .sd.dirty{background:var(--am)}.sd.error{background:var(--rd)}.sd.ok{background:var(--gr)}.sd.rec{background:var(--pk)}.sd.busy{background:var(--cy);animation:blink 1s infinite}.sd.ai{background:var(--g);animation:blink 1s infinite}
@@ -229,3 +231,5 @@ body.dragging iframe{pointer-events:none}
 .acclog .who{display:flex;justify-content:space-between;width:100%;max-width:340px;background:#f3f3f6;border:0;border-radius:12px;padding:10px 14px;font:600 13.5px Inter,system-ui;color:#111;cursor:pointer}.acclog .who small{color:#6b6b80}
 .acclog .er{color:#c62828;font-size:13px;min-height:18px}.acclog .bk{position:absolute;top:10px;inset-inline-start:10px;width:32px;height:32px;border-radius:9px;border:0;background:#f3f3f6;color:#333;cursor:pointer;display:grid;place-items:center}
 #cc.acclogin .ccs{display:none}
+.cct.ap .g{position:relative}.cct.ap .wk{top:-5px;inset-inline-end:-7px}
+.cct.ap .runs{position:absolute;bottom:4px;left:50%;width:14px;height:3px;margin-left:-7px;border-radius:99px;background:var(--vi)}.cct.ap{position:relative}
