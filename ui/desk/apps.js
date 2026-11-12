@@ -24,7 +24,9 @@
     accts.forEach(ac => {
       const n = ac.slot, sx = n ? "~" + n : "", r = ac.user.role, a0 = A.length, w0 = W.length;
       const lapp = ["manager", "admin"].includes(r), designer = r === "designer", acct = { slot: n, name: ac.user.name || "@" + ac.user.username };
-      const push = x => A.push({ ...x, id: x.id + sx, url: withAs(x.url, n), as: n });
+      // an app from the store shows only when its space installed it and lets this person use it
+      const ok = (x, ws, role, admin) => { const c = STORE_OF(x.id); if (!c) return true; const inst = (D.INST || {})[ws]; if (!inst) return true; const w = inst[c]; return !!w && (w.all || (w.me ? admin : (w.roles || []).includes(role))); };
+      const push = (x, role, admin) => { if (ok(x, x.ws, role === undefined ? r : role, admin === undefined ? r === "admin" : admin)) A.push({ ...x, id: x.id + sx, url: withAs(x.url, n), as: n }); };
       if (!n || lapp || designer) W.push({ key: "me" + sx, name: lapp ? "LAPP" : n ? acct.name : "My work", color: "#8B5CF6", as: n });
       if (lapp) {
         push({ id: "users", title: "Users", icon: "users", url: "/users", ws: "me" + sx });
@@ -35,6 +37,8 @@
         push({ id: "studio:home", title: "Studio", icon: "video", url: "/studio#home", ws: "me" + sx, studio: "" });
         push({ id: "studio:universe", title: "Characters", icon: "cast", url: "/studio#universe", ws: "me" + sx, studio: "" });
       }
+      if (lapp || designer) push({ id: "store", title: "App Store", icon: "download", url: "/store", ws: "me" + sx });
+      if (lapp) push({ id: "customers", title: "Customer Center", icon: "headphones", url: "/customers", ws: "me" + sx });
       if (!n || lapp || designer) {
         push({ id: "files", title: "Files", icon: "files", url: "/files", ws: "me" + sx });
         if (!n) push({ id: "settings", title: "Settings", icon: "settings", url: "/settings", ws: "me" });
@@ -42,19 +46,32 @@
       (ac.orgs || []).filter(o => SCHOOL_APPS[o.role]).forEach(o => {
         const ws = "s:" + o.slug + sx, color = COLORS[(W.length - 1 + COLORS.length) % COLORS.length];
         W.push({ key: ws, name: n ? `${o.name} · ${o.role}` : o.name, color, role: o.role, as: n });
-        SCHOOL_APPS[o.role].forEach(([k, ic, l]) => push(k === "people" && o.role === "admin" ? { id: `users@${o.slug}`, title: "Users", icon: "users", url: `/users?org=${o.slug}`, ws } : { id: `s:${o.slug}:${k}`, title: l, icon: ic, url: `/s/${o.slug}#${k}`, ws }));
+        const R = o.role, AD = o.role === "admin";
+        SCHOOL_APPS[o.role].forEach(([k, ic, l]) => push(k === "people" && AD ? { id: `users@${o.slug}`, title: "Users", icon: "users", url: `/users?org=${o.slug}`, ws } : { id: `s:${o.slug}:${k}`, title: l, icon: ic, url: `/s/${o.slug}#${k}`, ws }, R, AD));
         if (["admin", "teacher"].includes(o.role)) {
-          push({ id: `studio:library@${o.slug}`, title: "Lesson library", icon: "library", url: `/s/${o.slug}#lessons`, ws, studio: o.slug });
-          push({ id: `studio:home@${o.slug}`, title: "Studio", icon: "video", url: `/studio?org=${o.slug}#home`, ws, studio: o.slug });
-          push({ id: `studio:universe@${o.slug}`, title: "Characters", icon: "cast", url: `/studio?org=${o.slug}#universe`, ws, studio: o.slug });
+          push({ id: `studio:library@${o.slug}`, title: "Lesson library", icon: "library", url: `/s/${o.slug}#lessons`, ws, studio: o.slug }, R, AD);
+          push({ id: `studio:home@${o.slug}`, title: "Studio", icon: "video", url: `/studio?org=${o.slug}#home`, ws, studio: o.slug }, R, AD);
+          push({ id: `studio:universe@${o.slug}`, title: "Characters", icon: "cast", url: `/studio?org=${o.slug}#universe`, ws, studio: o.slug }, R, AD);
         }
-        push({ id: `files@${o.slug}`, title: "Files", icon: "files", url: `/files?org=${o.slug}`, ws });
+        if (AD) push({ id: `store@${o.slug}`, title: "App Store", icon: "download", url: `/store?org=${o.slug}`, ws }, R, AD);
+        push({ id: `files@${o.slug}`, title: "Files", icon: "files", url: `/files?org=${o.slug}`, ws }, R, AD);
       });
       ac.ws = W.slice(w0).map(w => w.key); ac.apps = A.length - a0;
     });
     A.forEach(a => a.color = (W.find(w => w.key === a.ws) || W[0]).color);
     D.APPS = A; D.WS = W;
     if (!W.some(w => w.key === D.CUR)) D.CUR = W[0].key;
+  };
+  // which store app an app of the desk belongs to (apps not listed here are always there)
+  const STORE_OF = id => /^studio:/.test(id) ? "studio" : /:(overview|classes)$/.test(id) ? "classes" : /:(timetable|week)$/.test(id) ? "timetable" : /:homework$/.test(id) ? "homework" : /:finance$/.test(id) ? "money" : "";
+  // what each space installed (asked once per space; a space that never opened the store keeps its first apps)
+  D.INST = null;
+  D.loadInstalls = async () => {
+    const out = {};
+    await Promise.all(D.ACCTS.flatMap(ac => { const sx = ac.slot ? "~" + ac.slot : "", h = ac.slot ? { headers: { "X-As": String(ac.slot) } } : undefined;
+      const spaces = [...(["designer", "manager", "admin"].includes(ac.user.role) ? [["me" + sx, ""]] : []), ...(ac.orgs || []).map(o => ["s:" + o.slug + sx, o.slug])];
+      return spaces.map(([ws, org]) => fetch("/api/store" + (org ? "?org=" + org : ""), { credentials: "same-origin", ...(h || {}) }).then(r => r.ok ? r.json() : null).then(j => { if (j) out[ws] = Object.fromEntries(j.apps.filter(a => a.installed).map(a => [a.id, a.who])); }).catch(() => {})); }));
+    D.INST = out;
   };
   D.acctOf = n => D.ACCTS.find(a => a.slot === (n || 0)) || null;
   D.asOf = url => { try { return +(new URL(url, location.origin).searchParams.get("as") || 0); } catch { return 0; } };
@@ -69,6 +86,8 @@
     if (p.startsWith("/files")) { const org = u.searchParams.get("org"); return "files" + (org ? "@" + org : ""); }
     if (p.startsWith("/settings")) return "settings";
     if (p.startsWith("/users")) { const org = u.searchParams.get("org"); return "users" + (org ? "@" + org : ""); }
+    if (p.startsWith("/store")) { const org = u.searchParams.get("org"); return "store" + (org ? "@" + org : ""); }
+    if (p.startsWith("/customers")) return "customers";
     if (p.startsWith("/admin")) return "admin:" + (h || "dash");
     const m = p.match(/^\/s\/([^/]+)/); if (m) return `s:${m[1]}:${h || "overview"}`;
     return p;
@@ -79,7 +98,7 @@
     // a school the person works in has its own workspace; any other school (e.g. LAPP admins opening one) opens where they are
     const m = p.match(/^\/s\/([^/]+)/); if (m) return D.WS.some(w => w.key === "s:" + m[1]) ? "s:" + m[1] : D.CUR;
     const org = u.searchParams.get("org"); if (org && D.WS.some(w => w.key === "s:" + org)) return "s:" + org;
-    if (p.startsWith("/admin") || p.startsWith("/studio") || p.startsWith("/files") || p.startsWith("/users")) return "me";
+    if (p.startsWith("/admin") || p.startsWith("/studio") || p.startsWith("/files") || p.startsWith("/users") || p.startsWith("/store") || p.startsWith("/customers")) return "me";
     if (p.startsWith("/settings")) return D.CUR;
     return D.CUR;
   };

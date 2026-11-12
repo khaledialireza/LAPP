@@ -132,7 +132,7 @@
   D.reloadAccounts = async () => {
     const r = await D.api("GET", "/auth/linked").catch(() => ({}));
     D.ACCTS = [{ slot: 0, user: D.ME, orgs: D.ORGS }, ...(r.accounts || [])];
-    D.buildApps(); D.drawMe(); D.drawTask && D.drawTask(); D.emit && D.emit("ws");
+    await D.loadInstalls(); D.buildApps(); D.drawMe(); D.drawTask && D.drawTask(); D.emit && D.emit("ws");
   };
   D.signOutAcct = async n => {
     D.WN().filter(w => (w.as || 0) === n).forEach(w => D.closeWin(w));

@@ -22,6 +22,9 @@ import MANAGE from "./manage.html";
 import FILES from "./files.html";
 import SETTINGS from "./settings.html";
 import USERS from "./users.html";
+import STORE from "./store.html";
+import CARE from "./customers.html";
+import { storeApi, careApi, logAccount, pubId } from "./care.js";
 import { deskApi, worksHere } from "./desk.js";
 import { aiLimit, fail, enc, sha, b64, b64url, STAFF, teamOf } from "./util.js";
 import SCHOOL from "./school.html";
@@ -161,11 +164,11 @@ async function planOf(env, req, u) {
 const publicUser = u => ({ id: u.id, email: hasEmail(u.email) ? u.email : "", managed: !!u.managed_by, username: u.username, name: u.name, role: u.role, lang: u.lang || "", avatar: u.avatar || "", verified: !!u.verified, since: new Date(u.created_at).toISOString().slice(0, 10) });
 async function me(env, req, u) {
   const orgs = (await env.DB.prepare("SELECT o.slug, o.name, m.role FROM org_members m JOIN orgs o ON o.id = m.org_id WHERE m.user_id = ? AND m.active = 1 AND o.disabled = 0 ORDER BY o.name").bind(u.id).all()).results;
-  return { user: publicUser(u), plan: await planOf(env, req, u), country: country(req), orgs };
+  return { user: { ...publicUser(u), pub: await pubId(env, "users", u.id).catch(() => "") }, plan: await planOf(env, req, u), country: country(req), orgs };
 }
 // what school.js needs from here
 // the work desktop and the apps that only live in its windows; only people who work in /manage may open them
-const DESK_PAGES = { "/manage": [MANAGE, "/manage"], "/files": [FILES, "/files"], "/settings": [SETTINGS, "/settings"], "/users": [USERS, "/users"] };
+const DESK_PAGES = { "/manage": [MANAGE, "/manage"], "/files": [FILES, "/files"], "/settings": [SETTINGS, "/settings"], "/users": [USERS, "/users"], "/store": [STORE, "/store"], "/customers": [CARE, "/customers"] };
 async function deskPage(req, env, url, [html, path]) {
   const u = env.DB ? await currentUser(req, env) : null;
   if (!u) return Response.redirect(`${url.origin}/?login=1&next=/manage`, 302);
@@ -177,6 +180,7 @@ const H = {
   json, fail, body, need: (req, env, roles) => need(req, env, roles), sendMail, newCode, hashPassword, rand, b64url,
   appUrl, cleanEmail, cleanUser, EMAIL, USERNAME, RESERVED, now, DAY, hasEmail
 };
+const logA = (env, req, uid, kind, d) => logAccount(env, H, req, uid, kind, d).catch(() => {});
 
 /* ================= e-mail ================= */
 const T = {
@@ -282,10 +286,11 @@ async function api(req, env, url, ctx) {
     const u = await env.DB.prepare("SELECT * FROM users WHERE email = ? OR username = ?").bind(id, id.replace(/^@/, "")).first();
     // same work and the same answer for an unknown account and a wrong password
     const ok = u ? await checkPassword(u, pw) : (await pbkdf2(pw, "AAAAAAAAAAAAAAAAAAAAAA==", ITER), false);
-    if (!ok) throw fail("wrong e-mail or password", 401, { code: "wrong" });
+    if (!ok) { if (u) await logA(env, req, u.id, "wrongpw"); throw fail("wrong e-mail or password", 401, { code: "wrong" }); }
     if (u.disabled) throw fail("this account is disabled", 403, { code: "disabled" });
     await promote(env, u);
     await env.DB.prepare("UPDATE users SET last_seen = ?, country = ? WHERE id = ?").bind(now(), country(req) || u.country, u.id).run();
+    await logA(env, req, u.id, "signin");
     if (b.link) {   // add this account next to the one already signed in here; it never replaces it
       const main = await userOfToken(env, cookieOf(req, 0));
       if (!main) throw fail("sign in first", 401, { code: "auth" });
@@ -355,6 +360,7 @@ async function api(req, env, url, ctx) {
     ]);
     const u = await env.DB.prepare("SELECT * FROM users WHERE id = ?").bind(c.user_id).first();
     if (u.disabled) throw fail("this account is disabled", 403, { code: "disabled" });
+    await logA(env, req, u.id, "password", "reset by e-mail link");
     await promote(env, u);
     const cookie = await startSession(env, req, u);
     return json(await me(env, req, u), 200, { "Set-Cookie": cookie });
@@ -496,6 +502,7 @@ Windows: ${wins.map(w => `${w.id} = ${w.label}`).join("; ")}`;
       env.DB.prepare("UPDATE users SET pw_hash = ?, salt = ?, iter = ? WHERE id = ?").bind(h.pw_hash, h.salt, h.iter, u.id),
       env.DB.prepare("DELETE FROM sessions WHERE user_id = ? AND token_hash != ?").bind(u.id, u.token_hash)
     ]);
+    await logA(env, req, u.id, "password", "changed in the account");
     return json({ ok: true });
   }
 
@@ -552,6 +559,10 @@ Windows: ${wins.map(w => `${w.id} = ${w.label}`).join("; ")}`;
   let om;
   if ((om = p.match(/^\/org\/([a-z0-9][a-z0-9-]{1,30})(\/.*)?$/))) return orgApi(req, env, H, om[1], om[2] || "", url);
 
+  /* ---- the app store and the Customer Center ---- */
+  if (p === "/store" || p.startsWith("/store/")) return storeApi(req, env, H, p.slice(6), url);
+  if (p.startsWith("/care/")) return careApi(req, env, H, p.slice(5), url);
+
   /* ---- studio: lessons made in the site ---- */
   if (p.startsWith("/studio/")) return lessonsApi(req, env, H, p.slice(7), url, ctx);
   if (p === "/lib" && M === "GET") return libApi(req, env, H, url, currentUser);
@@ -580,7 +591,7 @@ async function promote(env, u) {
 /* ================= pages for staff ================= */
 // every page of the panels starts with the same head: the shared kit, the language, icons, theme, pointer,
 // the form controls and the window bridge. One asset version (ASSET_V, set by tools/bump.js) for all of them.
-const ASSET_V = "mwcunwpt";
+const ASSET_V = "mwcv48v0";
 const HEAD = `<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/ui/kit.css?v=${ASSET_V}">

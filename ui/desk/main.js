@@ -74,6 +74,7 @@
     if (!m.user) { location.href = "/?login=1&next=/manage"; return; }
     D.ME = m.user; D.ORGS = m.orgs || [];
     D.ACCTS = [{ slot: 0, user: D.ME, orgs: D.ORGS }, ...((await D.api("GET", "/auth/linked").catch(() => ({}))).accounts || [])];
+    await D.loadInstalls();
     const d = await D.api("GET", "/desk").catch(() => ({ desk: null, files: [] }));
     D.DESK = { ...D.deskDefault(), ...(d.desk || {}) }; D.FILES = d.files || [];
     D.CUR = D.DESK.cur || "me";
@@ -97,5 +98,9 @@
     const wait = () => { const ws = D.WN(), n = ws.filter(w => w.ready).length; bootTo(65 + (ws.length ? 30 * n / ws.length : 30)); if (n === ws.length && K.net.busy === 0) D.bootEnd(); else if (n === ws.length) setTimeout(wait, 120); };
     D.on("winready", wait); setTimeout(wait, 120);
     D.tick(); D.pollJobs(); D.lessons().then(() => D.emit("lessons")).catch(() => {});
+    // our support asked to look into this account (or a space this person runs): they answer here
+    D.api("GET", "/care/mine").then(async r => { for (const q of r.requests || []) {
+      const yes = await K.confirm({ title: q.kind === "org" ? "Our support asks to look into your space" : "Our support asks to look into your account", text: [q.reason, "For 24 hours. You can end it any time."].filter(Boolean).join(" · "), ok: "Allow" });
+      await D.api("POST", "/care/answer", { id: q.id, yes }).catch(() => {}); if (yes) D.toast("Allowed for 24 hours", { kind: "ok" }); } }).catch(() => {});
   })();
 })();

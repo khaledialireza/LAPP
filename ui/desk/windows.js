@@ -142,6 +142,7 @@
     if (d.t === "ask" && typeof d.text === "string") return D.ask(d.text.slice(0, 1200), w);
     if (!w) return;
     if (d.t === "settings" && /^\/settings/.test(w.url)) return D.settings(String(d.key), d.value);
+    if (d.t === "apps" && /^\/store/.test(w.url)) return D.reloadAccounts && D.reloadAccounts();   // an app was installed or removed
     if (d.t === "state") return D.setState(w, ["busy", "ai", "dirty", "error", "ok", "rec"].includes(d.state) ? d.state : "");
     if (d.t === "ready") return ready(w);
     if (d.t === "chrome") { w.chrome = { title: String(d.title || ""), back: d.back || "", backI: Number.isInteger(d.backI) ? d.backI : null, actions: Array.isArray(d.actions) ? d.actions.slice(0, 30) : [], menus: Array.isArray(d.menus) ? d.menus.slice(0, 8) : [] }; if (w.title === "Loading…" && w.chrome.title) { w.title = w.chrome.title; } return dress(w); }

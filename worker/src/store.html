@@ -1,0 +1,94 @@
+<!doctype html>
+<html data-desk lang="en"><head><!--LAPP:HEAD-->
+<title>App Store · LAPP</title>
+<style>
+/* App Store: the apps a space can install, and who in it may use each. Installed apps appear in the command center. */
+body{background:var(--bg);color:var(--tx);font:13.5px/1.5 Inter,Vazirmatn,system-ui,sans-serif;display:grid;grid-template-columns:210px minmax(0,1fr);height:100vh;overflow:hidden}
+#nav{border-inline-end:1px solid var(--ln);background:var(--p1);padding:12px 8px;overflow:auto}
+#nav h6{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--mu2);margin:14px 10px 6px}
+#nav .ct{margin-inline-start:auto;font-size:11px;color:var(--mu2)}
+#main{overflow:auto;display:flex;flex-direction:column}
+.top{display:flex;align-items:center;gap:10px;padding:14px 18px 6px}
+.srch{flex:1;display:flex;align-items:center;gap:8px;background:var(--p2);border:1px solid var(--ln);border-radius:10px;padding:0 11px;color:var(--mu2)}.srch input{flex:1;background:none;border:0;outline:none;color:var(--tx);font:500 13px Inter,system-ui;padding:8px 0;min-width:0}
+.acct{display:flex;align-items:center;gap:7px;padding:3px 10px 3px 3px;border-radius:99px;background:color-mix(in srgb,var(--vi) 16%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--vi) 40%,transparent);font-weight:600;font-size:12px;white-space:nowrap}
+.acct i{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:var(--vi);color:#fff;font-style:normal;font-size:11px;font-weight:800}
+h4{font-size:14px;margin:12px 18px 8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;padding:0 18px 18px}
+.app{display:flex;gap:12px;align-items:flex-start;padding:14px;border:1px solid var(--ln);border-radius:14px;background:var(--p2);text-align:start;width:100%;color:inherit;font:inherit;cursor:pointer}.app:hover{background:var(--p3)}
+.ai{width:48px;height:48px;border-radius:13px;display:grid;place-items:center;flex:none;color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.15)}
+.app .t{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.app b{font-size:14px}.app small{font-size:12px;color:var(--mu);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.app .by{color:var(--mu2);font-size:11.5px}
+.get{border-radius:99px;padding:5px 14px;font-weight:700;font-size:12px;background:var(--p4);align-self:center;white-space:nowrap}.get.done{background:none;color:var(--gr);padding:5px 4px}
+.page{padding:12px 22px 22px;display:flex;flex-direction:column;gap:16px;max-width:900px}
+.ph{display:flex;gap:18px;align-items:center}.ph .ai{width:80px;height:80px;border-radius:20px}.ph h2{font-size:22px}.ph p{color:var(--mu)}.ph .sp{flex:1}
+.about{color:var(--mu);font-size:14px;max-width:680px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.box{border:1px solid var(--ln);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px}.box h5{font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--mu2)}
+.reach{display:flex;align-items:center;gap:8px;color:var(--mu)}
+.opt{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--ln);border-radius:10px;cursor:pointer}.opt.on{border-color:var(--vi);background:color-mix(in srgb,var(--vi) 10%,transparent)}.opt i{width:16px;height:16px;border-radius:50%;border:2px solid var(--p4);flex:none}.opt.on i{border:5px solid var(--vi)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chip{border:1px solid var(--ln);border-radius:99px;padding:4px 11px;font-size:12px;font-weight:600;color:var(--mu);background:none;cursor:pointer;text-transform:capitalize}.chip.on{background:var(--p4);color:var(--tx);border-color:transparent}
+.into{display:flex;align-items:center;gap:10px;padding:10px;border-radius:12px;background:color-mix(in srgb,var(--vi) 10%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--vi) 35%,transparent)}.into span{display:flex;flex-direction:column}.into small{font-size:11px;color:var(--mu)}
+.none{display:grid;place-items:center;height:200px;color:var(--mu2)}
+@media (max-width:760px){body{grid-template-columns:minmax(0,1fr)}#nav{display:none}.two{grid-template-columns:1fr}}
+</style></head><body>
+<nav id="nav" class="k-nav" aria-label="Store"></nav>
+<main id="main"></main>
+<script>
+"use strict";
+const { $, esc: E, I } = K;
+const ORG = new URLSearchParams(location.search).get("org") || "";
+const ROLES = ORG ? ["admin", "teacher", "finance", "student"] : ["admin", "manager", "designer"];
+const S = { apps: [], root: null, me: null, view: "discover", cat: "", q: "", open: null };
+const api = (m, p, b) => K.api(m, "/store" + p + (ORG ? "?org=" + ORG : ""), b);
+async function load() { const [r, me] = await Promise.all([api("GET", ""), K.api("GET", "/me")]); S.apps = r.apps; S.root = r.root; S.me = me.user; draw(); }
+const cats = () => [...new Set(S.apps.map(a => a.cat))];
+function draw() {
+  const n = S.apps.filter(a => a.installed).length;
+  $("#nav").innerHTML = [["discover", "Discover", "star"], ["installed", "Installed", "check"]].map(([k, l, ic]) => `<button class="${S.view === k && !S.cat && !S.open ? "on" : ""}" data-v="${k}">${I(ic, 16)}<span>${E(l)}</span>${k === "installed" ? `<span class="ct">${n}</span>` : ""}</button>`).join("")
+    + `<h6>Categories</h6>` + cats().map(c => `<button class="${S.cat === c && !S.open ? "on" : ""}" data-c="${E(c)}"><span>${E(c)}</span><span class="ct">${S.apps.filter(a => a.cat === c).length}</span></button>`).join("");
+  const a = S.apps.find(x => x.id === S.open), m = $("#main");
+  const acct = `<span class="acct" title="${E(S.root.name)}"><i>${E(S.root.name.charAt(0))}</i>${E(S.root.name)}</span>`;
+  if (a) return page(a, acct);
+  const q = S.q.toLowerCase(), L = S.apps.filter(x => (S.view !== "installed" || x.installed) && (!S.cat || x.cat === S.cat) && (!q || (x.name + x.about + x.by).toLowerCase().includes(q)));
+  const card = x => `<button class="app" data-a="${x.id}"><span class="ai" style="background:${x.color}">${I(x.icon, 24)}</span><span class="t"><b>${E(x.name)}</b><small>${E(x.about)}</small><span class="by">${E(x.by)}</span></span><span class="get ${x.installed ? "done" : ""}">${x.installed ? I("check", 16) : "Get"}</span></button>`;
+  const groups = S.view === "discover" && !S.cat && !q ? cats().map(c => `<h4>${E(c)}</h4><div class="grid">${S.apps.filter(x => x.cat === c).map(card).join("")}</div>`).join("") : `<div class="grid" style="padding-top:8px">${L.map(card).join("") || `<div class="none">${I("search", 30)}</div>`}</div>`;
+  m.innerHTML = `<div class="top"><label class="srch">${I("search", 15)}<input id="q" placeholder="Search apps" value="${E(S.q)}" autocomplete="off"></label>${acct}</div>${groups}`;
+  $("#q").oninput = e => { S.q = e.target.value; const p = e.target.selectionStart; draw(); const i = $("#q"); i.focus(); i.setSelectionRange(p, p); };
+}
+const whoText = w => !w ? "—" : w.all ? "Everyone" : w.me ? "Only admins" : (w.roles || []).join(", ");
+function page(a, acct) {
+  $("#main").innerHTML = `<div class="top"><button class="b" data-back>${I("back", 15)} Back</button><span style="flex:1"></span>${acct}</div><div class="page">
+    <div class="ph"><span class="ai" style="background:${a.color}">${I(a.icon, 38)}</span><div><h2>${E(a.name)}</h2><p>${E(a.by)} · ${E(a.cat)}</p></div><span class="sp"></span>
+      ${S.root.admin ? (a.installed ? `<button class="b" data-who>Who may use it</button><button class="b d" data-rm>Remove</button>` : `<button class="b pr" data-get>Get</button>`) : ""}</div>
+    <div class="about">${E(a.about)}</div>
+    <div class="two"><div class="box"><h5>It can reach</h5>${a.reach.map(r => `<span class="reach">${I("check", 14)} ${E(r)}</span>`).join("")}</div>
+      <div class="box"><h5>Used in ${E(S.root.name)} by</h5><span>${E(whoText(a.who))}</span></div></div></div>`;
+}
+// install: into which space, and who may use it
+async function install(a, again) {
+  let who = a.who && a.who.roles ? "roles" : a.who && a.who.me ? "me" : "all", roles = (a.who && a.who.roles) || [ROLES[1]];
+  const body = () => `<h3>${E(a.name)}</h3><div class="into"><span class="ai" style="width:30px;height:30px;border-radius:50%;background:var(--vi)">${E(S.root.name.charAt(0))}</span><span><small>Into</small><b>${E(S.root.name)}</b></span></div>
+    <div class="box"><h5>Who may use it</h5>${[["all", "Everyone"], ["roles", "Only some roles"], ["me", "Only admins"]].map(([k, l]) => `<div class="opt ${who === k ? "on" : ""}" data-w="${k}"><i></i>${l}</div>`).join("")}
+    <div class="chips" ${who === "roles" ? "" : "hidden"}>${ROLES.map(r => `<button type="button" class="chip ${roles.includes(r) ? "on" : ""}" data-r="${r}">${r}</button>`).join("")}</div></div>
+    <div class="err" role="alert"></div><div class="k-acts"><button class="b" value="cancel" formnovalidate>Cancel</button><button class="b pr" value="ok">${again ? "Save" : "Install"}</button></div>`;
+  const ok = await K.dialog(body(), async () => { await api("PUT", "/" + a.id, { who: who === "all" ? { all: 1 } : who === "me" ? { me: 1 } : { roles } }); }, {
+    ready: f => f.addEventListener("click", e => { const w = e.target.closest("[data-w]"), r = e.target.closest("[data-r]"); if (!w && !r) return; if (w) who = w.dataset.w; if (r) roles = roles.includes(r.dataset.r) ? roles.filter(x => x !== r.dataset.r) : [...roles, r.dataset.r];
+      f.innerHTML = body(); }) });
+  if (ok === null) return;
+  K.toast(again ? "Saved" : `${a.name} is in ${S.root.name}'s command center`, { kind: "ok" });
+  LAPPFrame.up({ t: "apps" });   // the desk reads what is installed again
+  await load();
+}
+document.addEventListener("click", async e => {
+  const t = e.target;
+  const v = t.closest("[data-v]"); if (v) { S.view = v.dataset.v; S.cat = ""; S.open = null; return draw(); }
+  const c = t.closest("[data-c]"); if (c) { S.cat = c.dataset.c; S.view = "discover"; S.open = null; return draw(); }
+  const a = t.closest("[data-a]"); if (a) { S.open = a.dataset.a; return draw(); }
+  if (t.closest("[data-back]")) { S.open = null; return draw(); }
+  const app = S.apps.find(x => x.id === S.open); if (!app) return;
+  if (t.closest("[data-get]")) return install(app);
+  if (t.closest("[data-who]")) return install(app, true);
+  if (t.closest("[data-rm]")) { if (!await K.confirm({ title: `Remove ${app.name} from ${S.root.name}?`, ok: "Remove", danger: true })) return; try { await api("DELETE", "/" + app.id); K.toast("Removed", { kind: "ok" }); LAPPFrame.up({ t: "apps" }); await load(); } catch (x) { K.toast(x.message, { kind: "err" }); } }
+});
+load().catch(x => { $("#main").innerHTML = `<div class="none">${E(x.message)}</div>`; });
+</script>
+</body></html>

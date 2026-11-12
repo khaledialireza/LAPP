@@ -438,9 +438,21 @@
     else if (k === "out") signOut();
   });
 
+  /* ---------- our support asks to look into the account: the person allows or refuses ---------- */
+  function careAsk(token) {
+    const d = document.createElement("div");
+    d.style.cssText = "position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:rgba(0,0,0,.55);font:15px/1.5 Inter,system-ui,sans-serif";
+    d.innerHTML = `<div style="background:#fff;color:#111;border-radius:16px;padding:22px;max-width:360px;margin:16px;display:flex;flex-direction:column;gap:12px">
+      <b style="font-size:17px">Let our support look into your account?</b><span style="color:#555">For 24 hours. You can end it any time.</span>
+      <div style="display:flex;gap:8px;justify-content:flex-end"><button data-a="0" style="border:0;border-radius:10px;padding:10px 14px;background:#eee;font:inherit;cursor:pointer">Refuse</button><button data-a="1" style="border:0;border-radius:10px;padding:10px 14px;background:#111;color:#fff;font:inherit;font-weight:700;cursor:pointer">Allow</button></div></div>`;
+    d.onclick = async e => { const b = e.target.closest("[data-a]"); if (!b) return; try { await call("POST", "/care/answer", { token, yes: b.dataset.a === "1" }); toast(b.dataset.a === "1" ? "Allowed for 24 hours" : "Refused"); } catch (x) { toast(x.message || "This request is no longer open"); } d.remove(); };
+    document.body.append(d);
+  }
+
   /* ---------- links back from e-mail and Stripe ---------- */
   function fromLink() {
     const q = new URLSearchParams(location.search);
+    if (q.get("care")) { careAsk(q.get("care")); history.replaceState(null, "", location.pathname); return true; }
     if (q.get("reset") && cfg) { W.token = q.get("reset"); open("reset", { closable: false }); return true; }
     if (q.get("login") && cfg && !isAccount()) { open("email", { closable: Auth.signedIn }); return true; }
     if (q.get("plus")) {
