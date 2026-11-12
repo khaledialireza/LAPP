@@ -288,6 +288,7 @@ V.hw = async id => {
 };
 // students: hand in (quiz answers, text or a recording)
 let recBlob = null;
+document.addEventListener("click", e => { if (e.target.closest("[data-copyid]")) K.copy(S.org.pub); });
 document.addEventListener("submit", async e => {
   if (e.target.id !== "hwForm") return;
   e.preventDefault();
@@ -396,6 +397,7 @@ V.settings = async () => `<div class="top"><h1>Settings</h1></div><div class="ca
   <div class="cols2"><div class="f"><label for="s_color">Colour</label><input class="in" id="s_color" name="color" type="color" value="${esc(S.org.color)}" style="height:42px;padding:4px"></div>
   <div class="f"><label for="s_cur">Currency</label><l-select id="s_cur" name="currency" value="${esc(S.org.currency)}">${[["EUR", "Euro", "€"], ["PLN", "Polish złoty", "zł"], ["CHF", "Swiss franc", "Fr"], ["GBP", "British pound", "£"], ["USD", "US dollar", "$"]].map(([c, n, i]) => `<option value="${c}" data-sub="${n}" data-icon="${i}">${c}</option>`).join("")}</l-select></div></div>
   <p class="mu">Your school's address: <b>${location.origin}/s/${SLUG}</b> — share it with teachers and students.</p>
+  ${S.org.pub ? `<div class="f"><label>Your school's ID</label><div style="display:flex;gap:8px;align-items:center"><code style="font:600 15px ui-monospace,Menlo,monospace;letter-spacing:.08em">${esc(S.org.pub)}</code><button type="button" class="b" data-copyid>Copy</button></div></div>` : ""}
   <button class="b pr" style="align-self:flex-start">Save</button></form></div>`;
 document.addEventListener("submit", async e => {
   if (e.target.id !== "setForm") return;

@@ -1,3 +1,4 @@
+import { pubId } from "./care.js";
 // Schools API — /api/org/<slug>/…  (and /api/orgs, /api/admin/orgs for the platform)
 //
 // A school (org) has members with one role each: admin · teacher · finance · student.
@@ -192,7 +193,7 @@ export async function orgApi(req, env, H, slug, p, url) {
       staff: await n("SELECT COUNT(*) n FROM org_members WHERE org_id = ? AND role IN ('admin','finance') AND active = 1", c.org.id),
       classes: await n("SELECT COUNT(*) n FROM classes WHERE org_id = ? AND archived = 0", c.org.id)
     } : null;
-    return H.json({ org: { id: c.org.id, slug: c.org.slug, name: c.org.name, color: c.org.color, currency: c.org.currency }, role: c.role, me: { id: c.u.id, username: c.u.username, name: c.u.name, email: c.u.email }, counts });
+    return H.json({ org: { id: c.org.id, slug: c.org.slug, name: c.org.name, color: c.org.color, currency: c.org.currency, pub: c.role === "admin" ? await pubId(env, "orgs", c.org.id) : "" }, role: c.role, me: { id: c.u.id, username: c.u.username, name: c.u.name, email: c.u.email }, counts });
   }
   if (p === "" && M === "PATCH") {
     allow(c, "admin");

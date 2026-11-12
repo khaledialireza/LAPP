@@ -32,7 +32,7 @@
     if (u.lang && u.lang !== I18N.lang) { if (I18N.langs.includes(u.lang)) I18N.setLang(u.lang); else try { localStorage.setItem("lapp:lang", u.lang); } catch {} }
     else if (!u.lang) call("PATCH", "/me", { lang: I18N.lang }).catch(() => {});
     const s = Auth.session || {};
-    Auth.setSession({ type: "account", id: u.id, email: u.email, username: u.username, name: u.name, role: u.role, verified: u.verified, since: u.since || s.since });
+    Auth.setSession({ type: "account", id: u.id, email: u.email, username: u.username, name: u.name, role: u.role, verified: u.verified, pub: u.pub || s.pub || "", since: u.since || s.since });
     if (!jget("lapp:name", "")) rawSet.call(localStorage, "lapp:name", JSON.stringify(u.name || u.username));
   }
   const isAccount = () => (Auth.session || {}).type === "account";
@@ -419,6 +419,7 @@
     else if (plan.why === "iran") save = `<div class="ac-irc">${esc(t("acIranCard"))} 💚</div>`;
     const row = (ic, label, act, extra = "") => `<button type="button" class="pf-row pf-link" data-acct="${act}"><span>${ic} ${esc(label)}</span><span class="v">${extra}›</span></button>`;
     const rows = `<div class="pf-row pf-acct"><span class="pf-acct-ic">${esc(initial(s.name || s.username))}</span><span class="pf-acct-tx"><b><bdi>@${esc(s.username)}</bdi> ${badge()}</b><small><bdi>${esc(s.email)}</bdi> · ${esc(syncTx)}${planTx ? " · " + esc(planTx) : ""}</small></span></div>`
+      + (s.pub ? `<button type="button" class="pf-row pf-link" data-acct="copyid"><span>🪪 ${esc(t("acYourId"))}</span><span class="v"><bdi style="font-family:ui-monospace,Menlo,monospace;letter-spacing:.06em">${esc(s.pub)}</bdi></span></button>` : "")
       + (plan.why === "stripe" || plan.status ? row("💳", t("acBilling"), "portal") : "")
       + orgs.map(o => `<a class="pf-row pf-link" href="/s/${esc(o.slug)}"><span>🏫 ${esc(o.name)} <span class="ac-badge free">${esc(o.role)}</span></span><span class="v">›</span></a>`).join("")
       + (["manager", "admin", "designer"].includes(s.role) || orgs.some(o => o.role !== "student") ? `<a class="pf-row pf-link" href="/manage"><span>🛠 ${esc(t("acAdmin"))}</span><span class="v">›</span></a>` : "")
@@ -434,6 +435,7 @@
     else if (k === "verify") { W.email = (Auth.session || {}).email; open("verify"); }
     else if (k === "plans") plans();
     else if (k === "portal") portal();
+    else if (k === "copyid") K.copy((Auth.session || {}).pub || "");
     else if (k === "password") passwordSheet();
     else if (k === "out") signOut();
   });
