@@ -1,4 +1,4 @@
-import { pubId } from "./care.js";
+import { pubId, logAccount } from "./care.js";
 // Schools API — /api/org/<slug>/…  (and /api/orgs, /api/admin/orgs for the platform)
 //
 // A school (org) has members with one role each: admin · teacher · finance · student.
@@ -101,6 +101,7 @@ async function addPerson(env, H, req, org, by, p) {
       sent = await H.sendMail(env, email, { subject: `You were added to ${org.name}`, text: `${by.name || by.username} added you to ${org.name} on LAPP as ${role}.\n\nSign in: ${base}/s/${org.slug}` });
     }
   }
+  await logAccount(env, H, req, u.id, "org", `added to ${org.name} as ${role} · by ${by.name || "@" + by.username}`).catch(() => {});
   return { id: u.id, email: H.hasEmail(u.email) ? u.email : "", username: u.username, created, sent };
 }
 
@@ -239,12 +240,16 @@ export async function orgApi(req, env, H, slug, p, url) {
         DB.prepare("DELETE FROM class_students WHERE user_id = ? AND class_id IN (SELECT id FROM classes WHERE org_id = ?)").bind(uid, c.org.id),
         DB.prepare("UPDATE classes SET teacher_id = NULL WHERE teacher_id = ? AND org_id = ?").bind(uid, c.org.id)
       ]);
+      await logAccount(env, H, req, uid, "org", `removed from ${c.org.name} · by ${c.u.name || "@" + c.u.username}`).catch(() => {});
       return H.json({ ok: true });
     }
     const b = await H.body(req);
     if (b.role !== undefined && !ROLES.includes(b.role)) throw H.fail("bad role");
+    const before = await DB.prepare("SELECT role, active FROM org_members WHERE org_id = ? AND user_id = ?").bind(c.org.id, uid).first() || {}, by = c.u.name || "@" + c.u.username;
     await DB.prepare("UPDATE org_members SET role = COALESCE(?, role), active = COALESCE(?, active) WHERE org_id = ? AND user_id = ?")
       .bind(b.role ?? null, b.active === undefined ? null : (b.active ? 1 : 0), c.org.id, uid).run();
+    if (b.role !== undefined && b.role !== before.role) await logAccount(env, H, req, uid, "role", `${c.org.name}: ${before.role} → ${b.role} · by ${by}`).catch(() => {});
+    if (b.active !== undefined && !!b.active !== !!before.active) await logAccount(env, H, req, uid, "org", `${c.org.name}: membership ${b.active ? "on" : "off"} · by ${by}`).catch(() => {});
     if (b.name !== undefined) await DB.prepare("UPDATE users SET name = ? WHERE id = ?").bind(str(b.name, 40), uid).run();
     if (b.password !== undefined || b.username !== undefined) {
       // only accounts this school made; people who signed up themselves keep their own password
@@ -261,6 +266,7 @@ export async function orgApi(req, env, H, slug, p, url) {
         if (pw.length < 8 || pw.length > 200) throw H.fail("password: at least 8 characters");
         const h = await H.hashPassword(pw);
         await DB.batch([DB.prepare("UPDATE users SET pw_hash = ?, salt = ?, iter = ? WHERE id = ?").bind(h.pw_hash, h.salt, h.iter, uid), DB.prepare("DELETE FROM sessions WHERE user_id = ?").bind(uid)]);
+        await logAccount(env, H, req, uid, "password", `set by ${c.org.name}`).catch(() => {});
       }
     }
     return H.json({ ok: true });

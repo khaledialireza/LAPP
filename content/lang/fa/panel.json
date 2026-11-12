@@ -1692,5 +1692,10 @@
  "Wrong password": "رمز اشتباه",
  "Password changed": "رمز عوض شد",
  "Suspension lifted": "تعلیق برداشته شد",
- "Suspended": "تعلیق‌شده"
+ "Suspended": "تعلیق‌شده",
+ "Screen unlocked": "قفل باز شد",
+ "Account changed": "حساب تغییر کرد",
+ "Linked account": "حساب پیوسته",
+ "Linked account removed": "حساب پیوسته برداشته شد",
+ "Organisation": "سازمان"
 }

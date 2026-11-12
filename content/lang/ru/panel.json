@@ -1692,5 +1692,10 @@
  "Wrong password": "Неверный пароль",
  "Password changed": "Пароль изменён",
  "Suspension lifted": "Блокировка снята",
- "Suspended": "Приостановлен"
+ "Suspended": "Приостановлен",
+ "Screen unlocked": "Экран разблокирован",
+ "Account changed": "Аккаунт изменён",
+ "Linked account": "Связанный аккаунт",
+ "Linked account removed": "Связанный аккаунт убран",
+ "Organisation": "Организация"
 }

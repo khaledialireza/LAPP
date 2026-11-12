@@ -70,7 +70,7 @@ function draw() {
   if (part === "about") h = `<h2>About</h2><div class="card rows"><div class="opt"><div><b>LAPP work desktop</b><small>Icons: Lucide (ISC licence)</small></div></div></div>`;
   $("#main").innerHTML = `<div class="top" data-chrome><h1>Settings</h1></div>` + h;
   if (part === "ai" && window.AISettings) AISettings.mount($("#aiBox"));
-  if (part === "you") K.api("GET", "/me/log").then(r => { const KIND = { signin: "Signed in", wrongpw: "Wrong password", password: "Password changed", support: "Support", suspended: "Suspended", lifted: "Suspension lifted" };
+  if (part === "you") K.api("GET", "/me/log").then(r => { const KIND = { signin: "Signed in", signout: "Signed out", wrongpw: "Wrong password", unlock: "Screen unlocked", password: "Password", account: "Account changed", linked: "Linked account", unlinked: "Linked account removed", role: "Role changed", org: "Organisation", support: "Support", store: "Apps", suspended: "Suspended", lifted: "Suspension lifted" };
     const box = $("#myLog"); if (!box) return;
     box.innerHTML = r.log.map(l => `<div class="opt"><div><b>${E(KIND[l.kind] || l.kind)}</b><small>${E([l.detail, l.device, l.country].filter(Boolean).join(" · "))}</small></div><small>${E(new Date(l.at).toLocaleString(K.loc(), { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }))}</small></div>`).join("") || `<div class="opt"><small>—</small></div>`; }).catch(() => {});
   LAPPFrame.sync();

@@ -52,13 +52,16 @@ export async function storeApi(req, env, H, p, url) {
       await DB.batch([DB.prepare("INSERT INTO install_roots (root, at) VALUES (?, ?)").bind(root.key, H.now()),
         ...Object.keys(cur).map(a => DB.prepare("INSERT OR IGNORE INTO installs (root, app, who, by_user, at) VALUES (?, ?, ?, ?, ?)").bind(root.key, a, '{"all":1}', u.id, H.now()))]);
     }
-    if (M === "DELETE") { await DB.prepare("DELETE FROM installs WHERE root = ? AND app = ?").bind(root.key, app).run(); return H.json({ ok: true }); }
+    const appName = CATALOG.find(x => x.id === app).name;
+    if (M === "DELETE") { await DB.prepare("DELETE FROM installs WHERE root = ? AND app = ?").bind(root.key, app).run(); await logAccount(env, H, req, u.id, "store", `removed ${appName} from ${root.name}`).catch(() => {}); return H.json({ ok: true }); }
     const b = await H.body(req);
     const who = b.who && b.who.me ? { me: 1 } : b.who && Array.isArray(b.who.roles) && b.who.roles.length ? { roles: b.who.roles.map(String).slice(0, 20) } : { all: 1 };
     // a group app: which of its apps this space wants (none listed = all of them)
     const cat = CATALOG.find(x => x.id === app);
     if (cat.parts && b.who && Array.isArray(b.who.parts)) { const ps = b.who.parts.filter(x => cat.parts.some(c => c.id === x)); if (!ps.length) { await DB.prepare("DELETE FROM installs WHERE root = ? AND app = ?").bind(root.key, app).run(); return H.json({ ok: true }); } if (ps.length < cat.parts.length) who.parts = ps; }
+    const had = await DB.prepare("SELECT 1 FROM installs WHERE root = ? AND app = ?").bind(root.key, app).first();
     await DB.prepare("INSERT INTO installs (root, app, who, by_user, at) VALUES (?, ?, ?, ?, ?) ON CONFLICT(root, app) DO UPDATE SET who = excluded.who").bind(root.key, app, JSON.stringify(who), u.id, H.now()).run();
+    await logAccount(env, H, req, u.id, "store", `${had ? "changed" : "installed"} ${appName} in ${root.name}`).catch(() => {});
     return H.json({ ok: true });
   }
   throw H.fail("not found", 404);
@@ -80,6 +83,10 @@ const device = ua => { ua = ua || ""; const b = /Edg\//.test(ua) ? "Edge" : /Chr
 export async function logAccount(env, H, req, userId, kind, detail = "") {
   if (!userId) return;
   const country = (req.cf && req.cf.country) || req.headers.get("CF-IPCountry") || "";
+  if (kind === "signin") {   // a device or a country this account never signed in from before is marked
+    const dv = device(req.headers.get("User-Agent")), seen = await env.DB.prepare("SELECT SUM(device = ?) d, SUM(country = ?) c, COUNT(*) n FROM account_log WHERE user_id = ? AND kind = 'signin'").bind(dv, country, userId).first();
+    if (seen && seen.n) detail = [detail, !seen.d ? "new device" : "", country && !seen.c ? "new country" : ""].filter(Boolean).join(" · ");
+  }
   await env.DB.prepare("INSERT INTO account_log (user_id, kind, country, device, detail, at) VALUES (?, ?, ?, ?, ?, ?)").bind(userId, kind, country, device(req.headers.get("User-Agent")), String(detail).slice(0, 200), H.now()).run();
   if (kind === "signin" || kind === "wrongpw") await checkRules(env, H, userId).catch(() => {});
 }
@@ -121,6 +128,8 @@ async function byPub(env, pub) {
 async function granted(env, H, kind, id) {
   return env.DB.prepare("SELECT * FROM care_requests WHERE kind = ? AND target = ? AND status = 'approved' AND expires > ? ORDER BY id DESC LIMIT 1").bind(kind, id, H.now()).first();
 }
+// the people a support request is about: the person, or the organisation's admins
+async function careUsers(env, r) { return r.kind === "user" ? [r.target] : (await env.DB.prepare("SELECT user_id FROM org_members WHERE org_id = ? AND role = 'admin' AND active = 1").bind(r.target).all()).results.map(x => x.user_id); }
 const sha = async s => btoa(String.fromCharCode(...new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)))));
 
 export async function careApi(req, env, H, p, url) {
@@ -136,6 +145,7 @@ export async function careApi(req, env, H, p, url) {
     }
     if (!r) throw H.fail("this request is no longer open", 404);
     await DB.prepare("UPDATE care_requests SET status = ?, answered_at = ?, expires = ?, token_hash = NULL WHERE id = ?").bind(yes ? "approved" : "declined", H.now(), yes ? H.now() + H.DAY : null, r.id).run();
+    for (const t of await careUsers(env, r)) await logAccount(env, H, req, t, "support", yes ? "support access allowed for 24 hours" : "support access refused").catch(() => {});
     return H.json({ ok: true });
   }
   // requests waiting for me (shown on my desk)
@@ -173,7 +183,8 @@ export async function careApi(req, env, H, p, url) {
   }
   if (p === "/find" && M === "GET") { const w = await byPub(env, url.searchParams.get("id")); if (!w) throw H.fail("no account with this ID", 404); return H.json({ who: w }); }
   if (p === "/requests" && M === "GET") {
-    await DB.prepare("UPDATE care_requests SET status = 'ended' WHERE status = 'approved' AND expires <= ?").bind(H.now()).run();
+    const over = (await DB.prepare("SELECT * FROM care_requests WHERE status = 'approved' AND expires <= ?").bind(H.now()).all()).results;
+    for (const r of over) { await DB.prepare("UPDATE care_requests SET status = 'ended' WHERE id = ?").bind(r.id).run(); for (const t of await careUsers(env, r)) await logAccount(env, H, req, t, "support", "support access ended (24 hours)").catch(() => {}); }
     const rows = (await DB.prepare("SELECT r.*, u.name by_name, u.username by_username FROM care_requests r LEFT JOIN users u ON u.id = r.by_user ORDER BY r.id DESC LIMIT 100").all()).results;
     return H.json({ requests: await Promise.all(rows.map(async r => ({ id: r.id, status: r.status, reason: r.reason, via: r.via, at: r.created_at, expires: r.expires, by: r.by_name || "@" + r.by_username, who: await who(env, r.kind, r.target) }))) });
   }
@@ -182,6 +193,8 @@ export async function careApi(req, env, H, p, url) {
     if (await DB.prepare("SELECT 1 FROM care_requests WHERE kind = ? AND target = ? AND status IN ('waiting','approved') AND (expires IS NULL OR expires > ?)").bind(w.kind, w.id, H.now()).first()) throw H.fail("there is already an open request for this account", 409);
     const token = H.b64url(H.rand(24)), via = ["app", "email"].filter(v => !b.via || b.via.includes(v)).join(",") || "app";
     const r = await DB.prepare("INSERT INTO care_requests (kind, target, reason, via, token_hash, by_user, created_at) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id").bind(w.kind, w.id, String(b.reason || "").slice(0, 200), via, await sha(token), me.id, H.now()).first();
+    const targets = w.kind === "user" ? [w.id] : (await DB.prepare("SELECT user_id FROM org_members WHERE org_id = ? AND role = 'admin' AND active = 1").bind(w.id).all()).results.map(x => x.user_id);
+    for (const t of targets) await logAccount(env, H, req, t, "support", `support asked for access${b.reason ? ": " + String(b.reason).slice(0, 120) : ""}`).catch(() => {});
     let dev = {};
     if (via.includes("email")) {
       const to = w.kind === "user" ? (await DB.prepare("SELECT email FROM users WHERE id = ?").bind(w.id).first()).email
@@ -194,6 +207,8 @@ export async function careApi(req, env, H, p, url) {
   }
   let m;
   if ((m = p.match(/^\/requests\/(\d+)$/)) && M === "DELETE") {
+    const r0 = await DB.prepare("SELECT * FROM care_requests WHERE id = ? AND status = 'approved'").bind(+m[1]).first();
+    if (r0) for (const t of await careUsers(env, r0)) await logAccount(env, H, req, t, "support", "support access ended").catch(() => {});
     await DB.prepare("UPDATE care_requests SET status = CASE WHEN status = 'approved' THEN 'ended' ELSE 'cancelled' END, expires = MIN(COALESCE(expires, ?), ?) WHERE id = ? AND status IN ('waiting','approved')").bind(H.now(), H.now(), +m[1]).run();
     return H.json({ ok: true });
   }

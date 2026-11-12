@@ -299,6 +299,7 @@ async function api(req, env, url, ctx) {
       const slot = SLOTS.find((n, i) => !taken[i]);
       if (!slot) throw fail("four accounts at most", 409, { code: "full" });
       const cookie = await startSession(env, req, u, slot);
+      await logA(env, req, u.id, "linked", `opened next to ${main.name || "@" + main.username}`); await logA(env, req, main.id, "linked", `${u.name || "@" + u.username} opened next to this account`);
       return json({ ...(await me(env, req, u)), slot }, 200, { "Set-Cookie": cookie });
     }
     const cookie = await startSession(env, req, u);
@@ -319,14 +320,17 @@ async function api(req, env, url, ctx) {
     await limit(env, `unlock:${u.id}`, 8, 15 * 60e3);
     const pw = String((await body(req)).password || "");
     if (!u.pw_hash) throw fail("this account has no password — sign out and in again", 400, { code: "nopw" });
-    if (!await checkPassword(u, pw)) throw fail("wrong password", 403, { code: "wrong" });   // 403, not 401: the person is still signed in
+    if (!await checkPassword(u, pw)) { await logA(env, req, u.id, "wrongpw", "lock screen"); throw fail("wrong password", 403, { code: "wrong" }); }   // 403, not 401: the person is still signed in
+    await logA(env, req, u.id, "unlock");
     return json({ ok: true });
   }
 
   // signing out of a linked account (X-As) ends only that one; signing out of the main one ends all of them
   if (p === "/auth/logout" && M === "POST") {
     const slot = slotOf(req), r = json({ ok: true });
-    for (const n of slot ? [slot] : [0, ...SLOTS]) { const token = cookieOf(req, n); if (!token) continue; await env.DB.prepare("DELETE FROM sessions WHERE token_hash = ?").bind(await sha(token)).run(); r.headers.append("Set-Cookie", setCookie("x".repeat(20), 0, n)); }
+    for (const n of slot ? [slot] : [0, ...SLOTS]) { const token = cookieOf(req, n); if (!token) continue; const who = await userOfToken(env, token);
+      if (who) await logA(env, req, who.id, n ? "unlinked" : "signout", n ? "this account was taken off the desk" : "");
+      await env.DB.prepare("DELETE FROM sessions WHERE token_hash = ?").bind(await sha(token)).run(); r.headers.append("Set-Cookie", setCookie("x".repeat(20), 0, n)); }
     return r;
   }
 
@@ -461,6 +465,7 @@ Windows: ${wins.map(w => `${w.id} = ${w.label}`).join("; ")}`;
       sets.push("username = ?"); vals.push(un);
     }
     if (sets.length) await env.DB.prepare(`UPDATE users SET ${sets.join(", ")} WHERE id = ?`).bind(...vals, u.id).run();
+    if (b.username !== undefined && cleanUser(b.username) !== u.username) await logA(env, req, u.id, "account", `username @${u.username} → @${cleanUser(b.username)}`);
     return json(await me(env, req, await env.DB.prepare("SELECT * FROM users WHERE id = ?").bind(u.id).first()));
   }
 
@@ -597,7 +602,7 @@ async function promote(env, u) {
 /* ================= pages for staff ================= */
 // every page of the panels starts with the same head: the shared kit, the language, icons, theme, pointer,
 // the form controls and the window bridge. One asset version (ASSET_V, set by tools/bump.js) for all of them.
-const ASSET_V = "mwcx27sz";
+const ASSET_V = "mwcxekpn";
 const HEAD = `<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/ui/kit.css?v=${ASSET_V}">
@@ -771,6 +776,11 @@ async function adminApi(req, env, p, url) {
     const stmts = [env.DB.prepare(`UPDATE users SET ${sets.join(", ")} WHERE id = ?`).bind(...vals, id)];
     if (b.disabled) stmts.push(env.DB.prepare("DELETE FROM sessions WHERE user_id = ?").bind(id));
     await env.DB.batch(stmts);
+    const by = me.name || "@" + me.username;
+    if (b.role !== undefined && b.role !== target.role) await logA(env, req, id, "role", `${target.role} → ${b.role} · by ${by}`);
+    if (b.email !== undefined && cleanEmail(b.email) !== target.email) await logA(env, req, id, "account", `e-mail changed · by ${by}`);
+    if (b.username !== undefined && cleanUser(b.username) !== target.username) await logA(env, req, id, "account", `username @${target.username} → @${cleanUser(b.username)} · by ${by}`);
+    if (b.disabled !== undefined && !!b.disabled !== !!target.disabled) await logA(env, req, id, b.disabled ? "suspended" : "lifted", `by ${by}`);
     return json({ ok: true });
   }
 
