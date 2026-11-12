@@ -63,6 +63,24 @@
   };
   // which store app an app of the desk belongs to (apps not listed here are always there)
   const STORE_OF = id => /^studio:/.test(id) ? "studio" : /:(overview|classes)$/.test(id) ? "classes" : /:(timetable|week)$/.test(id) ? "timetable" : /:homework$/.test(id) ? "homework" : /:finance$/.test(id) ? "money" : "";
+  // the store app behind a desk app (to remove it from its space), or null for apps that are always there
+  const STORE_NAME = { studio: "Language Studio", classes: "Classes", timetable: "Timetable", homework: "Homework", money: "Payments" };
+  D.storeAppOf = a => {
+    if (!a) return null; const cid = STORE_OF(a.id.replace(/~\d$/, "")); if (!cid) return null;
+    const ws = D.wsOf(a.ws) || {}, m = /^s:([^~]+)/.exec(a.ws || ""), ac = D.acctOf(a.as || 0);
+    const admin = m ? ws.role === "admin" : !!(ac && ac.user.role === "admin");
+    return { id: cid, name: STORE_NAME[cid] || cid, org: m ? m[1] : "", slot: a.as || 0, admin, space: ws.name || "" };
+  };
+  D.uninstall = async a => {
+    const s = D.storeAppOf(a); if (!s || !s.admin) return;
+    const with_ = D.APPS.filter(x => x.ws === a.ws && (D.storeAppOf(x) || {}).id === s.id).map(x => x.title);
+    if (!await K.confirm({ title: `Remove ${s.name} from ${s.space}?`, text: with_.length > 1 ? with_.join(" · ") : "", ok: "Remove", danger: true })) return;
+    const r = await fetch(`/api/store/${s.id}${s.org ? "?org=" + s.org : ""}`, { method: "DELETE", credentials: "same-origin", headers: { "X-LAPP": "1", ...(s.slot ? { "X-As": String(s.slot) } : {}) } });
+    if (!r.ok) return D.toast((await r.json().catch(() => ({}))).error || "Could not remove it", { kind: "err" });
+    D.WN().filter(w => with_.length && D.appOf(w.url) && (D.storeAppOf(D.appOf(w.url)) || {}).id === s.id && w.ws === a.ws).forEach(w => D.closeWin(w));
+    await D.reloadAccounts(); D.ccRedraw && D.ccRedraw(); D.toast(`${s.name} removed`, { kind: "ok" });
+    D.WN().filter(w => /^\/store/.test(w.url)).forEach(w => D.post(w, { t: "apps" }));   // an open store shows it at once
+  };
   // what each space installed (asked once per space; a space that never opened the store keeps its first apps)
   D.INST = null;
   D.loadInstalls = async () => {

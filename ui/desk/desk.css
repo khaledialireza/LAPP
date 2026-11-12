@@ -233,3 +233,7 @@ body.dragging iframe{pointer-events:none}
 #cc.acclogin .ccs{display:none}
 .cct.ap .g{position:relative}.cct.ap .wk{top:-5px;inset-inline-end:-7px}
 .cct.ap .runs{position:absolute;bottom:4px;left:50%;width:14px;height:3px;margin-left:-7px;border-radius:99px;background:var(--vi)}.cct.ap{position:relative}
+.arow .amore{margin-inline-start:auto;width:26px;height:26px;border-radius:7px;display:grid;place-items:center;color:var(--mu2);opacity:0}.arow:hover .amore,.arow:focus-within .amore{opacity:1}.arow .amore:hover{background:var(--p4);color:var(--tx)}
+/* the desk itself is not a document: dragging the mouse over it never selects text (fields and notes still do) */
+body{-webkit-user-select:none;user-select:none}
+body input,body textarea,body [contenteditable]:not([contenteditable=false]),body .k-dlg,body .selectable{-webkit-user-select:text;user-select:text}

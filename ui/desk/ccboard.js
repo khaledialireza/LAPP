@@ -142,7 +142,7 @@
 
   D.ccExtra = (B, v, q) => {
     q = (q || "").trim().toLowerCase();
-    if (v === "applist") B.innerHTML = `<div class="alist">${D.APPS.filter(a => !q || (a.title + " " + D.wsOf(a.ws).name).toLowerCase().includes(q)).map(a => `<button class="arow" data-open-app="${esc(a.id)}" draggable="true" data-app="${esc(a.id)}"><span class="g" style="background:${a.color}">${I(a.icon, 15)}</span><span class="t">${esc(a.title)}</span>${a.ws !== D.CUR ? `<small>${esc(D.wsOf(a.ws).name)}</small>` : ""}</button>`).join("")}</div>`;
+    if (v === "applist") B.innerHTML = `<div class="alist">${D.APPS.filter(a => !q || (a.title + " " + D.wsOf(a.ws).name).toLowerCase().includes(q)).map(a => `<button class="arow" data-open-app="${esc(a.id)}" draggable="true" data-app="${esc(a.id)}"><span class="g" style="background:${a.color}">${I(a.icon, 15)}</span><span class="t">${esc(a.title)}</span>${a.ws !== D.CUR ? `<small>${esc(D.wsOf(a.ws).name)}</small>` : ""}<span class="amore" data-amore="${esc(a.id)}" role="button" aria-label="More">${I("more", 16)}</span></button>`).join("")}</div>`;
     if (v === "widgets") B.innerHTML = `<div class="bento">${Object.entries(D.WT).map(([k, w]) => `<button class="cct s21 wd" data-addwid="${k}"><span class="th">${I(w[0], 14)}${esc(w[1])}</span><span class="mu">${esc(w[2])}</span></button>`).join("")}</div>`;
     if (v === "accounts") return accounts(B, q);
     if (v === "walls") { const cur = D.DESK.wall || ""; B.innerHTML = `<div class="bento">${WALLS.map(([k, l, g]) => `<button class="cct s21 wall ${k === cur ? "on" : ""}" data-wall="${k}" title="${esc(l)}" aria-label="${esc(l)}" style="background:${g}"></button>`).join("")}</div>`; }
@@ -168,6 +168,7 @@
     const rm = t.closest("[data-rm]"); if (rm) { setTiles(tiles().filter(x => x[0] !== rm.dataset.rm)); return redraw(); }
     const frm = t.closest("[data-frm]"); if (frm) { CCS().foot = foot().filter(x => x[0] !== frm.dataset.frm); save(); return redraw(); }
     const lib = t.closest("[data-lib]"); if (lib) { const x = LIB[+lib.dataset.lib]; if (x) setTiles([...tiles(), x]); return redraw(); }
+    const am = t.closest("[data-amore]"); if (am) { e.stopPropagation(); const items = appMenu(app(am.dataset.amore)); return setTimeout(() => K.menuAt(am, items, { end: true }), 0); }
     const oa = t.closest("[data-open-app]"); if (oa) { const a = app(oa.dataset.openApp); if (a) { use("app:" + a.id); D.ccClose(); D.openWin(a.url); } return; }
     const aw = t.closest("[data-addwid]"); if (aw) { D.addWidget(aw.dataset.addwid); return D.toast(`${D.WT[aw.dataset.addwid][1]} is on the desktop`, { kind: "ok" }); }
     const wl = t.closest("[data-wall]"); if (wl && t.closest("#cc .wall")) { D.setLook("wall", wl.dataset.wall); return redraw(); }
@@ -201,6 +202,11 @@
   document.addEventListener("dragend", () => { if (ST.drag && ST.drag.id) save(); ST.drag = null; setTimeout(() => { D.DRAGAPP = null; }, 50); });
 
   /* ---------- right-click a tile: its own settings ---------- */
+  // an app in the list: open it, put it on the board, or remove it from its space (the store follows)
+  const appMenu = a => !a ? [] : [{ head: a.title }, { label: "Open", icon: "external", run: () => { D.ccClose(); D.openWin(a.url); } },
+    ...(tiles().some(y => y[1] === "app" && y[3] === a.id) ? [] : [{ label: "Add to the board", icon: "plus", run: () => { setTiles([...tiles(), ["app:" + a.id, "app", "s11", a.id]]); D.toast("On the board", { kind: "ok" }); } }]),
+    ...((D.storeAppOf(a) || {}).admin ? ["-", { label: "Remove app", icon: "trash", danger: true, run: () => D.uninstall(a) }] : [])];
+  K.ctx(t => { const r = t.closest && t.closest("#cc [data-open-app]"); return r ? appMenu(app(r.dataset.openApp)) : null; });
   K.ctx(t => {
     const el = t.closest && t.closest("#cc [data-t]"); if (!el) return null;
     const id = el.dataset.t, x = find(id); if (!x) return null;
@@ -212,7 +218,8 @@
       { label: "Shown", icon: "clock", sub: [["always", "Always"], ["morning", "Mornings"], ["work", "Work days"]].map(([v, l]) => ({ label: l, on: p.when === v, run: () => { setP(id, "when", v); redraw(); } })) },
       { label: p.key ? `Shortcut · ${D.nice(p.key)}` : "Shortcut…", icon: "keyboard", run: async () => { const v = await K.ask({ title: `A shortcut for “${name(x)}”`, value: p.key || "Alt+1", placeholder: "Alt+1", ok: "Use it", validate: v => /^(Ctrl|Cmd|Alt)\+/.test(v) ? "" : "Start with Ctrl, Cmd or Alt" }); if (v != null) { setP(id, "key", v); redraw(); } } },
       ...(id === "q:learn" ? [{ label: "Clear what it learned", icon: "trash", run: () => { CCS().uses = {}; save(); D.toast("Forgotten", { kind: "ok" }); } }] : []),
-      "-", { label: "Remove", icon: "trash", danger: true, run: () => { if (inFoot) CCS().foot = foot().filter(y => y[0] !== id); else CCS().tiles = tiles().filter(y => y[0] !== id); save(); redraw(); } }];
+      ...(x[1] === "app" && (D.storeAppOf(app(x[3])) || {}).admin ? [{ label: "Remove app", icon: "trash", danger: true, run: () => D.uninstall(app(x[3])) }] : []),
+      "-", { label: "Remove from the board", icon: "x", danger: true, run: () => { if (inFoot) CCS().foot = foot().filter(y => y[0] !== id); else CCS().tiles = tiles().filter(y => y[0] !== id); save(); redraw(); } }];
   });
   // a tile's own shortcut (pages in windows pass it up as well: D.shareKeys puts it in their list)
   D.ccKey = combo => { const id = Object.keys(CCS().props || {}).find(k => CCS().props[k].key && CCS().props[k].key === combo); const x = id && find(id); if (!x) return false; if (x[1] === "hero" || x[1] === "clock" || x[1] === "cal" || x[1] === "lang") D.ccOpen("all"); else runTile(x); return true; };

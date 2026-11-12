@@ -58,7 +58,7 @@ const whoText = w => !w ? "—" : w.all ? "Everyone" : w.me ? "Only admins" : (w
 function page(a, acct) {
   $("#main").innerHTML = `<div class="top"><button class="b" data-back>${I("back", 15)} Back</button><span style="flex:1"></span>${acct}</div><div class="page">
     <div class="ph"><span class="ai" style="background:${a.color}">${I(a.icon, 38)}</span><div><h2>${E(a.name)}</h2><p>${E(a.by)} · ${E(a.cat)}</p></div><span class="sp"></span>
-      ${S.root.admin ? (a.installed ? `<button class="b" data-who>Who may use it</button><button class="b d" data-rm>Remove</button>` : `<button class="b pr" data-get>Get</button>`) : ""}</div>
+      ${S.root.admin ? (a.installed ? `<button class="b" data-who>Who may use it</button>` : `<button class="b pr" data-get>Get</button>`) : ""}</div>
     <div class="about">${E(a.about)}</div>
     <div class="two"><div class="box"><h5>It can reach</h5>${a.reach.map(r => `<span class="reach">${I("check", 14)} ${E(r)}</span>`).join("")}</div>
       <div class="box"><h5>Used in ${E(S.root.name)} by</h5><span>${E(whoText(a.who))}</span></div></div></div>`;
@@ -87,8 +87,9 @@ document.addEventListener("click", async e => {
   const app = S.apps.find(x => x.id === S.open); if (!app) return;
   if (t.closest("[data-get]")) return install(app);
   if (t.closest("[data-who]")) return install(app, true);
-  if (t.closest("[data-rm]")) { if (!await K.confirm({ title: `Remove ${app.name} from ${S.root.name}?`, ok: "Remove", danger: true })) return; try { await api("DELETE", "/" + app.id); K.toast("Removed", { kind: "ok" }); LAPPFrame.up({ t: "apps" }); await load(); } catch (x) { K.toast(x.message, { kind: "err" }); } }
 });
+// the desk tells the store when an app was removed from the command center
+addEventListener("message", e => { if (e.origin === location.origin && e.data && e.data.t === "apps") load().catch(() => {}); });
 load().catch(x => { $("#main").innerHTML = `<div class="none">${E(x.message)}</div>`; });
 </script>
 </body></html>
