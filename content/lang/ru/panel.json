@@ -1697,5 +1697,9 @@
  "Account changed": "Аккаунт изменён",
  "Linked account": "Связанный аккаунт",
  "Linked account removed": "Связанный аккаунт убран",
- "Organisation": "Организация"
+ "Organisation": "Организация",
+ "Translation shown first": "Первый перевод",
+ "Under the line": "Под строкой",
+ "Under the line · others folded": "Под строкой · остальные свёрнуты",
+ "Side by side": "Рядом"
 }

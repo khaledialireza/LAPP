@@ -214,7 +214,10 @@ if (window.LAPPFrame) LAPPFrame.menus = () => {
   const v = (location.hash.slice(1) || "home").split("/")[0], id = S.L ? "/" + S.L.id : "";
   const go = (k, l, ic, needs) => ({ label: l, icon: ic, on: v === k, disabled: needs && !S.L, run: () => { location.hash = k + (needs ? id : ""); } });
   return [{ label: "Go", items: [go("home", "Studio home", "⌘"), go("script", "Script", "✎", 1), go("lesson", "Lesson settings", "⚙", 1), go("voice", "Voice desk", "〰", 1), go("insights", "Insights", "📈"), go("universe", "Characters", "🎭")] },
-    { label: "View", items: [{ label: "Reload", icon: "⟳", run: () => show() }, { label: "Ribbon", icon: "layers", on: K.ribbon.on, run: () => K.ribbon.set(!K.ribbon.on) }] }];
+    { label: "View", items: [{ label: "Reload", icon: "⟳", run: () => show() }, { label: "Ribbon", icon: "layers", on: K.ribbon.on, run: () => K.ribbon.set(!K.ribbon.on) },
+      // the studio's own settings live in the studio (it is an app from the store, not part of the system's Settings)
+      { label: "Translations", icon: "translate", sub: [["a", "Under the line"], ["b", "Under the line · others folded"], ["c", "Side by side"]].map(([k, l]) => ({ label: l, on: trMode() === k, run: () => { K.LS.set("lapp.theme", { ...(K.LS.get("lapp.theme", {}) || {}), trMode: k }); show(); } })) },
+      { label: "Translation shown first", icon: "globe", sub: TRL.map(l => ({ label: l.toUpperCase(), on: S.tr === l, run: () => { S.tr = l; K.LS.set("lapp.studio.tr", l); show(); } })) }] }];
 };
 async function show() {
   const seq = ++SEQ;

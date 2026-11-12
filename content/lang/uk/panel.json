@@ -1697,5 +1697,9 @@
  "Account changed": "Акаунт змінено",
  "Linked account": "Пов'язаний акаунт",
  "Linked account removed": "Пов'язаний акаунт прибрано",
- "Organisation": "Організація"
+ "Organisation": "Організація",
+ "Translation shown first": "Перший переклад",
+ "Under the line": "Під рядком",
+ "Under the line · others folded": "Під рядком · інші згорнуті",
+ "Side by side": "Поруч"
 }

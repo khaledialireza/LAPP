@@ -20,7 +20,7 @@ h2{font-size:18px;margin-bottom:4px}.sub{color:var(--mu);margin-bottom:16px}
 "use strict";
 const { $, $$, esc: E, I, LS, MAC } = K, keyName = K.keyLabel;
 const tell = (key, value) => LAPPFrame.up({ t: "settings", key, value });   // the desktop applies it to every window and saves it
-const PARTS = [["you", "user", "You"], ["look", "palette", "Look & theme"], ["desk", "desktop", "Desktop"], ["cc", "grid", "Command center"], ["studio", "video", "Studio"], ["keys", "keyboard", "Keyboard"], ["notes", "bell", "Notifications"], ["ai", "ai", "AI"], ["about", "info", "About"]];
+const PARTS = [["you", "user", "You"], ["look", "palette", "Look & theme"], ["desk", "desktop", "Desktop"], ["cc", "grid", "Command center"], ["keys", "keyboard", "Keyboard"], ["notes", "bell", "Notifications"], ["ai", "ai", "AI"], ["about", "info", "About"]];
 const THEMES = window.LAPPThemes || {};
 let ME = null, part = location.hash.slice(1) || "you";
 async function load() { ME = (await K.api("GET", "/me")).user; draw(); }
@@ -47,12 +47,6 @@ function draw() {
     <div class="opt"><div><b>Widgets</b><small>today, needs you, notes, numbers…</small></div><button class="b" data-tell="widget">${I("puzzle", 14)} Add a widget</button></div>
     <div class="opt"><div><b>Reopen my windows when I come back</b></div>${sw("restore", th.restore !== false)}</div>
     <div class="opt"><div><b>Lock after a quiet time</b><small>asks for your password again</small></div><div class="seg">${[[0, "Never"], [5, "5 min"], [15, "15 min"], [30, "30 min"], [60, "1 h"]].map(([k, l]) => `<button data-lockafter="${k}" class="${(+th.lockAfter || 0) === k ? "on" : ""}">${l}</button>`).join("")}</div></div></div>`;
-  if (part === "studio") { const M = th.trMode || "a", Lg = th.trLang || "";
-    const pv = k => k === "a" ? `<div style="font-size:12px;line-height:1.5"><b>Eine Fahrkarte, bitte.</b><div style="color:var(--mu)"><span style="font-size:9px;border:1px solid var(--ln2);border-radius:5px;padding:0 4px">EN</span> A ticket, please.</div></div>`
-      : k === "b" ? `<div style="font-size:12px;line-height:1.5"><b>Eine Fahrkarte, bitte.</b><div style="color:var(--mu)">EN A ticket, please.</div><div style="color:var(--mu2)">▾ FA · RU · UK</div></div>`
-      : `<div style="font-size:12px;line-height:1.5;display:grid;grid-template-columns:1fr 1fr;gap:8px"><b>Eine Fahrkarte, bitte.</b><span style="color:var(--mu);border-inline-start:1px solid var(--ln2);padding-inline-start:8px">A ticket, please.</span></div>`;
-    h = `<h2>Studio</h2><div class="sub">How the script looks while you write.</div><div class="card rows"><div class="opt" style="display:block"><b>Translations under the lines</b><div class="themes">${[["a", "A · one line + tag"], ["b", "B · all four, folded"], ["c", "C · side by side"]].map(([k, l]) => `<button class="th ${M === k ? "on" : ""}" data-trmode="${k}"><span class="pv" style="background:var(--p2);padding:10px;height:auto;min-height:70px">${pv(k)}</span><b>${E(l)}</b></button>`).join("")}</div></div>
-    <div class="opt"><div><b>Language shown first</b><small>click the tag on a line to switch at any time</small></div><div class="seg">${[["", "My language"], ["en", "EN"], ["fa", "FA"], ["ru", "RU"], ["uk", "UK"]].map(([k, l]) => `<button data-trlang="${k}" class="${Lg === k ? "on" : ""}">${l}</button>`).join("")}</div></div></div>`; }
   if (part === "keys") h = `<h2>Keyboard</h2><div class="sub">Every shortcut can be changed. They work in every window.</div><div class="card rows"><div class="opt"><div><b>Keyboard shortcuts</b><small>${E(keyName(MAC ? "Cmd+K" : "Ctrl+K"))} command center · ${E(keyName(MAC ? "Cmd+J" : "Ctrl+J"))} AI · ${E(keyName("Alt+T"))} windows · ${E(keyName("Alt+Q"))} workspace …</small></div><button class="b pr" data-tell="keys">${I("keyboard", 14)} Change shortcuts</button></div></div>`;
   if (part === "notes") h = `<h2>Notifications</h2><div class="sub">What may pop up while you work.</div><div class="card rows">
     <div class="opt"><div><b>Pop-ups (toasts)</b><small>notifications still collect under the bell</small></div>${sw("toasts", th.toasts !== false)}</div>
@@ -88,8 +82,6 @@ document.addEventListener("click", e => {
   const la = t.closest("[data-lockafter]"); if (la) return tell("lockAfter", +la.dataset.lockafter);
   if (t.closest("#photo")) return $("#photoIn").click();
   if (t.closest("#nophoto")) return savePhoto("");
-  const tm = t.closest("[data-trmode]"); if (tm) return tell("trMode", tm.dataset.trmode);
-  const tlg = t.closest("[data-trlang]"); if (tlg) { K.LS.del("lapp.studio.tr"); return tell("trLang", tlg.dataset.trlang); }
   const gr = t.closest("[data-group]"); if (gr) return tell("groupBy", gr.dataset.group);
   const tl = t.closest("[data-tell]"); if (tl) return tell(tl.dataset.tell, true);
   const sw = t.closest("[data-sw]"); if (sw) { const k = sw.dataset.sw, v = !sw.classList.contains("on");
