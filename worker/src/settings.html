@@ -25,11 +25,12 @@ const THEMES = window.LAPPThemes || {};
 let ME = null, part = location.hash.slice(1) || "you";
 async function load() { ME = (await K.api("GET", "/me")).user; draw(); }
 function draw() {
-  $("#nav").innerHTML = PARTS.filter(p => p[0] !== "ai" || (ME && ME.role === "admin")).map(([k, ic, l]) => `<button class="${part === k ? "on" : ""}" data-p="${k}">${I(ic)}<span>${E(l)}</span></button>`).join("");
+  // the first item is the person: their name and their face, not a word
+  $("#nav").innerHTML = PARTS.filter(p => p[0] !== "ai" || (ME && ME.role === "admin")).map(([k, ic, l]) => `<button class="${part === k ? "on" : ""}" data-p="${k}">${k === "you" && ME ? K.avatar(ME, 20) : I(ic)}<span>${E(k === "you" && ME ? ME.name || "@" + ME.username : l)}</span></button>`).join("");
   const th = LS.get("lapp.theme", {}), T = th.theme || "aurora", A = th.accent || "#8B5CF6";
   const sw = (id, on) => `<button class="sw ${on ? "on" : ""}" data-sw="${id}" role="switch" aria-checked="${!!on}"></button>`;
   let h = "";
-  if (part === "you") h = `<h2>You</h2><div class="sub">Your account. Name and email are changed on your profile.</div><div class="card rows"><div class="opt"><div style="display:flex;gap:14px;align-items:center">${K.avatar(ME, 52)}<div><b>${E(ME.name || "@" + ME.username)}</b><small>${E(ME.email || "")} · ${E(ME.role)}</small></div></div><a class="b" href="/profile" target="_blank" rel="noopener">Profile ↗</a></div>
+  if (part === "you") h = `<h2>${E(ME.name || "@" + ME.username)}</h2><div class="sub">Your account. Name and email are changed on your profile.</div><div class="card rows"><div class="opt"><div style="display:flex;gap:14px;align-items:center">${K.avatar(ME, 52)}<div><b>${E(ME.name || "@" + ME.username)}</b><small>${E(ME.email || "")} · ${E(ME.role)}</small></div></div><a class="b" href="/profile" target="_blank" rel="noopener">Profile ↗</a></div>
     ${ME.pub ? `<div class="opt"><div><b>Your ID</b></div><span style="display:flex;gap:8px;align-items:center"><code style="font:600 15px ui-monospace,Menlo,monospace;letter-spacing:.08em">${E(ME.pub)}</code><button class="b" id="copyId">${I("copy", 15)} Copy</button></span></div>` : ""}
     <div class="opt"><div><b>Photo</b><small>shown on the taskbar, the lock screen and to your team</small></div><div style="display:flex;gap:8px"><button class="b" id="photo">${I("image", 14)} ${ME.avatar ? "Change" : "Add a photo"}</button>${ME.avatar ? `<button class="b" id="nophoto">Remove</button>` : ""}<input type="file" id="photoIn" accept="image/*" hidden></div></div>
     <div class="opt"><div><b>Lock the screen</b><small>${E(keyName("Ctrl+Alt+L"))} · your windows stay as they are</small></div><button class="b" data-tell="lock">${I("lock", 14)} Lock now</button></div>
@@ -70,7 +71,7 @@ function draw() {
   if (part === "ai" && window.AISettings) AISettings.mount($("#aiBox"));
   LAPPFrame.sync();
 }
-if (window.LAPPFrame) LAPPFrame.menus = () => [{ label: "Go", items: PARTS.map(([k, ic, l]) => ({ label: l, icon: ic, on: part === k, run: () => { part = k; draw(); } })) }];
+if (window.LAPPFrame) LAPPFrame.menus = () => [{ label: "Go", items: PARTS.map(([k, ic, l]) => ({ label: k === "you" && ME ? ME.name || "@" + ME.username : l, icon: ic, on: part === k, run: () => { part = k; draw(); } })) }];
 document.addEventListener("click", e => {
   if (e.target.closest("#copyId")) return K.copy(ME.pub);
   const t = e.target;
