@@ -92,7 +92,6 @@
     history.replaceState(null, "", "/manage");
     if (want && /^\/(admin|studio|files|settings|s\/)/.test(want)) D.openWin(want);
     else if (D.WN().length > 1) D.toast(`Welcome back · your windows are where you left them`, { kind: "info" });
-    else if (!D.WN().length) D.toast(`Press ${D.nice(D.BIND.cc)} or the L button: search, apps, lessons and the AI`, { kind: "info" });
     D.emit("ready"); bootTo(65);
     // the glass goes when every window that came back is ready
     const wait = () => { const ws = D.WN(), n = ws.filter(w => w.ready).length; bootTo(65 + (ws.length ? 30 * n / ws.length : 30)); if (n === ws.length && K.net.busy === 0) D.bootEnd(); else if (n === ws.length) setTimeout(wait, 120); };

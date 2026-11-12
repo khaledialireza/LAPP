@@ -142,7 +142,19 @@
 
   D.ccExtra = (B, v, q) => {
     q = (q || "").trim().toLowerCase();
-    if (v === "applist") B.innerHTML = `<div class="alist">${D.APPS.filter(a => !q || (a.title + " " + D.wsOf(a.ws).name).toLowerCase().includes(q)).map(a => `<button class="arow" data-open-app="${esc(a.id)}" draggable="true" data-app="${esc(a.id)}"><span class="g" style="background:${a.color}">${I(a.icon, 15)}</span><span class="t">${esc(a.title)}</span>${a.ws !== D.CUR ? `<small>${esc(D.wsOf(a.ws).name)}</small>` : ""}<span class="amore" data-amore="${esc(a.id)}" role="button" aria-label="More">${I("more", 16)}</span></button>`).join("")}</div>`;
+    if (v === "applist") {
+      // apps that come together from the store (e.g. Language Studio = Lesson library, Studio, Characters) show as one group
+      const L = D.APPS.filter(a => !q || (a.title + " " + D.wsOf(a.ws).name).toLowerCase().includes(q)), seen = new Set();
+      const row = a => `<button class="arow" data-open-app="${esc(a.id)}" draggable="true" data-app="${esc(a.id)}"><span class="g" style="background:${a.color}">${I(a.icon, 15)}</span><span class="t">${esc(a.title)}</span>${a.ws !== D.CUR ? `<small>${esc(D.wsOf(a.ws).name)}</small>` : ""}<span class="amore" data-amore="${esc(a.id)}" role="button" aria-label="More">${I("more", 16)}</span></button>`;
+      const key = a => { const s = D.storeAppOf(a); return s ? a.ws + "|" + s.id : ""; };
+      B.innerHTML = `<div class="alist">${L.map(a => {
+        const k = key(a); if (seen.has(a.id)) return "";
+        const group = k ? D.APPS.filter(x => key(x) === k) : [];
+        if (group.length < 2) return row(a);
+        group.forEach(x => seen.add(x.id)); const s = D.storeAppOf(a);
+        return `<div class="agrp"><div class="ghd"><span class="t">${esc(s.name)}</span>${a.ws !== D.CUR ? `<small>${esc(D.wsOf(a.ws).name)}</small>` : ""}${s.admin ? `<span class="amore" data-gmore="${esc(a.id)}" role="button" aria-label="More">${I("more", 16)}</span>` : ""}</div>${group.filter(x => L.includes(x)).map(row).join("")}</div>`;
+      }).join("")}</div>`;
+    }
     if (v === "widgets") B.innerHTML = `<div class="bento">${Object.entries(D.WT).map(([k, w]) => `<button class="cct s21 wd" data-addwid="${k}"><span class="th">${I(w[0], 14)}${esc(w[1])}</span><span class="mu">${esc(w[2])}</span></button>`).join("")}</div>`;
     if (v === "accounts") return accounts(B, q);
     if (v === "walls") { const cur = D.DESK.wall || ""; B.innerHTML = `<div class="bento">${WALLS.map(([k, l, g]) => `<button class="cct s21 wall ${k === cur ? "on" : ""}" data-wall="${k}" title="${esc(l)}" aria-label="${esc(l)}" style="background:${g}"></button>`).join("")}</div>`; }
@@ -168,6 +180,7 @@
     const rm = t.closest("[data-rm]"); if (rm) { setTiles(tiles().filter(x => x[0] !== rm.dataset.rm)); return redraw(); }
     const frm = t.closest("[data-frm]"); if (frm) { CCS().foot = foot().filter(x => x[0] !== frm.dataset.frm); save(); return redraw(); }
     const lib = t.closest("[data-lib]"); if (lib) { const x = LIB[+lib.dataset.lib]; if (x) setTiles([...tiles(), x]); return redraw(); }
+    const gm = t.closest("[data-gmore]"); if (gm) { e.stopPropagation(); const a = app(gm.dataset.gmore); return setTimeout(() => K.menuAt(gm, [{ head: D.storeAppOf(a).name }, { label: "Remove app", icon: "trash", danger: true, run: () => D.uninstall(a) }], { end: true }), 0); }
     const am = t.closest("[data-amore]"); if (am) { e.stopPropagation(); const items = appMenu(app(am.dataset.amore)); return setTimeout(() => K.menuAt(am, items, { end: true }), 0); }
     const oa = t.closest("[data-open-app]"); if (oa) { const a = app(oa.dataset.openApp); if (a) { use("app:" + a.id); D.ccClose(); D.openWin(a.url); } return; }
     const aw = t.closest("[data-addwid]"); if (aw) { D.addWidget(aw.dataset.addwid); return D.toast(`${D.WT[aw.dataset.addwid][1]} is on the desktop`, { kind: "ok" }); }
