@@ -21,6 +21,7 @@ import ADMIN from "./admin.html";
 import MANAGE from "./manage.html";
 import FILES from "./files.html";
 import SETTINGS from "./settings.html";
+import USERS from "./users.html";
 import { deskApi, worksHere } from "./desk.js";
 import { aiLimit, fail, enc, sha, b64, b64url, STAFF, teamOf } from "./util.js";
 import SCHOOL from "./school.html";
@@ -164,7 +165,7 @@ async function me(env, req, u) {
 }
 // what school.js needs from here
 // the work desktop and the apps that only live in its windows; only people who work in /manage may open them
-const DESK_PAGES = { "/manage": [MANAGE, "/manage"], "/files": [FILES, "/files"], "/settings": [SETTINGS, "/settings"] };
+const DESK_PAGES = { "/manage": [MANAGE, "/manage"], "/files": [FILES, "/files"], "/settings": [SETTINGS, "/settings"], "/users": [USERS, "/users"] };
 async function deskPage(req, env, url, [html, path]) {
   const u = env.DB ? await currentUser(req, env) : null;
   if (!u) return Response.redirect(`${url.origin}/?login=1&next=/manage`, 302);
@@ -579,7 +580,7 @@ async function promote(env, u) {
 /* ================= pages for staff ================= */
 // every page of the panels starts with the same head: the shared kit, the language, icons, theme, pointer,
 // the form controls and the window bridge. One asset version (ASSET_V, set by tools/bump.js) for all of them.
-const ASSET_V = "mwcjjjiv";
+const ASSET_V = "mwcscgne";
 const HEAD = `<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/ui/kit.css?v=${ASSET_V}">
@@ -811,6 +812,16 @@ async function adminApi(req, env, p, url) {
     const token = await newCode(env, u, "reset");
     const sent = await sendMail(env, u.email, T.reset(`${appUrl(env, req)}/?reset=${token}`));
     return json({ ok: true, sent });
+  }
+
+  // a team member's devices (sessions): only for the LAPP team, never for learners or school accounts
+  if ((m = p.match(/^\/users\/(\d+)\/sessions$/)) && (M === "GET" || M === "DELETE")) {
+    const id = Number(m[1]);
+    const t = await env.DB.prepare("SELECT role FROM users WHERE id = ?").bind(id).first();
+    if (!t || t.role === "user") throw fail("only for the LAPP team", 403);
+    if (M === "DELETE") { if (me.role !== "admin" && id !== me.id) throw fail("only an admin can do this", 403); await env.DB.prepare("DELETE FROM sessions WHERE user_id = ?").bind(id).run(); return json({ ok: true }); }
+    const rows = (await env.DB.prepare("SELECT created_at, expires, ua FROM sessions WHERE user_id = ? AND expires > ? ORDER BY created_at DESC LIMIT 20").bind(id, now()).all()).results;
+    return json({ sessions: rows });
   }
 
   if (p === "/customers" && M === "GET") {

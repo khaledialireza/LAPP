@@ -1,0 +1,142 @@
+<!doctype html>
+<html data-desk lang="en"><head><!--LAPP:HEAD-->
+<title>Users · LAPP</title>
+<style>
+/* Users: the people of one root (the LAPP team, or one organisation) — their roles and their accounts. Nothing else. */
+body{background:var(--bg);color:var(--tx);font:13.5px/1.5 Inter,Vazirmatn,system-ui,sans-serif;display:grid;grid-template-columns:210px minmax(0,1fr) auto;height:100vh;overflow:hidden}
+#nav{border-inline-end:1px solid var(--ln);background:var(--p1);padding:12px 8px;overflow:auto}
+#nav h6{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--mu2);margin:4px 10px 6px}
+#nav .ct{margin-inline-start:auto;font-size:11px;color:var(--mu2);font-variant-numeric:tabular-nums}
+#mid{display:flex;flex-direction:column;min-width:0}
+.tools{display:flex;gap:8px;align-items:center;padding:14px 16px 10px;border-bottom:1px solid var(--ln);flex-wrap:wrap}
+.tools h2{font-size:17px;width:100%}
+.srch{flex:1;min-width:160px;display:flex;align-items:center;gap:8px;background:var(--p2);border:1px solid var(--ln);border-radius:10px;padding:0 11px;color:var(--mu2)}.srch input{flex:1;background:none;border:0;outline:none;color:var(--tx);font:500 13px Inter,system-ui;padding:8px 0;min-width:0}
+.tools select{background:var(--p2);border:1px solid var(--ln);border-radius:10px;color:var(--tx);padding:7px 10px;font:500 12.5px Inter,system-ui}
+#rows{flex:1;overflow:auto;padding:6px 10px}
+.row{display:grid;grid-template-columns:minmax(0,1fr) auto 96px 80px;gap:12px;align-items:center;width:100%;height:52px;padding:0 10px;border-radius:10px;text-align:start;border:0;background:none;color:inherit;font:inherit;cursor:pointer}
+.row:hover{background:var(--p2)}.row.sel{background:var(--p3)}
+.who{display:flex;align-items:center;gap:10px;min-width:0}.who .t{min-width:0;display:flex;flex-direction:column}.who b{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.who small{font-size:12px;color:var(--mu2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rl{font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--p4);color:var(--mu);white-space:nowrap;text-transform:capitalize}
+.st{font-size:12px;color:var(--mu);display:flex;align-items:center;gap:6px}.st::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--c,var(--gr))}
+.seen{font-size:12px;color:var(--mu2);text-align:end;font-variant-numeric:tabular-nums}
+.none{display:grid;place-items:center;height:180px;color:var(--mu2)}
+#det{width:360px;border-inline-start:1px solid var(--ln);background:var(--p1);display:flex;flex-direction:column;min-height:0}
+#det[hidden]{display:none}
+.dh{padding:18px 18px 0;display:flex;gap:12px;align-items:center}.dh h3{font-size:16px}.dh p{font-size:12.5px;color:var(--mu)}
+.dh .x{margin-inline-start:auto;align-self:flex-start;width:28px;height:28px;border-radius:8px;color:var(--mu);display:grid;place-items:center}.dh .x:hover{background:var(--p3)}
+.dt{display:flex;gap:2px;padding:14px 14px 0;border-bottom:1px solid var(--ln)}.dt button{padding:8px 10px;font-size:12.5px;font-weight:600;color:var(--mu2);border-bottom:2px solid transparent;margin-bottom:-1px}.dt button.on{color:var(--tx);border-color:var(--vi)}
+.dc{flex:1;overflow:auto;padding:14px 18px;display:flex;flex-direction:column;gap:12px}
+.dc .f{display:flex;flex-direction:column;gap:5px}.dc label{font-size:11.5px;color:var(--mu2);font-weight:600}
+.ro{padding:8px 10px;border-radius:9px;background:var(--p2);color:var(--mu)}
+.ss{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--ln);border-radius:10px}.ss .t{flex:1;display:flex;flex-direction:column}.ss small{color:var(--mu2)}
+.dz{display:flex;gap:8px;flex-wrap:wrap;padding:12px 18px;border-top:1px solid var(--ln)}
+@media (max-width:1100px){body{grid-template-columns:190px minmax(0,1fr)}#det{position:fixed;top:10px;bottom:10px;inset-inline-end:10px;width:min(360px,calc(100% - 20px));border:1px solid var(--ln);border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.6);z-index:5}}
+@media (max-width:760px){.row{grid-template-columns:minmax(0,1fr) auto}.row .st,.row .seen{display:none}}
+@media (max-width:600px){body{grid-template-columns:minmax(0,1fr)}#nav{display:none}}
+</style></head><body>
+<nav id="nav" class="k-nav" aria-label="Roles"></nav>
+<section id="mid"><div class="tools"><h2 id="ttl"></h2><label class="srch">⌕<input id="q" placeholder="Search" autocomplete="off" aria-label="Search"></label>
+  <select id="st" aria-label="Status"><option value="">All statuses</option><option>Active</option><option>Unverified</option><option>Disabled</option></select>
+  <button class="b pr" id="add"></button></div>
+  <div id="rows" role="list"></div></section>
+<aside id="det" hidden></aside>
+<script>
+"use strict";
+const { $, $$, esc: E, I } = K;
+// the root: the LAPP team, or one organisation (?org=slug)
+const ORG = new URLSearchParams(location.search).get("org") || "";
+const ROLES = ORG ? ["admin", "teacher", "finance", "student"] : ["admin", "manager", "designer"];
+const S = { list: [], role: "", q: "", st: "", sel: null, tab: "profile", me: null, org: null, sessions: null };
+const api = (m, p, b) => K.api(m, (ORG ? `/org/${ORG}` : "/admin") + p, b);
+const statusOf = u => ORG ? (u.active ? (u.verified || u.managed ? "Active" : "Unverified") : "Disabled") : (u.disabled ? "Disabled" : u.verified ? "Active" : "Unverified");
+const COL = { Active: "var(--gr)", Unverified: "var(--cy)", Disabled: "var(--rd)" };
+
+async function load() {
+  const me = await K.api("GET", "/me"); S.me = me.user; S.org = ORG ? (me.orgs || []).find(o => o.slug === ORG) : null;
+  const r = ORG ? (await api("GET", "/members")).members : (await api("GET", "/users?filter=staff")).users;
+  S.list = r.map(u => ({ ...u, status: statusOf(u) })).filter(u => !ORG || true);
+  if (S.sel && !S.list.some(u => u.id === S.sel)) S.sel = null;
+  draw();
+}
+const canManage = () => ORG ? (S.org && S.org.role === "admin") : S.me && S.me.role === "admin";
+function shown() { const q = S.q.toLowerCase(); return S.list.filter(u => (!S.role || u.role === S.role) && (!S.st || u.status === S.st) && (!q || [u.name, u.username, u.email].join(" ").toLowerCase().includes(q))); }
+
+function draw() {
+  const n = r => S.list.filter(u => !r || u.role === r).length;
+  $("#nav").innerHTML = `<h6>${E(ORG ? (S.org ? S.org.name : ORG) : "LAPP team")}</h6>` + [["", "Everyone"], ...ROLES.map(r => [r, r[0].toUpperCase() + r.slice(1)])]
+    .map(([r, l]) => `<button class="${S.role === r ? "on" : ""}" data-role="${r}">${I(r ? "person" : "users", 16)}<span>${E(l)}</span><span class="ct">${n(r)}</span></button>`).join("");
+  $("#ttl").textContent = S.role ? S.role[0].toUpperCase() + S.role.slice(1) : ORG ? (S.org ? S.org.name : ORG) : "LAPP team";
+  $("#add").innerHTML = `${I("plus", 15)} ${ORG ? "Add" : "Invite"}`; $("#add").hidden = !canManage();
+  const L = shown();
+  $("#rows").innerHTML = L.map(u => `<button class="row ${u.id === S.sel ? "sel" : ""}" data-u="${u.id}" role="listitem">
+      <span class="who">${K.avatar(u, 32)}<span class="t"><b>${E(u.name || "@" + u.username)}</b><small>${E(u.email || "@" + u.username)}</small></span></span>
+      <span class="rl">${E(u.role)}</span><span class="st" style="--c:${COL[u.status]}">${E(u.status)}</span><span class="seen">${E(K.ago(u.last_seen))}</span></button>`).join("")
+    || `<div class="none">${I("users", 34)}</div>`;
+  drawDet();
+}
+
+function drawDet() {
+  const d = $("#det"), u = S.list.find(x => x.id === S.sel);
+  if (!u) { d.hidden = true; return; }
+  d.hidden = false;
+  const own = S.me && u.id === S.me.id, can = canManage() && !own, tabs = ["profile", "access", ...(ORG ? [] : ["devices"])];
+  let body = "";
+  if (S.tab === "profile") body = `
+    <div class="f"><label for="nm">Name</label><input class="in" id="nm" value="${E(u.name || "")}" ${can ? "" : "disabled"}></div>
+    <div class="f"><label>Username</label><div class="ro">@${E(u.username)}</div></div>
+    ${u.email ? `<div class="f"><label>E-mail</label><div class="ro">${E(u.email)}</div></div>` : ""}
+    ${ORG && (u.classes || u.teaches) ? `<div class="f"><label>Classes</label><div class="ro">${E(u.teaches || u.classes)}</div></div>` : ""}
+    <div class="f"><label>Since</label><div class="ro">${E(K.date(u.created_at) || "—")}</div></div>
+    ${can ? `<button class="b" id="saveNm">Save</button>` : ""}`;
+  if (S.tab === "access") body = `<div class="f"><label for="role">Role</label><select class="in" id="role" ${can ? "" : "disabled"}>${ROLES.map(r => `<option value="${r}" ${u.role === r ? "selected" : ""}>${r[0].toUpperCase() + r.slice(1)}</option>`).join("")}${!ORG ? `<option value="user">Not in the team</option>` : ""}</select></div>`;
+  if (S.tab === "devices") body = S.sessions == null ? `<div class="ro">…</div>` : S.sessions.length ? S.sessions.map(s => `<div class="ss">${I(/Mobile|iPhone|Android/.test(s.ua) ? "screen" : "desktop", 18)}<span class="t"><b>${E(uaName(s.ua))}</b><small>${E(K.ago(s.created_at))}</small></span></div>`).join("") : `<div class="ro">—</div>`;
+  d.innerHTML = `<div class="dh">${K.avatar(u, 52)}<div><h3>${E(u.name || "@" + u.username)}</h3><p>${E(u.role)} · ${E(u.status)}</p></div><button class="x" data-close aria-label="Close">${I("x", 15)}</button></div>
+    <div class="dt">${tabs.map(t => `<button class="${S.tab === t ? "on" : ""}" data-tab="${t}">${E(t[0].toUpperCase() + t.slice(1))}</button>`).join("")}</div>
+    <div class="dc">${body}</div>
+    ${can ? `<div class="dz">${ORG ? (u.managed ? `<button class="b" data-act="pw">Set password</button>` : "") : `<button class="b" data-act="reset">Reset password</button><button class="b" data-act="out">Sign out everywhere</button>`}
+      <button class="b ${u.status === "Disabled" ? "" : "d"}" data-act="toggle">${u.status === "Disabled" ? "Enable" : "Disable"}</button>${ORG ? `<button class="b d" data-act="remove">Remove</button>` : ""}</div>` : ""}`;
+  if (S.tab === "devices" && S.sessions == null) api("GET", `/users/${u.id}/sessions`).then(r => { S.sessions = r.sessions; drawDet(); }).catch(() => { S.sessions = []; drawDet(); });
+}
+const uaName = ua => { ua = ua || ""; const b = /Edg\//.test(ua) ? "Edge" : /Chrome\//.test(ua) ? "Chrome" : /Firefox\//.test(ua) ? "Firefox" : /Safari\//.test(ua) ? "Safari" : "Browser"; const o = /iPhone|iPad/.test(ua) ? "iOS" : /Android/.test(ua) ? "Android" : /Mac OS/.test(ua) ? "macOS" : /Windows/.test(ua) ? "Windows" : /Linux/.test(ua) ? "Linux" : ""; return b + (o ? " · " + o : ""); };
+
+/* ---------- actions ---------- */
+const patch = async (u, b, msg) => { try { await api("PATCH", ORG ? `/members/${u.id}` : `/users/${u.id}`, b); K.toast(msg || "Saved", { kind: "ok" }); await load(); } catch (x) { K.toast(x.message, { kind: "err" }); } };
+async function act(a, u) {
+  if (a === "toggle") { const off = u.status !== "Disabled"; if (off && !await K.confirm({ title: `Disable ${u.name || "@" + u.username}?`, ok: "Disable", danger: true })) return; return patch(u, ORG ? { active: !off } : { disabled: off }, off ? "Disabled" : "Enabled"); }
+  if (a === "reset") { try { await api("POST", `/users/${u.id}/reset`); K.toast("Reset link sent", { kind: "ok" }); } catch (x) { K.toast(x.message, { kind: "err" }); } return; }
+  if (a === "out") { if (!await K.confirm({ title: "Sign out of every device?", ok: "Sign out", danger: true })) return; try { await api("DELETE", `/users/${u.id}/sessions`); S.sessions = null; K.toast("Signed out everywhere", { kind: "ok" }); drawDet(); } catch (x) { K.toast(x.message, { kind: "err" }); } return; }
+  if (a === "pw") { const v = await K.ask({ title: "New password", type: "password", validate: v => v.length < 8 ? "At least 8 characters" : "" }); if (v) patch(u, { password: v }, "Password set"); return; }
+  if (a === "remove") { if (!await K.confirm({ title: `Remove ${u.name || "@" + u.username}?`, ok: "Remove", danger: true })) return; try { await api("DELETE", `/members/${u.id}`); S.sel = null; K.toast("Removed", { kind: "ok" }); await load(); } catch (x) { K.toast(x.message, { kind: "err" }); } }
+}
+async function add() {
+  const roles = ROLES.map(r => ({ value: r, label: r[0].toUpperCase() + r.slice(1) }));
+  if (ORG) return K.form("Add a person", [{ name: "name", label: "Name" }, { name: "email", label: "E-mail", type: "email", ph: "or leave empty and give a username" }, { name: "username", label: "Username" }, { name: "password", label: "Password", type: "password" }, { name: "role", label: "Role", type: "select", options: roles, value: "student" }],
+    async v => { const r = await api("POST", "/members", v.email ? { email: v.email, name: v.name, role: v.role } : { username: v.username, password: v.password, name: v.name, role: v.role }); if (r.failed && r.failed.length) throw new Error(r.failed[0].error); await load(); }, "Add");
+  return K.form("Invite to the team", [{ name: "name", label: "Name" }, { name: "email", label: "E-mail", type: "email", required: true }, { name: "username", label: "Username", required: true }, { name: "role", label: "Role", type: "select", options: roles, value: "designer" }],
+    async v => { await api("POST", "/users", v); K.toast("Invitation sent", { kind: "ok" }); await load(); }, "Invite");
+}
+
+/* ---------- wiring ---------- */
+document.addEventListener("click", e => {
+  const t = e.target;
+  const r = t.closest("[data-role]"); if (r) { S.role = r.dataset.role; return draw(); }
+  const row = t.closest("[data-u]"); if (row) { S.sel = +row.dataset.u; S.tab = "profile"; S.sessions = null; return draw(); }
+  if (t.closest("[data-close]")) { S.sel = null; return draw(); }
+  const tb = t.closest("[data-tab]"); if (tb) { S.tab = tb.dataset.tab; return drawDet(); }
+  const u = S.list.find(x => x.id === S.sel);
+  const a = t.closest("[data-act]"); if (a && u) return act(a.dataset.act, u);
+  if (t.closest("#saveNm") && u) return patch(u, { name: $("#nm").value.trim() });
+  if (t.closest("#add")) return add();
+});
+document.addEventListener("change", e => {
+  if (e.target.id === "st") { S.st = e.target.value; return draw(); }
+  if (e.target.id === "role") { const u = S.list.find(x => x.id === S.sel); if (u) patch(u, { role: e.target.value }, "Role changed"); }
+});
+$("#q").oninput = e => { S.q = e.target.value; draw(); };
+// right-click a person: the same actions
+K.ctx(t => { const row = t.closest && t.closest("#rows [data-u]"); if (!row) return null; const u = S.list.find(x => x.id === +row.dataset.u); if (!u || !canManage() || (S.me && u.id === S.me.id)) return null; S.sel = u.id; draw();
+  return [...(ORG ? (u.managed ? [{ label: "Set password", icon: "lock", run: () => act("pw", u) }] : []) : [{ label: "Reset password", icon: "lock", run: () => act("reset", u) }, { label: "Sign out everywhere", icon: "log-out", run: () => act("out", u) }]),
+    { label: u.status === "Disabled" ? "Enable" : "Disable", icon: "x", danger: u.status !== "Disabled", run: () => act("toggle", u) }, ...(ORG ? [{ label: "Remove", icon: "trash", danger: true, run: () => act("remove", u) }] : [])]; });
+load().catch(x => { $("#rows").innerHTML = `<div class="none">${E(x.message)}</div>`; });
+</script>
+</body></html>

@@ -27,7 +27,7 @@
       const push = x => A.push({ ...x, id: x.id + sx, url: withAs(x.url, n), as: n });
       if (!n || lapp || designer) W.push({ key: "me" + sx, name: lapp ? "LAPP" : n ? acct.name : "My work", color: "#8B5CF6", as: n });
       if (lapp) {
-        push({ id: "admin:users", title: "Users", icon: "users", url: "/admin#users", ws: "me" + sx });
+        push({ id: "users", title: "Users", icon: "users", url: "/users", ws: "me" + sx });
         if (r === "admin") push({ id: "admin:ai", title: "AI", icon: "bot", url: "/admin#ai", ws: "me" + sx });
         push({ id: "studio:library", title: "Lesson library", icon: "library", url: "/admin#content", ws: "me" + sx, studio: "" });
       }
@@ -42,7 +42,7 @@
       (ac.orgs || []).filter(o => SCHOOL_APPS[o.role]).forEach(o => {
         const ws = "s:" + o.slug + sx, color = COLORS[(W.length - 1 + COLORS.length) % COLORS.length];
         W.push({ key: ws, name: n ? `${o.name} · ${o.role}` : o.name, color, role: o.role, as: n });
-        SCHOOL_APPS[o.role].forEach(([k, ic, l]) => push({ id: `s:${o.slug}:${k}`, title: l, icon: ic, url: `/s/${o.slug}#${k}`, ws }));
+        SCHOOL_APPS[o.role].forEach(([k, ic, l]) => push(k === "people" && o.role === "admin" ? { id: `users@${o.slug}`, title: "Users", icon: "users", url: `/users?org=${o.slug}`, ws } : { id: `s:${o.slug}:${k}`, title: l, icon: ic, url: `/s/${o.slug}#${k}`, ws }));
         if (["admin", "teacher"].includes(o.role)) {
           push({ id: `studio:library@${o.slug}`, title: "Lesson library", icon: "library", url: `/s/${o.slug}#lessons`, ws, studio: o.slug });
           push({ id: `studio:home@${o.slug}`, title: "Studio", icon: "video", url: `/studio?org=${o.slug}#home`, ws, studio: o.slug });
@@ -68,6 +68,7 @@
     if (p.startsWith("/studio")) { const org = u.searchParams.get("org"); return `studio:${h || "home"}${org ? "@" + org : ""}`; }
     if (p.startsWith("/files")) { const org = u.searchParams.get("org"); return "files" + (org ? "@" + org : ""); }
     if (p.startsWith("/settings")) return "settings";
+    if (p.startsWith("/users")) { const org = u.searchParams.get("org"); return "users" + (org ? "@" + org : ""); }
     if (p.startsWith("/admin")) return "admin:" + (h || "dash");
     const m = p.match(/^\/s\/([^/]+)/); if (m) return `s:${m[1]}:${h || "overview"}`;
     return p;
@@ -78,7 +79,7 @@
     // a school the person works in has its own workspace; any other school (e.g. LAPP admins opening one) opens where they are
     const m = p.match(/^\/s\/([^/]+)/); if (m) return D.WS.some(w => w.key === "s:" + m[1]) ? "s:" + m[1] : D.CUR;
     const org = u.searchParams.get("org"); if (org && D.WS.some(w => w.key === "s:" + org)) return "s:" + org;
-    if (p.startsWith("/admin") || p.startsWith("/studio") || p.startsWith("/files")) return "me";
+    if (p.startsWith("/admin") || p.startsWith("/studio") || p.startsWith("/files") || p.startsWith("/users")) return "me";
     if (p.startsWith("/settings")) return D.CUR;
     return D.CUR;
   };
