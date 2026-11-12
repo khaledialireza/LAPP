@@ -60,6 +60,17 @@ Then:
   - Lesson rows lose the 3 buttons: ↵ opens the script; → (or hover) opens an action panel (Script, Voice, Insights, pin, share, ask AI) — the same action panel for every item type.
   - Footer: only "↵ open · → actions · Tab ask AI"; settings and shortcuts go to the avatar menu / a small ⚙ in the search bar.
 
+## Two kinds of users: roots and their members (approved 2026-11-12; replaces the three groups below)
+- A root user owns an independent space: a company (like LAPP), a school, a clinic, or one person on their own.
+- A member works under one root. The root creates and manages its members in its own Users app.
+- A root sees only its own members. The platform owner is just one more root.
+- The root defines what it is, in its profile, by itself: the system suggests no type, no roles and no apps.
+- App store: every app lives in one store. The root installs the apps it needs and decides which of its members
+  (or roles it made) may use each one. Users, Files, Settings and the App Store are always there.
+- LAPP is one root that installed the language studio apps.
+- Open: does a member account belong to exactly one root (someone working for two roots has two accounts, opened
+  side by side as linked accounts)?
+
 ## The platform gets its own name: KX5 (approved 2026-11-12, temporary)
 - The management system is no longer "LAPP": it is a standalone platform (an OS for organisations). Its temporary
   name is KX5 (short for KixVix); the domain for now is kixvix.com (we already own it). Candidates for the final
@@ -86,7 +97,7 @@ Then:
 - Plans and subscriptions are not accounting: a simple subscriptions app tracks packages, plans and simple money
   actions. Accounting is a separate app one installs; it connects to the data it needs.
 
-## Users app: people, roles and permissions only (approved 2026-11-11)
+## Users app: people, roles and permissions only (approved 2026-11-11; its three groups are replaced by roots and members)
 - Nothing about money in it: plans, subscriptions, invoices and payments live in the finance app.
 - It works by context: in the LAPP workspace it manages the platform; inside an organisation, that organisation's people.
 - Three groups, at most 3 levels, shown as a tree beside the list:
