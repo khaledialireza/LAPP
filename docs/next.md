@@ -68,6 +68,10 @@ Then:
 - App store: every app lives in one store. The root installs the apps it needs and decides which of its members
   (or roles it made) may use each one. Users, Files, Settings and the App Store are always there.
 - LAPP is one root that installed the language studio apps.
+- The platform owner (us) manages only its own space: it does not know who the other roots are or what they do,
+  until a root grants support access.
+- No app belongs to one kind of root: every app is in the store, and any root may install it. So we install and
+  test every app (teacher apps, school apps, …) in our own root while we build them.
 - Open: does a member account belong to exactly one root (someone working for two roots has two accounts, opened
   side by side as linked accounts)?
 
