@@ -25,6 +25,8 @@
 .dv-sep{height:1px;background:var(--ln);margin:6px 2px}
 .dv-files{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;min-height:120px}
 .dv-f{background:var(--p3);border:1px solid var(--ln);border-radius:13px;padding:9px;display:flex;flex-direction:column;gap:5px;text-align:start;cursor:default;user-select:none;position:relative}
+.dv-box{position:fixed;display:none;z-index:50;border:1px solid rgba(139,92,246,.9);background:rgba(139,92,246,.15);border-radius:4px;pointer-events:none}
+.dv-files{user-select:none}
 .dv-f:hover{border-color:var(--ln2)}.dv-f.sel{border-color:rgba(139,92,246,.85);box-shadow:0 0 0 2px rgba(139,92,246,.3)}
 .dv-f.drop{outline:2px dashed var(--cy)}.dv-f.drag{opacity:.4}
 .dv-f .ic{height:62px;border-radius:9px;display:grid;place-items:center;font-size:26px;background:var(--p2);position:relative}
@@ -101,7 +103,7 @@
     const { folders, lessons } = shown();
     const ideas = S.ideas.map((x, i) => `<div class="dv-f idea" data-dv-idea="${i}"><div class="ic">✦</div><b class="de">${esc(x.title)}</b><small>${esc(x.level)} · ${esc(TOPIC[x.topic] || "")}</small><div style="display:flex;gap:4px"><button class="b sm pr" data-dv-make="${i}">Create</button><button class="b sm" data-dv-skip="${i}" aria-label="Dismiss">✕</button></div></div>`).join("");
     const head = S.cur === "bin" ? `Bin · kept ${D.binDays} days` : inSmart() ? smart[S.cur][1] : S.q ? "Search results" : (F(S.cur) ? F(S.cur).name : "All content");
-    return `<h3>${esc(head)} · ${folders.length + lessons.length} <span style="margin-inline-start:auto;text-transform:none;letter-spacing:0;font-weight:500;color:var(--mu2)">${S.cur === "bin" ? "right-click to restore" : "drag onto a folder to move · Ctrl/Shift to select several"}</span></h3>
+    return `<h3>${esc(head)} · ${folders.length + lessons.length}</h3>
       ${S.ideas.length ? `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span class="mu">✦ ${S.ideas.length} ideas${S.series ? " · " + esc(S.series) : ""}</span><button class="b sm pr" data-dv-make="all">Create all</button><button class="b sm" data-dv-skip="all">Dismiss</button></div>` : ""}
       <div class="dv-files" data-dv-area>${ideas}${folders.map(folderCard).join("")}${lessons.map(fileCard).join("") || (folders.length || ideas ? "" : `<div class="dv-empty">${S.cur === "bin" ? "The bin is empty." : "Empty. Make a lesson or a folder, or drag lessons here."}</div>`)}</div>`;
   }
@@ -222,7 +224,7 @@
       const sk = t.closest("[data-dv-skip]"); if (sk) { S.ideas = sk.dataset.dvSkip === "all" ? [] : S.ideas.filter((_, i) => i !== +sk.dataset.dvSkip); return C.refresh(); }
       const l = t.closest("[data-dv-l]"); if (l) return select("l" + l.dataset.dvL, e);
       const f = t.closest("[data-dv-f]"); if (f) return select("f" + f.dataset.dvF, e);
-      if (t.closest("[data-dv-area]") && S.sel.size) { S.sel.clear(); C.refresh(); }
+      // (a click on empty space clears the selection in the box code below; a box drag ends in a click that must not)
     });
     document.addEventListener("dblclick", e => {
       if (!inDrive(e)) return;
@@ -254,7 +256,31 @@
       catch (x) { Shell.toast(x.message, { kind: "err" }); }
       S.busy = false; C.refresh();
     });
+    const cards = () => [...document.querySelectorAll("[data-dv-main] [data-dv-l], [data-dv-main] [data-dv-f]")];
+    const keyOf = x => x.dataset.dvL ? "l" + x.dataset.dvL : "f" + x.dataset.dvF;
+    // drag on an empty part of the files to draw a box: what it touches is selected (Ctrl / Shift adds to it)
+    document.addEventListener("pointerdown", e => {
+      const area = e.target.closest && e.target.closest("[data-dv-area]");
+      if (!area || e.button !== 0 || e.target.closest("[data-dv-l], [data-dv-f], button, a, input, l-select")) return;
+      const add = e.ctrlKey || e.metaKey || e.shiftKey, base = add ? new Set(S.sel) : new Set(), x0 = e.clientX, y0 = e.clientY;
+      const box = document.createElement("div"); box.className = "dv-box"; document.body.append(box);
+      let moved = false;
+      const mv = ev => {
+        const x1 = Math.min(x0, ev.clientX), y1 = Math.min(y0, ev.clientY), x2 = Math.max(x0, ev.clientX), y2 = Math.max(y0, ev.clientY);
+        if (!moved && x2 - x1 < 4 && y2 - y1 < 4) return; moved = true; ev.preventDefault();
+        Object.assign(box.style, { left: x1 + "px", top: y1 + "px", width: x2 - x1 + "px", height: y2 - y1 + "px", display: "block" });
+        S.sel = new Set(base);
+        cards().forEach(c => { const r = c.getBoundingClientRect(), hit = r.left < x2 && r.right > x1 && r.top < y2 && r.bottom > y1; if (hit) S.sel.add(keyOf(c)); c.classList.toggle("sel", S.sel.has(keyOf(c))); });
+      };
+      const up = () => { removeEventListener("pointermove", mv); removeEventListener("pointerup", up); box.remove();
+        if (!moved && !add) S.sel.clear();   // a click on empty space: nothing selected
+        C.refresh(); };
+      addEventListener("pointermove", mv); addEventListener("pointerup", up);
+    });
     document.addEventListener("keydown", e => {
+      // Ctrl/Cmd + A: everything in the open folder
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "a" && document.querySelector("[data-dv-area]") && !e.target.closest("input, textarea, select, [contenteditable]")) {
+        e.preventDefault(); S.sel = new Set(cards().map(keyOf)); return C.refresh(); }
       if (!document.querySelector(".dv") || e.target.closest("input, textarea, select") || !S.sel.size) return;
       if (!document.querySelector(".dv").offsetParent) return;
       if (e.key === "Delete" || e.key === "Backspace") { if (lessonIds().length && S.cur !== "bin") { e.preventDefault(); run("bin"); } }
