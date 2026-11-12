@@ -60,9 +60,10 @@ Then:
   - Lesson rows lose the 3 buttons: ↵ opens the script; → (or hover) opens an action panel (Script, Voice, Insights, pin, share, ask AI) — the same action panel for every item type.
   - Footer: only "↵ open · → actions · Tab ask AI"; settings and shortcuts go to the avatar menu / a small ⚙ in the search bar.
 
-## The platform gets its own name: KixVix (approved 2026-11-12, for now)
-- The management system is no longer "LAPP": it is a standalone platform (an OS for organisations), named KixVix
-  for now, on kixvix.com (a domain we already own). The name may change later, so it must live in one setting,
+## The platform gets its own name: KX5 (approved 2026-11-12, temporary)
+- The management system is no longer "LAPP": it is a standalone platform (an OS for organisations). Its temporary
+  name is KX5 (short for KixVix); the domain for now is kixvix.com (we already own it). Candidates for the final
+  name: KixVix, Askr (Old Norse: the ash tree, the first man; domain idea askros.app). The name may change later, so it must live in one setting,
   never hard-coded.
 - LAPP becomes one organisation on the platform (a language-learning company) with its own apps
   (Lesson library, Studio, Characters, the learner site at lapp.khaledi.eu) — not part of the platform's admin.
