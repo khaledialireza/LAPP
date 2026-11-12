@@ -4,7 +4,7 @@
 // ${…} inside a text becomes {a}, {b}… so the translation can move the values around.
 const fs = require("fs"), path = require("path");
 const ROOT = path.join(__dirname, "..");
-const FILES = ["ui/kit.js", "ui/menu.js", "ui/desk/lock.js", "worker/src/admin.html", "worker/src/studio.html", "worker/src/school.html", "ui/lapp-ui.js", "ui/shell.js", "ui/drive.js", "worker/src/manage.html", "worker/src/files.html", "worker/src/settings.html", "worker/src/users.html", "worker/src/store.html", "worker/src/customers.html", "ui/desk/core.js", "ui/desk/apps.js", "ui/desk/windows.js", "ui/desk/taskbar.js", "ui/desk/command.js", "ui/desk/desktop.js", "ui/desk/system.js", "ui/desk/main.js", "ui/studio-menu.js", "ui/studio-lesson.js", "ui/studio-script.js", "ui/studio-voice.js"];
+const FILES = ["ui/kit.js", "ui/menu.js", "ui/desk/lock.js", "worker/src/admin.html", "worker/src/studio.html", "worker/src/school.html", "ui/lapp-ui.js", "ui/shell.js", "ui/drive.js", "worker/src/manage.html", "worker/src/files.html", "worker/src/settings.html", "ui/ai-settings.js", "worker/src/users.html", "worker/src/store.html", "worker/src/customers.html", "ui/desk/core.js", "ui/desk/apps.js", "ui/desk/windows.js", "ui/desk/taskbar.js", "ui/desk/command.js", "ui/desk/desktop.js", "ui/desk/system.js", "ui/desk/main.js", "ui/studio-menu.js", "ui/studio-lesson.js", "ui/studio-script.js", "ui/studio-voice.js"];
 const out = new Set();
 
 // a template string with ${…} → text with {a} {b} holes (nested braces are skipped over)

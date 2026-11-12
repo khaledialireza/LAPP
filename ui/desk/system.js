@@ -36,7 +36,6 @@
   const HELP = {
     "admin:dash": "LAPP at a glance: users, Plus, sign-ups and schools.",
     "users": "The people of this workspace: their roles and their accounts.",
-    "admin:ai": "Which AI does which job, keys and usage.",
     "admin:content": "The lesson library: folders with rules (level, access, approval), the curriculum map, the board and AI ideas. New lessons start here.",
     "studio:home": "The studio's start: lessons in work, what needs you, plans with the AI.",
     "studio:script": "Write and edit the lines. Right-click a line or a word for every action: AI rewrites, translation, speaker, voice, structure.",

@@ -30,7 +30,6 @@
       if (!n || lapp || designer) W.push({ key: "me" + sx, name: lapp ? "LAPP" : n ? acct.name : "My work", color: "#8B5CF6", as: n });
       if (lapp) {
         push({ id: "users", title: "Users", icon: "users", url: "/users", ws: "me" + sx });
-        if (r === "admin") push({ id: "admin:ai", title: "AI", icon: "bot", url: "/admin#ai", ws: "me" + sx });
         push({ id: "studio:library", title: "Lesson library", icon: "library", url: "/admin#content", ws: "me" + sx, studio: "" });
       }
       if (lapp || designer) {

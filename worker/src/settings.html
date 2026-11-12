@@ -13,19 +13,19 @@ h2{font-size:18px;margin-bottom:4px}.sub{color:var(--mu);margin-bottom:16px}
 .th{border-radius:12px;border:2px solid var(--ln);padding:8px;text-align:start;display:flex;flex-direction:column;gap:6px}.th.on{border-color:var(--vi)}
 .th .pv{height:70px;border-radius:8px;position:relative;overflow:hidden}.th .pv i{position:absolute;inset:12px 30px 12px 12px;border-radius:6px}.th .pv em{position:absolute;bottom:6px;left:6px;right:6px;height:8px;border-radius:4px}
 .dots{display:flex;gap:8px;flex-wrap:wrap}.dot{width:30px;height:30px;border-radius:50%;border:2px solid transparent;display:grid;place-items:center;color:#fff}.dot.on{border-color:var(--tx)}
-</style></head><body>
+</style><script src="/ui/ai-settings.js?v={{V}}" defer></script></head><body>
 <nav id="nav" class="k-nav" aria-label="Settings"></nav>
 <main id="main"><div class="top" data-chrome><h1>Settings</h1></div></main>
 <script>
 "use strict";
 const { $, $$, esc: E, I, LS, MAC } = K, keyName = K.keyLabel;
 const tell = (key, value) => LAPPFrame.up({ t: "settings", key, value });   // the desktop applies it to every window and saves it
-const PARTS = [["you", "user", "You"], ["look", "palette", "Look & theme"], ["desk", "desktop", "Desktop"], ["cc", "grid", "Command center"], ["studio", "video", "Studio"], ["keys", "keyboard", "Keyboard"], ["notes", "bell", "Notifications"], ["about", "info", "About"]];
+const PARTS = [["you", "user", "You"], ["look", "palette", "Look & theme"], ["desk", "desktop", "Desktop"], ["cc", "grid", "Command center"], ["studio", "video", "Studio"], ["keys", "keyboard", "Keyboard"], ["notes", "bell", "Notifications"], ["ai", "ai", "AI"], ["about", "info", "About"]];
 const THEMES = window.LAPPThemes || {};
 let ME = null, part = location.hash.slice(1) || "you";
 async function load() { ME = (await K.api("GET", "/me")).user; draw(); }
 function draw() {
-  $("#nav").innerHTML = PARTS.map(([k, ic, l]) => `<button class="${part === k ? "on" : ""}" data-p="${k}">${I(ic)}<span>${E(l)}</span></button>`).join("");
+  $("#nav").innerHTML = PARTS.filter(p => p[0] !== "ai" || (ME && ME.role === "admin")).map(([k, ic, l]) => `<button class="${part === k ? "on" : ""}" data-p="${k}">${I(ic)}<span>${E(l)}</span></button>`).join("");
   const th = LS.get("lapp.theme", {}), T = th.theme || "aurora", A = th.accent || "#8B5CF6";
   const sw = (id, on) => `<button class="sw ${on ? "on" : ""}" data-sw="${id}" role="switch" aria-checked="${!!on}"></button>`;
   let h = "";
@@ -64,8 +64,10 @@ function draw() {
     <div class="opt"><div><b>Tiles</b></div>${seg("tiles", C.tiles, [["calm", "Calm"], ["colour", "Colour"]])}</div>
     <div class="opt"><div><b>Cut · Copy · Paste row in every right-click</b></div>${sw("ctxSys", th.ctxSys !== false)}</div>
     <div class="opt"><div><b>Line bar</b></div>${sw("ribbon", !LS.get("lapp.ribbon.off", false))}</div></div>`; }
+  if (part === "ai") h = `<h2>AI</h2><div id="aiBox"></div>`;
   if (part === "about") h = `<h2>About</h2><div class="card rows"><div class="opt"><div><b>LAPP work desktop</b><small>Icons: Lucide (ISC licence)</small></div></div></div>`;
   $("#main").innerHTML = `<div class="top" data-chrome><h1>Settings</h1></div>` + h;
+  if (part === "ai" && window.AISettings) AISettings.mount($("#aiBox"));
   LAPPFrame.sync();
 }
 if (window.LAPPFrame) LAPPFrame.menus = () => [{ label: "Go", items: PARTS.map(([k, ic, l]) => ({ label: l, icon: ic, on: part === k, run: () => { part = k; draw(); } })) }];
