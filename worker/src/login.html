@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en"><head><!--LAPP:HEAD-->
+<title>Sign in · {{BRAND}}</title>
+<style>
+/* KX5's own sign-in: e-mail or username first, then the password. Nothing of the learner site. */
+html,body{height:100%}
+body{margin:0;background:radial-gradient(900px 600px at 15% 10%,rgba(139,92,246,.28),transparent 60%),radial-gradient(800px 600px at 90% 90%,rgba(34,211,238,.18),transparent 60%),var(--bg);color:var(--tx);font:14px/1.5 Inter,Vazirmatn,system-ui,sans-serif;display:grid;place-items:center;padding:16px;box-sizing:border-box}
+.card{width:100%;max-width:380px;background:color-mix(in srgb,var(--p1) 88%,transparent);backdrop-filter:blur(24px);border:1px solid var(--ln);border-radius:22px;padding:30px 26px 24px;box-shadow:0 30px 90px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:14px}
+.mark{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:6px}.mark img{width:60px;height:60px;border-radius:17px;box-shadow:0 16px 40px rgba(139,92,246,.4)}.mark b{font-size:20px;letter-spacing:.02em}
+.in{width:100%;box-sizing:border-box;font-size:15px;padding:12px 14px}
+.go{width:100%;padding:12px;font-size:15px}
+.who{display:flex;justify-content:space-between;align-items:center;width:100%;background:var(--p2);border:1px solid var(--ln);border-radius:12px;padding:10px 14px;color:var(--tx);font:600 14px Inter,system-ui;cursor:pointer;box-sizing:border-box}.who small{color:var(--mu2);font-weight:500}
+.err{color:var(--rd);font-size:13px;min-height:18px;text-align:center}
+.lnk{background:none;border:0;color:var(--mu);font:500 13px Inter,system-ui;cursor:pointer;align-self:center}.lnk:hover{color:var(--tx)}
+.foot{display:flex;justify-content:center;gap:12px;margin-top:4px}
+</style></head><body>
+<form class="card" id="f" autocomplete="on">
+  <div class="mark"><img src="/ui/kx5.svg?v={{V}}" alt=""><b>{{BRAND}}</b></div>
+  <div id="step"></div>
+  <div class="err" id="err" role="alert"></div>
+  <div class="foot" id="foot"></div>
+</form>
+<script>
+"use strict";
+const { $, esc: E } = K;
+const call = K.apiAt("/api", { signin: false });
+const NEXT = (() => { const n = new URLSearchParams(location.search).get("next") || ""; return /^\/(manage|admin|studio|s\/|files|settings|users|store|customers)/.test(n) ? n : "/manage"; })();
+const S = { step: "id", id: "", busy: false };
+function draw() {
+  $("#step").innerHTML = S.step === "id"
+    ? `<input class="in" id="id" name="username" autocomplete="username" placeholder="E-mail or username" value="${E(S.id)}" autofocus><div style="height:10px"></div><button class="b pr go" ${S.busy ? "disabled" : ""}>Continue</button>`
+    : S.step === "pw"
+    ? `<button type="button" class="who" data-change><span>${E(S.id)}</span><small>Change</small></button><div style="height:10px"></div><input class="in" id="pw" type="password" name="password" autocomplete="current-password" placeholder="Password" autofocus><div style="height:10px"></div><button class="b pr go" ${S.busy ? "disabled" : ""}>${S.busy ? "Signing in…" : "Sign in"}</button>`
+    : `<p style="text-align:center;color:var(--mu)">If ${E(S.id)} has an account, a link to choose a new password is on its way.</p>`;
+  $("#foot").innerHTML = S.step === "pw" ? `<button type="button" class="lnk" data-forgot>Forgot password?</button>` : S.step === "sent" ? `<button type="button" class="lnk" data-change>Back</button>` : "";
+  setTimeout(() => $("#id, #pw")?.focus(), 30);
+}
+$("#f").onsubmit = async e => {
+  e.preventDefault(); $("#err").textContent = "";
+  if (S.step === "id") { S.id = $("#id").value.trim(); if (!S.id) return; S.step = "pw"; return draw(); }
+  if (S.step !== "pw") return;
+  const pw = $("#pw").value; if (!pw) return;
+  S.busy = true; draw();
+  try { await call("POST", "/auth/login", { email: S.id, password: pw }); location.replace(NEXT); }
+  catch (x) { S.busy = false; draw(); $("#err").textContent = x.message || "Could not sign in"; }
+};
+document.addEventListener("click", async e => {
+  if (e.target.closest("[data-change]")) { S.step = "id"; $("#err").textContent = ""; return draw(); }
+  if (e.target.closest("[data-forgot]")) {
+    if (!/@/.test(S.id)) { $("#err").textContent = "Enter your e-mail to get a link"; S.step = "id"; return draw(); }
+    try { await call("POST", "/auth/forgot", { email: S.id }); } catch {}
+    S.step = "sent"; draw();
+  }
+});
+draw();
+</script>
+</body></html>

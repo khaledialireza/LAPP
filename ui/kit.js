@@ -89,6 +89,11 @@
   //   o.keepalive: true → a PUT still arrives when the page closes (small bodies only)
   // the management system's name (set once on the server)
   K.BRAND = (() => { try { return document.querySelector('meta[name="brand"]').content || "KX5"; } catch { return "KX5"; } })();
+  // the management system's mark, drawn at any size (one source: also /ui/kx5.svg for the browser tab)
+  let LOGO_N = 0;
+  K.logo = (size = 32) => { const g = "kxg" + (++LOGO_N); return `<svg class="k-logo" width="${size}" height="${size}" viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="${g}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8B5CF6"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#${g})"/><rect x="8" y="7" width="4.6" height="18" rx="2.3" fill="#fff"/><path d="M15.2 15.6 22.6 7.9" stroke="#fff" stroke-width="4.6" stroke-linecap="round"/><path d="M17.4 17.9 23 24.1" stroke="#fff" stroke-opacity=".7" stroke-width="4.6" stroke-linecap="round"/></svg>`; };
+  // the pages of the management system sign in on its own page (/login); the learner site keeps its own
+  K.isManage = () => K.embed || /^\/(manage|admin|studio|s\/|files|settings|users|store|customers)/.test(location.pathname);
   K.net = { busy: 0, done: 0 };
   // a window of a linked account (?as=n, kept in the frame's name across pages) talks to the server as that account
   K.AS = (() => { try { const n = +(new URLSearchParams(location.search).get("as") || (/^lapp-as(\d)$/.exec(window.name) || [])[1] || 0); if ([1, 2, 3].includes(n)) { window.name = "lapp-as" + n; return n; } } catch {} return 0; })();
@@ -100,7 +105,7 @@
     const r = await fetch(base + path, { method, credentials: "same-origin", headers, body: raw ? raw.body : body ? JSON.stringify(body) : undefined, keepalive: !!o.keepalive && method === "PUT" });
     const ct = r.headers.get("Content-Type") || "", j = /json/.test(ct) || !ct ? await r.json().catch(() => ({})) : {};
     if (r.status === 401 && K.AS) throw Object.assign(new Error("this account is signed out"), { status: 401, code: "auth" });
-    if (r.status === 401 && o.signin !== false) { location.href = `/?login=1&next=${encodeURIComponent(o.next || (K.embed ? "/manage" : location.pathname))}`; throw new Error("signed out"); }
+    if (r.status === 401 && o.signin !== false) { if (K.isManage()) { (K.embed ? top : window).location.href = `/login?next=${encodeURIComponent(K.embed ? "/manage" : o.next || location.pathname)}`; throw new Error("signed out"); } location.href = `/?login=1&next=${encodeURIComponent(o.next || location.pathname)}`; throw new Error("signed out"); }
     if (!r.ok) throw Object.assign(new Error(j.error || r.statusText), j, { status: r.status });
     return j;
   };
@@ -323,7 +328,7 @@
   // a question to the AI of the desktop (from a window: up to the desktop; on the desktop: its own chat)
   K.askAI = text => { if (window.LAPPFrame && LAPPFrame.embed) LAPPFrame.up({ t: "ask", text: String(text).slice(0, 1200) }); else if (window.D && D.ask) D.ask(text); else K.toast(text); };
 
-  K.signOut = () => K.api("POST", "/auth/logout").catch(() => {}).finally(() => { location.href = "/"; });
+  K.signOut = () => K.api("POST", "/auth/logout").catch(() => {}).finally(() => { (K.embed ? top : window).location.href = K.isManage() ? "/login" : "/"; });
 
   /* ---------- pages of the work desktop: opened on their own, they go into it ---------- */
   K.inDesk = () => { if (!K.embed) { location.replace("/manage#open=" + encodeURIComponent(location.pathname + location.search + location.hash)); return false; } return true; };

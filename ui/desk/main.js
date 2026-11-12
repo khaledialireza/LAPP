@@ -71,7 +71,7 @@
     bootTo(10);
     const m = await D.api("GET", "/me");
     bootTo(30);
-    if (!m.user) { location.href = "/?login=1&next=/manage"; return; }
+    if (!m.user) { location.href = "/login"; return; }
     D.ME = m.user; D.ORGS = m.orgs || [];
     D.ACCTS = [{ slot: 0, user: D.ME, orgs: D.ORGS }, ...((await D.api("GET", "/auth/linked").catch(() => ({}))).accounts || [])];
     await D.loadInstalls();

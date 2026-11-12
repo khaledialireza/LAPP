@@ -23,6 +23,7 @@ import FILES from "./files.html";
 import SETTINGS from "./settings.html";
 import USERS from "./users.html";
 import STORE from "./store.html";
+import LOGIN from "./login.html";
 import CARE from "./customers.html";
 import { storeApi, careApi, logAccount, pubId } from "./care.js";
 import { BRAND } from "./brand.js";
@@ -57,6 +58,12 @@ export default {
       if (p === "/admin" || p === "/admin/") return await page(req, env, ADMIN, ["manager", "admin"], "/admin");
       // the one place where everyone who isn't only a learner works: LAPP staff, school admins, teachers, finance
       // the work desktop and the apps that only live in its windows (Files, Settings)
+      // the management system's own sign-in page (KX5); someone already signed in who works here goes straight in
+      if (p === "/login" || p === "/login/") {
+        const u = env.DB ? await currentUser(req, env) : null;
+        if (u && await worksHere(env, u)) return Response.redirect(`${url.origin}/manage`, 302);
+        return new Response(pageHtml(LOGIN), { headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store", "X-Frame-Options": "DENY", ...SECURE } });
+      }
       const desk = DESK_PAGES[p.replace(/\/$/, "")];
       if (desk) return await deskPage(req, env, url, desk);
       // a school's portal: anyone signed in gets the page; the API decides what they may see
@@ -172,7 +179,7 @@ async function me(env, req, u) {
 const DESK_PAGES = { "/manage": [MANAGE, "/manage"], "/files": [FILES, "/files"], "/settings": [SETTINGS, "/settings"], "/users": [USERS, "/users"], "/store": [STORE, "/store"], "/customers": [CARE, "/customers"] };
 async function deskPage(req, env, url, [html, path]) {
   const u = env.DB ? await currentUser(req, env) : null;
-  if (!u) return Response.redirect(`${url.origin}/?login=1&next=/manage`, 302);
+  if (!u) return Response.redirect(`${url.origin}/login`, 302);
   if (!await worksHere(env, u)) return Response.redirect(`${url.origin}/`, 302);
   return await page(req, env, html, ROLES, path);
 }
@@ -603,8 +610,8 @@ async function promote(env, u) {
 /* ================= pages for staff ================= */
 // every page of the panels starts with the same head: the shared kit, the language, icons, theme, pointer,
 // the form controls and the window bridge. One asset version (ASSET_V, set by tools/bump.js) for all of them.
-const ASSET_V = "mwcxpxav";
-const HEAD = `<meta charset="utf-8"><meta name="brand" content="${BRAND.name}" data-letter="${BRAND.letter}"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex">
+const ASSET_V = "mwcxxeww";
+const HEAD = `<meta charset="utf-8"><meta name="brand" content="${BRAND.name}" data-letter="${BRAND.letter}"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex"><link rel="icon" href="/ui/kx5.svg?v=${ASSET_V}" type="image/svg+xml">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/ui/kit.css?v=${ASSET_V}">
 ${["kit", "menu", "panel-i18n", "icons", "theme", "cursor", "lapp-ui", "frame"].map(f => `<script src="/ui/${f}.js?v=${ASSET_V}"></script>`).join("\n")}`;
@@ -612,7 +619,7 @@ const pageHtml = html => html.replace("<!--LAPP:HEAD-->", HEAD).replaceAll("{{V}
 
 async function page(req, env, html, roles, path) {
   const u = env.DB ? await currentUser(req, env) : null;
-  if (!u) return Response.redirect(`${new URL(req.url).origin}/?login=1&next=${encodeURIComponent(path)}`, 302);
+  if (!u) return Response.redirect(`${new URL(req.url).origin}/login?next=${encodeURIComponent(path)}`, 302);
   if (!roles.includes(u.role)) return new Response("Forbidden", { status: 403, headers: { "Content-Type": "text/plain" } });
   return new Response(pageHtml(html), {
     headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store", "X-Frame-Options": "SAMEORIGIN", "Content-Security-Policy": "frame-ancestors 'self'", ...SECURE }

@@ -301,7 +301,7 @@ async function exportCsv() {
 
 (async () => {
   const m = await api("GET", "/me");
-  if (!m.user) { location.href = "/?login=1&next=/admin"; return; }
+  if (!m.user) { location.href = "/login?next=/admin"; return; }
   ME = m.user;
   Drive.setup({
     api: (p, m = "GET", b) => api(m, "/studio" + p, b), lapp: true,
