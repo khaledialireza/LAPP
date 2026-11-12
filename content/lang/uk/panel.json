@@ -1688,5 +1688,9 @@
  "Reaches": "Досягає",
  "Within": "За",
  "Then": "Тоді",
- "On": "Увімк"
+ "On": "Увімк",
+ "Wrong password": "Неправильний пароль",
+ "Password changed": "Пароль змінено",
+ "Suspension lifted": "Блокування знято",
+ "Suspended": "Призупинено"
 }

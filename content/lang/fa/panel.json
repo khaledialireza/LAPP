@@ -1688,5 +1688,9 @@
  "Reaches": "می‌رسد به",
  "Within": "در مدت",
  "Then": "آنگاه",
- "On": "روشن"
+ "On": "روشن",
+ "Wrong password": "رمز اشتباه",
+ "Password changed": "رمز عوض شد",
+ "Suspension lifted": "تعلیق برداشته شد",
+ "Suspended": "تعلیق‌شده"
 }

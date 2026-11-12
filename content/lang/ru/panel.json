@@ -1688,5 +1688,9 @@
  "Reaches": "Достигает",
  "Within": "За",
  "Then": "Тогда",
- "On": "Вкл"
+ "On": "Вкл",
+ "Wrong password": "Неверный пароль",
+ "Password changed": "Пароль изменён",
+ "Suspension lifted": "Блокировка снята",
+ "Suspended": "Приостановлен"
 }

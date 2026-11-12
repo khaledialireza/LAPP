@@ -559,6 +559,12 @@ Windows: ${wins.map(w => `${w.id} = ${w.label}`).join("; ")}`;
   let om;
   if ((om = p.match(/^\/org\/([a-z0-9][a-z0-9-]{1,30})(\/.*)?$/))) return orgApi(req, env, H, om[1], om[2] || "", url);
 
+  // what we keep about my account (sign-ins, wrong passwords, password changes, support): I can always see it
+  if (p === "/me/log" && M === "GET") {
+    const u = await need(req, env);
+    const rows = (await env.DB.prepare("SELECT kind, country, device, detail, at FROM account_log WHERE user_id = ? ORDER BY at DESC LIMIT 200").bind(u.id).all()).results;
+    return json({ log: rows });
+  }
   /* ---- the app store and the Customer Center ---- */
   if (p === "/store" || p.startsWith("/store/")) return storeApi(req, env, H, p.slice(6), url);
   if (p.startsWith("/care/")) return careApi(req, env, H, p.slice(5), url);
@@ -591,7 +597,7 @@ async function promote(env, u) {
 /* ================= pages for staff ================= */
 // every page of the panels starts with the same head: the shared kit, the language, icons, theme, pointer,
 // the form controls and the window bridge. One asset version (ASSET_V, set by tools/bump.js) for all of them.
-const ASSET_V = "mwcwzozc";
+const ASSET_V = "mwcx27sz";
 const HEAD = `<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/ui/kit.css?v=${ASSET_V}">

@@ -34,7 +34,8 @@ function draw() {
     ${ME.pub ? `<div class="opt"><div><b>Your ID</b></div><span style="display:flex;gap:8px;align-items:center"><code style="font:600 15px ui-monospace,Menlo,monospace;letter-spacing:.08em">${E(ME.pub)}</code><button class="b" id="copyId">${I("copy", 15)} Copy</button></span></div>` : ""}
     <div class="opt"><div><b>Photo</b><small>shown on the taskbar, the lock screen and to your team</small></div><div style="display:flex;gap:8px"><button class="b" id="photo">${I("image", 14)} ${ME.avatar ? "Change" : "Add a photo"}</button>${ME.avatar ? `<button class="b" id="nophoto">Remove</button>` : ""}<input type="file" id="photoIn" accept="image/*" hidden></div></div>
     <div class="opt"><div><b>Lock the screen</b><small>${E(keyName("Ctrl+Alt+L"))} · your windows stay as they are</small></div><button class="b" data-tell="lock">${I("lock", 14)} Lock now</button></div>
-    <div class="opt"><div><b>Language</b><small>the whole system follows it</small></div><button class="b" id="lang">${I("globe", 14)} ${(window.PanelI18N ? PanelI18N.lang : "en").toUpperCase()}</button></div></div>`;
+    <div class="opt"><div><b>Language</b><small>the whole system follows it</small></div><button class="b" id="lang">${I("globe", 14)} ${(window.PanelI18N ? PanelI18N.lang : "en").toUpperCase()}</button></div></div>
+    <h3 style="margin:18px 0 8px;font-size:14px">Log</h3><div class="card rows" id="myLog"><div class="opt"><small>…</small></div></div>`;
   if (part === "look") h = `<h2>Look & theme</h2><div class="sub">Changes the desktop and every window at once.</div>
     <div class="card rows"><div class="opt" style="display:block"><b>Theme</b><div class="themes">${Object.entries(THEMES).map(([k, t]) => `<button class="th ${T === k ? "on" : ""}" data-theme="${k}"><span class="pv" style="background:${t.vars["--bg"]}"><i style="background:${t.vars["--p2"]};border:1px solid ${t.vars["--ln2"]}"></i><em style="background:${A}"></em></span><b>${E(t.name)}</b></button>`).join("")}</div></div>
     <div class="opt"><div><b>Accent colour</b><small>buttons, the active window, highlights</small></div><div class="dots">${["#8B5CF6", "#FF3D7F", "#22D3EE", "#34D399", "#F59E0B", "#60A5FA"].map(c => `<button class="dot ${A === c ? "on" : ""}" data-accent="${c}" style="background:${c}" aria-label="${c}">${A === c ? I("check", 14) : ""}</button>`).join("")}</div></div>
@@ -69,6 +70,9 @@ function draw() {
   if (part === "about") h = `<h2>About</h2><div class="card rows"><div class="opt"><div><b>LAPP work desktop</b><small>Icons: Lucide (ISC licence)</small></div></div></div>`;
   $("#main").innerHTML = `<div class="top" data-chrome><h1>Settings</h1></div>` + h;
   if (part === "ai" && window.AISettings) AISettings.mount($("#aiBox"));
+  if (part === "you") K.api("GET", "/me/log").then(r => { const KIND = { signin: "Signed in", wrongpw: "Wrong password", password: "Password changed", support: "Support", suspended: "Suspended", lifted: "Suspension lifted" };
+    const box = $("#myLog"); if (!box) return;
+    box.innerHTML = r.log.map(l => `<div class="opt"><div><b>${E(KIND[l.kind] || l.kind)}</b><small>${E([l.detail, l.device, l.country].filter(Boolean).join(" · "))}</small></div><small>${E(new Date(l.at).toLocaleString(K.loc(), { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }))}</small></div>`).join("") || `<div class="opt"><small>—</small></div>`; }).catch(() => {});
   LAPPFrame.sync();
 }
 if (window.LAPPFrame) LAPPFrame.menus = () => [{ label: "Go", items: PARTS.map(([k, ic, l]) => ({ label: k === "you" && ME ? ME.name || "@" + ME.username : l, icon: ic, on: part === k, run: () => { part = k; draw(); } })) }];
