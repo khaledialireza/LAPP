@@ -1,3 +1,4 @@
+import { BRAND } from "./brand.js";
 // LAPP · the app store (every root installs what it needs) and the Customer Center (only the platform owner's own space).
 // A root is one independent space: "lapp" (the platform owner) or "org:<id>" (an organisation).
 // The Customer Center never shows another root's data until that root approves a support request.
@@ -20,7 +21,7 @@ const FIRST = { lapp: ["studio"], org: ["classes", "timetable", "homework", "mon
 async function rootOf(env, H, req, u, org) {
   if (!org) {
     if (!["designer", "manager", "admin"].includes(u.role)) throw H.fail("not allowed", 403);
-    return { key: "lapp", kind: "lapp", admin: u.role === "admin", name: "LAPP", role: u.role };
+    return { key: "lapp", kind: "lapp", admin: u.role === "admin", name: BRAND.name, role: u.role };
   }
   const r = await env.DB.prepare("SELECT o.id, o.name, m.role FROM orgs o JOIN org_members m ON m.org_id = o.id WHERE o.slug = ? AND m.user_id = ? AND m.active = 1 AND o.disabled = 0").bind(org, u.id).first();
   if (!r) throw H.fail("not allowed", 403);

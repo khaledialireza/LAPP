@@ -25,6 +25,7 @@ import USERS from "./users.html";
 import STORE from "./store.html";
 import CARE from "./customers.html";
 import { storeApi, careApi, logAccount, pubId } from "./care.js";
+import { BRAND } from "./brand.js";
 import { deskApi, worksHere } from "./desk.js";
 import { aiLimit, fail, enc, sha, b64, b64url, STAFF, teamOf } from "./util.js";
 import SCHOOL from "./school.html";
@@ -602,12 +603,12 @@ async function promote(env, u) {
 /* ================= pages for staff ================= */
 // every page of the panels starts with the same head: the shared kit, the language, icons, theme, pointer,
 // the form controls and the window bridge. One asset version (ASSET_V, set by tools/bump.js) for all of them.
-const ASSET_V = "mwcxfo00";
-const HEAD = `<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex">
+const ASSET_V = "mwcxpxav";
+const HEAD = `<meta charset="utf-8"><meta name="brand" content="${BRAND.name}" data-letter="${BRAND.letter}"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/ui/kit.css?v=${ASSET_V}">
 ${["kit", "menu", "panel-i18n", "icons", "theme", "cursor", "lapp-ui", "frame"].map(f => `<script src="/ui/${f}.js?v=${ASSET_V}"></script>`).join("\n")}`;
-const pageHtml = html => html.replace("<!--LAPP:HEAD-->", HEAD).replaceAll("{{V}}", ASSET_V);
+const pageHtml = html => html.replace("<!--LAPP:HEAD-->", HEAD).replaceAll("{{V}}", ASSET_V).replaceAll("{{BRAND}}", BRAND.name).replaceAll("{{BRAND1}}", BRAND.letter);
 
 async function page(req, env, html, roles, path) {
   const u = env.DB ? await currentUser(req, env) : null;

@@ -12,7 +12,7 @@
   const COLORS = ["#22D3EE", "#F59E0B", "#10B981", "#60A5FA", "#FF3D7F", "#A78BFA"];
   D.WS = []; D.APPS = []; D.CUR = "me";
 
-  D.studioScopes = () => [...(["designer", "manager", "admin"].includes(D.ME.role) ? [{ q: "", name: "LAPP library", ws: "me" }] : []), ...D.ORGS.filter(o => ["admin", "teacher"].includes(o.role)).map(o => ({ q: o.slug, name: o.name, ws: "s:" + o.slug }))];
+  D.studioScopes = () => [...(["designer", "manager", "admin"].includes(D.ME.role) ? [{ q: "", name: K.BRAND + " library", ws: "me" }] : []), ...D.ORGS.filter(o => ["admin", "teacher"].includes(o.role)).map(o => ({ q: o.slug, name: o.name, ws: "s:" + o.slug }))];
 
   // every signed-in account (the main one, slot 0, and linked ones) brings its own workspaces and apps;
   // a linked account's keys end in "~n" and its addresses carry ?as=n
@@ -29,7 +29,7 @@
         const part = PART_OF(x.id); if (part && Array.isArray(w.parts) && !w.parts.includes(part)) return false;   // a group app: only the parts the space chose
         return !!(w.all || (w.me ? admin : (w.roles || []).includes(role))); };
       const push = (x, role, admin) => { if (ok(x, x.ws, role === undefined ? r : role, admin === undefined ? r === "admin" : admin)) A.push({ ...x, id: x.id + sx, url: withAs(x.url, n), as: n }); };
-      if (!n || lapp || designer) W.push({ key: "me" + sx, name: lapp ? "LAPP" : n ? acct.name : "My work", color: "#8B5CF6", as: n });
+      if (!n || lapp || designer) W.push({ key: "me" + sx, name: lapp ? K.BRAND : n ? acct.name : "My work", color: "#8B5CF6", as: n });
       if (lapp) {
         push({ id: "users", title: "Users", icon: "users", url: "/users", ws: "me" + sx });
         push({ id: "studio:library", title: "Lesson library", icon: "library", url: "/admin#content", ws: "me" + sx, studio: "" });

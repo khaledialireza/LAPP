@@ -1,6 +1,6 @@
 <!doctype html>
 <html data-desk lang="en"><head><!--LAPP:HEAD-->
-<title>Users · LAPP</title>
+<title>Users · {{BRAND}}</title>
 <style>
 /* Users: the people of one root (the LAPP team, or one organisation) — their roles and their accounts. Nothing else. */
 body{background:var(--bg);color:var(--tx);font:13.5px/1.5 Inter,Vazirmatn,system-ui,sans-serif;display:grid;grid-template-columns:210px minmax(0,1fr) auto;height:100vh;overflow:hidden}
@@ -64,9 +64,9 @@ function shown() { const q = S.q.toLowerCase(); return S.list.filter(u => (!S.ro
 
 function draw() {
   const n = r => S.list.filter(u => !r || u.role === r).length;
-  $("#nav").innerHTML = `<h6>${E(ORG ? (S.org ? S.org.name : ORG) : "LAPP team")}</h6>` + [["", "Everyone"], ...ROLES.map(r => [r, r[0].toUpperCase() + r.slice(1)])]
+  $("#nav").innerHTML = `<h6>${E(ORG ? (S.org ? S.org.name : ORG) : K.BRAND)}</h6>` + [["", "Everyone"], ...ROLES.map(r => [r, r[0].toUpperCase() + r.slice(1)])]
     .map(([r, l]) => `<button class="${S.role === r ? "on" : ""}" data-role="${r}">${I(r ? "person" : "users", 16)}<span>${E(l)}</span><span class="ct">${n(r)}</span></button>`).join("");
-  $("#ttl").textContent = S.role ? S.role[0].toUpperCase() + S.role.slice(1) : ORG ? (S.org ? S.org.name : ORG) : "LAPP team";
+  $("#ttl").textContent = S.role ? S.role[0].toUpperCase() + S.role.slice(1) : ORG ? (S.org ? S.org.name : ORG) : K.BRAND;
   $("#add").innerHTML = `${I("plus", 15)} ${ORG ? "Add" : "Invite"}`; $("#add").hidden = !canManage();
   const L = shown();
   $("#rows").innerHTML = L.map(u => `<button class="row ${u.id === S.sel ? "sel" : ""}" data-u="${u.id}" role="listitem">

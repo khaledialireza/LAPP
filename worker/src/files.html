@@ -1,6 +1,6 @@
 <!doctype html>
 <html data-desk lang="en"><head><!--LAPP:HEAD-->
-<title>Files · LAPP</title>
+<title>Files · {{BRAND}}</title>
 <style>
 /* Files: every file of the system in one explorer. Sources on the left (recent, starred, my files, the lesson libraries,
    cloud drives later), the folder in the middle (list or grid), a preview on the right. Lessons are files: they open in the studio. */
@@ -75,7 +75,7 @@ async function loadMine() { const d = await api("GET", "/desk"); S.mine = { fold
 async function loadLib(l) { const d = await api("GET", "/studio/drive" + (l.q ? "?org=" + l.q : "")); l.folders = d.folders.map(f => ({ id: f.id, parent: f.parent, name: f.name })); l.lessons = d.lessons; l.ok = true; }
 async function load() {
   const m = await api("GET", "/me"); S.me = m.user; S.orgs = m.orgs || [];
-  const scopes = [...(["designer", "manager", "admin"].includes(S.me.role) && !ORG ? [{ q: "", name: "LAPP library" }] : []), ...S.orgs.filter(o => ["admin", "teacher"].includes(o.role) && (!ORG || o.slug === ORG)).map(o => ({ q: o.slug, name: o.name }))];
+  const scopes = [...(["designer", "manager", "admin"].includes(S.me.role) && !ORG ? [{ q: "", name: K.BRAND + " library" }] : []), ...S.orgs.filter(o => ["admin", "teacher"].includes(o.role) && (!ORG || o.slug === ORG)).map(o => ({ q: o.slug, name: o.name }))];
   S.libs = scopes.map(s => ({ ...s, folders: [], lessons: [], ok: false }));
   await Promise.all([loadMine(), ...S.libs.map(l => loadLib(l).catch(() => {}))]);
   if (!["mine", "recent", "starred"].includes(S.src) && !libOf(S.src)) S.src = "mine";

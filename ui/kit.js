@@ -87,6 +87,8 @@
   // K.api(method, path, body, raw?) against /api; K.apiAt(base, o) makes one for another base (e.g. /api/studio)
   //   o.next: where to come back after signing in (signed out → the sign-in page); o.signin: false → just an error
   //   o.keepalive: true → a PUT still arrives when the page closes (small bodies only)
+  // the management system's name (set once on the server)
+  K.BRAND = (() => { try { return document.querySelector('meta[name="brand"]').content || "KX5"; } catch { return "KX5"; } })();
   K.net = { busy: 0, done: 0 };
   // a window of a linked account (?as=n, kept in the frame's name across pages) talks to the server as that account
   K.AS = (() => { try { const n = +(new URLSearchParams(location.search).get("as") || (/^lapp-as(\d)$/.exec(window.name) || [])[1] || 0); if ([1, 2, 3].includes(n)) { window.name = "lapp-as" + n; return n; } } catch {} return 0; })();

@@ -1,6 +1,6 @@
 <!doctype html>
 <html data-desk lang="en"><head><!--LAPP:HEAD-->
-<title>Settings · LAPP</title>
+<title>Settings · {{BRAND}}</title>
 <style>
 /* Settings: you, the look of the whole system (theme, accent, wallpaper, pointer), the desktop, keys, notifications. */
 body{background:var(--bg);color:var(--tx);font:13.5px/1.5 Inter,Vazirmatn,system-ui,sans-serif;display:grid;grid-template-columns:210px 1fr;height:100vh;overflow:hidden}
@@ -40,7 +40,7 @@ function draw() {
     <div class="card rows"><div class="opt" style="display:block"><b>Theme</b><div class="themes">${Object.entries(THEMES).map(([k, t]) => `<button class="th ${T === k ? "on" : ""}" data-theme="${k}"><span class="pv" style="background:${t.vars["--bg"]}"><i style="background:${t.vars["--p2"]};border:1px solid ${t.vars["--ln2"]}"></i><em style="background:${A}"></em></span><b>${E(t.name)}</b></button>`).join("")}</div></div>
     <div class="opt"><div><b>Accent colour</b><small>buttons, the active window, highlights</small></div><div class="dots">${["#8B5CF6", "#FF3D7F", "#22D3EE", "#34D399", "#F59E0B", "#60A5FA"].map(c => `<button class="dot ${A === c ? "on" : ""}" data-accent="${c}" style="background:${c}" aria-label="${c}">${A === c ? I("check", 14) : ""}</button>`).join("")}</div></div>
     <div class="opt"><div><b>Wallpaper</b><small>behind the windows</small></div><div class="seg">${[["", "Aurora"], ["dawn", "Dawn"], ["sea", "Sea"], ["plain", "Plain"]].map(([k, l]) => `<button data-wall="${k}" class="${(th.wall || "") === k ? "on" : ""}">${l}</button>`).join("")}</div></div>
-    <div class="opt"><div><b>LAPP mouse pointer</b><small>our own arrow and hand</small></div>${sw("cursor", LS.get("lapp.cursor", "") !== "system")}</div>
+    <div class="opt"><div><b>${E(K.BRAND)} mouse pointer</b><small>our own arrow and hand</small></div>${sw("cursor", LS.get("lapp.cursor", "") !== "system")}</div>
     <div class="opt"><div><b>Rounded corners</b></div><div class="seg">${[["8", "Small"], ["12", "Medium"], ["16", "Large"]].map(([k, l]) => `<button data-radius="${k}" class="${String(th.radius || 12) === k ? "on" : ""}">${l}</button>`).join("")}</div></div></div>`;
   if (part === "desk") h = `<h2>Desktop</h2><div class="sub">How your windows and the taskbar behave.</div><div class="card rows">
     <div class="opt"><div><b>Group windows on the taskbar</b><small>automatic lets the AI pick the best grouping</small></div><div class="seg">${[["auto", "Automatic"], ["app", "By app"], ["task", "By task"]].map(([k, l]) => `<button data-group="${k}" class="${(th.groupBy || "auto") === k ? "on" : ""}">${l}</button>`).join("")}</div></div>
@@ -61,7 +61,7 @@ function draw() {
     <div class="opt"><div><b>Cut · Copy · Paste row in every right-click</b></div>${sw("ctxSys", th.ctxSys !== false)}</div>
     <div class="opt"><div><b>Line bar</b></div>${sw("ribbon", !LS.get("lapp.ribbon.off", false))}</div></div>`; }
   if (part === "ai") h = `<h2>AI</h2><div id="aiBox"></div>`;
-  if (part === "about") h = `<h2>About</h2><div class="card rows"><div class="opt"><div><b>LAPP work desktop</b><small>Icons: Lucide (ISC licence)</small></div></div></div>`;
+  if (part === "about") h = `<h2>About</h2><div class="card rows"><div class="opt"><div><b>${E(K.BRAND)}</b><small>Icons: Lucide (ISC licence)</small></div></div></div>`;
   $("#main").innerHTML = `<div class="top" data-chrome><h1>Settings</h1></div>` + h;
   if (part === "ai" && window.AISettings) AISettings.mount($("#aiBox"));
   if (part === "you") K.api("GET", "/me/log").then(r => { const KIND = { signin: "Signed in", signout: "Signed out", wrongpw: "Wrong password", unlock: "Screen unlocked", password: "Password", account: "Account changed", linked: "Linked account", unlinked: "Linked account removed", role: "Role changed", org: "Organisation", support: "Support", store: "Apps", suspended: "Suspended", lifted: "Suspension lifted" };

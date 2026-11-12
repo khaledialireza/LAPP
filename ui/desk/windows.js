@@ -85,7 +85,7 @@
     WN.forEach(x => x.el.classList.toggle("act", x === w));
     if (w) { w.min = false; w.el.style.zIndex = ++Z; w.used = Date.now(); place(w); }
     D.ACTW = w ? w.id : null; D.emit("wins"); D.save();
-    document.title = (w ? w.title + " · " : "") + "LAPP";
+    document.title = (w ? w.title + " · " : "") + K.BRAND;
   };
   const topWin = D.topWin = () => WN.filter(x => !x.min && x.ws === D.CUR).sort((a, b) => b.el.style.zIndex - a.el.style.zIndex)[0] || null;
   const closeWin = D.closeWin = w => { if (!w) return; w.el.remove(); WN = WN.filter(x => x !== w); WN.forEach(dress); D.focusWin(topWin()); };

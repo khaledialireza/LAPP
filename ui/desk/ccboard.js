@@ -16,7 +16,7 @@
   const isLight = () => (D.look().theme || "") === "light";
   const Q = {
     theme: { icon: () => isLight() ? "sun" : "moon", label: () => isLight() ? "Light" : "Dark", on: () => !isLight(), run: () => D.setLook("theme", isLight() ? "" : "light") },
-    pointer: { icon: () => "pointer", label: () => "LAPP pointer", on: () => D.LS.get("lapp.cursor", "") !== "system", run: () => D.settings("cursor", D.LS.get("lapp.cursor", "") === "system") },
+    pointer: { icon: () => "pointer", label: () => K.BRAND + " pointer", on: () => D.LS.get("lapp.cursor", "") !== "system", run: () => D.settings("cursor", D.LS.get("lapp.cursor", "") === "system") },
     ribbon: { icon: () => "layers", label: () => "Line bar", on: () => !K.LS.get("lapp.ribbon.off", false), run: () => K.LS.set("lapp.ribbon.off", !K.LS.get("lapp.ribbon.off", false)) },
     toasts: { icon: () => "bell", label: () => "Pop-ups", on: () => D.look().toasts !== false, run: () => D.setLook("toasts", D.look().toasts === false) },
     restore: { icon: () => "reload", label: () => "Reopen windows", on: () => D.look().restore !== false, run: () => D.setLook("restore", D.look().restore === false) },
@@ -99,7 +99,7 @@
   /* ---------- accounts: the ones signed in here, and adding one with the sign-in panel itself ---------- */
   const AL = { on: false, step: "id", id: "", err: "", busy: false };
   const acctName = ac => ac.user.name || "@" + ac.user.username;
-  const acctRole = ac => { const L = [["admin", "manager", "designer"].includes(ac.user.role) ? "LAPP · " + ac.user.role : "", ...(ac.orgs || []).map(o => `${o.name} · ${o.role}`)].filter(Boolean); return L.length > 1 ? `${L[0]} +${L.length - 1}` : L[0] || ""; };
+  const acctRole = ac => { const L = [["admin", "manager", "designer"].includes(ac.user.role) ? K.BRAND + " · " + ac.user.role : "", ...(ac.orgs || []).map(o => `${o.name} · ${o.role}`)].filter(Boolean); return L.length > 1 ? `${L[0]} +${L.length - 1}` : L[0] || ""; };
   function accounts(B, q) {
     const c = $("#cc"); c.classList.toggle("acclogin", AL.on);
     if (AL.on) {

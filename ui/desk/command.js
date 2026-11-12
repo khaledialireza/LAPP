@@ -27,7 +27,7 @@
   function frame() {
     const c = $("#cc");
     if (CC.mode === "chat") {
-      c.innerHTML = `<div class="cch" title="Drag to move"><i></i></div><div class="chathd"><button data-cc="back">${I("back", 15)} Back</button><span class="spark">✦</span><b style="font-size:13px">LAPP AI</b><span style="flex:1"></span>${CHAT.length ? `<button data-cc="new">${I("plus", 15)} New chat</button>` : ""}</div>
+      c.innerHTML = `<div class="cch" title="Drag to move"><i></i></div><div class="chathd"><button data-cc="back">${I("back", 15)} Back</button><span class="spark">✦</span><b style="font-size:13px">${K.BRAND} AI</b><span style="flex:1"></span>${CHAT.length ? `<button data-cc="new">${I("plus", 15)} New chat</button>` : ""}</div>
         <div class="ccb" id="ccb" aria-live="polite"></div><div class="chatin"><textarea id="cci" rows="1" placeholder="Ask the AI anything…" aria-label="Ask the AI"></textarea><button class="send" data-cc="send" aria-label="Send">${I("send", 15)}</button></div>`;
       const t = $("#cci"); t.value = CC.q; CC.q = "";
       t.oninput = () => { t.style.height = "auto"; t.style.height = Math.min(120, t.scrollHeight) + "px"; };
@@ -200,9 +200,9 @@
   /* ---------- the AI chat (inside the panel; the box stays at the bottom) ---------- */
   function drawChat(B) {
     const w = D.W(D.ACTW), tries = /\/studio/.test(w ? w.url : "") ? ["Make line 4 simpler for A1", "Write a short homework for this lesson", "Show the voice desk next to the script"] : ["What can I do here?", "Open Users and Files side by side", "Plan 6 A1 lessons for a trip to Vienna"];
-    B.innerHTML = (CHAT.length ? "" : `<div class="aiq"><div class="who2">${I("ai", 13)} LAPP AI</div>Ask anything, or tell me what to open or arrange. I see your open windows and show a plan before I do anything.</div><div class="ccg"><h5>Try</h5>${tries.map((s, k) => `<button class="rw" data-try="${esc(s)}"><span class="ri">${I("ai", 14)}</span><span class="nm">${esc(s)}</span></button>`).join("")}</div>`)
+    B.innerHTML = (CHAT.length ? "" : `<div class="aiq"><div class="who2">${I("ai", 13)} ${K.BRAND} AI</div>Ask anything, or tell me what to open or arrange. I see your open windows and show a plan before I do anything.</div><div class="ccg"><h5>Try</h5>${tries.map((s, k) => `<button class="rw" data-try="${esc(s)}"><span class="ri">${I("ai", 14)}</span><span class="nm">${esc(s)}</span></button>`).join("")}</div>`)
       + CHAT.map((m, k) => m.me ? `<div class="me2">${esc(m.t)}</div>` : m.wait ? `<div class="aiq" aria-label="Thinking"><span class="dots"><i></i><i></i><i></i></span></div>`
-        : `<div class="aiq ${m.err ? "err" : ""}"><div class="who2">${I("ai", 13)} LAPP AI${m.provider && !/^lapp ai$/i.test(m.provider) ? " · " + esc(m.provider) : ""}</div>${esc(m.t)}${m.plan && m.plan.length ? `<div class="plan">${m.plan.map(p => `<div>${I(p.icon, 14)} ${esc(p.label)}</div>`).join("")}</div><div class="btns">${m.done ? `<span class="mu sm">${I("check", 13)} Done</span>` : `<button class="b pr" data-plan="${k}">Do it</button>`}</div>` : ""}</div>`).join("");
+        : `<div class="aiq ${m.err ? "err" : ""}"><div class="who2">${I("ai", 13)} ${K.BRAND} AI${m.provider && !/^lapp ai$/i.test(m.provider) ? " · " + esc(m.provider) : ""}</div>${esc(m.t)}${m.plan && m.plan.length ? `<div class="plan">${m.plan.map(p => `<div>${I(p.icon, 14)} ${esc(p.label)}</div>`).join("")}</div><div class="btns">${m.done ? `<span class="mu sm">${I("check", 13)} Done</span>` : `<button class="b pr" data-plan="${k}">Do it</button>`}</div>` : ""}</div>`).join("");
     B.scrollTop = B.scrollHeight;
   }
   D.ask = async (q, about) => {
