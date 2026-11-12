@@ -72,7 +72,10 @@ Then:
   until a root grants support access.
 - No app belongs to one kind of root: every app is in the store, and any root may install it. So we install and
   test every app (teacher apps, school apps, …) in our own root while we build them.
-- A rules app (name open: Steward / Guardian), only for the platform owner's root: we write rules (e.g. sign-ins
+- One app holds everything about the roots outside ours (only the platform owner's root has it). [PROPOSAL, NOT
+  CONFIRMED: named "Customer Center".] In it: support-access requests by ID; after the root approves, opening its
+  space, its data and its logs to fix the problem; and the rules below.
+- Rules (inside that app), only for the platform owner's root: we write rules (e.g. sign-ins
   from two countries within an hour, 20 wrong passwords in 10 minutes, 5 reports) and the system checks behaviour
   only (sign-ins, requests, reports), never anyone's data. It lists only the accounts that broke a rule, by ID and
   rule; each rule has an action (warn the person, require 2-step sign-in, suspend). No database app.
