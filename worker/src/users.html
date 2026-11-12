@@ -54,7 +54,8 @@ const COL = { Active: "var(--gr)", Unverified: "var(--cy)", Disabled: "var(--rd)
 async function load() {
   const me = await K.api("GET", "/me"); S.me = me.user; S.org = ORG ? (me.orgs || []).find(o => o.slug === ORG) : null;
   const r = ORG ? (await api("GET", "/members")).members : (await api("GET", "/users?filter=staff")).users;
-  S.list = r.map(u => ({ ...u, status: statusOf(u) })).filter(u => !ORG || true);
+  // the root does not manage itself here: only the people under it
+  S.list = r.map(u => ({ ...u, status: statusOf(u) })).filter(u => u.id !== S.me.id);
   if (S.sel && !S.list.some(u => u.id === S.sel)) S.sel = null;
   draw();
 }

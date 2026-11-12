@@ -180,7 +180,7 @@
     const rm = t.closest("[data-rm]"); if (rm) { setTiles(tiles().filter(x => x[0] !== rm.dataset.rm)); return redraw(); }
     const frm = t.closest("[data-frm]"); if (frm) { CCS().foot = foot().filter(x => x[0] !== frm.dataset.frm); save(); return redraw(); }
     const lib = t.closest("[data-lib]"); if (lib) { const x = LIB[+lib.dataset.lib]; if (x) setTiles([...tiles(), x]); return redraw(); }
-    const gm = t.closest("[data-gmore]"); if (gm) { e.stopPropagation(); const a = app(gm.dataset.gmore); return setTimeout(() => K.menuAt(gm, [{ head: D.storeAppOf(a).name }, { label: "Remove app", icon: "trash", danger: true, run: () => D.uninstall(a) }], { end: true }), 0); }
+    const gm = t.closest("[data-gmore]"); if (gm) { e.stopPropagation(); const a = app(gm.dataset.gmore); return setTimeout(() => K.menuAt(gm, [{ head: D.storeAppOf(a).name }, { label: "Remove app", icon: "trash", danger: true, run: () => D.uninstall(a, true) }], { end: true }), 0); }
     const am = t.closest("[data-amore]"); if (am) { e.stopPropagation(); const items = appMenu(app(am.dataset.amore)); return setTimeout(() => K.menuAt(am, items, { end: true }), 0); }
     const oa = t.closest("[data-open-app]"); if (oa) { const a = app(oa.dataset.openApp); if (a) { use("app:" + a.id); D.ccClose(); D.openWin(a.url); } return; }
     const aw = t.closest("[data-addwid]"); if (aw) { D.addWidget(aw.dataset.addwid); return D.toast(`${D.WT[aw.dataset.addwid][1]} is on the desktop`, { kind: "ok" }); }

@@ -23,6 +23,7 @@ h4{font-size:14px;margin:12px 18px 8px}
 .about{color:var(--mu);font-size:14px;max-width:680px}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .box{border:1px solid var(--ln);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px}.box h5{font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--mu2)}
+.parts{display:flex;flex-direction:column;gap:8px}.part{display:flex;align-items:center;gap:10px}.part b{flex:1;font-weight:600}
 .reach{display:flex;align-items:center;gap:8px;color:var(--mu)}
 .opt{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--ln);border-radius:10px;cursor:pointer}.opt.on{border-color:var(--vi);background:color-mix(in srgb,var(--vi) 10%,transparent)}.opt i{width:16px;height:16px;border-radius:50%;border:2px solid var(--p4);flex:none}.opt.on i{border:5px solid var(--vi)}
 .chips{display:flex;flex-wrap:wrap;gap:6px}.chip{border:1px solid var(--ln);border-radius:99px;padding:4px 11px;font-size:12px;font-weight:600;color:var(--mu);background:none;cursor:pointer;text-transform:capitalize}.chip.on{background:var(--p4);color:var(--tx);border-color:transparent}
@@ -49,7 +50,7 @@ function draw() {
   const acct = `<span class="acct" title="${E(S.root.name)}"><i>${E(S.root.name.charAt(0))}</i>${E(S.root.name)}</span>`;
   if (a) return page(a, acct);
   const q = S.q.toLowerCase(), L = S.apps.filter(x => (S.view !== "installed" || x.installed) && (!S.cat || x.cat === S.cat) && (!q || (x.name + x.about + x.by).toLowerCase().includes(q)));
-  const card = x => `<button class="app" data-a="${x.id}"><span class="ai" style="background:${x.color}">${I(x.icon, 24)}</span><span class="t"><b>${E(x.name)}</b><small>${E(x.about)}</small><span class="by">${E(x.by)}</span></span><span class="get ${x.installed ? "done" : ""}">${x.installed ? I("check", 16) : "Get"}</span></button>`;
+  const card = x => `<button class="app" data-a="${x.id}"><span class="ai" style="background:${x.color}">${I(x.icon, 24)}</span><span class="t"><b>${E(x.name)}</b><small>${E(x.about)}</small><span class="by">${E(x.by)}${x.parts ? ` · ${x.parts.length} apps: ${x.parts.map(p => E(p.name)).join(", ")}` : ""}</span></span><span class="get ${x.installed ? "done" : ""}">${x.installed ? I("check", 16) : "Get"}</span></button>`;
   const groups = S.view === "discover" && !S.cat && !q ? cats().map(c => `<h4>${E(c)}</h4><div class="grid">${S.apps.filter(x => x.cat === c).map(card).join("")}</div>`).join("") : `<div class="grid" style="padding-top:8px">${L.map(card).join("") || `<div class="none">${I("search", 30)}</div>`}</div>`;
   m.innerHTML = `<div class="top"><label class="srch">${I("search", 15)}<input id="q" placeholder="Search apps" value="${E(S.q)}" autocomplete="off"></label>${acct}</div>${groups}`;
   $("#q").oninput = e => { S.q = e.target.value; const p = e.target.selectionStart; draw(); const i = $("#q"); i.focus(); i.setSelectionRange(p, p); };
@@ -60,18 +61,23 @@ function page(a, acct) {
     <div class="ph"><span class="ai" style="background:${a.color}">${I(a.icon, 38)}</span><div><h2>${E(a.name)}</h2><p>${E(a.by)} · ${E(a.cat)}</p></div><span class="sp"></span>
       ${S.root.admin ? (a.installed ? `<button class="b" data-who>Who may use it</button>` : `<button class="b pr" data-get>Get</button>`) : ""}</div>
     <div class="about">${E(a.about)}</div>
+    ${a.parts ? `<div class="box"><h5>Includes</h5><div class="parts">${a.parts.map(pt => { const on = a.installed && (!a.who || !a.who.parts || a.who.parts.includes(pt.id));
+      return `<div class="part"><span class="ai" style="background:${a.color};width:34px;height:34px;border-radius:10px">${I(pt.icon, 17)}</span><b>${E(pt.name)}</b>${S.root.admin && a.installed ? `<button class="sw ${on ? "on" : ""}" data-part="${pt.id}" role="switch" aria-checked="${on}" aria-label="${E(pt.name)}"></button>` : ""}</div>`; }).join("")}</div></div>` : ""}
     <div class="two"><div class="box"><h5>It can reach</h5>${a.reach.map(r => `<span class="reach">${I("check", 14)} ${E(r)}</span>`).join("")}</div>
       <div class="box"><h5>Used in ${E(S.root.name)} by</h5><span>${E(whoText(a.who))}</span></div></div></div>`;
 }
 // install: into which space, and who may use it
 async function install(a, again) {
   let who = a.who && a.who.roles ? "roles" : a.who && a.who.me ? "me" : "all", roles = (a.who && a.who.roles) || [ROLES[1]];
+  let parts = a.parts ? (a.who && a.who.parts) || a.parts.map(p => p.id) : null;
   const body = () => `<h3>${E(a.name)}</h3><div class="into"><span class="ai" style="width:30px;height:30px;border-radius:50%;background:var(--vi)">${E(S.root.name.charAt(0))}</span><span><small>Into</small><b>${E(S.root.name)}</b></span></div>
     <div class="box"><h5>Who may use it</h5>${[["all", "Everyone"], ["roles", "Only some roles"], ["me", "Only admins"]].map(([k, l]) => `<div class="opt ${who === k ? "on" : ""}" data-w="${k}"><i></i>${l}</div>`).join("")}
     <div class="chips" ${who === "roles" ? "" : "hidden"}>${ROLES.map(r => `<button type="button" class="chip ${roles.includes(r) ? "on" : ""}" data-r="${r}">${r}</button>`).join("")}</div></div>
+    ${parts ? `<div class="box"><h5>Which apps</h5><div class="chips">${a.parts.map(p => `<button type="button" class="chip ${parts.includes(p.id) ? "on" : ""}" data-pp="${p.id}">${E(p.name)}</button>`).join("")}</div></div>` : ""}
     <div class="err" role="alert"></div><div class="k-acts"><button class="b" value="cancel" formnovalidate>Cancel</button><button class="b pr" value="ok">${again ? "Save" : "Install"}</button></div>`;
-  const ok = await K.dialog(body(), async () => { await api("PUT", "/" + a.id, { who: who === "all" ? { all: 1 } : who === "me" ? { me: 1 } : { roles } }); }, {
-    ready: f => f.addEventListener("click", e => { const w = e.target.closest("[data-w]"), r = e.target.closest("[data-r]"); if (!w && !r) return; if (w) who = w.dataset.w; if (r) roles = roles.includes(r.dataset.r) ? roles.filter(x => x !== r.dataset.r) : [...roles, r.dataset.r];
+  const ok = await K.dialog(body(), async () => { if (parts && !parts.length) return "Choose at least one app."; await api("PUT", "/" + a.id, { who: { ...(who === "all" ? { all: 1 } : who === "me" ? { me: 1 } : { roles }), ...(parts ? { parts } : {}) } }); }, {
+    ready: f => f.addEventListener("click", e => { const w = e.target.closest("[data-w]"), r = e.target.closest("[data-r]"), pp = e.target.closest("[data-pp]"); if (!w && !r && !pp) return; if (w) who = w.dataset.w; if (r) roles = roles.includes(r.dataset.r) ? roles.filter(x => x !== r.dataset.r) : [...roles, r.dataset.r];
+      if (pp) parts = parts.includes(pp.dataset.pp) ? parts.filter(x => x !== pp.dataset.pp) : [...parts, pp.dataset.pp];
       f.innerHTML = body(); }) });
   if (ok === null) return;
   K.toast(again ? "Saved" : `${a.name} is in ${S.root.name}'s command center`, { kind: "ok" });
@@ -85,6 +91,10 @@ document.addEventListener("click", async e => {
   const a = t.closest("[data-a]"); if (a) { S.open = a.dataset.a; return draw(); }
   if (t.closest("[data-back]")) { S.open = null; return draw(); }
   const app = S.apps.find(x => x.id === S.open); if (!app) return;
+  const pt = t.closest("[data-part]");
+  if (pt) { const all = app.parts.map(x => x.id), have = (app.who && app.who.parts) || all, id = pt.dataset.part, next = have.includes(id) ? have.filter(x => x !== id) : [...have, id];
+    if (!next.length && !await K.confirm({ title: `Remove ${app.name} from ${S.root.name}?`, ok: "Remove", danger: true })) return;
+    try { await api("PUT", "/" + app.id, { who: { ...(app.who || { all: 1 }), parts: next } }); LAPPFrame.up({ t: "apps" }); await load(); } catch (x) { K.toast(x.message, { kind: "err" }); } return; }
   if (t.closest("[data-get]")) return install(app);
   if (t.closest("[data-who]")) return install(app, true);
 });

@@ -5,7 +5,8 @@
 /* ================= the store ================= */
 // every app in the store; core apps (Users, Files, Settings, App Store) are always there and are not listed
 export const CATALOG = [
-  { id: "studio", name: "Language Studio", by: "LAPP", icon: "video", color: "#8B5CF6", cat: "Education", about: "Write lessons line by line, cast voices and publish courses. Lesson library, Studio and Characters.", reach: ["Files of your space", "AI"] },
+  { id: "studio", name: "Language Studio", by: "LAPP", icon: "video", color: "#8B5CF6", cat: "Education", about: "Write lessons line by line, cast voices and publish courses.", reach: ["Files of your space", "AI"],
+    parts: [{ id: "library", name: "Lesson library", icon: "library" }, { id: "studio", name: "Studio", icon: "video" }, { id: "characters", name: "Characters", icon: "cast" }] },
   { id: "classes", name: "Classes", by: "KX5", icon: "school", color: "#0EA5E9", cat: "Education", about: "Groups, teachers and who sits in which class, with an overview of the day.", reach: ["Your members"] },
   { id: "timetable", name: "Timetable", by: "KX5", icon: "calendar", color: "#F59E0B", cat: "Education", about: "Lessons in the week, rooms and live classes.", reach: ["Your members", "Calendar"] },
   { id: "homework", name: "Homework", by: "KX5", icon: "homework", color: "#10B981", cat: "Education", about: "Give, collect and mark homework, with voice answers.", reach: ["Your members", "Files of your space"] },
@@ -54,6 +55,9 @@ export async function storeApi(req, env, H, p, url) {
     if (M === "DELETE") { await DB.prepare("DELETE FROM installs WHERE root = ? AND app = ?").bind(root.key, app).run(); return H.json({ ok: true }); }
     const b = await H.body(req);
     const who = b.who && b.who.me ? { me: 1 } : b.who && Array.isArray(b.who.roles) && b.who.roles.length ? { roles: b.who.roles.map(String).slice(0, 20) } : { all: 1 };
+    // a group app: which of its apps this space wants (none listed = all of them)
+    const cat = CATALOG.find(x => x.id === app);
+    if (cat.parts && b.who && Array.isArray(b.who.parts)) { const ps = b.who.parts.filter(x => cat.parts.some(c => c.id === x)); if (!ps.length) { await DB.prepare("DELETE FROM installs WHERE root = ? AND app = ?").bind(root.key, app).run(); return H.json({ ok: true }); } if (ps.length < cat.parts.length) who.parts = ps; }
     await DB.prepare("INSERT INTO installs (root, app, who, by_user, at) VALUES (?, ?, ?, ?, ?) ON CONFLICT(root, app) DO UPDATE SET who = excluded.who").bind(root.key, app, JSON.stringify(who), u.id, H.now()).run();
     return H.json({ ok: true });
   }

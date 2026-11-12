@@ -25,7 +25,9 @@
       const n = ac.slot, sx = n ? "~" + n : "", r = ac.user.role, a0 = A.length, w0 = W.length;
       const lapp = ["manager", "admin"].includes(r), designer = r === "designer", acct = { slot: n, name: ac.user.name || "@" + ac.user.username };
       // an app from the store shows only when its space installed it and lets this person use it
-      const ok = (x, ws, role, admin) => { const c = STORE_OF(x.id); if (!c) return true; const inst = (D.INST || {})[ws]; if (!inst) return true; const w = inst[c]; return !!w && (w.all || (w.me ? admin : (w.roles || []).includes(role))); };
+      const ok = (x, ws, role, admin) => { const c = STORE_OF(x.id); if (!c) return true; const inst = (D.INST || {})[ws]; if (!inst) return true; const w = inst[c]; if (!w) return false;
+        const part = PART_OF(x.id); if (part && Array.isArray(w.parts) && !w.parts.includes(part)) return false;   // a group app: only the parts the space chose
+        return !!(w.all || (w.me ? admin : (w.roles || []).includes(role))); };
       const push = (x, role, admin) => { if (ok(x, x.ws, role === undefined ? r : role, admin === undefined ? r === "admin" : admin)) A.push({ ...x, id: x.id + sx, url: withAs(x.url, n), as: n }); };
       if (!n || lapp || designer) W.push({ key: "me" + sx, name: lapp ? "LAPP" : n ? acct.name : "My work", color: "#8B5CF6", as: n });
       if (lapp) {
@@ -62,6 +64,9 @@
     if (!W.some(w => w.key === D.CUR)) D.CUR = W[0].key;
   };
   // which store app an app of the desk belongs to (apps not listed here are always there)
+  // which part of a group app (Language Studio: library · studio · characters)
+  const PART_OF = id => /^studio:library/.test(id) ? "library" : /^studio:home/.test(id) ? "studio" : /^studio:universe/.test(id) ? "characters" : "";
+  D.partOf = id => PART_OF(String(id || "").replace(/~\d$/, ""));
   const STORE_OF = id => /^studio:/.test(id) ? "studio" : /:(overview|classes)$/.test(id) ? "classes" : /:(timetable|week)$/.test(id) ? "timetable" : /:homework$/.test(id) ? "homework" : /:finance$/.test(id) ? "money" : "";
   // the store app behind a desk app (to remove it from its space), or null for apps that are always there
   const STORE_NAME = { studio: "Language Studio", classes: "Classes", timetable: "Timetable", homework: "Homework", money: "Payments" };
@@ -71,8 +76,19 @@
     const admin = m ? ws.role === "admin" : !!(ac && ac.user.role === "admin");
     return { id: cid, name: STORE_NAME[cid] || cid, org: m ? m[1] : "", slot: a.as || 0, admin, space: ws.name || "" };
   };
-  D.uninstall = async a => {
+  // the whole store app (group: true) or, for one app of a group, just that app
+  D.uninstall = async (a, group) => {
     const s = D.storeAppOf(a); if (!s || !s.admin) return;
+    const part = !group && D.partOf(a.id);
+    if (part) {
+      const inst = ((D.INST || {})[a.ws] || {})[s.id] || { all: 1 }, all = ["library", "studio", "characters"], have = Array.isArray(inst.parts) ? inst.parts : all, left = have.filter(x => x !== part);
+      if (!await K.confirm({ title: `Remove ${a.title} from ${s.space}?`, ok: "Remove", danger: true })) return;
+      const r = await fetch(`/api/store/${s.id}${s.org ? "?org=" + s.org : ""}`, { method: "PUT", credentials: "same-origin", headers: { "X-LAPP": "1", "Content-Type": "application/json", ...(s.slot ? { "X-As": String(s.slot) } : {}) }, body: JSON.stringify({ who: { ...inst, parts: left } }) });
+      if (!r.ok) return D.toast((await r.json().catch(() => ({}))).error || "Could not remove it", { kind: "err" });
+      D.WN().filter(w => w.ws === a.ws && D.appOf(w.url) && D.partOf(D.appOf(w.url).id) === part).forEach(w => D.closeWin(w));
+      await D.reloadAccounts(); D.ccRedraw && D.ccRedraw(); D.toast(`${a.title} removed`, { kind: "ok" });
+      return D.WN().filter(w => /^\/store/.test(w.url)).forEach(w => D.post(w, { t: "apps" }));
+    }
     const with_ = D.APPS.filter(x => x.ws === a.ws && (D.storeAppOf(x) || {}).id === s.id).map(x => x.title);
     if (!await K.confirm({ title: `Remove ${s.name} from ${s.space}?`, text: with_.length > 1 ? with_.join(" · ") : "", ok: "Remove", danger: true })) return;
     const r = await fetch(`/api/store/${s.id}${s.org ? "?org=" + s.org : ""}`, { method: "DELETE", credentials: "same-origin", headers: { "X-LAPP": "1", ...(s.slot ? { "X-As": String(s.slot) } : {}) } });
